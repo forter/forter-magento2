@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<!--
+/**
+ * @author Zach Vaknin | Girit interactive
+ * @copyright Copyright (c) 2019 Nextopic (https://www.nextopic.com)
+ * @package Nextopic_Core
+ */
+ -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
+	<module name="Forter_Forter" setup_version="1.0.0"/>
+</config>

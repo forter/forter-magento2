@@ -1,0 +1,94 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../Magento/Backend/etc/system_file.xsd">
+    <system>
+        <tab id="forter" translate="label" sortOrder="700">
+            <label>Forter</label>
+        </tab>
+        <section id="forter" translate="label" sortOrder="500" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Configuration</label>
+            <tab>forter</tab>
+            <resource>Forter_Forter::config</resource>
+            <group id="settings" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+              <label>General</label>
+              <field id="enabled" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                  <label>Enabled</label>
+                  <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                  <comment>
+                      Choose this option if previously agreed with Forter. This option requires the payment method to be set to
+                      Authorize and Capture, since the extension will not be capturing transactions if this mode is enabled.
+                  </comment>
+              </field>
+              <field id="site_id" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                  <label>Site ID</label>
+              </field>
+              <field id='secret_key' translate='label' type='obscure' sortOrder='2' showInDefault='1' showInWebsite='1' showInStore='1'>
+                <label>Secret Key</label>
+                <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+              </field>
+              <field id="module_version" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Extension Version</label>
+                <frontend_model>Forter\Forter\Block\Adminhtml\System\Config\ModuleVersion</frontend_model>
+              </field>
+              <field id="api_version" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Forter API Version</label>
+                <frontend_model>Forter\Forter\Block\Adminhtml\System\Config\ApiVersion</frontend_model>
+              </field>
+              <field id="debug_mode" translate="label" type="select" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                  <label>Debug Mode</label>
+                  <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                  <comment>
+                    Data related to the forter extensions will be logged to the logs files
+                  </comment>
+              </field>
+              <field id="sandbox_mode" translate="label" type="select" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
+                  <label>Sandbox Mode</label>
+                  <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                  <comment>
+                      More data will be sent to Forter's API calls to help Forter to support the integration
+                  </comment>
+              </field>
+            </group>
+            <group id="immediate_action_post_decision" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+              <label>Post-Decision Actions</label>
+              <field id="decline" translate="Module" type="multiselect" sortOrder="0" showInDefault="1" showInWebsite="1" showInStore="1">
+                  <label>On Decline</label>
+                  <source_model>Forter\Forter\Model\Config\Source\PostDecisionOptions</source_model>
+                  <comment>
+                      On Approve or Not Reviewed we the action will be the payment gateway default
+                  </comment>
+              </field>
+            </group>
+            <group id="connection_information" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+              <label>Connection Information</label>
+              <field id="base_connection_timeout" translate="label comment" sortOrder="1" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
+                  <label>Base Connection timeout</label>
+                  <validate>required-entry validate-digits validate-not-negative-number validate-digits-range digits-range-2000-20000</validate>
+                  <comment>
+                      Need to be a number between 2000 to 20,000
+                  </comment>
+              </field>
+              <field id="base_request_timeout" translate="label comment" sortOrder="2" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
+                  <label>Base Request timeout</label>
+                  <validate>required-entry validate-digits validate-not-negative-number validate-digits-range digits-range-2000-20000</validate>
+                  <comment>
+                      Need to be a number between 2000 to 20,000
+                  </comment>
+              </field>
+              <field id="max_connection_timeout" translate="label comment" sortOrder="3" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Max Connection timeout</label>
+                <validate>required-entry validate-digits validate-not-negative-number validate-digits-range digits-range-2000-20000</validate>
+                <comment>
+                    Need to be a number between 2000 to 20,000
+                </comment>
+              </field>
+              <field id="max_request_timeout" translate="label comment" sortOrder="4" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Max Request timeout</label>
+                <validate>required-entry validate-digits validate-not-negative-number validate-digits-range digits-range-2000-20000</validate>
+                <comment>
+                    Need to be a number between 2000 to 20,000
+                </comment>
+              </field>
+            </group>
+        </section>
+    </system>
+</config>

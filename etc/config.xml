@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <forter>
+            <connection_information>
+                <base_connection_timeout>2000</base_connection_timeout>
+                <base_request_timeout>2000</base_request_timeout>
+                <max_connection_timeout>2000</max_connection_timeout>
+                <max_request_timeout>2000</max_request_timeout>
+            </connection_information>
+        </forter>
+    </default>
+</config>
