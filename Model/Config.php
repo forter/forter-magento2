@@ -87,7 +87,7 @@ class Config
     */
    private function getConfigPath()
    {
-       return sprintf('forter/settings/');
+       return sprintf('forter/');
    }
 
    /**
@@ -123,7 +123,25 @@ class Config
     */
    public function getSiteId()
    {
-       return $this->getConfigValue('site_id');
+       return $this->getConfigValue('settings/site_id');
+   }
+
+   /**
+    * @return bool
+    */
+   public function getSecretKey()
+   {
+       $secretKey = $this->getConfigValue('settings/secret_key');
+       $decrypttSecretKey = $this->_encryptor->decrypt($secretKey);
+       return $decrypttSecretKey;
+   }
+
+   /**
+    * @return bool
+    */
+   public function getApiVersion()
+   {
+       return '2.0';
    }
 
    /**
