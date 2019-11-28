@@ -38,10 +38,10 @@ class RequestPrepare
       $this->subscriber = $subscriber;
   }
 
-  public function getConnectionInformation($order){
+  public function getConnectionInformation($remoteIp){
     $headers = getallheaders();
     $connectionInformation  = [
-      "customerIP" => $this->getIpFromOrder($order->getRemoteIp(), $headers),
+      "customerIP" => $this->getIpFromOrder($remoteIp, $headers),
       "userAgent" => ( is_array($headers) && array_key_exists("User-Agent", $headers) ) ? $headers['User-Agent'] : null,
       "forterTokenCookie" => null,
       "merchantDeviceIdentifier" => null,
@@ -99,7 +99,10 @@ class RequestPrepare
                       "amountLocalCurrency" => strval($item->getPrice()),
                       "currency" => $order->getOrderCurrency()->getCurrencyCode()
                   ],
-                  "id" => $item->getItemId(),
+                  "value" => [
+                      "amountLocalCurrency" => strval($item->getPrice()),
+                      "currency" => $order->getOrderCurrency()->getCurrencyCode()
+                  ],
                   "productId" => $item->getProductId(),
                   "productIdType" => $item->getProductType(),
                   "name" => $item->getName(),
