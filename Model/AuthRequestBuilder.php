@@ -16,6 +16,7 @@ use \Magento\Review\Model\Review;
 use \Magento\Wishlist\Controller\WishlistProviderInterface;
 use \Magento\Newsletter\Model\Subscriber;
 use \Forter\Forter\Model\RequestBuilder\RequestPrepare;
+use Forter\Forter\Model\Config as ForterConfig;
 
 class AuthRequestBuilder
 {
@@ -29,7 +30,8 @@ class AuthRequestBuilder
       Session $session,
       Review $review,
       WishlistProviderInterface $wishlistProvider,
-      Subscriber $subscriber
+      Subscriber $subscriber,
+      ForterConfig $forterConfig
   )
   {
       $this->requestPrepare = $requestPrepare;
@@ -39,6 +41,7 @@ class AuthRequestBuilder
       $this->review = $review;
       $this->wishlistProvider = $wishlistProvider;
       $this->subscriber = $subscriber;
+      $this->forterConfig = $forterConfig;
   }
 
   public function buildTransaction($order) {
@@ -49,7 +52,7 @@ class AuthRequestBuilder
         "timeSentToForter" => time()*1000,
         "checkoutTime" => time(),
         "additionalIdentifiers" => $this->requestPrepare->getAdditionalIdentifiers($order),
-        "connectionInformation" => $this->requestPrepare->getConnectionInformation($order),
+        "connectionInformation" => $this->requestPrepare->getConnectionInformation($order->getRemoteIp()),
         "totalAmount" => $this->requestPrepare->getTotalAmount($order),
         "cartItems" => $this->requestPrepare->generateCartItems($order),
         "primaryDeliveryDetails" => $this->requestPrepare->getPrimaryDeliveryDetails($order),
@@ -60,6 +63,11 @@ class AuthRequestBuilder
         "payment" => $this->generatePaymentInfo($order)
       ];
 
+      if ($this->forterConfig->isSandboxMode()) {
+          $data['additionalInformation'] = [
+              'debug' => $order->debug()
+          ];
+      }
     return $data;
   }
 

@@ -132,8 +132,21 @@ class Config
    public function getSecretKey()
    {
        $secretKey = $this->getConfigValue('settings/secret_key');
-       $decrypttSecretKey = $this->_encryptor->decrypt($secretKey);
-       return $decrypttSecretKey;
+       $decryptSecretKey = $this->encryptor->decrypt($secretKey);
+       return $decryptSecretKey;
+   }
+
+   /**
+    * @return bool
+    */
+   public function getTimeOutSettings()
+   {
+     return $timeOutArray = [
+       "base_connection_timeout" => $this->getConfigValue('connection_information/base_connection_timeout'),
+       "base_request_timeout" => $this->getConfigValue('connection_information/base_request_timeout'),
+       "max_connection_timeout" => $this->getConfigValue('connection_information/max_connection_timeout'),
+       "max_request_timeout" => $this->getConfigValue('connection_information/max_request_timeout')
+     ];
    }
 
    /**
@@ -168,7 +181,7 @@ class Config
     */
    public function isSandboxMode()
    {
-       return ($this->getConfigValue('mode') === CredoraxMethod::MODE_LIVE) ? false : true;
+      return (bool)$this->getConfigValue('settings/sandbox_mode');
    }
 
    /**

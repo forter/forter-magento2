@@ -8,7 +8,8 @@ use Magento\Framework\Event\ObserverInterface;
 
 class PaymentPlaceEnd implements ObserverInterface
 {
-
+    const VALIDATION_API_ENDPOINT = 'https://api.forter-secure.com/v2/orders/';
+    
     public function __construct(
         AbstractApi $abstractApi,
         Config $config,
@@ -22,13 +23,16 @@ class PaymentPlaceEnd implements ObserverInterface
 
 
     public function execute(\Magento\Framework\Event\Observer $observer) {
-      $this->config->log('1-PaymentPlaceEnd');
       $order = $observer->getEvent()->getPayment()->getOrder();
       $data = $this->authRequestBuilder->buildTransaction($order);
-      $test = $this->abstractApi->getCurlHeaders();
-      $test = json_encode($test);
-      $this->config->log($test);
-      $this->config->log($data);
+      $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
+
+      $response = $this->abstractApi->sendApiRequest($url,json_encode($data));
+
+      if($response){
+        $this->config->log('worked!!');
+      }
+
 
     }
 }

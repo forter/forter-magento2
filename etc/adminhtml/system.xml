@@ -48,17 +48,53 @@
                   </comment>
               </field>
             </group>
-            <group id="immediate_action_post_decision" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
-              <label>Post-Decision Actions</label>
-              <field id="decline" translate="Module" type="multiselect" sortOrder="0" showInDefault="1" showInWebsite="1" showInStore="1">
-                  <label>On Decline</label>
-                  <source_model>Forter\Forter\Model\Config\Source\PostDecisionOptions</source_model>
+            <group id="immediate_post_pre_decision" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+              <label>Pre/Post Auth Decision Actions</label>
+              <field id="pre_post_Select" translate="Module" type="select" sortOrder="0" showInDefault="1" showInWebsite="1" showInStore="1">
+                  <label>Pre/Post Auth</label>
+                  <source_model>Forter\Forter\Model\Config\Source\PrePostSelect</source_model>
+                  <comment>
+                      Comment About Pre Post_Select
+                  </comment>
+              </field>
+              <field id="decline_pre" translate="Module" type="select" sortOrder="0" showInDefault="1" showInWebsite="1" showInStore="1">
+                  <label>Pre Auth Action: On Decline</label>
+                  <source_model>Forter\Forter\Model\Config\Source\PreDecisionOptions</source_model>
                   <comment>
                       On Approve or Not Reviewed we the action will be the payment gateway default
                   </comment>
+                  <depends>
+                    <field id="pre_post_Select">1</field>
+                  </depends>
+              </field>
+              <field id="pre_thanks_msg" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                  <label>Pre Auth Thank you page error meassage</label>
+                  <depends>
+                    <field id="pre_post_Select">1</field>
+                  </depends>
+              </field>
+              <field id="decline_post" translate="Module" type="select" sortOrder="0" showInDefault="1" showInWebsite="1" showInStore="1">
+                  <label>Post Auth Action: On Decline</label>
+                  <source_model>Forter\Forter\Model\Config\Source\PostDecisionOptions</source_model>
+                  <depends>
+                    <field id="pre_post_Select">2</field>
+                  </depends>
+              </field>
+              <field id="capture_invoice" translate="Module" type="select" sortOrder="0" showInDefault="1" showInWebsite="1" showInStore="1">
+                  <label>Post Auth Action: On Approve / Not Reviewed</label>
+                  <source_model>Forter\Forter\Model\Config\Source\CaptureInvoiceOptions</source_model>
+                  <depends>
+                    <field id="pre_post_Select">2</field>
+                  </depends>
+              </field>
+              <field id="post_thanks_msg" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                  <label>Post Auth Thank you page error meassage</label>
+                  <depends>
+                    <field id="pre_post_Select">2</field>
+                  </depends>
               </field>
             </group>
-            <group id="connection_information" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+            <group id="connection_information" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
               <label>Connection Information</label>
               <field id="base_connection_timeout" translate="label comment" sortOrder="1" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
                   <label>Base Connection timeout</label>

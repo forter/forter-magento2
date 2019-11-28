@@ -3,134 +3,85 @@
 namespace Forter\Forter\Model;
 
 use Forter\Forter\Model\Config as ForterConfig;
-use \Magento\Framework\HTTP\Client\Curl;
+use \Magento\Framework\HTTP\ClientInterface;
 
 class AbstractApi
 {
     public function __construct(
-      Curl $curl,
+      ClientInterface $clientInterface,
       ForterConfig $forterConfig
     ) {
-      $this->curl = $curl;
+      $this->clientInterface = $clientInterface;
       $this->forterConfig = $forterConfig;
     }
 
-    public function sendApiRequest($data)
+    public function sendApiRequest($url,$data)
     {
       try {
+        $tries = 1;
 
+        do{
+          $tries++;
+          $timeOutStatus = $this->calcTimeOut($tries);
+          $this->setCurlOptions(strlen($data),$tries);
+          $this->clientInterface->post($url,$data);
+          $response = $this->clientInterface->getBody();
+          $response = json_decode($response);
 
-        $numberoftries = 1;
-
-        do {
-          $this->curl->reset();
-          $this->setCurlOptions(strlen($data));
-          $this->curl->post(
-              $this->_yotpoConfig->getYotpoApiUrl($path),
-              $data
-          );
-
-          $body = $this->_getCurlBody();
-          $errorCode =  $body['error_code'];
-
-          if($error_code != 0) {
-            $numberoftries++;
-            $this->calcTimeOut(); // ToDo
+          if($response->status == 'success'){
+            return true;
           }
-        }
-        while($numberoftries < 4);
 
-            return $this->_prepareCurlResponseData();
+        } while($timeOutStatus);
+
+        return false;
+
+
       } catch (\Exception $e) {
-        $this->reportToForterOnCatch(); //ToDo
+        //$this->reportToForterOnCatch($e->getMessage()); //ToDo
       }
     }
 
-    private function setCurlOptions($bodyLen)
+    private function setCurlOptions($bodyLen,$tries)
     {
-      $headers = $this->getCurlHeaders();
-      $password = $this->configHelper->getSecretKey() . ":";
-
-      /* if body exist */
-      if ($body !== null) {
-        $this->curl->setOption(CURLOPT_POST, 1);
-        $this->curl->addHeader('Content-Type', 'application/json');
-        $this->curl->addHeader('Content-Length', $bodyLen));
-      }
 
       /* Curl Headers */
-      $this->curl->addHeader('x-forter-siteid', $this->forterConfig->getSiteID());
-      $this->curl->addHeader('api-version', $this->forterConfig->getApiVersion());
-      $this->curl->addHeader('x-forter-extver', $this->forterConfig->getModuleVersion());
-      $this->curl->addHeader('x-forter-client', 'magento2');
-
+      $this->clientInterface->addHeader('x-forter-siteid', $this->forterConfig->getSiteId());
+      $this->clientInterface->addHeader('api-version', $this->forterConfig->getApiVersion());
+      $this->clientInterface->addHeader('x-forter-extver', $this->forterConfig->getModuleVersion());
+      $this->clientInterface->addHeader('x-forter-client', 'magento2');
+      $this->clientInterface->addHeader('Content-Type', 'application/json');
+      $this->clientInterface->addHeader('Content-Length', $bodyLen);
 
       /* Curl Options */
-      $this->curl->setOption(CURLOPT_USERPWD, $password);
-      $this->curl->setOption(CURLOPT_CONNECTTIMEOUT_MS,$connect_timeout_ms);
-      $this->curl->setOption(CURLOPT_TIMEOUT_MS,$total_timeout_ms);
-      $this->curl->setOption(CURLOPT_RETURNTRANSFER,true);
-      $this->curl->setOption(CURLOPT_SSL_VERIFYPEER,true);
-      $this->curl->setOption(CURLOPT_SSL_VERIFYHOST, 2);
+      $this->clientInterface->setOption(CURLOPT_USERNAME,$this->forterConfig->getSecretKey());
+      $this->clientInterface->setOption(CURLOPT_RETURNTRANSFER,true);
+      $this->clientInterface->setOption(CURLOPT_SSL_VERIFYPEER,true);
+      $this->clientInterface->setOption(CURLOPT_SSL_VERIFYHOST, 2);
     }
 
-    /**
-     * @return array
-     */
-    protected function _prepareCurlResponseData()
-    {
-        $responseData = [
-            'status' => $this->_getCurlStatus(),
-            'headers' => $this->_getCurlHeaders(),
-            'body' => $this->_getCurlBody(),
-        ];
-        return $responseData;
-    }
+    private function calcTimeOut($tries){
+      $timeOutSettingsArray = $this->forterConfig->getTimeOutSettings();
 
-    /**
-     * @param bool $refresh
-     * @return array
-     */
-    protected function _getCurlBody($refresh = false)
-    {
-        if ($this->body === null || $refresh) {
-            $this->body = json_decode($this->curl->getBody());
-        }
+      $connect_timeout_ms = min(
+        ($tries * $timeOutSettingsArray['base_connection_timeout']),
+        $timeOutSettingsArray['max_connection_timeout']
+      );
 
-        return $this->body;
-    }
+      $total_timeout_ms = min(
+        ($tries * $timeOutSettingsArray['base_request_timeout']),
+        $timeOutSettingsArray['max_request_timeout']
+      );
 
-    /**
-     * @param bool $refresh
-     * @return array
-     */
-    protected function _getCurlHeaders($refresh = false)
-    {
-        if ($this->headers === null || $refresh) {
-            $this->headers = $this->curl->getHeaders();
-        }
+      $this->clientInterface->setOption(CURLOPT_CONNECTTIMEOUT_MS,$connect_timeout_ms);
+      $this->clientInterface->setOption(CURLOPT_TIMEOUT_MS,$total_timeout_ms);
 
-        return $this->headers;
-    }
+      if($connect_timeout_ms >= $timeOutSettingsArray['max_connection_timeout']){
+        if($total_timeout_ms >= $timeOutSettingsArray['max_request_timeout']){
+         return false;
+       }
+      }
 
-    /**
-     * @param bool $refresh
-     * @return array
-     */
-    protected function _getCurlBody($refresh = false)
-    {
-        if ($this->body === null || $refresh) {
-            $this->body = json_decode($this->curl->getBody());
-        }
-
-        return $this->body;
-    }
-
-    protected function calcTimeOut(){
-
-    }
-
-    protected function reportToForterOnCatch(){
-
+      return true;
     }
 }

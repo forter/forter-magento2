@@ -2,8 +2,8 @@
 <!--
 /**
  * @author Zach Vaknin | Girit interactive
- * @copyright Copyright (c) 2019 Nextopic (https://www.nextopic.com)
- * @package Nextopic_Core
+ * @copyright Copyright (c) 2019 Forter (https://www.Forter.com)
+ * @package Forter_Forter
  */
  -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
