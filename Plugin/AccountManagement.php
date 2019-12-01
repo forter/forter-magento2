@@ -41,7 +41,6 @@ class AccountManagement
     $websiteID = $this->storemanager->getStore()->getWebsiteId();
     $customer = $this->customer->create()->setWebsiteId($websiteID)->loadByEmail($email);
     if($customer){
-      $url = self::PASSWORD_API_ENDPOINT . $customer->getId();
       $json = [
         "accountId" => $customer->getId(),
         "eventTime" => time(),
@@ -49,7 +48,13 @@ class AccountManagement
         "passwordUpdateTrigger" => 'USER_FORGOT_PASSWORD'
       ];
 
-      $response = $this->abstractApi->sendApiRequest($url,json_encode($json));
+      try{
+        $url = self::PASSWORD_API_ENDPOINT . $customer->getId();
+        $response = $this->abstractApi->sendApiRequest($url,json_encode($json));
+      } catch (\Exception $e) {
+        $this->abstractApi->reportToForterOnCatch($e);
+        throw new \Exception ($e->getMessage());
+      }
     }
   }
 
@@ -63,7 +68,7 @@ class AccountManagement
       $websiteID = $this->storemanager->getStore()->getWebsiteId();
       $customer = $this->customer->create()->setWebsiteId($websiteID)->loadByEmail($email);
       if($customer){
-        $url = self::PASSWORD_API_ENDPOINT . $customer->getId();
+
         $json = [
           "accountId" => $customer->getId(),
           "eventTime" => time(),
@@ -71,7 +76,13 @@ class AccountManagement
           "passwordUpdateTrigger" => 'LOGGED_IN_USER'
         ];
 
-        $response = $this->abstractApi->sendApiRequest($url,json_encode($json));
+        try{
+          $url = self::PASSWORD_API_ENDPOINT . $customer->getId();
+          $response = $this->abstractApi->sendApiRequest($url,json_encode($json));
+        } catch (\Exception $e) {
+          $this->abstractApi->reportToForterOnCatch($e);
+          throw new \Exception ($e->getMessage());
+        }
       }
   }
 }

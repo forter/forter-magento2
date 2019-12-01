@@ -59,7 +59,7 @@
               </field>
               <field id="decline_pre" translate="Module" type="select" sortOrder="0" showInDefault="1" showInWebsite="1" showInStore="1">
                   <label>Pre Auth Action: On Decline</label>
-                  <source_model>Forter\Forter\Model\Config\Source\PreDecisionOptions</source_model>
+                  <source_model>Forter\Forter\Model\Config\Source\DecisionOptions</source_model>
                   <comment>
                       On Approve or Not Reviewed we the action will be the payment gateway default
                   </comment>
@@ -75,7 +75,7 @@
               </field>
               <field id="decline_post" translate="Module" type="select" sortOrder="0" showInDefault="1" showInWebsite="1" showInStore="1">
                   <label>Post Auth Action: On Decline</label>
-                  <source_model>Forter\Forter\Model\Config\Source\PostDecisionOptions</source_model>
+                  <source_model>Forter\Forter\Model\Config\Source\DecisionOptions</source_model>
                   <depends>
                     <field id="pre_post_Select">2</field>
                   </depends>

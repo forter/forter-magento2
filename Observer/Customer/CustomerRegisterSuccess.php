@@ -24,14 +24,19 @@ class CustomerRegisterSuccess implements ObserverInterface
 
     public function execute(\Magento\Framework\Event\Observer $observer) {
       $customer = $observer->getEvent()->getCustomer();
-      $url = self::API_ENDPOINT . $customer->getId();
       $json = [
         "accountId" => $customer->getId(),
         "eventTime" => time(),
         "connectionInformation" => $this->requestPrepare->getConnectionInformation($this->remoteAddress->getRemoteAddress())
       ];
 
-      $response = $this->abstractApi->sendApiRequest($url,json_encode($json));
-    }
+      try{
+        $url = self::API_ENDPOINT . $customer->getId();
+        $response = $this->abstractApi->sendApiRequest($url,json_encode($json));
+      } catch (\Exception $e) {
+        $this->abstractApi->reportToForterOnCatch($e);
+        throw new \Exception ($e->getMessage());
+      }
 
+    }
 }
