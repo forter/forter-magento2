@@ -2,7 +2,7 @@
 
 namespace Forter\Forter\Model\Config\Source;
 
-class PostDecisionOptions implements \Magento\Framework\Option\ArrayInterface
+class DecisionOptions implements \Magento\Framework\Option\ArrayInterface
 {
     public function toOptionArray()
     {

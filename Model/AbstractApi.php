@@ -7,6 +7,8 @@ use \Magento\Framework\HTTP\ClientInterface;
 
 class AbstractApi
 {
+    const ERROR_ENDPOINT = 'https://api.forter-secure.com/errors/';
+
     public function __construct(
       ClientInterface $clientInterface,
       ForterConfig $forterConfig
@@ -38,7 +40,7 @@ class AbstractApi
 
 
       } catch (\Exception $e) {
-        //$this->reportToForterOnCatch($e->getMessage()); //ToDo
+        //$this->reportToForterOnCatch($e); TODO log instead of send otherwise endless loops
       }
     }
 
@@ -83,5 +85,26 @@ class AbstractApi
       }
 
       return true;
-    }
+   }
+
+   public function reportToForterOnCatch($e){
+     ini_set('memory_limit','-1');
+     $url = self::ERROR_ENDPOINT;
+
+     $json = [
+       "orderID" => "5610495952",
+       "exception" => [
+         "message" => [
+           "message" => $e->getMessage(),
+           "fileName" => $e->getFile(),
+           "lineNumber"=> $e->getLine(),
+           "name" => get_class($e),
+           "stack" => $e->getTrace()
+         ],
+         "debugInfo" => ""
+       ]
+     ];
+
+     $response = $this->sendApiRequest($url,json_encode($json));
+   }
 }

@@ -4,19 +4,19 @@ namespace Forter\Forter\Observer;
 
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Event\Observer;
-use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Store\Model\ScopeInterface;
+use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\Config;
 
 class ConfigObserver implements \Magento\Framework\Event\ObserverInterface
 {
+  const SETTINGS_API_ENDPOINT = 'https://api.forter-secure.com/ext/settings/';
 
   public function __construct(
-      ScopeConfigInterface $scopeConfig,
+      AbstractApi $abstractApi,
       Config $forterConfig
   )
   {
-      $this->scopeConfig = $scopeConfig;
+      $this->abstractApi = $abstractApi;
       $this->forterConfig = $forterConfig;
   }
 
@@ -29,44 +29,35 @@ class ConfigObserver implements \Magento\Framework\Event\ObserverInterface
     public function execute(Observer $observer) {
       $json = [
         "general" => [
-          "active" => $this->getSettings('enabled'),
+          "active" => $this->forterConfig->isEnabled(),
           "site_id" => $this->forterConfig->getSiteId(),
           "secret_key" => $this->forterConfig->getSecretKey(),
           "module_version" => $this->forterConfig->getModuleVersion(),
           "api_version" => $this->forterConfig->getApiVersion(),
-          "debug_mode" => $this->getSettings('debug_mode'),
-          "sandbox_mode" => $this->getSettings('sandbox_mode')
+          "debug_mode" => $this->forterConfig->isDebugEnabled(),
+          "sandbox_mode" => $this->forterConfig->isSandboxMode()
         ],
         "pre_post_desicion" => [
-          "pre_thanks_msg" => $this->getPrePostDesicion('pre_thanks_msg'),
-          "post_thanks_msg" => $this->getPrePostDesicion('post_thanks_msg')
+          "pre_post_Select" => $this->forterConfig->getPrePostDesicionMsg('pre_post_Select'),
+          "pre_decline" => $this->forterConfig->getPrePostDesicionMsg('decline_pre'),
+          "pre_thanks_msg" => $this->forterConfig->getPrePostDesicionMsg('pre_thanks_msg'),
+          "post_decline" => $this->forterConfig->getPrePostDesicionMsg('decline_post'),
+          "post_approve" => $this->forterConfig->getPrePostDesicionMsg('capture_invoice'),
+          "post_thanks_msg" => $this->forterConfig->getPrePostDesicionMsg('post_thanks_msg')
         ],
+        "store" => [
+          "storeId" => $this->forterConfig->getStoreId()
+        ],
+        "connection_information" => $this->forterConfig->getTimeOutSettings(),
         "eventTime" => time()
       ];
-      $json = json_encode($json);
-      $writer = new \Zend\Log\Writer\Stream(BP . '/var/log/testZ.log');
-      $logger = new \Zend\Log\Logger();
-      $logger->addWriter($writer);
-      $logger->info($json);
-    }
 
-    private function getSettings($type){
-      $result = $this->scopeConfig->getValue('forter/settings/'.$type, ScopeInterface::SCOPE_WEBSITE);
-
-      switch ($result) {
-        case 0:
-          $result = 'disable';
-          break;
-        case 1:
-          $result = 'enable';
-          break;
+      try{
+        $url = self::SETTINGS_API_ENDPOINT;
+        $response = $this->abstractApi->sendApiRequest($url,json_encode($json));
+      } catch (\Exception $e) {
+        $this->abstractApi->reportToForterOnCatch($e);
+        throw new \Exception ($e->getMessage());
       }
-
-      return $result;
-   }
-
-   private function getPrePostDesicion($type){
-     $result = $this->scopeConfig->getValue('forter/immediate_post_pre_decision/'.$type, ScopeInterface::SCOPE_WEBSITE);
-     return $result;
-   }
+    }
 }

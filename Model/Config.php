@@ -24,7 +24,6 @@ class Config
 {
    const MODULE_NAME = 'Forter_Forter';
 
-
    /**
     * Scope config object.
     *
@@ -169,8 +168,19 @@ class Config
        return $this->scopeConfig->getValue(
            $this->getConfigPath() . $fieldKey,
            ScopeInterface::SCOPE_STORE,
-           $this->getCurrentStoreId()
+           $this->getStoreId()
        );
+   }
+
+   /**
+    * Return bool value depends of that if payment method sandbox mode
+    * is enabled or not.
+    *
+    * @return bool
+    */
+   public function isEnabled()
+   {
+      return (bool)$this->getConfigValue('settings/enabled');
    }
 
    /**
@@ -204,15 +214,6 @@ class Config
    }
 
    /**
-    * @method getCurrentStoreId
-    * @return int
-    */
-   public function getCurrentStoreId()
-   {
-       return $this->storeManager->getStore()->getId();
-   }
-
-   /**
     * @method log
     * @param  mixed   $message
     * @param  string  $type
@@ -225,7 +226,7 @@ class Config
      $this->logger->debug($prefix . json_encode($message), $data); //REMOVE LATER
        if ($type !== 'debug' || $this->isDebugEnabled()) {
            if (!isset($data['store_id'])) {
-               $data['store_id'] = $this->getCurrentStoreId();
+               $data['store_id'] = $this->getStoreId();
            }
            switch ($type) {
                case 'error':
@@ -246,6 +247,22 @@ class Config
    public function getModuleVersion()
    {
        return $this->moduleList->getOne(self::MODULE_NAME)['setup_version'];
+   }
+
+   public function getPrePostDesicionMsg($type){
+     $result = $this->scopeConfig->getValue('forter/immediate_post_pre_decision/'.$type);
+     switch ($type) {
+         case 'pre_post_Select':
+             return ($result == '1' ? 'Auth pre paymernt' : 'Auth post paymernt');
+         case 'decline_pre':
+             return ($result == '1' ? 'Redirect Success Page, Cancel the order, prevent email sending' : 'Send user back to Checkout page with error');
+         case 'decline_post':
+             return ($result == '1' ? 'Redirect Success Page, Cancel the order, prevent email sending' : 'Send user back to Checkout page with error');
+         case 'capture_invoice':
+             return ($result == '1' ? 'Capture (invoice) Cron' : 'Capture (invoice) Immediate');
+         default:
+             return $result;
+     }
    }
 
 }
