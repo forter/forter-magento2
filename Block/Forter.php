@@ -1,9 +1,8 @@
 <?php
 namespace Forter\Forter\Block;
 
-use Magento\Framework\View\Element\Template\Context;
 use Forter\Forter\Model\Config;
-
+use Magento\Framework\View\Element\Template\Context;
 
 class Forter extends \Magento\Framework\View\Element\Template
 {
@@ -20,16 +19,16 @@ class Forter extends \Magento\Framework\View\Element\Template
      * @param \Forter\Forter\Model\Config $config
      */
     public function __construct(
-      Context $context,
-      Config $config,
-      array $data = []
+        Context $context,
+        Config $config,
+        array $data = []
     ) {
-      parent::__construct($context, $data);
-      $this->_config = $config;
-  }
+        parent::__construct($context, $data);
+        $this->_config = $config;
+    }
 
     public function getSiteId()
     {
-      return $this->_config->getSiteId();
+        return $this->_config->getSiteId();
     }
 }
