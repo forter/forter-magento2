@@ -50,8 +50,15 @@ class AccountManagement
         if (!$this->forterConfig->isEnabled()) {
             return false;
         }
-        $websiteID = $this->storemanager->getStore()->getWebsiteId();
-        $customer = $this->customer->create()->setWebsiteId($websiteID)->loadByEmail($email);
+
+        if (!$email) {
+            $customer = $accountManagement->matchCustomerByRpToken($resetToken);
+            $email = $customer->getEmail();
+        } else {
+            $websiteID = $this->storemanager->getStore()->getWebsiteId();
+            $customer = $this->customer->create()->setWebsiteId($websiteID)->loadByEmail($email);
+        }
+
         if ($customer) {
             $json = [
               "accountId" => $customer->getId(),
