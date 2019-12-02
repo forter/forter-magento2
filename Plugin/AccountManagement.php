@@ -5,9 +5,11 @@ namespace Forter\Forter\Plugin;
 use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\Config;
 use Forter\Forter\Model\RequestBuilder\RequestPrepare;
+use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Model\AccountManagement as AccountManagementOriginal;
 use Magento\Customer\Model\CustomerFactory;
 use Magento\Customer\Model\Session;
+use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\HTTP\PhpEnvironment\RemoteAddress;
 use Magento\Framework\Message\ManagerInterface;
 use Magento\Store\Model\StoreManagerInterface;
@@ -29,16 +31,21 @@ class AccountManagement
         RequestPrepare $requestPrepare,
         ManagerInterface $messageManager,
         Config $forterConfig,
-        RemoteAddress $remoteAddress
+        RemoteAddress $remoteAddress,
+        SearchCriteriaBuilder $searchCriteriaBuilder = null,
+        CustomerRepositoryInterface $customerRepository
     ) {
         $this->customerSession = $customerSession;
         $this->customer = $customer;
+        $this->customerRepository = $customerRepository;
         $this->messageManager = $messageManager;
         $this->storemanager = $store;
         $this->abstractApi = $abstractApi;
         $this->requestPrepare = $requestPrepare;
         $this->remoteAddress = $remoteAddress;
         $this->forterConfig = $forterConfig;
+        $this->searchCriteriaBuilder = $searchCriteriaBuilder
+            ?: ObjectManager::getInstance()->get(SearchCriteriaBuilder::class);
     }
 
     public function beforeResetPassword(
@@ -51,13 +58,7 @@ class AccountManagement
             return false;
         }
 
-        if (!$email) {
-            $customer = $this->matchCustomerByRpToken($resetToken);
-            $email = $customer->getEmail();
-        } else {
-            $websiteID = $this->storemanager->getStore()->getWebsiteId();
-            $customer = $this->customer->create()->setWebsiteId($websiteID)->loadByEmail($email);
-        }
+        $customer = $this->localMatchCustomerByRpToken($resetToken);
 
         if ($customer) {
             $json = [
@@ -144,5 +145,42 @@ class AccountManagement
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }
+    }
+
+    /**
+     * Match a customer by their RP token.
+     *
+     * @param string $rpToken
+     * @throws ExpiredException
+     * @throws NoSuchEntityException
+     *
+     * @return CustomerInterface
+     * @throws LocalizedException
+     */
+    private function localMatchCustomerByRpToken(string $rpToken): CustomerInterface
+    {
+        $this->searchCriteriaBuilder->addFilter(
+            'rp_token',
+            $rpToken
+        );
+        $this->searchCriteriaBuilder->setPageSize(1);
+        $found = $this->customerRepository->getList(
+            $this->searchCriteriaBuilder->create()
+        );
+        if ($found->getTotalCount() > 1) {
+            //Failed to generated unique RP token
+            throw new ExpiredException(
+                new Phrase('Reset password token expired.')
+            );
+        }
+        if ($found->getTotalCount() === 0) {
+            //Customer with such token not found.
+            throw NoSuchEntityException::singleField(
+                'rp_token',
+                $rpToken
+            );
+        }
+        //Unique customer found.
+        return $found->getItems()[0];
     }
 }
