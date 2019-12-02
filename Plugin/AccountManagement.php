@@ -41,7 +41,7 @@ class AccountManagement
         $this->forterConfig = $forterConfig;
     }
 
-    public function beforeResetPassword(
+    public function afterResetPassword(
         AccountManagementOriginal $accountManagement,
         $email,
         $resetToken,
@@ -51,13 +51,8 @@ class AccountManagement
             return false;
         }
 
-        if (!$email) {
-            $customer = $accountManagement->matchCustomerByRpToken($resetToken);
-            $email = $customer->getEmail();
-        } else {
-            $websiteID = $this->storemanager->getStore()->getWebsiteId();
-            $customer = $this->customer->create()->setWebsiteId($websiteID)->loadByEmail($email);
-        }
+        $websiteID = $this->storemanager->getStore()->getWebsiteId();
+        $customer = $this->customer->create()->setWebsiteId($websiteID)->loadByEmail($email);
 
         if ($customer) {
             $json = [
