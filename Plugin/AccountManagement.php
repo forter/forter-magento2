@@ -41,7 +41,7 @@ class AccountManagement
         $this->forterConfig = $forterConfig;
     }
 
-    public function beforeRresetPassword(
+    public function beforeResetPassword(
         AccountManagementOriginal $accountManagement,
         $email,
         $resetToken,
@@ -115,6 +115,7 @@ class AccountManagement
             throw $e;
         }
         $this->sendLoginAttempt('SUCCESS', $customer);
+
         return $result;
     }
 
