@@ -32,8 +32,8 @@ class CustomerSaveAfterDataObject implements ObserverInterface
 
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
-        if (!$this->forterConfig->isEnabled()) {
-            return false;
+        return false;
+        if ($this->forterConfig->isEnabled()) {
         }
 
         $customer = $observer->getEvent()->getCustomer();

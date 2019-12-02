@@ -1,6 +1,6 @@
 <?php
 
-namespace Forter\Forter\Observer;
+namespace Forter\Forter\Observer\Customer;
 
 use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\Config as ForterConfig;
@@ -32,10 +32,10 @@ class CustomerRegisterSuccess implements ObserverInterface
 
         $customer = $observer->getEvent()->getCustomer();
         $json = [
-        "accountId" => $customer->getId(),
-        "eventTime" => time(),
-        "connectionInformation" => $this->requestPrepare->getConnectionInformation($this->remoteAddress->getRemoteAddress())
-      ];
+          "accountId" => $customer->getId(),
+          "eventTime" => time(),
+          "connectionInformation" => $this->requestPrepare->getConnectionInformation($this->remoteAddress->getRemoteAddress())
+        ];
 
         try {
             $url = self::API_ENDPOINT . $customer->getId();
