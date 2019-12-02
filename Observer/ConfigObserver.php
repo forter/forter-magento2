@@ -2,23 +2,21 @@
 
 namespace Forter\Forter\Observer;
 
-use Magento\Framework\Event\ObserverInterface;
-use Magento\Framework\Event\Observer;
 use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\Config;
+use Magento\Framework\Event\Observer;
 
 class ConfigObserver implements \Magento\Framework\Event\ObserverInterface
 {
-  const SETTINGS_API_ENDPOINT = 'https://api.forter-secure.com/ext/settings/';
+    const SETTINGS_API_ENDPOINT = 'https://api.forter-secure.com/ext/settings/';
 
-  public function __construct(
+    public function __construct(
       AbstractApi $abstractApi,
       Config $forterConfig
-  )
-  {
-      $this->abstractApi = $abstractApi;
-      $this->forterConfig = $forterConfig;
-  }
+  ) {
+        $this->abstractApi = $abstractApi;
+        $this->forterConfig = $forterConfig;
+    }
 
     /**
      * Execute observer
@@ -26,8 +24,13 @@ class ConfigObserver implements \Magento\Framework\Event\ObserverInterface
      * @param \Magento\Framework\Event\Observer $observer
      * @return void
      */
-    public function execute(Observer $observer) {
-      $json = [
+    public function execute(Observer $observer)
+    {
+        if (!$this->forterConfig->isEnabled()) {
+            return false;
+        }
+
+        $json = [
         "general" => [
           "active" => $this->forterConfig->isEnabled(),
           "site_id" => $this->forterConfig->getSiteId(),
@@ -52,12 +55,12 @@ class ConfigObserver implements \Magento\Framework\Event\ObserverInterface
         "eventTime" => time()
       ];
 
-      try{
-        $url = self::SETTINGS_API_ENDPOINT;
-        $response = $this->abstractApi->sendApiRequest($url,json_encode($json));
-      } catch (\Exception $e) {
-        $this->abstractApi->reportToForterOnCatch($e);
-        throw new \Exception ($e->getMessage());
-      }
+        try {
+            $url = self::SETTINGS_API_ENDPOINT;
+            $response = $this->abstractApi->sendApiRequest($url, json_encode($json));
+        } catch (\Exception $e) {
+            $this->abstractApi->reportToForterOnCatch($e);
+            throw new \Exception($e->getMessage());
+        }
     }
 }

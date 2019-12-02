@@ -2,6 +2,20 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
     <default>
         <forter>
+            <settings>
+                <enabled>0</enabled>
+                <site_id>0</site_id>
+                <debug_mode>0</debug_mode>
+                <sandbox_mode>0</sandbox_mode>
+            </settings>
+            <immediate_post_pre_decision>
+              <pre_post_Select>2</pre_post_Select>
+              <decline_pre>1</decline_pre>
+              <pre_thanks_msg></pre_thanks_msg>
+              <decline_post>1</decline_post>
+              <capture_invoice>1</capture_invoice>
+              <post_thanks_msg></post_thanks_msg>
+            </immediate_post_pre_decision>
             <connection_information>
                 <base_connection_timeout>2000</base_connection_timeout>
                 <base_request_timeout>2000</base_request_timeout>

@@ -10,7 +10,6 @@ namespace Forter\Forter\Setup;
 use Magento\Framework\Setup\InstallSchemaInterface;
 use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\Setup\SchemaSetupInterface;
-use Magento\Framework\DB\Ddl\Table;
 
 class InstallSchema implements InstallSchemaInterface
 {
@@ -20,10 +19,9 @@ class InstallSchema implements InstallSchemaInterface
         $installer->startSetup();
         $connection = $installer->getConnection();
 
-
-            $syncTable = $installer->getConnection()->newTable(
-               $installer->getTable('forter_send_queue')
-           )
+        $syncTable = $installer->getConnection()->newTable(
+                $installer->getTable('forter_send_queue')
+            )
            ->addColumn(
                'sync_id',
                \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
@@ -76,5 +74,5 @@ class InstallSchema implements InstallSchemaInterface
 
         $installer->getConnection()->createTable($syncTable);
         $installer->endSetup();
-   }
+    }
 }

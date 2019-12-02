@@ -12,9 +12,6 @@
     <event name="customer_register_success">
         <observer name="customer_register_success_observer_forter" instance="Forter\Forter\Observer\Customer\CustomerRegisterSuccess" />
     </event>
-    <event name="customer_login">
-        <observer name="customer_login_observer" instance="Forter\Forter\Observer\Customer\CustomerLogin" />
-    </event>
     <event name="customer_save_after_data_object">
         <observer name="customer_save_after_data_object_observer" instance="Forter\Forter\Observer\Customer\CustomerSaveAfterDataObject" />
     </event>

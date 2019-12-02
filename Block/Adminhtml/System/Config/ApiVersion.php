@@ -2,10 +2,10 @@
 
 namespace Forter\Forter\Block\Adminhtml\System\Config;
 
+use Forter\Forter\Model\Config as ForterConfig;
 use Magento\Backend\Block\Template\Context;
 use Magento\Config\Block\System\Config\Form\Field;
 use Magento\Framework\Data\Form\Element\AbstractElement;
-use Forter\Forter\Model\Config as ForterConfig;
 
 class ApiVersion extends Field
 {

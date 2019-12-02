@@ -2,8 +2,8 @@
 namespace Forter\Forter\Observer;
 
 use Forter\Forter\Model\Config;
-use Magento\Framework\Event\ObserverInterface;
 use Forter\Forter\Model\QueueFactory as ForterQueueFactory;
+use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magento\Store\Model\StoreManagerInterface;
 
@@ -37,33 +37,37 @@ class OrderSaveAfter implements ObserverInterface
         $this->queue = $queue;
     }
 
-    public function execute(\Magento\Framework\Event\Observer $observer) {
-      $order = $observer->getEvent()->getOrder();
+    public function execute(\Magento\Framework\Event\Observer $observer)
+    {
+        if (!$this->config->isEnabled()) {
+            return false;
+        }
 
-      $orderState = $order->getState();
-      $orderOrigState = $order->getOrigData('state');
+        $order = $observer->getEvent()->getOrder();
 
+        $orderState = $order->getState();
+        $orderOrigState = $order->getOrigData('state');
 
-      if( $orderState == 'complete' && $orderOrigState != 'complete') {
-        $orderState = 'COMPLETED';
-      } elseif( $orderState == 'processing' && $orderOrigState != 'processing') {
-        $orderState = 'PROCESSING';
-      } elseif( $orderState == 'canceled' && $orderOrigState  != 'canceled') {
-        $orderState = 'CANCELED_BY_MERCHANT';
-      } else {
-        return false;
-      }
+        if ($orderState == 'complete' && $orderOrigState != 'complete') {
+            $orderState = 'COMPLETED';
+        } elseif ($orderState == 'processing' && $orderOrigState != 'processing') {
+            $orderState = 'PROCESSING';
+        } elseif ($orderState == 'canceled' && $orderOrigState  != 'canceled') {
+            $orderState = 'CANCELED_BY_MERCHANT';
+        } else {
+            return false;
+        }
 
-      $json = [
+        $json = [
         "orderId" => $order->getId(),
         "eventTime" => time(),
         "updatedStatus" =>  $orderState,
       ];
-      $json = json_encode($json);
-      $storeId = $this->storeManager->getStore()->getId();
-      $currentTime = $this->dateTime->gmtDate();
+        $json = json_encode($json);
+        $storeId = $this->storeManager->getStore()->getId();
+        $currentTime = $this->dateTime->gmtDate();
 
-      $this->queue->create()
+        $this->queue->create()
         ->setStoreId($storeId)
         ->setEntityType('order_fulfillment_status')
         ->setEntityId($order->getId())

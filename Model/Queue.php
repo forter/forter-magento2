@@ -16,5 +16,4 @@ class Queue extends \Magento\Framework\Model\AbstractModel
     {
         $this->_init('Forter\Forter\Model\ResourceModel\Queue');
     }
-
 }
