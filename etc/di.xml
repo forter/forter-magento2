@@ -3,4 +3,7 @@
   <type name="Magento\Customer\Model\AccountManagement">
       <plugin name="forter_customer_plugin" type="Forter\Forter\Plugin\AccountManagement" />
   </type>
+  <type name="Magento\Customer\Model\ResourceModel\CustomerRepository">
+     <plugin name="forter_customer_after_save" type="Forter\Forter\Plugin\CustomerAfterSave" sortOrder="10" disabled="false"/>
+ </type>
 </config>

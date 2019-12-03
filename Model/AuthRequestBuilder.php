@@ -56,7 +56,7 @@ class AuthRequestBuilder
         "primaryDeliveryDetails" => $this->requestPrepare->getPrimaryDeliveryDetails($order),
         "primaryRecipient" => $this->requestPrepare->getPrimaryRecipient($order),
         "accountOwner" => $this->requestPrepare->getAccountOwnerInfo($order),
-        "customerAccountData" => $this->requestPrepare->getCustomerAccountData($order),
+        "customerAccountData" => $this->requestPrepare->getCustomerAccountData($order, null),
         "totalDiscount" => $this->requestPrepare->getTotalDiscount($order),
         "payment" => $this->generatePaymentInfo($order)
       ];

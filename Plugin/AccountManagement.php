@@ -123,6 +123,7 @@ class AccountManagement
             $this->sendLoginAttempt('FAILED', $customer);
             throw $e;
         }
+
         $this->sendLoginAttempt('SUCCESS', $customer);
 
         return $result;
@@ -158,7 +159,7 @@ class AccountManagement
      * @return CustomerInterface
      * @throws LocalizedException
      */
-    private function localMatchCustomerByRpToken(string $rpToken): CustomerInterface
+    private function localMatchCustomerByRpToken(string $rpToken)
     {
         $this->searchCriteriaBuilder->addFilter(
             'rp_token',

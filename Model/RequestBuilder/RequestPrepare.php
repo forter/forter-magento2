@@ -14,6 +14,7 @@ use Magento\Customer\Model\Session;
 use Magento\Newsletter\Model\Subscriber;
 use Magento\Review\Model\Review;
 use Magento\Sales\Model\OrderFactory;
+use Magento\Store\Model\StoreManagerInterface;
 use Magento\Wishlist\Controller\WishlistProviderInterface;
 
 class RequestPrepare
@@ -21,14 +22,16 @@ class RequestPrepare
     const SHIPPING_METHOD_PREFIX = "Select Shipping Method - ";
 
     public function __construct(
-      OrderFactory $orderFactory,
-      CategoryFactory $categoryFactory,
-      Session $session,
-      Review $review,
-      WishlistProviderInterface $wishlistProvider,
-      Subscriber $subscriber
-  ) {
+        OrderFactory $orderFactory,
+        CategoryFactory $categoryFactory,
+        Session $session,
+        Review $review,
+        WishlistProviderInterface $wishlistProvider,
+        Subscriber $subscriber,
+        StoreManagerInterface $storeManager
+    ) {
         $this->orderFactory = $orderFactory;
+        $this->storeManager = $storeManager;
         $this->categoryFactory = $categoryFactory;
         $this->session = $session;
         $this->review = $review;
@@ -221,9 +224,17 @@ class RequestPrepare
       ];
     }
 
-    public function getCustomerAccountData($order)
+    public function getCustomerAccountData($order = null, $savedcustomer = null)
     {
-        $isGuest = $order->getCustomerIsGuest();
+        if ($savedcustomer) {
+            $isGuest = null;
+            $customerId = $savedcustomer->getId();
+        } else {
+            $isGuest = $order->getCustomerIsGuest();
+            $customer = $this->session->getCustomer();
+            $customerId = $order->getCustomerId();
+        }
+
         $customer = $this->session->getCustomer();
         if ($isGuest || !$customer) {
             $accountStatus = "GUEST";
@@ -235,8 +246,7 @@ class RequestPrepare
             $accountStatus = "ACTIVE";
         }
 
-        $customerId = $order->getCustomerId();
-        $reviews_count = $this->getCustomerReviewsCount($customerId, $order->getStore()->getId());
+        $reviews_count = $this->getCustomerReviewsCount($customerId, $this->storeManager->getStore()->getId());
 
         $currentUserWishlist = $this->wishlistProvider->getWishlist();
         $wishlistItemsCount = $currentUserWishlist ? count($currentUserWishlist->getItemCollection()) : 0;
