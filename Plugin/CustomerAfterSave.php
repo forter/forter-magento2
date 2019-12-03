@@ -72,6 +72,9 @@ class CustomerAfterSave
 
     private function getAddressInAccount($addresses)
     {
+        if (!isset($addresses) || !$addresses) {
+            return false;
+        }
         foreach ($addresses as $address) {
             $street = $address->getStreet();
             $customerAddress['address1'] = $street[0];
