@@ -38,7 +38,6 @@ class PaymentPlaceEnd implements ObserverInterface
         }
 
         if ($response) {
-            $this->config->log('worked!!');
         }
     }
 }

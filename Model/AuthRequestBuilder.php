@@ -131,21 +131,16 @@ class AuthRequestBuilder
         $billingDetails = [];
         $billingDetails["personalDetails"] = [
           "firstName" => $billing_address->getFirstName(),
-          "lastName" => $billing_address->getLastName(),
-          "middleInitials" => $billing_address->getMiddleName(),
-          "prefix" => $billing_address->getPrefix(),
-          "suffix" => $billing_address->getSuffix()
+          "lastName" => $billing_address->getLastName()
       ];
 
         if ($billing_address) {
             $billingDetails["address"] = $this->getAddressData($billing_address);
-            $billingDetails["address"]["addressRole"] = "BILLING";
 
             if ($billing_address->getTelephone()) {
                 $billingDetails["phone"] = [
                   [
-                      "phone" => $billing_address->getTelephone(),
-                      "phoneRole" => "BILLING"
+                      "phone" => $billing_address->getTelephone()
                   ]
               ];
             }
@@ -178,7 +173,6 @@ class AuthRequestBuilder
           "region" => $address->getRegion(),
           "country" => $address->getCountryId(),
           "company" => $address->getCompany(),
-          "suggestedCorrectAddress" => null,
           "savedData" => [
               "usedSavedData" => $address->getCustomerAddressId() != null,
               "choseToSaveData" => false  // Default value because this field is required and is not easy enough to get.

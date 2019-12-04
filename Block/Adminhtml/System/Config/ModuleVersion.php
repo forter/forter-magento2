@@ -1,5 +1,13 @@
 <?php
 
+/**
+* Forter fraud detection module for Magento 2
+* https://www.Forter.com/
+*
+* @category Forter
+* @package  Forter_Forter
+* @author   Girit-Interactive (https://www.girit-tech.com/)
+*/
 namespace Forter\Forter\Block\Adminhtml\System\Config;
 
 use Forter\Forter\Model\Config as ForterConfig;
@@ -59,7 +67,7 @@ class ModuleVersion extends Field
     }
 
     /**
-     * Generate collect button html
+     * Return Forter magetno 2 module version
      *
      * @return string
      */

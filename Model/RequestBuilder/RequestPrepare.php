@@ -109,7 +109,6 @@ class RequestPrepare
                       "currency" => $order->getOrderCurrency()->getCurrencyCode()
                   ],
                   "productId" => $item->getProductId(),
-                  "productIdType" => $item->getProductType(),
                   "name" => $item->getName(),
                   "type" => $item->getData("is_virtual") ? "NON_TANGIBLE" : "TANGIBLE",
                   "quantity" => (double)$item->getQtyOrdered(),
@@ -119,8 +118,7 @@ class RequestPrepare
                   "physicalGoods" => [
                     "wrapAsGift" => $item->getData("gift_message_available") ? true : false
                   ]
-              ],
-              "created" => $item->getCreatedAt() ? strtotime($item->getCreatedAt()) : null
+              ]
           ];
         }
         return $cartItems;
@@ -153,19 +151,16 @@ class RequestPrepare
             if ($shippingAddress->getTelephone()) {
                 $phone = [
                   [
-                      "phone" => $shippingAddress->getTelephone(),
-                      "phoneRole" => "SHIPPING"
+                      "phone" => $shippingAddress->getTelephone()
                   ]
               ];
             }
             $primaryRecipient["address"] = $this->getAddressData($shippingAddress);
-            $primaryRecipient["address"]["addressRole"] = "SHIPPING";
         } else {
             if ($billingAddress->getTelephone()) {
                 $phone = [
                   [
-                      "phone" => $billingAddress->getTelephone(),
-                      "phoneRole" => "BILLING"
+                      "phone" => $billingAddress->getTelephone()
                   ]
               ];
             }
@@ -306,7 +301,6 @@ class RequestPrepare
           "region" => $address->getRegion(),
           "country" => $address->getCountryId(),
           "company" => $address->getCompany(),
-          "suggestedCorrectAddress" => null,
           "savedData" => [
               "usedSavedData" => $address->getCustomerAddressId() != null,
               "choseToSaveData" => false  // Default value because this field is required and is not easy enough to get.

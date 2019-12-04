@@ -1,4 +1,5 @@
 <?php
+
 /**
 * Forter Payments For Magento 2
 * https://www.Forter.com/
@@ -64,13 +65,13 @@ class Config
      * @param  ModuleListInterface      $moduleList
      */
     public function __construct(
-       ScopeConfigInterface $scopeConfig,
-       StoreManagerInterface $storeManager,
-       EncryptorInterface $encryptor,
-       LoggerInterface $logger,
-       ModuleListInterface $moduleList,
-       UrlInterface $urlBuilder
-   ) {
+        ScopeConfigInterface $scopeConfig,
+        StoreManagerInterface $storeManager,
+        EncryptorInterface $encryptor,
+        LoggerInterface $logger,
+        ModuleListInterface $moduleList,
+        UrlInterface $urlBuilder
+    ) {
         $this->scopeConfig = $scopeConfig;
         $this->storeManager = $storeManager;
         $this->encryptor = $encryptor;
@@ -149,11 +150,11 @@ class Config
     }
 
     /**
-     * @return bool
+     * @return string
      */
     public function getApiVersion()
     {
-        return '2.0';
+        return $this->getConfigValue('settings/api_version');
     }
 
     /**
@@ -166,10 +167,10 @@ class Config
     private function getConfigValue($fieldKey)
     {
         return $this->scopeConfig->getValue(
-           $this->getConfigPath() . $fieldKey,
-           ScopeInterface::SCOPE_STORE,
-           $this->getStoreId()
-       );
+            $this->getConfigPath() . $fieldKey,
+            ScopeInterface::SCOPE_STORE,
+            $this->getStoreId()
+        );
     }
 
     /**
@@ -181,6 +182,17 @@ class Config
     public function isEnabled()
     {
         return (bool)$this->getConfigValue('settings/enabled');
+    }
+
+    /**
+     * Return bool value depends of that if payment method sandbox mode
+     * is enabled or not.
+     *
+     * @return bool
+     */
+    public function isLogging()
+    {
+        return (bool)$this->getConfigValue('settings/log_mode');
     }
 
     /**
@@ -223,6 +235,10 @@ class Config
      */
     public function log($message, $type = "debug", $data = [], $prefix = '[Forter] ')
     {
+        if (!$this->isLogging()) {
+            return false;
+        }
+
         $this->logger->debug($prefix . json_encode($message), $data); //REMOVE LATER
         if ($type !== 'debug' || $this->isDebugEnabled()) {
             if (!isset($data['store_id'])) {

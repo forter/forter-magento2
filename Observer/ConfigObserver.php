@@ -11,9 +11,9 @@ class ConfigObserver implements \Magento\Framework\Event\ObserverInterface
     const SETTINGS_API_ENDPOINT = 'https://api.forter-secure.com/ext/settings/';
 
     public function __construct(
-      AbstractApi $abstractApi,
-      Config $forterConfig
-  ) {
+        AbstractApi $abstractApi,
+        Config $forterConfig
+    ) {
         $this->abstractApi = $abstractApi;
         $this->forterConfig = $forterConfig;
     }
@@ -38,7 +38,8 @@ class ConfigObserver implements \Magento\Framework\Event\ObserverInterface
           "module_version" => $this->forterConfig->getModuleVersion(),
           "api_version" => $this->forterConfig->getApiVersion(),
           "debug_mode" => $this->forterConfig->isDebugEnabled(),
-          "sandbox_mode" => $this->forterConfig->isSandboxMode()
+          "sandbox_mode" => $this->forterConfig->isSandboxMode(),
+          "log_mode" => $this->forterConfig->isLogging()
         ],
         "pre_post_desicion" => [
           "pre_post_Select" => $this->forterConfig->getPrePostDesicionMsg('pre_post_Select'),

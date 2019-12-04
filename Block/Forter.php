@@ -1,34 +1,39 @@
 <?php
 namespace Forter\Forter\Block;
 
-use Forter\Forter\Model\Config;
+use Forter\Forter\Model\Config as ForterConfig;
 use Magento\Framework\View\Element\Template\Context;
 
 class Forter extends \Magento\Framework\View\Element\Template
 {
-    /**
-     * This block is used by forter.phtml template
-     */
 
-    protected $_config;
+    /**
+     * @var ForterConfig
+     */
+    private $forterConfig;
 
     /**
      * Forter Block Constructor
      * @param \Magento\Framework\View\Element\Template\Context $context
      * @param array $data
-     * @param \Forter\Forter\Model\Config $config
+     * @param ForterConfig forterConfig
      */
     public function __construct(
         Context $context,
-        Config $config,
+        ForterConfig $forterConfig,
         array $data = []
     ) {
         parent::__construct($context, $data);
-        $this->_config = $config;
+        $this->forterConfig = $forterConfig;
     }
 
+    /**
+     * Return Merchant Site Id
+     *
+     * @return string
+     */
     public function getSiteId()
     {
-        return $this->_config->getSiteId();
+        return $this->forterConfig->getSiteId();
     }
 }

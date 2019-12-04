@@ -9,20 +9,24 @@ class SendQueue
 {
     const ORDER_FULFILLMENT_STATUS_ENDPOINT = "https://api.forter-secure.com/v2/status/";
 
+    /**
+     * @param  AbstractApi     $abstractApi
+     * @param  ForterConfig forterConfig
+     */
     public function __construct(
-      AbstractApi $abstractApi,
-      QueueFactory $forterQueue
-  ) {
+        AbstractApi $abstractApi,
+        QueueFactory $forterQueue
+    ) {
         $this->abstractApi = $abstractApi;
         $this->forterQueue = $forterQueue;
     }
 
+    /**
+     * Send to forter items in Queue
+     * @return boolval
+     */
     public function execute()
     {
-        $writer = new \Zend\Log\Writer\Stream(BP . '/var/log/cron.log');
-        $logger = new \Zend\Log\Logger();
-        $logger->addWriter($writer);
-
         $items = $this->forterQueue
       ->create()
       ->getCollection()
@@ -42,9 +46,14 @@ class SendQueue
             }
         }
 
-        return $this;
+        return true;
     }
 
+    /**
+     * Return endpoint base on item type
+     * @param  Forter\Forter\Model\QueueFactory
+     * @return string
+     */
     private function getUrl($item)
     {
         if ($item->getEntityType() == 'order_fulfillment_status') {
