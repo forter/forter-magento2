@@ -30,18 +30,22 @@ class AbstractApi
                 $tries++;
                 $timeOutStatus = $this->calcTimeOut($tries);
                 $this->setCurlOptions(strlen($data), $tries);
+                $this->forterConfig->log('Request Url:' . $url);
+                $this->forterConfig->log('Request Body:' . $data);
                 $this->clientInterface->post($url, $data);
                 $response = $this->clientInterface->getBody();
+                $this->forterConfig->log('Response Body:' . $response, 'debug');
+                $this->forterConfig->log('Response Header:' . json_encode($this->clientInterface->getHeaders()));
                 $response = json_decode($response);
 
-                if ($response->status == 'success') {
+                if ($response->forterDecision == 'APPROVE') {
                     return true;
                 }
             } while ($timeOutStatus);
 
             return false;
         } catch (\Exception $e) {
-            //$this->reportToForterOnCatch($e); TODO log instead of send otherwise endless loops
+            $this->forterConfig->log('Error:' . $e->getMessage());
         }
     }
 
@@ -91,7 +95,6 @@ class AbstractApi
 
     public function reportToForterOnCatch($e)
     {
-        ini_set('memory_limit', '-1');
         $url = self::ERROR_ENDPOINT;
 
         $json = [

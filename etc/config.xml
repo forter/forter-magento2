@@ -6,7 +6,9 @@
                 <enabled>0</enabled>
                 <site_id>0</site_id>
                 <debug_mode>0</debug_mode>
+                <api_version>2.0</api_version>
                 <sandbox_mode>0</sandbox_mode>
+                <log_mode>0</log_mode>
             </settings>
             <immediate_post_pre_decision>
               <pre_post_Select>2</pre_post_Select>
