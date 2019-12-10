@@ -5,6 +5,7 @@ use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\AuthRequestBuilder;
 use Forter\Forter\Model\Config;
 use Magento\Framework\Event\ObserverInterface;
+use Magento\Sales\Api\OrderManagementInterface;
 
 class PaymentPlaceEnd implements ObserverInterface
 {
@@ -13,16 +14,18 @@ class PaymentPlaceEnd implements ObserverInterface
     public function __construct(
         AbstractApi $abstractApi,
         Config $config,
-        AuthRequestBuilder $authRequestBuilder
+        AuthRequestBuilder $authRequestBuilder,
+        OrderManagementInterface $orderManagement
     ) {
         $this->abstractApi = $abstractApi;
         $this->config = $config;
         $this->authRequestBuilder = $authRequestBuilder;
+        $this->orderManagement = $orderManagement;
     }
 
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
-        if (!$this->config->isEnabled()) {
+        if (!$this->config->isEnabled() || !$this->config->getIsPost()) {
             return false;
         }
 
@@ -37,7 +40,12 @@ class PaymentPlaceEnd implements ObserverInterface
             throw new \Exception($e->getMessage());
         }
 
-        if ($response) {
+        $order->setForterResponse($response);
+        $response = json_decode($response);
+        $order->setForterStatus($response->action);
+
+        if ($response->action == 'decline') {
+            $this->decline->handlePostTransactionDescision();
         }
     }
 }

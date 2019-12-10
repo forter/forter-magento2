@@ -6,4 +6,11 @@
   <type name="Magento\Customer\Model\ResourceModel\CustomerRepository">
      <plugin name="forter_customer_after_save" type="Forter\Forter\Plugin\CustomerAfterSave" sortOrder="10" disabled="false"/>
  </type>
+ <virtualType name="Magento\Sales\Model\ResourceModel\Order\Grid" type="Magento\Sales\Model\ResourceModel\Grid">
+    <arguments>
+        <argument name="columns" xsi:type="array">
+            <item name="forter_status" xsi:type="string">sales_order.forter_status</item>
+        </argument>
+    </arguments>
+</virtualType>
 </config>

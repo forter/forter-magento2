@@ -265,6 +265,22 @@ class Config
         return $this->moduleList->getOne(self::MODULE_NAME)['setup_version'];
     }
 
+    public function getDeclinePre()
+    {
+        return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/decline_pre');
+    }
+
+    public function getPreThanksMsg()
+    {
+        return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/pre_thanks_msg');
+    }
+
+    public function getIsPost()
+    {
+        $result = $this->scopeConfig->getValue('forter/immediate_post_pre_decision/pre_post_Select');
+        return ($result == '2' ? true : false);
+    }
+
     public function getPrePostDesicionMsg($type)
     {
         $result = $this->scopeConfig->getValue('forter/immediate_post_pre_decision/' . $type);
@@ -272,7 +288,14 @@ class Config
          case 'pre_post_Select':
              return ($result == '1' ? 'Auth pre paymernt' : 'Auth post paymernt');
          case 'decline_pre':
-             return ($result == '1' ? 'Redirect Success Page, Cancel the order, prevent email sending' : 'Send user back to Checkout page with error');
+            if ($result == '0') {
+                $result = 'Do Nothing';
+            } elseif ($result == '1') {
+                $result = 'Payment exception (stay in checkout page with error message)';
+            } elseif ($result == '2') {
+                $result = 'Destroy customer session and redirect back to cart page with error message';
+            }
+            return $result;
          case 'decline_post':
              return ($result == '1' ? 'Redirect Success Page, Cancel the order, prevent email sending' : 'Send user back to Checkout page with error');
          case 'capture_invoice':

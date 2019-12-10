@@ -1,0 +1,55 @@
+<?php
+/**
+ * @var Eset\License\Block\Adminhtml\Order\View\Tab\Invoice $block
+*/
+$order = $this->getOrder();
+$forterResponse = $order->getData('forter_response');
+$forterResponse = json_decode($forterResponse);
+
+?>
+
+<section class="admin__page-section">
+    <div class="admin__page-section-title invoice_title">
+        <span class="title"><?php echo __("Forter Response Details"); ?></span>
+    </div>
+</section>
+<section class="admin__page-section">
+    <div class="admin__page-section-content">
+        <div class="admin__page-section-item-title invoice_item_title">
+            <span class="title"><?php echo __("Forter Status"); ?></span>
+        </div>
+        <div class="admin__page-section-item-content invoice_item_content">
+            <div class=""><?php echo $forterResponse->status; ?></div>
+        </div>
+    </div>
+</section>
+<section class="admin__page-section">
+    <div class="admin__page-section-content">
+        <div class="admin__page-section-item-title invoice_item_title">
+            <span class="title"><?php echo __("Forter Action"); ?></span>
+        </div>
+        <div class="admin__page-section-item-content invoice_item_content">
+            <div class=""><?php echo $forterResponse->action;?></div>
+        </div>
+    </div>
+</section>
+<section class="admin__page-section">
+    <div class="admin__page-section-content">
+        <div class="admin__page-section-item-title invoice_item_title">
+            <span class="title"><?php echo __("Forter Message"); ?></span>
+        </div>
+        <div class="admin__page-section-item-content invoice_item_content">
+            <div class=""><?php echo $forterResponse->message;?></div>
+        </div>
+    </div>
+</section>
+<section class="admin__page-section">
+    <div class="admin__page-section-content">
+        <div class="admin__page-section-item-title invoice_item_title">
+            <span class="title"><?php echo __("Forter Reason Code"); ?></span>
+        </div>
+        <div class="admin__page-section-item-content invoice_item_content">
+            <div class=""><?php echo $forterResponse->reasonCode;?></div>
+        </div>
+    </div>
+</section>
