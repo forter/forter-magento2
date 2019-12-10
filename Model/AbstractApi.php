@@ -38,6 +38,10 @@ class AbstractApi
                 $this->forterConfig->log('Response Header:' . json_encode($this->clientInterface->getHeaders()));
                 $response = json_decode($response);
 
+                if ($response->status == 'success') {
+                    return json_encode($response);
+                }
+
                 if ($response->forterDecision == 'APPROVE') {
                     return true;
                 }

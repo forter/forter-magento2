@@ -20,8 +20,8 @@ class InstallSchema implements InstallSchemaInterface
         $connection = $installer->getConnection();
 
         $syncTable = $installer->getConnection()->newTable(
-                $installer->getTable('forter_send_queue')
-            )
+            $installer->getTable('forter_send_queue')
+        )
            ->addColumn(
                'sync_id',
                \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
@@ -73,6 +73,40 @@ class InstallSchema implements InstallSchemaInterface
            );
 
         $installer->getConnection()->createTable($syncTable);
+
+        $connection
+          ->addColumn(
+              $setup->getTable('sales_order'),
+              'forter_status',
+              [
+              'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+              'length' => 255,
+              'comment' => 'Forter Response Status'
+            ]
+          );
+
+        $connection
+            ->addColumn(
+                $setup->getTable('sales_order_grid'),
+                'forter_status',
+                [
+                'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                'length' => 255,
+                'comment' => 'Forter Response Status'
+              ]
+            );
+
+        $connection
+              ->addColumn(
+                  $setup->getTable('sales_order'),
+                  'forter_response',
+                  [
+                  'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                  'length' => 255,
+                  'comment' => 'Forter Full Response'
+                ]
+              );
+
         $installer->endSetup();
     }
 }
