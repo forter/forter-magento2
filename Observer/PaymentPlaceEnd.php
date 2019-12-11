@@ -4,6 +4,8 @@ namespace Forter\Forter\Observer;
 use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\AuthRequestBuilder;
 use Forter\Forter\Model\Config;
+use Forter\Forter\Model\RequestHandler\Approve;
+use Forter\Forter\Model\RequestHandler\Decline;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Sales\Api\OrderManagementInterface;
 
@@ -12,11 +14,15 @@ class PaymentPlaceEnd implements ObserverInterface
     const VALIDATION_API_ENDPOINT = 'https://api.forter-secure.com/v2/orders/';
 
     public function __construct(
+        Decline $decline,
+        Approve $approve,
         AbstractApi $abstractApi,
         Config $config,
         AuthRequestBuilder $authRequestBuilder,
         OrderManagementInterface $orderManagement
     ) {
+        $this->decline = $decline;
+        $this->approve = $approve;
         $this->abstractApi = $abstractApi;
         $this->config = $config;
         $this->authRequestBuilder = $authRequestBuilder;
@@ -45,7 +51,7 @@ class PaymentPlaceEnd implements ObserverInterface
         $order->setForterStatus($response->action);
 
         if ($response->action == 'decline') {
-            $this->decline->handlePostTransactionDescision();
+            $this->decline->handlePostTransactionDescision($order);
         }
     }
 }

@@ -4,6 +4,8 @@ namespace Forter\Forter\Cron;
 
 use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\QueueFactory;
+use Forter\Forter\Model\RequestHandler\Approve;
+use Magento\Sales\Api\OrderRepositoryInterface;
 
 class SendQueue
 {
@@ -15,10 +17,14 @@ class SendQueue
      */
     public function __construct(
         AbstractApi $abstractApi,
+        Approve $approve,
+        OrderRepositoryInterface $orderRepository,
         QueueFactory $forterQueue
     ) {
         $this->abstractApi = $abstractApi;
+        $this->approve = $approve;
         $this->forterQueue = $forterQueue;
+        $this->orderRepository = $orderRepository;
     }
 
     /**
@@ -38,11 +44,17 @@ class SendQueue
         foreach ($items as $item) {
             $url = $this->getUrl($item);
             $data = $item->getData('entity_body');
-            $response = $this->abstractApi->sendApiRequest($url, $data);
-
-            if ($response) {
+            if ($item->getEntityType() == 'approve_order') {
+                $order = $this->orderRepository->get($item->getData('entity_id'));
+                $this->approve->handleApproveImmediatly($order);
                 $item->setSyncFlag('1');
                 $item->save();
+            } else {
+                $response = $this->abstractApi->sendApiRequest($url, $data);
+                if ($response) {
+                    $item->setSyncFlag('1');
+                    $item->save();
+                }
             }
         }
 

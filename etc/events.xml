@@ -9,6 +9,10 @@
     <event name="sales_order_save_after">
         <observer name="sales_order_save_after_observer_forter" instance="Forter\Forter\Observer\OrderSaveAfter" />
     </event>
+    <event name="checkout_submit_all_after">
+        <observer name="checkout_submit_all_after_observer_forter" instance="Forter\Forter\Observer\CheckoutSubmitAllAfter" />
+    </event>
+
     <event name="customer_register_success">
         <observer name="customer_register_success_observer_forter" instance="Forter\Forter\Observer\Customer\CustomerRegisterSuccess" />
     </event>
