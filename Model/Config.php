@@ -270,9 +270,19 @@ class Config
         return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/decline_pre');
     }
 
+    public function getDeclinePost()
+    {
+        return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/decline_post');
+    }
+
     public function getPreThanksMsg()
     {
         return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/pre_thanks_msg');
+    }
+
+    public function captureInvoice()
+    {
+        return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/capture_invoice');
     }
 
     public function getIsPost()

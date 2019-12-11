@@ -45,22 +45,32 @@ class Decline
 
     public function handlePostTransactionDescision($order)
     {
-        $result = $this->cancelOrder($order);
-        if ($result) {
-            return true;
+        $forterDecision = $this->forterConfig->getDeclinePost();
+        if ($forterDecision == '1') {
+            $this->messageManager->addError($this->forterConfig->getPreThanksMsg());
+
+            $result = $this->cancelOrder($order);
+            if ($result) {
+                return true;
+            }
+
+            $result = $this->createCreditMemo($order);
+            if ($result) {
+                return true;
+            }
+
+            $result = $this->holdOrder($order);
+            if ($result) {
+                return true;
+            }
+        } elseif ($forterDecision == '2') {
+            $orderState = Order::STATE_PAYMENT_REVIEW;
+            $order->setState($orderState)->setStatus(Order::STATE_PAYMENT_REVIEW);
+            $order->save();
+            $this->addCommentToOrder($order, 'Order Has been marked for Payment Review by Forter');
         }
 
-        $result = $this->createCreditMemo($order);
-        if ($result) {
-            return true;
-        }
-
-        $result = $this->holdOrder($order);
-        if ($result) {
-            return true;
-        }
-
-        return false;
+        return $this;
     }
 
     private function cancelOrder($order)
