@@ -5,10 +5,30 @@ namespace Forter\Forter\Model;
 use Forter\Forter\Model\Config as ForterConfig;
 use Magento\Framework\HTTP\ClientInterface;
 
+/**
+ * Class AbstractApi
+ * @package Forter\Forter\Model
+ */
 class AbstractApi
 {
+    /**
+     *
+     */
     const ERROR_ENDPOINT = 'https://api.forter-secure.com/errors/';
+    /**
+     * @var ClientInterface
+     */
+    private $clientInterface;
+    /**
+     * @var Config
+     */
+    private $forterConfig;
 
+    /**
+     * AbstractApi constructor.
+     * @param ClientInterface $clientInterface
+     * @param Config $forterConfig
+     */
     public function __construct(
         ClientInterface $clientInterface,
         ForterConfig $forterConfig
@@ -17,6 +37,11 @@ class AbstractApi
         $this->forterConfig = $forterConfig;
     }
 
+    /**
+     * @param $url
+     * @param $data
+     * @return bool|false|string
+     */
     public function sendApiRequest($url, $data)
     {
         if (!$this->forterConfig->isEnabled()) {
@@ -53,6 +78,10 @@ class AbstractApi
         }
     }
 
+    /**
+     * @param $bodyLen
+     * @param $tries
+     */
     private function setCurlOptions($bodyLen, $tries)
     {
 
@@ -71,6 +100,10 @@ class AbstractApi
         $this->clientInterface->setOption(CURLOPT_SSL_VERIFYHOST, 2);
     }
 
+    /**
+     * @param $tries
+     * @return bool
+     */
     private function calcTimeOut($tries)
     {
         $timeOutSettingsArray = $this->forterConfig->getTimeOutSettings();
@@ -97,6 +130,9 @@ class AbstractApi
         return true;
     }
 
+    /**
+     * @param $e
+     */
     public function reportToForterOnCatch($e)
     {
         $url = self::ERROR_ENDPOINT;

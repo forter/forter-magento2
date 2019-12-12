@@ -1,16 +1,25 @@
 <?php
 /**
-* Forter Payments For Magento 2
-* https://www.Forter.com/
-*
-* @category Forter
-* @package  Forter_Forter
-* @author   Girit-Interactive (https://www.girit-tech.com/)
-*/
+ * Forter Payments For Magento 2
+ * https://www.Forter.com/
+ *
+ * @category Forter
+ * @package  Forter_Forter
+ * @author   Girit-Interactive (https://www.girit-tech.com/)
+ */
+
 namespace Forter\Forter\Model\RequestBuilder;
 
+/**
+ * Class Payment
+ * @package Forter\Forter\Model\RequestBuilder
+ */
 class Payment
 {
+    /**
+     * @param $order
+     * @return array
+     */
     public function generatePaymentInfo($order)
     {
         $billingAddress = $order->getBillingAddress();
@@ -27,21 +36,21 @@ class Payment
         // If paypal:
         if (strpos($payment->getMethod(), 'paypal') !== false) {
             $paymentData["paypal"] = [
-                  "payerId" => $payment->getAdditionalInformation("paypal_payer_id"),
-                  "payerEmail" => $payment->getAdditionalInformation("paypal_payer_email"),
-                  "payerStatus" => $payment->getAdditionalInformation("paypal_payer_status"),
-                  "payerAddressStatus" => $payment->getAdditionalInformation("paypal_address_status"),
-                  "paymentMethod" => $payment->getMethod(),
-                  "paymentStatus" => $payment->getAdditionalInformation("paypal_payment_status"),
-                  "protectionEligibility" => $payment->getAdditionalInformation("paypal_protection_eligibility"),
-                  "correlationId" => $payment->getAdditionalInformation("paypal_correlation_id"),
-                  "checkoutToken" => $payment->getAdditionalInformation("paypal_express_checkout_token"),
-                  "paymentGatewayData" => [
-                      "gatewayName" => $payment->getMethod(),
-                      "gatewayTransactionId" => $payment->getTransactionId(),
-                  ],
-                  "fullPaypalResponsePayload" => $payment->getAdditionalInformation()
-          ];
+                "payerId" => $payment->getAdditionalInformation("paypal_payer_id"),
+                "payerEmail" => $payment->getAdditionalInformation("paypal_payer_email"),
+                "payerStatus" => $payment->getAdditionalInformation("paypal_payer_status"),
+                "payerAddressStatus" => $payment->getAdditionalInformation("paypal_address_status"),
+                "paymentMethod" => $payment->getMethod(),
+                "paymentStatus" => $payment->getAdditionalInformation("paypal_payment_status"),
+                "protectionEligibility" => $payment->getAdditionalInformation("paypal_protection_eligibility"),
+                "correlationId" => $payment->getAdditionalInformation("paypal_correlation_id"),
+                "checkoutToken" => $payment->getAdditionalInformation("paypal_express_checkout_token"),
+                "paymentGatewayData" => [
+                    "gatewayName" => $payment->getMethod(),
+                    "gatewayTransactionId" => $payment->getTransactionId(),
+                ],
+                "fullPaypalResponsePayload" => $payment->getAdditionalInformation()
+            ];
         } elseif ($paymentMethodInfo['cc_last4']) {
             $paymentData["creditCard"] = [
                 "nameOnCard" => $paymentMethodInfo['cc_owner'],
@@ -71,32 +80,36 @@ class Payment
 
         $billingDetails = [];
         $billingDetails["personalDetails"] = [
-          "firstName" => $billingAddress->getFirstName(),
-          "lastName" => $billingAddress->getLastName()
-      ];
+            "firstName" => $billingAddress->getFirstName(),
+            "lastName" => $billingAddress->getLastName()
+        ];
 
         if ($billingAddress) {
             $billingDetails["address"] = $this->getAddressData($billingAddress);
 
             if ($billingAddress->getTelephone()) {
                 $billingDetails["phone"] = [
-                  [
-                      "phone" => $billingAddress->getTelephone()
-                  ]
-              ];
+                    [
+                        "phone" => $billingAddress->getTelephone()
+                    ]
+                ];
             }
         }
 
         $paymentData["billingDetails"] = $billingDetails;
         $paymentData["paymentMethodNickname"] = $payment->getMethod();
         $paymentData["amount"] = [
-          "amountLocalCurrency" => strval($order->getGrandTotal()),
-          "currency" => $order->getOrderCurrency()->getCurrencyCode()
-      ];
+            "amountLocalCurrency" => strval($order->getGrandTotal()),
+            "currency" => $order->getOrderCurrency()->getCurrencyCode()
+        ];
 
         return [$paymentData];
     }
 
+    /**
+     * @param $order
+     * @return array|null
+     */
     public function getSpecificPaymentMethodInfo($order)
     {
         $payment = $order->getPayment();
@@ -129,7 +142,7 @@ class Payment
                     }
                     break;
                     $cc_last4 = isset($cc_last4) ? $cc_last4 : $payment->decrypt($payment->getCcLast4());
-                  //  return $this->ccInfo($payment, $cc_last4, $cvv_result_code, $avs_result_code, $credit_card_brand, null, null, null, null, null, null, null);
+                //  return $this->ccInfo($payment, $cc_last4, $cvv_result_code, $avs_result_code, $credit_card_brand, null, null, null, null, null, null, null);
                 case 'braintree':
                     $credit_card_brand = $payment->getAdditionalInformation('cc_type');
                     $cvv_result_code = $payment->getAdditionalInformation('cvvResponseCode');
@@ -145,13 +158,28 @@ class Payment
                     $cvv_result_code = $payment->getAdditionalInformation('paypal_cvv2_match');
                     break;
                 //    return $this->ccInfo($payment, $cc_last4, $cvv_result_code, $avs_result_code, $credit_card_brand, null, null, null, null, null, null, null);
-              }
+            }
         } catch (\Exception $e) {
             $this->logger->error("Exception in getSpecificPaymentMethodInfo: ", $e, $order->getIncrementId());
         }
         return $this->ccInfo($payment, null, null, null, null, null, null, null, null, null, null, null);
     }
 
+    /**
+     * @param $payment
+     * @param $cc_last4
+     * @param $cvv_result_code
+     * @param $avs_result_code
+     * @param $credit_card_brand
+     * @param $avs_zip_code
+     * @param $avs_street_code
+     * @param $cc_bin
+     * @param $cc_owner
+     * @param $cc_exp_month
+     * @param $cc_exp_year
+     * @param $auth_code
+     * @return array
+     */
     public function ccInfo($payment, $cc_last4, $cvv_result_code, $avs_result_code, $credit_card_brand, $avs_zip_code, $avs_street_code, $cc_bin, $cc_owner, $cc_exp_month, $cc_exp_year, $auth_code)
     {
         $cc_last4 = $cc_last4 ? $cc_last4 : $payment->getCcLast4();

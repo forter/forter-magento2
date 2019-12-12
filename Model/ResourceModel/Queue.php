@@ -7,6 +7,10 @@
 
 namespace Forter\Forter\Model\ResourceModel;
 
+/**
+ * Class Queue
+ * @package Forter\Forter\Model\ResourceModel
+ */
 class Queue extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
 {
     /**

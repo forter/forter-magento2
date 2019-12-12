@@ -1,4 +1,5 @@
 <?php
+
 namespace Forter\Forter\Observer\OrderFullfilment;
 
 use Forter\Forter\Model\Config;
@@ -7,36 +8,57 @@ use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magento\Store\Model\StoreManagerInterface;
 
+/**
+ * Class OrderSaveAfter
+ * @package Forter\Forter\Observer\OrderFullfilment
+ */
 class OrderSaveAfter implements ObserverInterface
 {
 
     /**
-      * @var \Forter\Forter\Queue
-      */
+     * @var \Forter\Forter\Queue
+     */
     protected $queue;
 
     /**
-      * @var \Magento\Framework\Stdlib\DateTime\DateTime
-      */
+     * @var \Magento\Framework\Stdlib\DateTime\DateTime
+     */
     protected $dateTime;
 
     /**
-      * @var \Magento\Store\Model\StoreManagerInterface
-      */
+     * @var \Magento\Store\Model\StoreManagerInterface
+     */
     protected $storeManager;
+    /**
+     * @var Config
+     */
+    private $config;
 
+    /**
+     * OrderSaveAfter constructor.
+     * @param Config $config
+     * @param ForterQueueFactory $queue
+     * @param DateTime $dateTime
+     * @param StoreManagerInterface $storeManager
+     */
     public function __construct(
         Config $config,
         ForterQueueFactory $queue,
         DateTime $dateTime,
         StoreManagerInterface $storeManager
-    ) {
+    )
+    {
         $this->storeManager = $storeManager;
         $this->config = $config;
         $this->dateTime = $dateTime;
         $this->queue = $queue;
     }
 
+    /**
+     * @param \Magento\Framework\Event\Observer $observer
+     * @return bool|void
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
         if (!$this->config->isEnabled()) {
@@ -52,27 +74,27 @@ class OrderSaveAfter implements ObserverInterface
             $orderState = 'COMPLETED';
         } elseif ($orderState == 'processing' && $orderOrigState != 'processing') {
             $orderState = 'PROCESSING';
-        } elseif ($orderState == 'canceled' && $orderOrigState  != 'canceled') {
+        } elseif ($orderState == 'canceled' && $orderOrigState != 'canceled') {
             $orderState = 'CANCELED_BY_MERCHANT';
         } else {
             return false;
         }
 
         $json = [
-        "orderId" => $order->getId(),
-        "eventTime" => time(),
-        "updatedStatus" =>  $orderState,
-      ];
+            "orderId" => $order->getId(),
+            "eventTime" => time(),
+            "updatedStatus" => $orderState,
+        ];
         $json = json_encode($json);
         $storeId = $this->storeManager->getStore()->getId();
         $currentTime = $this->dateTime->gmtDate();
 
         $this->queue->create()
-        ->setStoreId($storeId)
-        ->setEntityType('order_fulfillment_status')
-        ->setEntityId($order->getId())
-        ->setEntityBody($json)
-        ->setSyncDate($currentTime)
-        ->save();
+            ->setStoreId($storeId)
+            ->setEntityType('order_fulfillment_status')
+            ->setEntityId($order->getId())
+            ->setEntityBody($json)
+            ->setSyncDate($currentTime)
+            ->save();
     }
 }

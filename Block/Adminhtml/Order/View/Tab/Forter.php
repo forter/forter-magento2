@@ -1,4 +1,5 @@
 <?php
+
 namespace Forter\Forter\Block\Adminhtml\Order\View\Tab;
 
 use Magento\Backend\Block\Template\Context;
@@ -6,13 +7,18 @@ use Magento\Framework\Registry;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Helper\Admin;
 
+/**
+ * Class Forter
+ * @package Forter\Forter\Block\Adminhtml\Order\View\Tab
+ */
 class Forter extends \Magento\Sales\Block\Adminhtml\Order\AbstractOrder implements
     \Magento\Backend\Block\Widget\Tab\TabInterface
 {
     /**
-    * order Object
-    */
+     * order Object
+     */
     protected $orderInterface;
+
     /**
      * invoice constructor.
      * @param \Magento\Backend\Block\Template\Context $context
@@ -27,10 +33,12 @@ class Forter extends \Magento\Sales\Block\Adminhtml\Order\AbstractOrder implemen
         OrderInterface $orderInterface,
         Admin $adminHelper,
         array $data = []
-    ) {
+    )
+    {
         $this->orderInterface = $orderInterface;
         parent::__construct($context, $registry, $adminHelper, $data);
     }
+
     /**
      * @return \Magento\Framework\Phrase
      */
@@ -38,6 +46,7 @@ class Forter extends \Magento\Sales\Block\Adminhtml\Order\AbstractOrder implemen
     {
         return __('Forter Desicion');
     }
+
     /**
      * @return \Magento\Framework\Phrase
      */
@@ -45,6 +54,7 @@ class Forter extends \Magento\Sales\Block\Adminhtml\Order\AbstractOrder implemen
     {
         return __('Forter Desicion');
     }
+
     /**
      * @return bool
      */
@@ -52,6 +62,7 @@ class Forter extends \Magento\Sales\Block\Adminhtml\Order\AbstractOrder implemen
     {
         return true;
     }
+
     /**
      * @return bool
      */
@@ -59,6 +70,7 @@ class Forter extends \Magento\Sales\Block\Adminhtml\Order\AbstractOrder implemen
     {
         return false;
     }
+
     /**
      * @param $orderId
      * @return string
@@ -67,10 +79,13 @@ class Forter extends \Magento\Sales\Block\Adminhtml\Order\AbstractOrder implemen
     {
         return $this->getUrl('sales/*/*', ['order_id' => $orderId]);
     }
+
+    /**
+     * @return \Magento\Sales\Model\Order
+     */
     public function getOrder()
     {
         $order_id = $this->getRequest()->getParam('order_id');
-        $order = $this->orderInterface->load($order_id);
-        return $order;
+        return $this->orderInterface->load($order_id);
     }
 }

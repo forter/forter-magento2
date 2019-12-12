@@ -2,29 +2,57 @@
 
 namespace Forter\Forter\Model\RequestHandler;
 
+use Exception;
 use Magento\Framework\DB\TransactionFactory;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Api\InvoiceRepositoryInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
+use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\ResourceModel\Order\Invoice\CollectionFactory;
 use Magento\Sales\Model\Service\InvoiceService;
 
+/**
+ * Class Approve
+ * @package Forter\Forter\Model\RequestHandler
+ */
 class Approve
 {
+    /**
+     * @var CollectionFactory
+     */
+    private $_invoiceCollectionFactory;
+    /**
+     * @var InvoiceService
+     */
+    private $_invoiceService;
+    /**
+     * @var TransactionFactory
+     */
+    private $_transactionFactory;
+    /**
+     * @var InvoiceRepositoryInterface
+     */
+    private $_invoiceRepository;
+    /**
+     * @var OrderRepositoryInterface
+     */
+    private $_orderRepository;
 
-  /**
-  * @param \Magento\Sales\Model\ResourceModel\Order\Invoice\CollectionFactory $invoiceCollectionFactory
-  * @param \Magento\Sales\Model\Service\InvoiceService $invoiceService
-  * @param \Magento\Framework\DB\TransactionFactory $transactionFactory
-  * @param \Magento\Sales\Api\InvoiceRepositoryInterface $invoiceRepository
-  * @param \Magento\Sales\Api\OrderRepositoryInterface $orderRepository
-  */
+    /**
+     * @param CollectionFactory $invoiceCollectionFactory
+     * @param InvoiceService $invoiceService
+     * @param TransactionFactory $transactionFactory
+     * @param InvoiceRepositoryInterface $invoiceRepository
+     * @param OrderRepositoryInterface $orderRepository
+     */
     public function __construct(
         CollectionFactory $invoiceCollectionFactory,
         InvoiceService $invoiceService,
         TransactionFactory $transactionFactory,
         InvoiceRepositoryInterface $invoiceRepository,
         OrderRepositoryInterface $orderRepository
-    ) {
+    )
+    {
         $this->_invoiceCollectionFactory = $invoiceCollectionFactory;
         $this->_invoiceService = $invoiceService;
         $this->_transactionFactory = $transactionFactory;
@@ -32,12 +60,17 @@ class Approve
         $this->_orderRepository = $orderRepository;
     }
 
+    /**
+     * @param $order
+     * @return \Magento\Sales\Api\Data\InvoiceInterface|Invoice|null
+     * @throws LocalizedException
+     */
     public function handleApproveImmediatly($order)
     {
         try {
             if ($order) {
                 $invoices = $this->_invoiceCollectionFactory->create()
-                ->addAttributeToFilter('order_id', ['eq' => $order->getId()]);
+                    ->addAttributeToFilter('order_id', ['eq' => $order->getId()]);
 
                 $invoices->getSelect()->limit(1);
 
@@ -52,7 +85,7 @@ class Approve
                 }
 
                 $invoice = $this->_invoiceService->prepareInvoice($order);
-                $invoice->setRequestedCaptureCase(\Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE);
+                $invoice->setRequestedCaptureCase(Invoice::CAPTURE_ONLINE);
                 $invoice->register();
                 $invoice->getOrder()->setCustomerNoteNotify(false);
                 $invoice->getOrder()->setIsInProcess(true);
@@ -62,8 +95,8 @@ class Approve
 
                 return $invoice;
             }
-        } catch (\Exception $e) {
-            throw new \Magento\Framework\Exception\LocalizedException(
+        } catch (Exception $e) {
+            throw new LocalizedException(
                 __($e->getMessage())
             );
         }
