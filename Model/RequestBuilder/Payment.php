@@ -68,7 +68,7 @@ class Payment
             $paymentData["creditCard"] = [
                 "nameOnCard" => $paymentMethodInfo['cc_owner'],
                 "cardBrand" => $paymentMethodInfo['credit_card_brand'],
-                "bin" => $paymentMethodInfo['cc_bin'],
+                /*"bin" => $paymentMethodInfo['cc_bin'],*/
                 "lastFourDigits" => $paymentMethodInfo['cc_last4'],
                 "expirationMonth" => $paymentMethodInfo['cc_exp_month'],
                 "expirationYear" => $paymentMethodInfo['cc_exp_year'],
@@ -79,9 +79,9 @@ class Payment
                     "authorizationCode" => $paymentMethodInfo['auth_code'],
                     "processorResponseCode" => $payment->getAdditionalInformation("processorResponseCode"),
                     "processorResponseText" => $payment->getAdditionalInformation("processorResponseText"),
-                    "avsStreetResult" => array_key_exists('avs_street_code', $paymentMethodInfo) ? $paymentMethodInfo['avs_street_code'] : null,
-                    "avsZipResult" => array_key_exists('avs_zip_code', $paymentMethodInfo) ? $paymentMethodInfo['avs_zip_code'] : null,
-                    "avsFullResult" => array_key_exists('avs_result_code', $paymentMethodInfo) ? $paymentMethodInfo['avs_result_code'] : null
+                    /*"avsStreetResult" => array_key_exists('avs_street_code', $paymentMethodInfo) ? $paymentMethodInfo['avs_street_code'] : null,
+                    "avsZipResult" => array_key_exists('avs_zip_code', $paymentMethodInfo) ? $paymentMethodInfo['avs_zip_code'] : null,*/
+                    "avsFullResult" => array_key_exists('avs_result_code', $paymentMethodInfo) ? $paymentMethodInfo['avs_result_code'] : ""
                 ],
                 "paymentGatewayData" => [
                     "gatewayName" => $payment->getMethod(),
