@@ -131,8 +131,8 @@ class Payment
         }
 
         $payment_method = $payment->getMethod();
-        /* try { */
-        switch ($payment_method) {
+        try {
+          switch ($payment_method) {
                 case 'authorizenet_directpost':
                     $authorize_data = $payment->getAdditionalInformation('authorize_cards');
                     if ($authorize_data && is_array($authorize_data)) {
@@ -169,9 +169,9 @@ class Payment
                     $cvv_result_code = $payment->getAdditionalInformation('paypal_cvv2_match');
                     return $this->ccInfo($payment, $cc_last4, $cvv_result_code, $avs_result_code, $credit_card_brand, null, null, null, null, null, null, null);
             }
-        /* } catch (\Exception $e) {
+        } catch (\Exception $e) {
             /$this->logger->error("Exception in getSpecificPaymentMethodInfo: ", $e, $order->getIncrementId());
-        } */
+        }
         return $this->ccInfo($payment, null, null, null, null, null, null, null, null, null, null, null);
     }
 
