@@ -32,10 +32,6 @@ class Approve
         $this->_orderRepository = $orderRepository;
     }
 
-    public function handleApproveCron()
-    {
-    }
-
     public function handleApproveImmediatly($order)
     {
         try {

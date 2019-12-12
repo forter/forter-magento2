@@ -1,5 +1,5 @@
 <?php
-namespace Forter\Forter\Observer;
+namespace Forter\Forter\Observer\OrderFullfilment;
 
 use Forter\Forter\Model\Config;
 use Forter\Forter\Model\QueueFactory as ForterQueueFactory;

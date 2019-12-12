@@ -1,6 +1,6 @@
 <?php
 
-namespace Forter\Forter\Plugin;
+namespace Forter\Forter\Plugin\Customer\Model;
 
 use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\Config;
