@@ -10,12 +10,25 @@
 
 namespace Forter\Forter\Model\RequestBuilder;
 
+use Forter\Forter\Model\RequestBuilder\Customer as CustomerPreper;
+
 /**
  * Class Payment
  * @package Forter\Forter\Model\RequestBuilder
  */
 class Payment
 {
+
+  /**
+   * Payment constructor.
+   * @param Subscriber $subscriber
+   */
+    public function __construct(
+        CustomerPreper $customerPreper
+    ) {
+        $this->customerPreper = $customerPreper;
+    }
+
     /**
      * @param $order
      * @return array
@@ -85,7 +98,7 @@ class Payment
         ];
 
         if ($billingAddress) {
-            $billingDetails["address"] = $this->getAddressData($billingAddress);
+            $billingDetails["address"] = $this->customerPreper->getAddressData($billingAddress);
 
             if ($billingAddress->getTelephone()) {
                 $billingDetails["phone"] = [
@@ -140,24 +153,21 @@ class Payment
                             }
                         }
                     }
-                    break;
                     $cc_last4 = isset($cc_last4) ? $cc_last4 : $payment->decrypt($payment->getCcLast4());
-                //  return $this->ccInfo($payment, $cc_last4, $cvv_result_code, $avs_result_code, $credit_card_brand, null, null, null, null, null, null, null);
+                    return $this->ccInfo($payment, $cc_last4, $cvv_result_code, $avs_result_code, $credit_card_brand, null, null, null, null, null, null, null);
                 case 'braintree':
                     $credit_card_brand = $payment->getAdditionalInformation('cc_type');
                     $cvv_result_code = $payment->getAdditionalInformation('cvvResponseCode');
                     $zipVerification = $payment->getAdditionalInformation('avsPostalCodeResponseCode');
                     $streetVerification = $payment->getAdditionalInformation('avsStreetAddressResponseCode');
-                    break;
-                //    return $this->ccInfo($payment, null, $cvv_result_code, null, $credit_card_brand, $zipVerification, $streetVerification, null, null, null, null, null);
+                    return $this->ccInfo($payment, null, $cvv_result_code, null, $credit_card_brand, $zipVerification, $streetVerification, null, null, null, null, null);
                 case 'paypal_direct':
                 case 'paypaluk_direct':
                     $cc_last4 = $payment->getCcLast4();
                     $credit_card_brand = $payment->getCcType();
                     $avs_result_code = $payment->getAdditionalInformation('paypal_avs_code');
                     $cvv_result_code = $payment->getAdditionalInformation('paypal_cvv2_match');
-                    break;
-                //    return $this->ccInfo($payment, $cc_last4, $cvv_result_code, $avs_result_code, $credit_card_brand, null, null, null, null, null, null, null);
+                    return $this->ccInfo($payment, $cc_last4, $cvv_result_code, $avs_result_code, $credit_card_brand, null, null, null, null, null, null, null);
             }
         } catch (\Exception $e) {
             $this->logger->error("Exception in getSpecificPaymentMethodInfo: ", $e, $order->getIncrementId());
@@ -186,7 +196,6 @@ class Payment
         $cvv_result_code = $cvv_result_code ? $cvv_result_code : $payment->getCcCidStatus();
         $avs_result_code = $avs_result_code ? $avs_result_code : $payment->getCcAvsStatus();
         $credit_card_brand = $credit_card_brand ? $credit_card_brand : $payment->getCcType();
-        $cc_bin = $cc_bin ? $cc_bin : $this->getBinNumber($payment);
         $cc_owner = $cc_owner ? $cc_owner : $payment->getCcOwner() . "";
         $cc_exp_month = $cc_exp_month ? $cc_exp_month : str_pad($payment->getCcExpMonth(), 2, "0", STR_PAD_LEFT);
         $cc_exp_year = $cc_exp_year ? $cc_exp_year : str_pad($payment->getCcExpYear(), 4, "20", STR_PAD_LEFT);
@@ -199,7 +208,7 @@ class Payment
             'credit_card_brand' => $credit_card_brand,
             'avs_zip_code' => $avs_zip_code,
             'avs_street_code' => $avs_street_code,
-            'cc_bin' => $cc_bin,
+            'cc_bin' => '',
             'cc_owner' => $cc_owner,
             'cc_exp_month' => $cc_exp_month,
             'cc_exp_year' => $cc_exp_year,

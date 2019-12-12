@@ -125,8 +125,8 @@ class AuthRequestBuilder
         "cartItems" => $this->requestPrepare->generateCartItems($order),
         "primaryDeliveryDetails" => $this->customerPreper->getPrimaryDeliveryDetails($order),
         "primaryRecipient" => $this->customerPreper->getPrimaryRecipient($order),
-        "accountOwner" => $this->requestPrepare->getAccountOwnerInfo($order),
-        "customerAccountData" => $this->requestPrepare->getCustomerAccountData($order, null),
+        "accountOwner" => $this->customerPreper->getAccountOwnerInfo($order),
+        "customerAccountData" => $this->customerPreper->getCustomerAccountData($order, null),
         "totalDiscount" => $this->requestPrepare->getTotalDiscount($order),
         "payment" => $this->paymentPreper->generatePaymentInfo($order)
       ];

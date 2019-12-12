@@ -61,8 +61,7 @@ class PaymentPlaceEnd implements ObserverInterface
         Config $config,
         AuthRequestBuilder $authRequestBuilder,
         OrderManagementInterface $orderManagement
-    )
-    {
+    ) {
         $this->decline = $decline;
         $this->approve = $approve;
         $this->abstractApi = $abstractApi;

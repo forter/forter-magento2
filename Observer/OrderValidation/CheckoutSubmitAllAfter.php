@@ -50,8 +50,7 @@ class CheckoutSubmitAllAfter implements \Magento\Framework\Event\ObserverInterfa
         Config $forterConfig,
         DateTime $dateTime,
         StoreManagerInterface $storeManager
-    )
-    {
+    ) {
         $this->storeManager = $storeManager;
         $this->approve = $approve;
         $this->forterConfig = $forterConfig;
