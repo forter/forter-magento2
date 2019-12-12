@@ -1,40 +1,37 @@
 <?php
-namespace Forter\Forter\Observer;
+namespace Forter\Forter\Observer\OrderValidation;
 
 use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\AuthRequestBuilder;
 use Forter\Forter\Model\Config;
+use Forter\Forter\Model\RequestHandler\Approve;
 use Forter\Forter\Model\RequestHandler\Decline;
-use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\Event\ObserverInterface;
-use Magento\Framework\Message\ManagerInterface;
-use Magento\Quote\Model\Quote\Item;
+use Magento\Sales\Api\OrderManagementInterface;
 
-class PaymentPlaceStart implements ObserverInterface
+class PaymentPlaceEnd implements ObserverInterface
 {
     const VALIDATION_API_ENDPOINT = 'https://api.forter-secure.com/v2/orders/';
 
     public function __construct(
         Decline $decline,
-        ManagerInterface $messageManager,
-        CheckoutSession $checkoutSession,
+        Approve $approve,
         AbstractApi $abstractApi,
         Config $config,
         AuthRequestBuilder $authRequestBuilder,
-        Item $modelCartItem
+        OrderManagementInterface $orderManagement
     ) {
         $this->decline = $decline;
-        $this->checkoutSession = $checkoutSession;
-        $this->modelCartItem = $modelCartItem;
+        $this->approve = $approve;
         $this->abstractApi = $abstractApi;
-        $this->messageManager = $messageManager;
         $this->config = $config;
         $this->authRequestBuilder = $authRequestBuilder;
+        $this->orderManagement = $orderManagement;
     }
 
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
-        if (!$this->config->isEnabled() || $this->config->getIsPost()) {
+        if (!$this->config->isEnabled() || !$this->config->getIsPost()) {
             return false;
         }
 
@@ -49,12 +46,12 @@ class PaymentPlaceStart implements ObserverInterface
             throw new \Exception($e->getMessage());
         }
 
+        $order->setForterResponse($response);
         $response = json_decode($response);
+        $order->setForterStatus($response->action);
 
-        if ($response->action == 'decline') {
-            $this->decline->handlePreTransactionDescision();
+        if ($response->action == 'decline' &&  $response->status == 'success') {
+            $this->decline->handlePostTransactionDescision($order);
         }
-
-        return true;
     }
 }

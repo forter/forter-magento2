@@ -1,6 +1,6 @@
 <?php
 
-namespace Forter\Forter\Observer;
+namespace Forter\Forter\Observer\OrderValidation;
 
 use Forter\Forter\Model\Config;
 use Forter\Forter\Model\QueueFactory as ForterQueueFactory;
@@ -44,7 +44,7 @@ class CheckoutSubmitAllAfter implements \Magento\Framework\Event\ObserverInterfa
         $storeId = $this->storeManager->getStore()->getId();
         $currentTime = $this->dateTime->gmtDate();
 
-        if ($ForterResponse->action == 'approve') {
+        if ($ForterResponse->action == 'approve' &&  $ForterResponse->status == 'success') {
             $result = $this->forterConfig->captureInvoice();
             if ($result == '1') {
                 $this->queue->create()

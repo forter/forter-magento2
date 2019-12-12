@@ -1,10 +1,10 @@
 <?php
-namespace Forter\Forter\Plugin;
+namespace Forter\Forter\Plugin\Customer\Model\ResourceModel;
 
 use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\RequestBuilder\RequestPrepare;
 use Magento\Customer\Api\GroupRepositoryInterface;
-use Magento\Customer\Model\ResourceModel\CustomerRepository;
+use Magento\Customer\Model\ResourceModel\CustomerRepository as CustomerRepositoryOriginal;
 use Magento\Framework\App\State;
 use Magento\Framework\HTTP\PhpEnvironment\RemoteAddress;
 use Magento\Store\Model\StoreManagerInterface;
@@ -13,7 +13,7 @@ use Magento\Store\Model\StoreManagerInterface;
  * Class CustomerAfterSave
  * @package [Vendor_Name]\[Module_Name]\Plugin
  */
-class CustomerAfterSave
+class CustomerRepository
 {
     const API_ENDPOINT ="https://api.forter-secure.com/v2/accounts/update/";
     public function __construct(
@@ -38,7 +38,7 @@ class CustomerAfterSave
      * @return mixed
      */
     public function afterSave(
-        CustomerRepository $subject,
+        CustomerRepositoryOriginal $subject,
         $savedCustomer
     ) {
         $customerGroup = $this->groupRepository->getById($savedCustomer->getGroupId());
