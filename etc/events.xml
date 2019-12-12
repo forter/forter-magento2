@@ -6,13 +6,12 @@
     <event name="sales_order_payment_place_start">
         <observer name="sales_order_payment_place_before_observer_forter" instance="Forter\Forter\Observer\OrderValidation\PaymentPlaceStart" />
     </event>
-    <event name="sales_order_save_after">
-        <observer name="sales_order_save_after_observer_forter" instance="Forter\Forter\Observer\OrderValidationOrderSaveAfter" />
-    </event>
     <event name="checkout_submit_all_after">
         <observer name="checkout_submit_all_after_observer_forter" instance="Forter\Forter\Observer\OrderValidation\CheckoutSubmitAllAfter" />
     </event>
-
+    <event name="sales_order_save_after">
+        <observer name="sales_order_save_after_observer_forter" instance="Forter\Forter\Observer\OrderFullfilment\OrderSaveAfter" />
+    </event>
     <event name="customer_register_success">
         <observer name="customer_register_success_observer_forter" instance="Forter\Forter\Observer\Customer\CustomerRegisterSuccess" />
     </event>

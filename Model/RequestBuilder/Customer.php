@@ -11,8 +11,11 @@
 namespace Forter\Forter\Model\RequestBuilder;
 
 use Magento\Customer\Model\Session;
-use Magento\Sales\Model\OrderFactory;
+use Magento\Newsletter\Model\Subscriber;
 use Magento\Review\Model\Review;
+use Magento\Sales\Model\OrderFactory;
+use Magento\Store\Model\StoreManagerInterface;
+use Magento\Wishlist\Controller\WishlistProviderInterface;
 
 /**
  * Class Customer
@@ -20,6 +23,19 @@ use Magento\Review\Model\Review;
  */
 class Customer
 {
+    /**
+     *
+     */
+    const SHIPPING_METHOD_PREFIX = "Select Shipping Method - ";
+
+    /**
+     * @var StoreManagerInterface
+     */
+    private $storeManager;
+    /**
+     * @var WishlistProviderInterface
+     */
+    private $wishlistProvider;
     /**
      * @var Session
      */
@@ -32,22 +48,33 @@ class Customer
      * @var Review
      */
     private $review;
+    /**
+     * @var Subscriber
+     */
+    private $subscriber;
 
     /**
      * Customer constructor.
      * @param OrderFactory $orderFactory
      * @param Review $review
      * @param Session $session
+     * @param StoreManagerInterface $storeManager
+     * @param Subscriber $subscriber
      */
     public function __construct(
         OrderFactory $orderFactory,
         Review $review,
-        Session $session
-    )
-    {
+        Session $session,
+        WishlistProviderInterface $wishlistProvider,
+        StoreManagerInterface $storeManager,
+        Subscriber $subscriber
+    ) {
         $this->session = $session;
+        $this->wishlistProvider = $wishlistProvider;
         $this->orderFactory = $orderFactory;
         $this->review = $review;
+        $this->storeManager = $storeManager;
+        $this->subscriber = $subscriber;
     }
 
     /**
@@ -234,7 +261,7 @@ class Customer
      * @param $address
      * @return array|null
      */
-    private function getAddressData($address)
+    public function getAddressData($address)
     {
         if (!$address) {
             return null;

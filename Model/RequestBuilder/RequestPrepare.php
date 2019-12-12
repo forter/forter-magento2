@@ -11,9 +11,6 @@
 namespace Forter\Forter\Model\RequestBuilder;
 
 use Magento\Catalog\Model\CategoryFactory;
-use Magento\Newsletter\Model\Subscriber;
-use Magento\Store\Model\StoreManagerInterface;
-use Magento\Wishlist\Controller\WishlistProviderInterface;
 
 /**
  * Class RequestPrepare
@@ -21,45 +18,20 @@ use Magento\Wishlist\Controller\WishlistProviderInterface;
  */
 class RequestPrepare
 {
-    /**
-     *
-     */
-    const SHIPPING_METHOD_PREFIX = "Select Shipping Method - ";
-    /**
-     * @var StoreManagerInterface
-     */
-    private $storeManager;
+
     /**
      * @var CategoryFactory
      */
-    private $categoryFactory;
-    /**
-     * @var WishlistProviderInterface
-     */
     private $wishlistProvider;
-    /**
-     * @var Subscriber
-     */
-    private $subscriber;
 
     /**
      * RequestPrepare constructor.
      * @param CategoryFactory $categoryFactory
-     * @param WishlistProviderInterface $wishlistProvider
-     * @param Subscriber $subscriber
-     * @param StoreManagerInterface $storeManager
      */
     public function __construct(
-        CategoryFactory $categoryFactory,
-        WishlistProviderInterface $wishlistProvider,
-        Subscriber $subscriber,
-        StoreManagerInterface $storeManager
-    )
-    {
-        $this->storeManager = $storeManager;
+        CategoryFactory $categoryFactory
+    ) {
         $this->categoryFactory = $categoryFactory;
-        $this->wishlistProvider = $wishlistProvider;
-        $this->subscriber = $subscriber;
     }
 
     /**
