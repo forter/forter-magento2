@@ -1,41 +1,75 @@
 <?php
 /**
-* Forter Payments For Magento 2
-* https://www.Forter.com/
-*
-* @category Forter
-* @package  Forter_Forter
-* @author   Girit-Interactive (https://www.girit-tech.com/)
-*/
+ * Forter Payments For Magento 2
+ * https://www.Forter.com/
+ *
+ * @category Forter
+ * @package  Forter_Forter
+ * @author   Girit-Interactive (https://www.girit-tech.com/)
+ */
+
 namespace Forter\Forter\Model\RequestBuilder;
 
 use Magento\Customer\Model\Session;
 use Magento\Sales\Model\OrderFactory;
+use Magento\Review\Model\Review;
 
+/**
+ * Class Customer
+ * @package Forter\Forter\Model\RequestBuilder
+ */
 class Customer
 {
+    /**
+     * @var Session
+     */
+    private $session;
+    /**
+     * @var OrderFactory
+     */
+    private $orderFactory;
+    /**
+     * @var Review
+     */
+    private $review;
+
+    /**
+     * Customer constructor.
+     * @param OrderFactory $orderFactory
+     * @param Review $review
+     * @param Session $session
+     */
     public function __construct(
         OrderFactory $orderFactory,
         Review $review,
         Session $session
-    ) {
+    )
+    {
         $this->session = $session;
         $this->orderFactory = $orderFactory;
         $this->review = $review;
     }
 
+    /**
+     * @param $order
+     * @return array
+     */
     public function getPrimaryDeliveryDetails($order)
     {
         return [
-          "deliveryType" => $order->getShippingMethod() ? "PHYSICAL" : "DIGITAL",
-          "deliveryMethod" => substr(str_replace($this::SHIPPING_METHOD_PREFIX, "", $order->getShippingDescription()), 0, 45),
-          "deliveryPrice" => [
-              "amountLocalCurrency" => strval($order->getShippingAmount()),
-              "currency" => $order->getOrderCurrency()->getCurrencyCode()
-          ]
-      ];
+            "deliveryType" => $order->getShippingMethod() ? "PHYSICAL" : "DIGITAL",
+            "deliveryMethod" => substr(str_replace($this::SHIPPING_METHOD_PREFIX, "", $order->getShippingDescription()), 0, 45),
+            "deliveryPrice" => [
+                "amountLocalCurrency" => strval($order->getShippingAmount()),
+                "currency" => $order->getOrderCurrency()->getCurrencyCode()
+            ]
+        ];
     }
 
+    /**
+     * @param $order
+     * @return array
+     */
     public function getPrimaryRecipient($order)
     {
         $shippingAddress = $order->getShippingAddress();
@@ -44,33 +78,33 @@ class Customer
         $primaryRecipient = [];
         if ($shippingAddress) {
             $personalDetails = [
-              "firstName" => $shippingAddress->getFirstname(),
-              "lastName" => $shippingAddress->getLastname(),
-              "email" => $shippingAddress->getEmail()
-          ];
+                "firstName" => $shippingAddress->getFirstname(),
+                "lastName" => $shippingAddress->getLastname(),
+                "email" => $shippingAddress->getEmail()
+            ];
             if ($shippingAddress->getTelephone()) {
                 $phone = [
-                  [
-                      "phone" => $shippingAddress->getTelephone()
-                  ]
-              ];
+                    [
+                        "phone" => $shippingAddress->getTelephone()
+                    ]
+                ];
             }
             $primaryRecipient["address"] = $this->getAddressData($shippingAddress);
         } else {
             if ($billingAddress->getTelephone()) {
                 $phone = [
-                  [
-                      "phone" => $billingAddress->getTelephone()
-                  ]
-              ];
+                    [
+                        "phone" => $billingAddress->getTelephone()
+                    ]
+                ];
             }
             $personalDetails = [
-              "firstName" => $billingAddress->getFirstName(),
-              "lastName" => $billingAddress->getLastName(),
-              "middleInitials" => $billingAddress->getMiddleName(),
-              "prefix" => $billingAddress->getPrefix(),
-              "suffix" => $billingAddress->getSuffix()
-          ];
+                "firstName" => $billingAddress->getFirstName(),
+                "lastName" => $billingAddress->getLastName(),
+                "middleInitials" => $billingAddress->getMiddleName(),
+                "prefix" => $billingAddress->getPrefix(),
+                "suffix" => $billingAddress->getSuffix()
+            ];
         }
         $primaryRecipient["personalDetails"] = $personalDetails;
 
@@ -81,6 +115,10 @@ class Customer
         return $primaryRecipient;
     }
 
+    /**
+     * @param $order
+     * @return array
+     */
     public function getAccountOwnerInfo($order)
     {
         $customer = $this->getCustomer($order);
@@ -89,16 +127,16 @@ class Customer
         if (!$customer) {
             $billingAddress = $order->getBillingAddress();
             return [
-              "firstName" => $billingAddress->getFirstname(),
-              "lastName" => $billingAddress->getLastname(),
-              "email" => $billingAddress->getEmail()
-          ];
+                "firstName" => $billingAddress->getFirstname(),
+                "lastName" => $billingAddress->getLastname(),
+                "email" => $billingAddress->getEmail()
+            ];
         }
 
         //Retrieve all orders with this email address
         $totalOrders = $this->orderFactory->create()
-          ->getCollection()
-          ->addFieldToFilter('customer_email', $customer->getEmail());
+            ->getCollection()
+            ->addFieldToFilter('customer_email', $customer->getEmail());
 
         $ordersSum = 0;
 
@@ -109,16 +147,22 @@ class Customer
         $ordersCount = $totalOrders->getTotalCount();
 
         return [
-        "firstName" => $customer->getFirstname(),
-        "lastName" => $customer->getLastname(),
-        "email" => $customer->getEmail(),
-        "accountId" => $customer->getId(),
-        "created" => strtotime($customer->getCreatedAt()),
-        "pastOrdersCount" => $ordersCount,
-        "pastOrdersSum" => $ordersSum
-      ];
+            "firstName" => $customer->getFirstname(),
+            "lastName" => $customer->getLastname(),
+            "email" => $customer->getEmail(),
+            "accountId" => $customer->getId(),
+            "created" => strtotime($customer->getCreatedAt()),
+            "pastOrdersCount" => $ordersCount,
+            "pastOrdersSum" => $ordersSum
+        ];
     }
 
+    /**
+     * @param null $order
+     * @param null $savedcustomer
+     * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
     public function getCustomerAccountData($order = null, $savedcustomer = null)
     {
         if ($savedcustomer) {
@@ -149,30 +193,34 @@ class Customer
         $checkSubscriber = $this->subscriber->loadByCustomerId($customerId);
 
         $customerEngagement = [
-          "wishlist" => [
-              "inUse" => $wishlistItemsCount > 0,
-              "itemInListCount" => $wishlistItemsCount
-          ],
-          "reviewsWritten" => [
-              "inUse" => ($reviews_count > 0),
-              "itemInListCount" => $reviews_count
-          ],
-          "newsletters" => [
-              "inUse" => $checkSubscriber->isSubscribed()
-          ]
-      ];
+            "wishlist" => [
+                "inUse" => $wishlistItemsCount > 0,
+                "itemInListCount" => $wishlistItemsCount
+            ],
+            "reviewsWritten" => [
+                "inUse" => ($reviews_count > 0),
+                "itemInListCount" => $reviews_count
+            ],
+            "newsletters" => [
+                "inUse" => $checkSubscriber->isSubscribed()
+            ]
+        ];
 
         return [
-          "status" => $accountStatus,
-          "customerEngagement" => $customerEngagement
-      ];
+            "status" => $accountStatus,
+            "customerEngagement" => $customerEngagement
+        ];
     }
 
+    /**
+     * @param $order
+     * @return \Magento\Customer\Api\Data\CustomerInterface|null
+     */
     private function getCustomer($order)
     {
         if (!is_null($this->session) &&
-          method_exists($this->session, "getCustomerData") &&
-          $this->session->getCustomerData()) {
+            method_exists($this->session, "getCustomerData") &&
+            $this->session->getCustomerData()) {
             return $this->session->getCustomerData();
         } elseif ($order->getCustomerId()) {
             // If can't get customer from session - for example in cases of order send failure
@@ -182,6 +230,10 @@ class Customer
         }
     }
 
+    /**
+     * @param $address
+     * @return array|null
+     */
     private function getAddressData($address)
     {
         if (!$address) {
@@ -192,26 +244,32 @@ class Customer
         $address_2 = (!is_null($street_address) && array_key_exists('1', $street_address)) ? $street_address['1'] : null;
 
         return [
-          "address1" => $address_1,
-          "address2" => $address_2,
-          "zip" => $address->getPostCode(),
-          "city" => $address->getCity(),
-          "region" => $address->getRegion(),
-          "country" => $address->getCountryId(),
-          "company" => $address->getCompany(),
-          "savedData" => [
-              "usedSavedData" => $address->getCustomerAddressId() != null,
-              "choseToSaveData" => false  // Default value because this field is required and is not easy enough to get.
-          ]
-      ];
+            "address1" => $address_1,
+            "address2" => $address_2,
+            "zip" => $address->getPostCode(),
+            "city" => $address->getCity(),
+            "region" => $address->getRegion(),
+            "country" => $address->getCountryId(),
+            "company" => $address->getCompany(),
+            "savedData" => [
+                "usedSavedData" => $address->getCustomerAddressId() != null,
+                "choseToSaveData" => false  // Default value because this field is required and is not easy enough to get.
+            ]
+        ];
     }
 
+    /**
+     * @param $customerId
+     * @param $storeId
+     * @return mixed
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
     private function getCustomerReviewsCount($customerId, $storeId)
     {
         $reviews_count = $this->review->getResourceCollection()
-          ->addStoreFilter($storeId)
-          ->addCustomerFilter($customerId)
-          ->count();
+            ->addStoreFilter($storeId)
+            ->addCustomerFilter($customerId)
+            ->count();
         return $reviews_count;
     }
 }

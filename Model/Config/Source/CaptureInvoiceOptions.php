@@ -2,8 +2,15 @@
 
 namespace Forter\Forter\Model\Config\Source;
 
+/**
+ * Class CaptureInvoiceOptions
+ * @package Forter\Forter\Model\Config\Source
+ */
 class CaptureInvoiceOptions implements \Magento\Framework\Option\ArrayInterface
 {
+    /**
+     * @return array
+     */
     public function toOptionArray()
     {
         return [

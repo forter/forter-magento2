@@ -12,6 +12,7 @@ namespace Forter\Forter\Model;
 use Forter\Forter\Model\Config as ForterConfig;
 use Forter\Forter\Model\RequestBuilder\Customer as CustomerPreper;
 use Forter\Forter\Model\RequestBuilder\Payment as PaymentPreper;
+use Forter\Forter\Model\RequestBuilder\RequestPrepare;
 use Magento\Catalog\Model\CategoryFactory;
 use Magento\Customer\Model\Session;
 use Magento\Newsletter\Model\Subscriber;
@@ -19,10 +20,70 @@ use Magento\Review\Model\Review;
 use Magento\Sales\Model\OrderFactory;
 use Magento\Wishlist\Controller\WishlistProviderInterface;
 
+/**
+ * Class AuthRequestBuilder
+ * @package Forter\Forter\Model
+ */
 class AuthRequestBuilder
 {
+    /**
+     *
+     */
     const SHIPPING_METHOD_PREFIX = "Select Shipping Method - ";
+    /**
+     * @var RequestPrepare
+     */
+    private $requestPrepare;
+    /**
+     * @var CustomerPreper
+     */
+    private $customerPreper;
+    /**
+     * @var PaymentPreper
+     */
+    private $paymentPreper;
+    /**
+     * @var OrderFactory
+     */
+    private $orderFactory;
+    /**
+     * @var CategoryFactory
+     */
+    private $categoryFactory;
+    /**
+     * @var Session
+     */
+    private $session;
+    /**
+     * @var Review
+     */
+    private $review;
+    /**
+     * @var WishlistProviderInterface
+     */
+    private $wishlistProvider;
+    /**
+     * @var Subscriber
+     */
+    private $subscriber;
+    /**
+     * @var Config
+     */
+    private $forterConfig;
 
+    /**
+     * AuthRequestBuilder constructor.
+     * @param RequestPrepare $requestPrepare
+     * @param CustomerPreper $customerPreper
+     * @param PaymentPreper $paymentPreper
+     * @param OrderFactory $orderFactory
+     * @param CategoryFactory $categoryFactory
+     * @param Session $session
+     * @param Review $review
+     * @param WishlistProviderInterface $wishlistProvider
+     * @param Subscriber $subscriber
+     * @param Config $forterConfig
+     */
     public function __construct(
         RequestPrepare $requestPrepare,
         CustomerPreper $customerPreper,
@@ -47,6 +108,10 @@ class AuthRequestBuilder
         $this->forterConfig = $forterConfig;
     }
 
+    /**
+     * @param $order
+     * @return array
+     */
     public function buildTransaction($order)
     {
         $data = [

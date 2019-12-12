@@ -1,12 +1,13 @@
 <?php
 /**
-* Forter Payments For Magento 2
-* https://www.Forter.com/
-*
-* @category Forter
-* @package  Forter_Forter
-* @author   Girit-Interactive (https://www.girit-tech.com/)
-*/
+ * Forter Payments For Magento 2
+ * https://www.Forter.com/
+ *
+ * @category Forter
+ * @package  Forter_Forter
+ * @author   Girit-Interactive (https://www.girit-tech.com/)
+ */
+
 namespace Forter\Forter\Model\RequestBuilder;
 
 use Magento\Catalog\Model\CategoryFactory;
@@ -14,107 +15,153 @@ use Magento\Newsletter\Model\Subscriber;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Wishlist\Controller\WishlistProviderInterface;
 
+/**
+ * Class RequestPrepare
+ * @package Forter\Forter\Model\RequestBuilder
+ */
 class RequestPrepare
 {
+    /**
+     *
+     */
     const SHIPPING_METHOD_PREFIX = "Select Shipping Method - ";
+    /**
+     * @var StoreManagerInterface
+     */
+    private $storeManager;
+    /**
+     * @var CategoryFactory
+     */
+    private $categoryFactory;
+    /**
+     * @var WishlistProviderInterface
+     */
+    private $wishlistProvider;
+    /**
+     * @var Subscriber
+     */
+    private $subscriber;
 
+    /**
+     * RequestPrepare constructor.
+     * @param CategoryFactory $categoryFactory
+     * @param WishlistProviderInterface $wishlistProvider
+     * @param Subscriber $subscriber
+     * @param StoreManagerInterface $storeManager
+     */
     public function __construct(
         CategoryFactory $categoryFactory,
         WishlistProviderInterface $wishlistProvider,
         Subscriber $subscriber,
         StoreManagerInterface $storeManager
-    ) {
+    )
+    {
         $this->storeManager = $storeManager;
         $this->categoryFactory = $categoryFactory;
         $this->wishlistProvider = $wishlistProvider;
         $this->subscriber = $subscriber;
     }
 
+    /**
+     * @param $remoteIp
+     * @return array
+     */
     public function getConnectionInformation($remoteIp)
     {
         $headers = getallheaders();
-        $connectionInformation  = [
-      "customerIP" => $this->getIpFromOrder($remoteIp, $headers),
-      "userAgent" => (is_array($headers) && array_key_exists("User-Agent", $headers)) ? $headers['User-Agent'] : null,
-      "forterTokenCookie" => null,
-      "merchantDeviceIdentifier" => null,
-      "fullHeaders" => json_encode($headers)
-    ];
-        return $connectionInformation;
+        return [
+            "customerIP" => $this->getIpFromOrder($remoteIp, $headers),
+            "userAgent" => (is_array($headers) && array_key_exists("User-Agent", $headers)) ? $headers['User-Agent'] : null,
+            "forterTokenCookie" => null,
+            "merchantDeviceIdentifier" => null,
+            "fullHeaders" => json_encode($headers)
+        ];
     }
 
+    /**
+     * @param $order
+     * @return array
+     */
     public function getTotalAmount($order)
     {
-        $totalAmount  = [
-      "amountUSD" => null,
-      "amountLocalCurrency" => strval($order->getGrandTotal()),
-      "currency" => $order->getOrderCurrency()->getCurrencyCode()
-    ];
-        return $totalAmount;
+        return [
+            "amountUSD" => null,
+            "amountLocalCurrency" => strval($order->getGrandTotal()),
+            "currency" => $order->getOrderCurrency()->getCurrencyCode()
+        ];
     }
 
+    /**
+     * @param $order
+     * @return array
+     */
     public function getAdditionalIdentifiers($order)
     {
         $store = $order->getStore();
         $payment = $order->getPayment();
 
-        $additionalIdentifiers  = [
-      'additionalOrderId' => $order->getRealOrderId(),
-      'paymentGatewayId' => $payment ? strval($payment->getTransactionId()) : "",
-      'merchant' => [
-        'merchantId' => $store->getId(),
-        'merchantDomain' => $store->getUrl(),
-        'merchantName' => $store->getName()
-      ]
-    ];
-
-        return $additionalIdentifiers;
+        return [
+            'additionalOrderId' => $order->getRealOrderId(),
+            'paymentGatewayId' => $payment ? strval($payment->getTransactionId()) : "",
+            'merchant' => [
+                'merchantId' => $store->getId(),
+                'merchantDomain' => $store->getUrl(),
+                'merchantName' => $store->getName()
+            ]
+        ];
     }
 
+    /**
+     * @param $order
+     * @return array
+     */
     public function generateCartItems($order)
     {
         $totalDiscount = 0;
         $cartItems = [];
 
         foreach ($order->getAllItems() as $item) {
-
-          // Each item is added to items list twice - once as parent as once as a child. Only add the parents to the cart items
-            if ($item->getParentItem() && in_array($item->getParentItem()->getProductId(), $itemIds)) {
-                continue;
-            }
-
             //Category generation
             $product = $item->getProduct();
             $categories = $this->getProductCategories($item->getProduct());
             $totalDiscount += $item->getDiscountAmount();
             $itemIds[] = $item->getProductId();
 
+            // Each item is added to items list twice - once as parent as once as a child. Only add the parents to the cart items
+            if ($item->getParentItem() && in_array($item->getParentItem()->getProductId(), $itemIds)) {
+                continue;
+            }
+
             $cartItems[] = [
-              "basicItemData" => [
-                  "price" => [
-                      "amountLocalCurrency" => strval($item->getPrice()),
-                      "currency" => $order->getOrderCurrency()->getCurrencyCode()
-                  ],
-                  "value" => [
-                      "amountLocalCurrency" => strval($item->getPrice()),
-                      "currency" => $order->getOrderCurrency()->getCurrencyCode()
-                  ],
-                  "productId" => $item->getProductId(),
-                  "name" => $item->getName(),
-                  "type" => $item->getData("is_virtual") ? "NON_TANGIBLE" : "TANGIBLE",
-                  "quantity" => (double)$item->getQtyOrdered(),
-                  "category" => $categories
-              ],
-              "itemSpecificData" => [
-                  "physicalGoods" => [
-                    "wrapAsGift" => $item->getData("gift_message_available") ? true : false
-                  ]
-              ]
-          ];
+                "basicItemData" => [
+                    "price" => [
+                        "amountLocalCurrency" => strval($item->getPrice()),
+                        "currency" => $order->getOrderCurrency()->getCurrencyCode()
+                    ],
+                    "value" => [
+                        "amountLocalCurrency" => strval($item->getPrice()),
+                        "currency" => $order->getOrderCurrency()->getCurrencyCode()
+                    ],
+                    "productId" => $item->getProductId(),
+                    "name" => $item->getName(),
+                    "type" => $item->getData("is_virtual") ? "NON_TANGIBLE" : "TANGIBLE",
+                    "quantity" => (double)$item->getQtyOrdered(),
+                    "category" => $categories
+                ],
+                "itemSpecificData" => [
+                    "physicalGoods" => [
+                        "wrapAsGift" => $item->getData("gift_message_available") ? true : false
+                    ]
+                ]
+            ];
         }
         return $cartItems;
     }
 
+    /**
+     * @param $order
+     * @return array|null
+     */
     public function getTotalDiscount($order)
     {
         if (!$order->getCouponCode()) {
@@ -122,15 +169,19 @@ class RequestPrepare
         }
 
         return [
-        "couponCodeUsed" => $order->getCouponCode(),
-        "couponDiscountAmount" => [
-            "amountLocalCurrency" => strval($order->getDiscountAmount()),
-            "currency"=> $order->getOrderCurrency()->getCurrencyCode()
-        ],
-        "discountType" => $order->getDiscountDescription() ? $order->getDiscountDescription() : null
-    ];
+            "couponCodeUsed" => $order->getCouponCode(),
+            "couponDiscountAmount" => [
+                "amountLocalCurrency" => strval($order->getDiscountAmount()),
+                "currency" => $order->getOrderCurrency()->getCurrencyCode()
+            ],
+            "discountType" => $order->getDiscountDescription() ? $order->getDiscountDescription() : null
+        ];
     }
 
+    /**
+     * @param $product
+     * @return array|string|null
+     */
     private function getProductCategories($product)
     {
         $categories = [];
@@ -156,6 +207,11 @@ class RequestPrepare
         return $categories;
     }
 
+    /**
+     * @param $remoteIp
+     * @param $headers
+     * @return false|mixed|string
+     */
     private function getIpFromOrder($remoteIp, $headers)
     {
         $xForwardedFor = array_key_exists('X-Forwarded-For', $headers) ? $headers['X-Forwarded-For'] : '';

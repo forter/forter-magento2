@@ -1,13 +1,14 @@
 <?php
 
 /**
-* Forter fraud detection module for Magento 2
-* https://www.Forter.com/
-*
-* @category Forter
-* @package  Forter_Forter
-* @author   Girit-Interactive (https://www.girit-tech.com/)
-*/
+ * Forter fraud detection module for Magento 2
+ * https://www.Forter.com/
+ *
+ * @category Forter
+ * @package  Forter_Forter
+ * @author   Girit-Interactive (https://www.girit-tech.com/)
+ */
+
 namespace Forter\Forter\Block\Adminhtml\System\Config;
 
 use Forter\Forter\Model\Config as ForterConfig;
@@ -15,6 +16,10 @@ use Magento\Backend\Block\Template\Context;
 use Magento\Config\Block\System\Config\Form\Field;
 use Magento\Framework\Data\Form\Element\AbstractElement;
 
+/**
+ * Class ModuleVersion
+ * @package Forter\Forter\Block\Adminhtml\System\Config
+ */
 class ModuleVersion extends Field
 {
     /**
@@ -30,15 +35,16 @@ class ModuleVersion extends Field
     private $forterConfig;
 
     /**
-     * @param  Context     $context
-     * @param  ForterConfig forterConfig
-     * @param  array       $data
+     * @param Context $context
+     * @param ForterConfig $forterConfig
+     * @param array $data
      */
     public function __construct(
         Context $context,
         ForterConfig $forterConfig,
         array $data = []
-    ) {
+    )
+    {
         $this->forterConfig = $forterConfig;
         parent::__construct($context, $data);
     }
@@ -46,7 +52,7 @@ class ModuleVersion extends Field
     /**
      * Remove scope label
      *
-     * @param  AbstractElement $element
+     * @param AbstractElement $element
      * @return string
      */
     public function render(AbstractElement $element)
@@ -58,7 +64,7 @@ class ModuleVersion extends Field
     /**
      * Return element html
      *
-     * @param  AbstractElement $element
+     * @param AbstractElement $element
      * @return string
      */
     protected function _getElementHtml(AbstractElement $element)

@@ -15,8 +15,15 @@ use Magento\Framework\HTTP\PhpEnvironment\RemoteAddress;
 use Magento\Framework\Message\ManagerInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
+/**
+ * Class AccountManagement
+ * @package Forter\Forter\Plugin\Customer\Model
+ */
 class AccountManagement
 {
+    /**
+     *
+     */
     const PASSWORD_API_ENDPOINT = 'https://api.forter-secure.com/v2/accounts/reset-password/';
 
     /**
@@ -24,6 +31,19 @@ class AccountManagement
      */
     private $messageManager;
 
+    /**
+     * AccountManagement constructor.
+     * @param Session $customerSession
+     * @param CustomerFactory $customer
+     * @param StoreManagerInterface $store
+     * @param AbstractApi $abstractApi
+     * @param RequestPrepare $requestPrepare
+     * @param ManagerInterface $messageManager
+     * @param Config $forterConfig
+     * @param RemoteAddress $remoteAddress
+     * @param SearchCriteriaBuilder|null $searchCriteriaBuilder
+     * @param CustomerRepositoryInterface $customerRepository
+     */
     public function __construct(
         Session $customerSession,
         CustomerFactory $customer,
@@ -35,7 +55,8 @@ class AccountManagement
         RemoteAddress $remoteAddress,
         SearchCriteriaBuilder $searchCriteriaBuilder = null,
         CustomerRepositoryInterface $customerRepository
-    ) {
+    )
+    {
         $this->customerSession = $customerSession;
         $this->customer = $customer;
         $this->customerRepository = $customerRepository;
@@ -49,12 +70,21 @@ class AccountManagement
             ?: ObjectManager::getInstance()->get(SearchCriteriaBuilder::class);
     }
 
+    /**
+     * @param AccountManagementOriginal $accountManagement
+     * @param $email
+     * @param $resetToken
+     * @param null $newPassword
+     * @return bool
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
     public function beforeResetPassword(
         AccountManagementOriginal $accountManagement,
         $email,
         $resetToken,
         $newPassword = null
-    ) {
+    )
+    {
         if (!$this->forterConfig->isEnabled()) {
             return false;
         }
@@ -63,10 +93,10 @@ class AccountManagement
 
         if ($customer) {
             $json = [
-              "accountId" => $customer->getId(),
-              "eventTime" => time(),
-              "connectionInformation" => $this->requestPrepare->getConnectionInformation($this->remoteAddress->getRemoteAddress()),
-              "passwordUpdateTrigger" => 'USER_FORGOT_PASSWORD'
+                "accountId" => $customer->getId(),
+                "eventTime" => time(),
+                "connectionInformation" => $this->requestPrepare->getConnectionInformation($this->remoteAddress->getRemoteAddress()),
+                "passwordUpdateTrigger" => 'USER_FORGOT_PASSWORD'
             ];
 
             try {
@@ -79,12 +109,21 @@ class AccountManagement
         }
     }
 
+    /**
+     * @param AccountManagementOriginal $accountManagement
+     * @param $email
+     * @param $currentPassword
+     * @param $newPassword
+     * @return bool
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
     public function beforeChangePassword(
         AccountManagementOriginal $accountManagement,
         $email,
         $currentPassword,
         $newPassword
-    ) {
+    )
+    {
         if (!$this->forterConfig->isEnabled()) {
             return false;
         }
@@ -92,11 +131,11 @@ class AccountManagement
         $customer = $this->customer->create()->setWebsiteId($websiteID)->loadByEmail($email);
         if ($customer) {
             $json = [
-          "accountId" => $customer->getId(),
-          "eventTime" => time(),
-          "connectionInformation" => $this->requestPrepare->getConnectionInformation($this->remoteAddress->getRemoteAddress()),
-          "passwordUpdateTrigger" => 'LOGGED_IN_USER'
-        ];
+                "accountId" => $customer->getId(),
+                "eventTime" => time(),
+                "connectionInformation" => $this->requestPrepare->getConnectionInformation($this->remoteAddress->getRemoteAddress()),
+                "passwordUpdateTrigger" => 'LOGGED_IN_USER'
+            ];
 
             try {
                 $url = self::PASSWORD_API_ENDPOINT . $customer->getId();
@@ -108,6 +147,14 @@ class AccountManagement
         }
     }
 
+    /**
+     * @param AccountManagementOriginal $subject
+     * @param callable $proceed
+     * @param $username
+     * @param $password
+     * @return bool
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
     public function aroundAuthenticate(AccountManagementOriginal $subject, callable $proceed, $username, $password)
     {
         if (!$this->forterConfig->isEnabled()) {
@@ -129,15 +176,19 @@ class AccountManagement
         return $result;
     }
 
+    /**
+     * @param $loginStatus
+     * @param $customer
+     */
     private function sendLoginAttempt($loginStatus, $customer)
     {
         try {
             $json = [
-              "accountId" => $customer->getId(),
-              "eventTime" => time(),
-              "connectionInformation" => $this->requestPrepare->getConnectionInformation($this->remoteAddress->getRemoteAddress()),
-              "loginStatus" => $loginStatus,
-              "loginMethodType" => "PASSWORD"
+                "accountId" => $customer->getId(),
+                "eventTime" => time(),
+                "connectionInformation" => $this->requestPrepare->getConnectionInformation($this->remoteAddress->getRemoteAddress()),
+                "loginStatus" => $loginStatus,
+                "loginMethodType" => "PASSWORD"
             ];
 
             if ($customer) {
@@ -153,10 +204,10 @@ class AccountManagement
      * Match a customer by their RP token.
      *
      * @param string $rpToken
-     * @throws ExpiredException
+     * @return CustomerInterface
      * @throws NoSuchEntityException
      *
-     * @return CustomerInterface
+     * @throws ExpiredException
      * @throws LocalizedException
      */
     private function localMatchCustomerByRpToken(string $rpToken)

@@ -1,13 +1,14 @@
 <?php
 
 /**
-* Forter Payments For Magento 2
-* https://www.Forter.com/
-*
-* @category Forter
-* @package  Forter_Forter
-* @author   Girit-Interactive (https://www.girit-tech.com/)
-*/
+ * Forter Payments For Magento 2
+ * https://www.Forter.com/
+ *
+ * @category Forter
+ * @package  Forter_Forter
+ * @author   Girit-Interactive (https://www.girit-tech.com/)
+ */
+
 namespace Forter\Forter\Model;
 
 use Magento\Framework\App\Config\ScopeConfigInterface;
@@ -19,10 +20,13 @@ use Magento\Store\Model\StoreManagerInterface;
 use Psr\Log\LoggerInterface;
 
 /**
-* Forter Forter config model.
-*/
+ * Forter Forter config model.
+ */
 class Config
 {
+    /**
+     *
+     */
     const MODULE_NAME = 'Forter_Forter';
 
     /**
@@ -55,14 +59,15 @@ class Config
      * @var UrlInterface
      */
     private $urlBuilder;
+
     /**
      * @method __construct
-     * @param  ScopeConfigInterface  $scopeConfig
-     * @param  StoreManagerInterface $storeManager
-     * @param  EncryptorInterface    $encryptor
-     * @param  LoggerInterface       $logger
-     * @param  UrlInterface          $urlBuilder
-     * @param  ModuleListInterface      $moduleList
+     * @param ScopeConfigInterface $scopeConfig
+     * @param StoreManagerInterface $storeManager
+     * @param EncryptorInterface $encryptor
+     * @param LoggerInterface $logger
+     * @param UrlInterface $urlBuilder
+     * @param ModuleListInterface $moduleList
      */
     public function __construct(
         ScopeConfigInterface $scopeConfig,
@@ -71,7 +76,8 @@ class Config
         LoggerInterface $logger,
         ModuleListInterface $moduleList,
         UrlInterface $urlBuilder
-    ) {
+    )
+    {
         $this->scopeConfig = $scopeConfig;
         $this->storeManager = $storeManager;
         $this->encryptor = $encryptor;
@@ -112,6 +118,7 @@ class Config
      * Return store id.
      *
      * @return int
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function getStoreId()
     {
@@ -120,6 +127,7 @@ class Config
 
     /**
      * @return bool
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function getSiteId()
     {
@@ -128,6 +136,7 @@ class Config
 
     /**
      * @return bool
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function getSecretKey()
     {
@@ -137,20 +146,22 @@ class Config
     }
 
     /**
-     * @return bool
+     * @return array
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function getTimeOutSettings()
     {
         return $timeOutArray = [
-       "base_connection_timeout" => $this->getConfigValue('connection_information/base_connection_timeout'),
-       "base_request_timeout" => $this->getConfigValue('connection_information/base_request_timeout'),
-       "max_connection_timeout" => $this->getConfigValue('connection_information/max_connection_timeout'),
-       "max_request_timeout" => $this->getConfigValue('connection_information/max_request_timeout')
-     ];
+            "base_connection_timeout" => $this->getConfigValue('connection_information/base_connection_timeout'),
+            "base_request_timeout" => $this->getConfigValue('connection_information/base_request_timeout'),
+            "max_connection_timeout" => $this->getConfigValue('connection_information/max_connection_timeout'),
+            "max_request_timeout" => $this->getConfigValue('connection_information/max_request_timeout')
+        ];
     }
 
     /**
      * @return string
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function getApiVersion()
     {
@@ -159,10 +170,9 @@ class Config
 
     /**
      * Return config field value.
-     *
      * @param string $fieldKey Field key.
-     *
      * @return mixed
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     private function getConfigValue($fieldKey)
     {
@@ -178,6 +188,7 @@ class Config
      * is enabled or not.
      *
      * @return bool
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function isEnabled()
     {
@@ -189,6 +200,7 @@ class Config
      * is enabled or not.
      *
      * @return bool
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function isLogging()
     {
@@ -200,6 +212,7 @@ class Config
      * is enabled or not.
      *
      * @return bool
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function isSandboxMode()
     {
@@ -211,6 +224,7 @@ class Config
      * is enabled or not.
      *
      * @return bool
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function isDebugEnabled()
     {
@@ -227,11 +241,12 @@ class Config
 
     /**
      * @method log
-     * @param  mixed   $message
-     * @param  string  $type
-     * @param  array   $data
-     * @param  string  $prefix
+     * @param mixed $message
+     * @param string $type
+     * @param array $data
+     * @param string $prefix
      * @return $this
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function log($message, $type = "debug", $data = [], $prefix = '[Forter] ')
     {
@@ -245,73 +260,95 @@ class Config
                 $data['store_id'] = $this->getStoreId();
             }
             switch ($type) {
-               case 'error':
-                   $this->logger->error($prefix . json_encode($message), $data);
-                   break;
-               case 'info':
-                   $this->logger->info($prefix . json_encode($message), $data);
-                   break;
-               case 'debug':
-               default:
-                   $this->logger->debug($prefix . json_encode($message), $data);
-                   break;
-           }
+                case 'error':
+                    $this->logger->error($prefix . json_encode($message), $data);
+                    break;
+                case 'info':
+                    $this->logger->info($prefix . json_encode($message), $data);
+                    break;
+                case 'debug':
+                default:
+                    $this->logger->debug($prefix . json_encode($message), $data);
+                    break;
+            }
         }
         return $this;
     }
 
+    /**
+     * @return mixed
+     */
     public function getModuleVersion()
     {
         return $this->moduleList->getOne(self::MODULE_NAME)['setup_version'];
     }
 
+    /**
+     * @return mixed
+     */
     public function getDeclinePre()
     {
         return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/decline_pre');
     }
 
+    /**
+     * @return mixed
+     */
     public function getDeclinePost()
     {
         return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/decline_post');
     }
 
+    /**
+     * @return mixed
+     */
     public function getPreThanksMsg()
     {
         return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/pre_thanks_msg');
     }
 
+    /**
+     * @return mixed
+     */
     public function captureInvoice()
     {
         return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/capture_invoice');
     }
 
+    /**
+     * @return bool
+     */
     public function getIsPost()
     {
         $result = $this->scopeConfig->getValue('forter/immediate_post_pre_decision/pre_post_Select');
         return ($result == '2' ? true : false);
     }
 
+    /**
+     * @param $type
+     * @return mixed|string
+     */
     public function getPrePostDesicionMsg($type)
     {
         $result = $this->scopeConfig->getValue('forter/immediate_post_pre_decision/' . $type);
         switch ($type) {
-         case 'pre_post_Select':
-             return ($result == '1' ? 'Auth pre paymernt' : 'Auth post paymernt');
-         case 'decline_pre':
-            if ($result == '0') {
-                $result = 'Do Nothing';
-            } elseif ($result == '1') {
-                $result = 'Payment exception (stay in checkout page with error message)';
-            } elseif ($result == '2') {
-                $result = 'Destroy customer session and redirect back to cart page with error message';
-            }
-            return $result;
-         case 'decline_post':
-             return ($result == '1' ? 'Redirect Success Page, Cancel the order, prevent email sending' : 'Send user back to Checkout page with error');
-         case 'capture_invoice':
-             return ($result == '1' ? 'Capture (invoice) Cron' : 'Capture (invoice) Immediate');
-         default:
-             return $result;
-     }
+            case 'pre_post_Select':
+                return ($result == '1' ? 'Auth pre paymernt' : 'Auth post paymernt');
+            case 'decline_pre':
+                if ($result == '0') {
+                    $result = 'Do Nothing';
+                } elseif ($result == '1') {
+                    $result = 'Payment exception (stay in checkout page with error message)';
+                } elseif ($result == '2') {
+                    $result = 'Destroy customer session and redirect back to cart page with error message';
+                }
+                return $result;
+            case 'decline_post':
+                return ($result == '1' ? 'Redirect Success Page, Cancel the order, prevent email sending' : 'Send user back to Checkout page with error');
+            case 'capture_invoice':
+                return ($result == '1' ? 'Capture (invoice) Cron' : 'Capture (invoice) Immediate');
+            default:
+                return $result;
+        }
     }
 }

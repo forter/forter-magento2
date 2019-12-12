@@ -2,8 +2,15 @@
 
 namespace Forter\Forter\Model\Config\Source;
 
+/**
+ * Class PreDecisionOptions
+ * @package Forter\Forter\Model\Config\Source
+ */
 class PreDecisionOptions implements \Magento\Framework\Option\ArrayInterface
 {
+    /**
+     * @return array
+     */
     public function toOptionArray()
     {
         return [

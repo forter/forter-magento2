@@ -10,8 +10,51 @@ use Magento\Sales\Model\Order\CreditmemoFactory;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Service\CreditmemoService;
 
+/**
+ * Class Decline
+ * @package Forter\Forter\Model\RequestHandler
+ */
 class Decline
 {
+    /**
+     * @var CheckoutSession
+     */
+    private $checkoutSession;
+    /**
+     * @var Order
+     */
+    private $order;
+    /**
+     * @var ManagerInterface
+     */
+    private $messageManager;
+    /**
+     * @var ForterConfig
+     */
+    private $forterConfig;
+    /**
+     * @var CreditmemoFactory
+     */
+    private $creditmemoFactory;
+    /**
+     * @var CreditmemoService
+     */
+    private $creditmemoService;
+    /**
+     * @var Invoice
+     */
+    private $invoice;
+
+    /**
+     * Decline constructor.
+     * @param ManagerInterface $messageManager
+     * @param Order $order
+     * @param CreditmemoFactory $creditmemoFactory
+     * @param ForterConfig $forterConfig
+     * @param CheckoutSession $checkoutSession
+     * @param Invoice $invoice
+     * @param CreditmemoService $creditmemoService
+     */
     public function __construct(
         ManagerInterface $messageManager,
         Order $order,
@@ -30,6 +73,9 @@ class Decline
         $this->invoice = $invoice;
     }
 
+    /**
+     * @return $this
+     */
     public function handlePreTransactionDescision()
     {
         $forterDecision = $this->forterConfig->getDeclinePre();
@@ -43,6 +89,11 @@ class Decline
         return $this;
     }
 
+    /**
+     * @param $order
+     * @return $this|bool
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
     public function handlePostTransactionDescision($order)
     {
         $forterDecision = $this->forterConfig->getDeclinePost();
@@ -73,6 +124,10 @@ class Decline
         return $this;
     }
 
+    /**
+     * @param $order
+     * @return bool
+     */
     private function cancelOrder($order)
     {
         $order->cancel()->save();
@@ -85,6 +140,11 @@ class Decline
         return false;
     }
 
+    /**
+     * @param $order
+     * @return bool
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
     private function createCreditMemo($order)
     {
         $invoices = $order->getInvoiceCollection();
@@ -111,6 +171,10 @@ class Decline
         return false;
     }
 
+    /**
+     * @param $order
+     * @return bool
+     */
     private function holdOrder($order)
     {
         $orderState = Order::STATE_HOLDED;
@@ -121,6 +185,10 @@ class Decline
         return true;
     }
 
+    /**
+     * @param $order
+     * @param $message
+     */
     private function addCommentToOrder($order, $message)
     {
         $order->addStatusHistoryComment($message)
