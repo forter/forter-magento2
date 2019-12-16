@@ -4,7 +4,7 @@ namespace Forter\Forter\Observer\Customer;
 
 use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\Config as ForterConfig;
-use Forter\Forter\Model\RequestBuilder\RequestPrepare;
+use Forter\Forter\Model\RequestBuilder\BasicInfo;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\HTTP\PhpEnvironment\RemoteAddress;
 
@@ -23,9 +23,9 @@ class CustomerRegisterSuccess implements ObserverInterface
      */
     private $abstractApi;
     /**
-     * @var RequestPrepare
+     * @var BasicInfo
      */
-    private $requestPrepare;
+    private $basicInfo;
     /**
      * @var RemoteAddress
      */
@@ -38,19 +38,18 @@ class CustomerRegisterSuccess implements ObserverInterface
     /**
      * CustomerRegisterSuccess constructor.
      * @param AbstractApi $abstractApi
-     * @param RequestPrepare $requestPrepare
+     * @param BasicInfo $basicInfo
      * @param RemoteAddress $remoteAddress
      * @param ForterConfig $forterConfig
      */
     public function __construct(
         AbstractApi $abstractApi,
-        RequestPrepare $requestPrepare,
+        BasicInfo $basicInfo,
         RemoteAddress $remoteAddress,
         ForterConfig $forterConfig
-    )
-    {
+    ) {
         $this->abstractApi = $abstractApi;
-        $this->requestPrepare = $requestPrepare;
+        $this->basicInfo = $basicInfo;
         $this->remoteAddress = $remoteAddress;
         $this->forterConfig = $forterConfig;
     }
@@ -70,7 +69,7 @@ class CustomerRegisterSuccess implements ObserverInterface
         $json = [
             "accountId" => $customer->getId(),
             "eventTime" => time(),
-            "connectionInformation" => $this->requestPrepare->getConnectionInformation($this->remoteAddress->getRemoteAddress())
+            "connectionInformation" => $this->basicInfo->getConnectionInformation($this->remoteAddress->getRemoteAddress())
         ];
 
         try {

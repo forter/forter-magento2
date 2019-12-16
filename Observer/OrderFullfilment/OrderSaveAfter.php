@@ -2,11 +2,9 @@
 
 namespace Forter\Forter\Observer\OrderFullfilment;
 
+use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\Config;
-use Forter\Forter\Model\QueueFactory as ForterQueueFactory;
 use Magento\Framework\Event\ObserverInterface;
-use Magento\Framework\Stdlib\DateTime\DateTime;
-use Magento\Store\Model\StoreManagerInterface;
 
 /**
  * Class OrderSaveAfter
@@ -14,21 +12,8 @@ use Magento\Store\Model\StoreManagerInterface;
  */
 class OrderSaveAfter implements ObserverInterface
 {
+    const ORDER_FULFILLMENT_STATUS_ENDPOINT = "https://api.forter-secure.com/v2/status/";
 
-    /**
-     * @var \Forter\Forter\Queue
-     */
-    protected $queue;
-
-    /**
-     * @var \Magento\Framework\Stdlib\DateTime\DateTime
-     */
-    protected $dateTime;
-
-    /**
-     * @var \Magento\Store\Model\StoreManagerInterface
-     */
-    protected $storeManager;
     /**
      * @var Config
      */
@@ -37,21 +22,14 @@ class OrderSaveAfter implements ObserverInterface
     /**
      * OrderSaveAfter constructor.
      * @param Config $config
-     * @param ForterQueueFactory $queue
-     * @param DateTime $dateTime
-     * @param StoreManagerInterface $storeManager
+     * @param  AbstractApi $abstractApi
      */
     public function __construct(
-        Config $config,
-        ForterQueueFactory $queue,
-        DateTime $dateTime,
-        StoreManagerInterface $storeManager
-    )
-    {
-        $this->storeManager = $storeManager;
+        AbstractApi $abstractApi,
+        Config $config
+    ) {
+        $this->abstractApi = $abstractApi;
         $this->config = $config;
-        $this->dateTime = $dateTime;
-        $this->queue = $queue;
     }
 
     /**
@@ -85,16 +63,13 @@ class OrderSaveAfter implements ObserverInterface
             "eventTime" => time(),
             "updatedStatus" => $orderState,
         ];
-        $json = json_encode($json);
-        $storeId = $this->storeManager->getStore()->getId();
-        $currentTime = $this->dateTime->gmtDate();
 
-        $this->queue->create()
-            ->setStoreId($storeId)
-            ->setEntityType('order_fulfillment_status')
-            ->setEntityId($order->getId())
-            ->setEntityBody($json)
-            ->setSyncDate($currentTime)
-            ->save();
+        try {
+            $url = self::ORDER_FULFILLMENT_STATUS_ENDPOINT . $order->getId();
+            $response = $this->abstractApi->sendApiRequest($url, json_encode($json));
+        } catch (\Exception $e) {
+            $this->abstractApi->reportToForterOnCatch($e);
+            throw new \Exception($e->getMessage());
+        }
     }
 }
