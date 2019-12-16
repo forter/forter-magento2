@@ -72,19 +72,19 @@ class CheckoutSubmitAllAfter implements \Magento\Framework\Event\ObserverInterfa
         }
 
         $order = $observer->getEvent()->getOrder();
-        $ForterResponse = $order->getForterResponse();
-        $ForterResponse = json_decode($ForterResponse);
+        $forterResponse = $order->getForterResponse();
+        $forterResponse = json_decode($forterResponse);
 
         $storeId = $this->storeManager->getStore()->getId();
         $currentTime = $this->dateTime->gmtDate();
 
-        if ( && $ForterResponse->status == 'success') {
-            if($ForterResponse->action == 'approve'){
-              $result = $this->forterConfig->getApprovePost();
-            } elseif ($ForterResponse->action == "not reviewed" ){
-              $result = $this->forterConfig->getNotReviewPost();
+        if ($forterResponse->status == 'success') {
+            if ($forterResponse->action == 'approve') {
+                $result = $this->forterConfig->getApprovePost();
+            } elseif ($forterResponse->action == "not reviewed") {
+                $result = $this->forterConfig->getNotReviewPost();
             } else {
-              return false;
+                return false;
             }
 
             if ($result == '1') {
