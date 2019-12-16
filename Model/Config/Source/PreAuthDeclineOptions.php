@@ -3,10 +3,10 @@
 namespace Forter\Forter\Model\Config\Source;
 
 /**
- * Class PreDecisionOptions
+ * Class PreAuthDeclineOptions
  * @package Forter\Forter\Model\Config\Source
  */
-class PreDecisionOptions implements \Magento\Framework\Option\ArrayInterface
+class PreAuthDeclineOptions implements \Magento\Framework\Option\ArrayInterface
 {
     /**
      * @return array
