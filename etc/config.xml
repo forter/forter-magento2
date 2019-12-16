@@ -15,7 +15,8 @@
               <decline_pre>1</decline_pre>
               <pre_thanks_msg></pre_thanks_msg>
               <decline_post>1</decline_post>
-              <capture_invoice>1</capture_invoice>
+              <not_review_post>3</not_review_post>
+              <approve_post>1</approve_post>
               <post_thanks_msg></post_thanks_msg>
             </immediate_post_pre_decision>
             <connection_information>

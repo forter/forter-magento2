@@ -76,8 +76,7 @@ class Config
         LoggerInterface $logger,
         ModuleListInterface $moduleList,
         UrlInterface $urlBuilder
-    )
-    {
+    ) {
         $this->scopeConfig = $scopeConfig;
         $this->storeManager = $storeManager;
         $this->encryptor = $encryptor;
@@ -310,9 +309,17 @@ class Config
     /**
      * @return mixed
      */
-    public function captureInvoice()
+    public function getApprovePost()
     {
-        return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/capture_invoice');
+        return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/approve_post');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getNotReviewPost()
+    {
+        return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/not_review_post');
     }
 
     /**

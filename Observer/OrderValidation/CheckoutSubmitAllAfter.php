@@ -78,8 +78,15 @@ class CheckoutSubmitAllAfter implements \Magento\Framework\Event\ObserverInterfa
         $storeId = $this->storeManager->getStore()->getId();
         $currentTime = $this->dateTime->gmtDate();
 
-        if ($ForterResponse->action == 'approve' && $ForterResponse->status == 'success') {
-            $result = $this->forterConfig->captureInvoice();
+        if ( && $ForterResponse->status == 'success') {
+            if($ForterResponse->action == 'approve'){
+              $result = $this->forterConfig->getApprovePost();
+            } elseif ($ForterResponse->action == "not reviewed" ){
+              $result = $this->forterConfig->getNotReviewPost();
+            } else {
+              return false;
+            }
+
             if ($result == '1') {
                 $this->queue->create()
                     ->setStoreId($storeId)
@@ -88,8 +95,10 @@ class CheckoutSubmitAllAfter implements \Magento\Framework\Event\ObserverInterfa
                     ->setEntityBody('approve')
                     ->setSyncDate($currentTime)
                     ->save();
-            } else {
+            } elseif ($result == '2') {
                 $this->approve->handleApproveImmediatly($order);
+            } else {
+                return false;
             }
         }
     }
