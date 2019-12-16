@@ -10,12 +10,20 @@
 
 namespace Forter\Forter\Model\RequestBuilder;
 
+use Magento\Framework\Stdlib\CookieManagerInterface;
+
 /**
  * Class BasicInfo
  * @package Forter\Forter\Model\RequestBuilder
  */
 class BasicInfo
 {
+    public function __construct(
+        CookieManagerInterface $cookieManager
+    ) {
+        $this->cookieManager = $cookieManager;
+    }
+
     /**
      * @param $remoteIp
      * @return array
@@ -26,7 +34,7 @@ class BasicInfo
         return [
             "customerIP" => $this->getIpFromOrder($remoteIp, $headers),
             "userAgent" => (is_array($headers) && array_key_exists("User-Agent", $headers)) ? $headers['User-Agent'] : null,
-            "forterTokenCookie" => null,
+            "forterTokenCookie" => $this->cookieManager->getCookie("forterToken"),
             "merchantDeviceIdentifier" => null,
             "fullHeaders" => json_encode($headers)
         ];

@@ -59,13 +59,13 @@ class OrderSaveAfter implements ObserverInterface
         }
 
         $json = [
-            "orderId" => $order->getId(),
+            "orderId" => $order->getIncrementId(),
             "eventTime" => time(),
             "updatedStatus" => $orderState,
         ];
 
         try {
-            $url = self::ORDER_FULFILLMENT_STATUS_ENDPOINT . $order->getId();
+            $url = self::ORDER_FULFILLMENT_STATUS_ENDPOINT . $order->getIncrementId();
             $response = $this->abstractApi->sendApiRequest($url, json_encode($json));
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
