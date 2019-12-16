@@ -299,4 +299,31 @@ class Customer
             ->count();
         return $reviews_count;
     }
+
+    /**
+     * @param $billingAddress
+     * @return array|null
+     */
+    public function getBillingDetails($billingAddress)
+    {
+        $billingDetails = [];
+        $billingDetails["personalDetails"] = [
+          "firstName" => $billingAddress->getFirstName(),
+          "lastName" => $billingAddress->getLastName()
+        ];
+
+        if ($billingAddress) {
+            $billingDetails["address"] = $this->getAddressData($billingAddress);
+
+            if ($billingAddress->getTelephone()) {
+                $billingDetails["phone"] = [
+                  [
+                      "phone" => $billingAddress->getTelephone()
+                  ]
+              ];
+            }
+        }
+
+        return $billingDetails;
+    }
 }

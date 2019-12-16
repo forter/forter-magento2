@@ -4,7 +4,7 @@ namespace Forter\Forter\Plugin\Customer\Model;
 
 use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\Config;
-use Forter\Forter\Model\RequestBuilder\RequestPrepare;
+use Forter\Forter\Model\RequestBuilder\BasicInfo;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Model\AccountManagement as AccountManagementOriginal;
 use Magento\Customer\Model\CustomerFactory;
@@ -37,7 +37,7 @@ class AccountManagement
      * @param CustomerFactory $customer
      * @param StoreManagerInterface $store
      * @param AbstractApi $abstractApi
-     * @param RequestPrepare $requestPrepare
+     * @param BasicInfo $basicInfo
      * @param ManagerInterface $messageManager
      * @param Config $forterConfig
      * @param RemoteAddress $remoteAddress
@@ -49,21 +49,20 @@ class AccountManagement
         CustomerFactory $customer,
         StoreManagerInterface $store,
         AbstractApi $abstractApi,
-        RequestPrepare $requestPrepare,
+        BasicInfo $basicInfo,
         ManagerInterface $messageManager,
         Config $forterConfig,
         RemoteAddress $remoteAddress,
         SearchCriteriaBuilder $searchCriteriaBuilder = null,
         CustomerRepositoryInterface $customerRepository
-    )
-    {
+    ) {
         $this->customerSession = $customerSession;
         $this->customer = $customer;
         $this->customerRepository = $customerRepository;
         $this->messageManager = $messageManager;
         $this->storemanager = $store;
         $this->abstractApi = $abstractApi;
-        $this->requestPrepare = $requestPrepare;
+        $this->basicInfo = $basicInfo;
         $this->remoteAddress = $remoteAddress;
         $this->forterConfig = $forterConfig;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder
@@ -83,8 +82,7 @@ class AccountManagement
         $email,
         $resetToken,
         $newPassword = null
-    )
-    {
+    ) {
         if (!$this->forterConfig->isEnabled()) {
             return false;
         }
@@ -95,7 +93,7 @@ class AccountManagement
             $json = [
                 "accountId" => $customer->getId(),
                 "eventTime" => time(),
-                "connectionInformation" => $this->requestPrepare->getConnectionInformation($this->remoteAddress->getRemoteAddress()),
+                "connectionInformation" => $this->basicInfo->getConnectionInformation($this->remoteAddress->getRemoteAddress()),
                 "passwordUpdateTrigger" => 'USER_FORGOT_PASSWORD'
             ];
 
@@ -122,8 +120,7 @@ class AccountManagement
         $email,
         $currentPassword,
         $newPassword
-    )
-    {
+    ) {
         if (!$this->forterConfig->isEnabled()) {
             return false;
         }
@@ -133,7 +130,7 @@ class AccountManagement
             $json = [
                 "accountId" => $customer->getId(),
                 "eventTime" => time(),
-                "connectionInformation" => $this->requestPrepare->getConnectionInformation($this->remoteAddress->getRemoteAddress()),
+                "connectionInformation" => $this->basicInfo->getConnectionInformation($this->remoteAddress->getRemoteAddress()),
                 "passwordUpdateTrigger" => 'LOGGED_IN_USER'
             ];
 
@@ -186,7 +183,7 @@ class AccountManagement
             $json = [
                 "accountId" => $customer->getId(),
                 "eventTime" => time(),
-                "connectionInformation" => $this->requestPrepare->getConnectionInformation($this->remoteAddress->getRemoteAddress()),
+                "connectionInformation" => $this->basicInfo->getConnectionInformation($this->remoteAddress->getRemoteAddress()),
                 "loginStatus" => $loginStatus,
                 "loginMethodType" => "PASSWORD"
             ];

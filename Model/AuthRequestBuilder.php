@@ -10,9 +10,10 @@
 namespace Forter\Forter\Model;
 
 use Forter\Forter\Model\Config as ForterConfig;
-use Forter\Forter\Model\RequestBuilder\Customer as CustomerPreper;
-use Forter\Forter\Model\RequestBuilder\Payment as PaymentPreper;
-use Forter\Forter\Model\RequestBuilder\RequestPrepare;
+use Forter\Forter\Model\RequestBuilder\BasicInfo as BasicInfoPrepere;
+use Forter\Forter\Model\RequestBuilder\Cart as CartPrepere;
+use Forter\Forter\Model\RequestBuilder\Customer as CustomerPrepere;
+use Forter\Forter\Model\RequestBuilder\Payment as PaymentPrepere;
 use Magento\Catalog\Model\CategoryFactory;
 use Magento\Customer\Model\Session;
 use Magento\Newsletter\Model\Subscriber;
@@ -30,18 +31,23 @@ class AuthRequestBuilder
      *
      */
     const SHIPPING_METHOD_PREFIX = "Select Shipping Method - ";
+
     /**
-     * @var RequestPrepare
+     * @var PaymentPrepere
      */
-    private $requestPrepare;
+    private $cartPrepere;
     /**
-     * @var CustomerPreper
+     * @var PaymentPrepere
      */
-    private $customerPreper;
+    private $basicInfoPrepare;
     /**
-     * @var PaymentPreper
+     * @var CustomerPrepere
      */
-    private $paymentPreper;
+    private $customerPrepere;
+    /**
+     * @var PaymentPrepere
+     */
+    private $paymentPrepere;
     /**
      * @var OrderFactory
      */
@@ -73,9 +79,10 @@ class AuthRequestBuilder
 
     /**
      * AuthRequestBuilder constructor.
-     * @param RequestPrepare $requestPrepare
-     * @param CustomerPreper $customerPreper
-     * @param PaymentPreper $paymentPreper
+     * @param BasicInfoPrepare $basicInfoPrepare
+     * @param CartPrepare  $cartPrepare
+     * @param CustomerPrepere $customerPrepere
+     * @param PaymentPrepere $paymentPrepere
      * @param OrderFactory $orderFactory
      * @param CategoryFactory $categoryFactory
      * @param Session $session
@@ -85,9 +92,10 @@ class AuthRequestBuilder
      * @param Config $forterConfig
      */
     public function __construct(
-        RequestPrepare $requestPrepare,
-        CustomerPreper $customerPreper,
-        PaymentPreper $paymentPreper,
+        CartPrepere $cartPrepare,
+        BasicInfoPrepere $basicInfoPrepare,
+        CustomerPrepere $customerPrepere,
+        PaymentPrepere $paymentPrepere,
         OrderFactory $orderFactory,
         CategoryFactory $categoryFactory,
         Session $session,
@@ -96,9 +104,10 @@ class AuthRequestBuilder
         Subscriber $subscriber,
         ForterConfig $forterConfig
     ) {
-        $this->requestPrepare = $requestPrepare;
-        $this->customerPreper = $customerPreper;
-        $this->paymentPreper = $paymentPreper;
+        $this->basicInfoPrepare = $basicInfoPrepare;
+        $this->cartPrepare = $cartPrepare;
+        $this->customerPrepere = $customerPrepere;
+        $this->paymentPrepere = $paymentPrepere;
         $this->orderFactory = $orderFactory;
         $this->categoryFactory = $categoryFactory;
         $this->session = $session;
@@ -119,16 +128,16 @@ class AuthRequestBuilder
         "orderType" => "WEB",
         "timeSentToForter" => time()*1000,
         "checkoutTime" => time(),
-        "additionalIdentifiers" => $this->requestPrepare->getAdditionalIdentifiers($order),
-        "connectionInformation" => $this->requestPrepare->getConnectionInformation($order->getRemoteIp()),
-        "totalAmount" => $this->requestPrepare->getTotalAmount($order),
-        "cartItems" => $this->requestPrepare->generateCartItems($order),
-        "primaryDeliveryDetails" => $this->customerPreper->getPrimaryDeliveryDetails($order),
-        "primaryRecipient" => $this->customerPreper->getPrimaryRecipient($order),
-        "accountOwner" => $this->customerPreper->getAccountOwnerInfo($order),
-        "customerAccountData" => $this->customerPreper->getCustomerAccountData($order, null),
-        "totalDiscount" => $this->requestPrepare->getTotalDiscount($order),
-        "payment" => $this->paymentPreper->generatePaymentInfo($order)
+        "additionalIdentifiers" => $this->basicInfoPrepare->getAdditionalIdentifiers($order),
+        "connectionInformation" => $this->basicInfoPrepare->getConnectionInformation($order->getRemoteIp()),
+        "totalAmount" => $this->cartPrepare->getTotalAmount($order),
+        "cartItems" => $this->cartPrepare->generateCartItems($order),
+        "primaryDeliveryDetails" => $this->customerPrepere->getPrimaryDeliveryDetails($order),
+        "primaryRecipient" => $this->customerPrepere->getPrimaryRecipient($order),
+        "accountOwner" => $this->customerPrepere->getAccountOwnerInfo($order),
+        "customerAccountData" => $this->customerPrepere->getCustomerAccountData($order, null),
+        "totalDiscount" => $this->cartPrepare->getTotalDiscount($order),
+        "payment" => $this->paymentPrepere->generatePaymentInfo($order)
       ];
 
         if ($this->forterConfig->isSandboxMode()) {
