@@ -14,8 +14,8 @@ class PostDecisionOptions implements \Magento\Framework\Option\ArrayInterface
     public function toOptionArray()
     {
         return [
-            ['value' => '1', 'label' => __('Cancel + void + refund')],
-            ['value' => '2', 'label' => __('Set to payment review state')],
+            ['value' => '1', 'label' => __('Cancel Order, Void or Refund Payment')],
+            ['value' => '2', 'label' => __('Set to Payment Review State')],
             ['value' => '3', 'label' => __('Do nothing')]
         ];
     }
