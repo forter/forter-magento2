@@ -14,8 +14,8 @@ class CaptureInvoiceOptions implements \Magento\Framework\Option\ArrayInterface
     public function toOptionArray()
     {
         return [
-            ['value' => '1', 'label' => __('Capture (invoice) Cron')],
-            ['value' => '2', 'label' => __('Capture (invoice) Immediate')]
+            ['value' => '1', 'label' => __('Create Invoice and Capture Payments (CRON)')],
+            ['value' => '2', 'label' => __('Create Invoice and Capture Payments (IMMEDIATELY)')]
         ];
     }
 }

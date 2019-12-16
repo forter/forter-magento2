@@ -14,8 +14,8 @@ class PrePostSelect implements \Magento\Framework\Option\ArrayInterface
     public function toOptionArray()
     {
         return [
-            ['value' => '1', 'label' => __('Auth pre paymernt')],
-            ['value' => '2', 'label' => __('Auth post paymernt')]
+            ['value' => '1', 'label' => __('Before Payment Action (pre-authorization)')],
+            ['value' => '2', 'label' => __('After Payment Action (post-authorization)')]
         ];
     }
 }
