@@ -309,6 +309,14 @@ class Config
     /**
      * @return mixed
      */
+    public function getPostThanksMsg()
+    {
+        return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/post_thanks_msg');
+    }
+
+    /**
+     * @return mixed
+     */
     public function getApprovePost()
     {
         return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/approve_post');
@@ -327,8 +335,8 @@ class Config
      */
     public function getIsPost()
     {
-        $result = $this->scopeConfig->getValue('forter/immediate_post_pre_decision/pre_post_Select');
-        return ($result == '2' ? true : false);
+        $prePostSelect = $this->scopeConfig->getValue('forter/immediate_post_pre_decision/pre_post_Select');
+        return ($prePostSelect == '2' ? true : false);
     }
 
     /**
@@ -340,20 +348,43 @@ class Config
         $result = $this->scopeConfig->getValue('forter/immediate_post_pre_decision/' . $type);
         switch ($type) {
             case 'pre_post_Select':
-                return ($result == '1' ? 'Auth pre paymernt' : 'Auth post paymernt');
+                return ($result == '1' ? 'Before Payment Action (pre-authorization)' : 'After Payment Action (post-authorization)');
             case 'decline_pre':
                 if ($result == '0') {
-                    $result = 'Do Nothing';
+                    $result = 'Do nothing';
                 } elseif ($result == '1') {
                     $result = 'Payment exception (stay in checkout page with error message)';
                 } elseif ($result == '2') {
-                    $result = 'Destroy customer session and redirect back to cart page with error message';
+                    $result = 'Deletes the order session and redirects the customet back to cart page with error message';
                 }
                 return $result;
             case 'decline_post':
-                return ($result == '1' ? 'Redirect Success Page, Cancel the order, prevent email sending' : 'Send user back to Checkout page with error');
-            case 'capture_invoice':
-                return ($result == '1' ? 'Capture (invoice) Cron' : 'Capture (invoice) Immediate');
+                if ($result == '3') {
+                    $result = 'Do nothing';
+                } elseif ($result == '1') {
+                    $result = 'Cancel Order, Void or Refund Payment';
+                } elseif ($result == '2') {
+                    $result = 'Set to Payment Review State';
+                }
+                return $result;
+            case 'approve_post':
+              if ($result == '1') {
+                  $result = 'Create Invoice and Capture Payments (CRON)';
+              } elseif ($result == '2') {
+                  $result = 'Create Invoice and Capture Payments (IMMEDIATELY)';
+              } elseif ($result == '3') {
+                  $result = 'Do Nothing';
+              }
+              return $result;
+            case 'not_review_post':
+              if ($result == '1') {
+                  $result = 'Create Invoice and Capture Payments (CRON)';
+              } elseif ($result == '2') {
+                  $result = 'Create Invoice and Capture Payments (IMMEDIATELY)';
+              } elseif ($result == '3') {
+                  $result = 'Do Nothing';
+              }
+              return $result;
             default:
                 return $result;
         }

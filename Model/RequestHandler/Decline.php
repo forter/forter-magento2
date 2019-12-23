@@ -97,9 +97,9 @@ class Decline
     public function handlePostTransactionDescision($order)
     {
         $forterDecision = $this->forterConfig->getDeclinePost();
+        $this->messageManager->getMessages(true);
+        $this->messageManager->addError($this->forterConfig->getPostThanksMsg());
         if ($forterDecision == '1') {
-            $this->messageManager->addError($this->forterConfig->getPreThanksMsg());
-
             $result = $this->cancelOrder($order);
             if ($result) {
                 return true;
