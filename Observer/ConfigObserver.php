@@ -33,8 +33,7 @@ class ConfigObserver implements \Magento\Framework\Event\ObserverInterface
     public function __construct(
         AbstractApi $abstractApi,
         Config $forterConfig
-    )
-    {
+    ) {
         $this->abstractApi = $abstractApi;
         $this->forterConfig = $forterConfig;
     }
@@ -65,10 +64,11 @@ class ConfigObserver implements \Magento\Framework\Event\ObserverInterface
             "pre_post_desicion" => [
                 "pre_post_Select" => $this->forterConfig->getPrePostDesicionMsg('pre_post_Select'),
                 "pre_decline" => $this->forterConfig->getPrePostDesicionMsg('decline_pre'),
-                "pre_thanks_msg" => $this->forterConfig->getPrePostDesicionMsg('pre_thanks_msg'),
+                "pre_thanks_msg" => $this->forterConfig->getPreThanksMsg(),
                 "post_decline" => $this->forterConfig->getPrePostDesicionMsg('decline_post'),
-                "post_approve" => $this->forterConfig->getPrePostDesicionMsg('capture_invoice'),
-                "post_thanks_msg" => $this->forterConfig->getPrePostDesicionMsg('post_thanks_msg')
+                "post_approve" => $this->forterConfig->getPrePostDesicionMsg('approve_post'),
+                "post_not_review" => $this->forterConfig->getPrePostDesicionMsg('not_review_post'),
+                "post_thanks_msg" => $this->forterConfig->getPostThanksMsg()
             ],
             "store" => [
                 "storeId" => $this->forterConfig->getStoreId()

@@ -3,7 +3,8 @@
 namespace Forter\Forter\Plugin\Customer\Model\ResourceModel;
 
 use Forter\Forter\Model\AbstractApi;
-use Forter\Forter\Model\RequestBuilder\BasicInfo;
+use Forter\Forter\Model\RequestBuilder\BasicInfo as BasicInfoPrepere;
+use Forter\Forter\Model\RequestBuilder\Customer as CustomerPrepere;
 use Magento\Customer\Api\GroupRepositoryInterface;
 use Magento\Customer\Model\ResourceModel\CustomerRepository as CustomerRepositoryOriginal;
 use Magento\Framework\App\State;
@@ -21,9 +22,13 @@ class CustomerRepository
      */
     const API_ENDPOINT = "https://api.forter-secure.com/v2/accounts/update/";
     /**
-     * @var BasicInfo
+     * @var PaymentPrepere
      */
-    private $basicInfo;
+    private $basicInfoPrepare;
+    /**
+     * @var CustomerPrepere
+     */
+    private $customerPrepere;
     /**
      * @var State
      */
@@ -48,7 +53,8 @@ class CustomerRepository
     /**
      * CustomerRepository constructor.
      * @param State $state
-     * @param BasicInfo $basicInfo
+     * @param BasicInfoPrepere $basicInfoPrepare
+     * @param CustomerPrepere $customerPrepere
      * @param AbstractApi $abstractApi
      * @param GroupRepositoryInterface $groupRepository
      * @param RemoteAddress $remoteAddress
@@ -56,13 +62,15 @@ class CustomerRepository
      */
     public function __construct(
         State $state,
-        BasicInfo $basicInfo,
+        BasicInfoPrepere $basicInfoPrepare,
+        CustomerPrepere $customerPrepere,
         AbstractApi $abstractApi,
         GroupRepositoryInterface $groupRepository,
         RemoteAddress $remoteAddress,
         StoreManagerInterface $storeManager
     ) {
-        $this->basicInfo = $basicInfo;
+        $this->basicInfoPrepare = $basicInfoPrepare;
+        $this->customerPrepere = $customerPrepere;
         $this->state = $state;
         $this->abstractApi = $abstractApi;
         $this->storeManager = $storeManager;
@@ -82,14 +90,14 @@ class CustomerRepository
         $savedCustomer
     ) {
         $customerGroup = $this->groupRepository->getById($savedCustomer->getGroupId());
-        $customerAccountData = $this->basicInfo->getCustomerAccountData(null, $savedCustomer);
+        $customerAccountData = $this->customerPrepere->getCustomerAccountData(null, $savedCustomer);
         $areaCode = ($this->state->getAreaCode() == 'frontend' ? 'END_USER' : 'MERCHANT_ADMIN');
         $type = ($this->state->getAreaCode() == 'frontend' ? 'PRIVATE' : 'MERCHANT_EMPLOYEE');
 
         $json = [
             "accountId" => $savedCustomer->getId(),
             "eventTime" => time(),
-            "connectionInformation" => $this->basicInfo->getConnectionInformation($this->remoteAddress->getRemoteAddress()),
+            "connectionInformation" => $this->basicInfoPrepare->getConnectionInformation($this->remoteAddress->getRemoteAddress()),
             "accountData" => [
                 "type" => $type,
                 "statusChangeBy" => $areaCode,
