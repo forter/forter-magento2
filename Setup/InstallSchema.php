@@ -106,7 +106,7 @@ class InstallSchema implements InstallSchemaInterface
                 'forter_response',
                 [
                     'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
-                    'length' => 255,
+                    'length'   => \Magento\Framework\DB\Ddl\Table::MAX_TEXT_SIZE,
                     'comment' => 'Forter Full Response'
                 ]
             );

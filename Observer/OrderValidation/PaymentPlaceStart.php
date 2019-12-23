@@ -68,8 +68,7 @@ class PaymentPlaceStart implements ObserverInterface
         Config $config,
         AuthRequestBuilder $authRequestBuilder,
         Item $modelCartItem
-    )
-    {
+    ) {
         $this->decline = $decline;
         $this->checkoutSession = $checkoutSession;
         $this->modelCartItem = $modelCartItem;
@@ -102,6 +101,10 @@ class PaymentPlaceStart implements ObserverInterface
         }
 
         $response = json_decode($response);
+
+        if ($response->status == 'failed') {
+            return true;
+        }
 
         if ($response->action == 'decline' && $response->status == 'success') {
             $this->decline->handlePreTransactionDescision();

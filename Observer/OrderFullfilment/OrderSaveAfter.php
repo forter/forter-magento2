@@ -39,7 +39,7 @@ class OrderSaveAfter implements ObserverInterface
      */
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
-        if (!$this->config->isEnabled()) {
+        if (!$this->config->isEnabled() || !$this->config->isOrderFulfillmentEnable()) {
             return false;
         }
 
