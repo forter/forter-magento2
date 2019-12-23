@@ -317,6 +317,22 @@ class Config
     /**
      * @return mixed
      */
+    public function isAccountTouchpointEnabled()
+    {
+        return $this->scopeConfig->getValue('forter/advanced_settings/enabled_account_touchpoint');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function isOrderFulfillmentEnable()
+    {
+        return $this->scopeConfig->getValue('forter/advanced_settings/enabled_order_fulfillment');
+    }
+
+    /**
+     * @return mixed
+     */
     public function getApprovePost()
     {
         return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/approve_post');

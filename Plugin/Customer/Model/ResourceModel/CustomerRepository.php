@@ -3,6 +3,7 @@
 namespace Forter\Forter\Plugin\Customer\Model\ResourceModel;
 
 use Forter\Forter\Model\AbstractApi;
+use Forter\Forter\Model\Config;
 use Forter\Forter\Model\RequestBuilder\BasicInfo as BasicInfoPrepere;
 use Forter\Forter\Model\RequestBuilder\Customer as CustomerPrepere;
 use Magento\Customer\Api\GroupRepositoryInterface;
@@ -65,6 +66,7 @@ class CustomerRepository
         BasicInfoPrepere $basicInfoPrepare,
         CustomerPrepere $customerPrepere,
         AbstractApi $abstractApi,
+        Config $forterConfig,
         GroupRepositoryInterface $groupRepository,
         RemoteAddress $remoteAddress,
         StoreManagerInterface $storeManager
@@ -74,6 +76,7 @@ class CustomerRepository
         $this->state = $state;
         $this->abstractApi = $abstractApi;
         $this->storeManager = $storeManager;
+        $this->forterConfig = $forterConfig;
         $this->groupRepository = $groupRepository;
         $this->remoteAddress = $remoteAddress;
     }
@@ -89,6 +92,10 @@ class CustomerRepository
         CustomerRepositoryOriginal $subject,
         $savedCustomer
     ) {
+        if (!$this->forterConfig->isEnabled() || !$this->forterConfig->isAccountTouchpointEnabled()) {
+            return $savedCustomer;
+        }
+
         $customerGroup = $this->groupRepository->getById($savedCustomer->getGroupId());
         $customerAccountData = $this->customerPrepere->getCustomerAccountData(null, $savedCustomer);
         $areaCode = ($this->state->getAreaCode() == 'frontend' ? 'END_USER' : 'MERCHANT_ADMIN');

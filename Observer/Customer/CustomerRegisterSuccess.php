@@ -61,7 +61,7 @@ class CustomerRegisterSuccess implements ObserverInterface
      */
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
-        if (!$this->forterConfig->isEnabled()) {
+        if (!$this->forterConfig->isEnabled() || !$this->forterConfig->isAccountTouchpointEnabled()) {
             return false;
         }
 

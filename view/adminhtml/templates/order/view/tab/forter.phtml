@@ -13,6 +13,8 @@ $forterResponse = json_decode($forterResponse);
         <span class="title"><?php echo __("Forter Response Details"); ?></span>
     </div>
 </section>
+
+<?php if (isset($forterResponse->status)): ?>
 <section class="admin__page-section">
     <div class="admin__page-section-content">
         <div class="admin__page-section-item-title invoice_item_title">
@@ -23,6 +25,9 @@ $forterResponse = json_decode($forterResponse);
         </div>
     </div>
 </section>
+<?php endif; ?>
+
+<?php if (isset($forterResponse->action)): ?>
 <section class="admin__page-section">
     <div class="admin__page-section-content">
         <div class="admin__page-section-item-title invoice_item_title">
@@ -33,6 +38,9 @@ $forterResponse = json_decode($forterResponse);
         </div>
     </div>
 </section>
+<?php endif; ?>
+
+<?php if (isset($forterResponse->message)): ?>
 <section class="admin__page-section">
     <div class="admin__page-section-content">
         <div class="admin__page-section-item-title invoice_item_title">
@@ -43,6 +51,9 @@ $forterResponse = json_decode($forterResponse);
         </div>
     </div>
 </section>
+<?php endif; ?>
+
+<?php if (isset($forterResponse->reasonCode)): ?>
 <section class="admin__page-section">
     <div class="admin__page-section-content">
         <div class="admin__page-section-item-title invoice_item_title">
@@ -53,3 +64,20 @@ $forterResponse = json_decode($forterResponse);
         </div>
     </div>
 </section>
+<?php endif; ?>
+
+<?php if (isset($forterResponse->errors)): ?>
+<section class="admin__page-section">
+    <div class="admin__page-section-content">
+        <div class="admin__page-section-item-title invoice_item_title">
+            <span class="title"><?php echo __("Forter Errors"); ?></span>
+        </div>
+        <?php foreach ($forterResponse->errors as $element): ?>
+        <div class="admin__page-section-item-content invoice_item_content">
+            <div class=""><strong style="color:red;"><?php echo __("Error Path: "); ?></strong><?php echo stripcslashes(json_encode($element->path)); ?></div>
+            <div class=""><strong style="color:red;"><?php echo __("Error Message: "); ?></strong><?php echo json_encode($element->message); ?></div><br><br>
+        </div>
+        <?php endforeach; ?>
+    </div>
+</section>
+<?php endif; ?>

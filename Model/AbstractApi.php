@@ -63,7 +63,7 @@ class AbstractApi
                 $this->forterConfig->log('Response Header:' . json_encode($this->clientInterface->getHeaders()));
                 $response = json_decode($response);
 
-                if ($response->status == 'success') {
+                if ($response->status) {
                     return json_encode($response);
                 }
 

@@ -83,7 +83,7 @@ class AccountManagement
         $resetToken,
         $newPassword = null
     ) {
-        if (!$this->forterConfig->isEnabled()) {
+        if (!$this->forterConfig->isEnabled() || !$this->forterConfig->isAccountTouchpointEnabled()) {
             return false;
         }
 
@@ -121,7 +121,7 @@ class AccountManagement
         $currentPassword,
         $newPassword
     ) {
-        if (!$this->forterConfig->isEnabled()) {
+        if (!$this->forterConfig->isEnabled()  || !$this->forterConfig->isAccountTouchpointEnabled()) {
             return false;
         }
         $websiteID = $this->storemanager->getStore()->getWebsiteId();
@@ -154,8 +154,9 @@ class AccountManagement
      */
     public function aroundAuthenticate(AccountManagementOriginal $subject, callable $proceed, $username, $password)
     {
-        if (!$this->forterConfig->isEnabled()) {
-            return false;
+        if (!$this->forterConfig->isEnabled()  || !$this->forterConfig->isAccountTouchpointEnabled()) {
+            $result = $proceed($username, $password);
+            return $result;
         }
 
         $websiteID = $this->storemanager->getStore()->getWebsiteId();
