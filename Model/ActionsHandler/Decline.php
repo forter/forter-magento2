@@ -1,6 +1,6 @@
 <?php
 
-namespace Forter\Forter\Model\RequestHandler;
+namespace Forter\Forter\Model\ActionsHandler;
 
 use Forter\Forter\Model\Config as ForterConfig;
 use Magento\Checkout\Model\Session as CheckoutSession;
@@ -12,7 +12,7 @@ use Magento\Sales\Model\Service\CreditmemoService;
 
 /**
  * Class Decline
- * @package Forter\Forter\Model\RequestHandler
+ * @package Forter\Forter\Model\ActionsHandler
  */
 class Decline
 {

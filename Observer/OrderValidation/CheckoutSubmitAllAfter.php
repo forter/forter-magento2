@@ -2,9 +2,9 @@
 
 namespace Forter\Forter\Observer\OrderValidation;
 
+use Forter\Forter\Model\ActionsHandler\Approve;
 use Forter\Forter\Model\Config;
 use Forter\Forter\Model\QueueFactory as ForterQueueFactory;
-use Forter\Forter\Model\RequestHandler\Approve;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magento\Store\Model\StoreManagerInterface;

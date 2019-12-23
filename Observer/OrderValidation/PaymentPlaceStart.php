@@ -3,9 +3,9 @@
 namespace Forter\Forter\Observer\OrderValidation;
 
 use Forter\Forter\Model\AbstractApi;
-use Forter\Forter\Model\AuthRequestBuilder;
+use Forter\Forter\Model\ActionsHandler\Decline;
 use Forter\Forter\Model\Config;
-use Forter\Forter\Model\RequestHandler\Decline;
+use Forter\Forter\Model\RequestBuilder\Order;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Message\ManagerInterface;
@@ -46,9 +46,9 @@ class PaymentPlaceStart implements ObserverInterface
      */
     private $config;
     /**
-     * @var AuthRequestBuilder
+     * @var Order
      */
-    private $authRequestBuilder;
+    private $requestBuilderOrder;
 
     /**
      * PaymentPlaceStart constructor.
@@ -57,7 +57,7 @@ class PaymentPlaceStart implements ObserverInterface
      * @param CheckoutSession $checkoutSession
      * @param AbstractApi $abstractApi
      * @param Config $config
-     * @param AuthRequestBuilder $authRequestBuilder
+     * @param Order $requestBuilderOrder
      * @param Item $modelCartItem
      */
     public function __construct(
@@ -66,7 +66,7 @@ class PaymentPlaceStart implements ObserverInterface
         CheckoutSession $checkoutSession,
         AbstractApi $abstractApi,
         Config $config,
-        AuthRequestBuilder $authRequestBuilder,
+        Order $requestBuilderOrder,
         Item $modelCartItem
     ) {
         $this->decline = $decline;
@@ -75,7 +75,7 @@ class PaymentPlaceStart implements ObserverInterface
         $this->abstractApi = $abstractApi;
         $this->messageManager = $messageManager;
         $this->config = $config;
-        $this->authRequestBuilder = $authRequestBuilder;
+        $this->requestBuilderOrder = $requestBuilderOrder;
     }
 
     /**
@@ -90,7 +90,7 @@ class PaymentPlaceStart implements ObserverInterface
         }
 
         $order = $observer->getEvent()->getPayment()->getOrder();
-        $data = $this->authRequestBuilder->buildTransaction($order);
+        $data = $this->requestBuilderOrder->buildTransaction($order);
 
         try {
             $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();

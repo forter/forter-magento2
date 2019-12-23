@@ -1,6 +1,6 @@
 <?php
 
-namespace Forter\Forter\Model\RequestHandler;
+namespace Forter\Forter\Model\ActionsHandler;
 
 use Exception;
 use Magento\Framework\DB\TransactionFactory;
@@ -13,7 +13,7 @@ use Magento\Sales\Model\Service\InvoiceService;
 
 /**
  * Class Approve
- * @package Forter\Forter\Model\RequestHandler
+ * @package Forter\Forter\Model\ActionsHandler
  */
 class Approve
 {
@@ -51,8 +51,7 @@ class Approve
         TransactionFactory $transactionFactory,
         InvoiceRepositoryInterface $invoiceRepository,
         OrderRepositoryInterface $orderRepository
-    )
-    {
+    ) {
         $this->_invoiceCollectionFactory = $invoiceCollectionFactory;
         $this->_invoiceService = $invoiceService;
         $this->_transactionFactory = $transactionFactory;
