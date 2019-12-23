@@ -7,7 +7,7 @@
 * @package  Forter_Forter
 * @author   Girit-Interactive (https://www.girit-tech.com/)
 */
-namespace Forter\Forter\Model;
+namespace Forter\Forter\Model\RequestBuilder;
 
 use Forter\Forter\Model\Config as ForterConfig;
 use Forter\Forter\Model\RequestBuilder\BasicInfo as BasicInfoPrepere;
@@ -22,10 +22,10 @@ use Magento\Sales\Model\OrderFactory;
 use Magento\Wishlist\Controller\WishlistProviderInterface;
 
 /**
- * Class AuthRequestBuilder
+ * Class Order
  * @package Forter\Forter\Model
  */
-class AuthRequestBuilder
+class Order
 {
     /**
      *
@@ -78,7 +78,7 @@ class AuthRequestBuilder
     private $forterConfig;
 
     /**
-     * AuthRequestBuilder constructor.
+     * Order constructor.
      * @param BasicInfoPrepare $basicInfoPrepare
      * @param CartPrepare  $cartPrepare
      * @param CustomerPrepere $customerPrepere

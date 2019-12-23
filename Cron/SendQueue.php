@@ -3,8 +3,8 @@
 namespace Forter\Forter\Cron;
 
 use Forter\Forter\Model\AbstractApi;
+use Forter\Forter\Model\ActionsHandler\Approve;
 use Forter\Forter\Model\QueueFactory;
-use Forter\Forter\Model\RequestHandler\Approve;
 use Magento\Sales\Api\OrderRepositoryInterface;
 
 class SendQueue
