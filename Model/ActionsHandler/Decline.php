@@ -110,8 +110,7 @@ class Decline
         $this->messageManager->getMessages(true);
         $this->messageManager->addError($this->forterConfig->getPostThanksMsg());
         if ($forterDecision == '1') {
-            $orderID = $order->getId();
-            $result = $this->cancelOrder($order,$orderID);
+            $result = $this->cancelOrder($order);
             if ($result) {
                 return true;
             }
@@ -140,9 +139,9 @@ class Decline
      * @param $orderID
      * @return bool
      */
-    private function cancelOrder($order,$orderID)
+    private function cancelOrder($order)
     {
-        $this->orderManagement->cancel($orderID);
+        $this->orderManagement->cancel($order->getId());
         if ($order->isCanceled()) {
             $this->addCommentToOrder($order, 'Order Cancelled by Forter');
             return true;

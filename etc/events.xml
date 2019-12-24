@@ -18,7 +18,4 @@
     <event name="admin_system_config_changed_section_forter">
       <observer name="admin_system_config_changed_section_forter" instance="Forter\Forter\Observer\ConfigObserver"/>
     </event>
-    <event name="sales_order_place_after">
-        <observer name="sales_order_place_after_observer_forter" instance="Forter\Forter\Observer\OrderValidation\OrderPlaceAfter" />
-    </event>
 </config>
