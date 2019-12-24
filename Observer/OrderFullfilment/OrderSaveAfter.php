@@ -3,6 +3,7 @@
 namespace Forter\Forter\Observer\OrderFullfilment;
 
 use Forter\Forter\Model\AbstractApi;
+use Forter\Forter\Model\ActionsHandler\Decline;
 use Forter\Forter\Model\Config;
 use Magento\Framework\Event\ObserverInterface;
 
@@ -21,15 +22,18 @@ class OrderSaveAfter implements ObserverInterface
 
     /**
      * OrderSaveAfter constructor.
+     * @param AbstractApi $abstractApi
      * @param Config $config
-     * @param  AbstractApi $abstractApi
+     * @param Decline $decline
      */
     public function __construct(
         AbstractApi $abstractApi,
-        Config $config
+        Config $config,
+        Decline $decline
     ) {
         $this->abstractApi = $abstractApi;
         $this->config = $config;
+        $this->decline = $decline;
     }
 
     /**
@@ -44,6 +48,13 @@ class OrderSaveAfter implements ObserverInterface
         }
 
         $order = $observer->getEvent()->getOrder();
+
+        $forterResponse = $order->getForterResponse();
+        $forterResponse = json_decode($forterResponse);
+
+        if ($forterResponse->action == 'decline' && $forterResponse->status == 'success') {
+            $this->decline->handlePostTransactionDescision($order);
+        }
 
         $orderState = $order->getState();
         $orderOrigState = $order->getOrigData('state');

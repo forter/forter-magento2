@@ -79,10 +79,6 @@ class CheckoutSubmitAllAfter implements \Magento\Framework\Event\ObserverInterfa
         $storeId = $this->storeManager->getStore()->getId();
         $currentTime = $this->dateTime->gmtDate();
 
-        if ($forterResponse->action == 'decline' && $forterResponse->status == 'success') {
-            $this->decline->handlePostTransactionDescision($order);
-        }
-
         if ($forterResponse->status == 'success') {
             if ($forterResponse->action == 'approve') {
                 $result = $this->forterConfig->getApprovePost();
