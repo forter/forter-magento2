@@ -83,7 +83,7 @@ class Decline
             throw new PaymentException(__($this->forterConfig->getPreThanksMsg()));
         } elseif ($forterDecision == '2') {
             $this->checkoutSession->destroy();
-            $this->messageManager->addError($this->forterConfig->getPreThanksMsg());
+            $this->messageManager->addErrorMessage($this->forterConfig->getPreThanksMsg());
         }
 
         return $this;
@@ -98,7 +98,7 @@ class Decline
     {
         $forterDecision = $this->forterConfig->getDeclinePost();
         $this->messageManager->getMessages(true);
-        $this->messageManager->addError($this->forterConfig->getPostThanksMsg());
+        $this->messageManager->addErrorMessage($this->forterConfig->getPostThanksMsg());
         if ($forterDecision == '1') {
             $result = $this->cancelOrder($order);
             if ($result) {
