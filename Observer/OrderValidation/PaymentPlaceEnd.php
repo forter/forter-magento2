@@ -103,5 +103,8 @@ class PaymentPlaceEnd implements ObserverInterface
 
         $order->setForterStatus($response->action);
 
+        if ($response->action == 'decline' && $response->status == 'success') {
+            $this->decline->handlePostTransactionDescision($order);
+        }
     }
 }
