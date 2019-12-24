@@ -3,6 +3,7 @@
 namespace Forter\Forter\Observer\OrderValidation;
 
 use Forter\Forter\Model\ActionsHandler\Approve;
+use Forter\Forter\Model\ActionsHandler\Decline;
 use Forter\Forter\Model\Config;
 use Forter\Forter\Model\QueueFactory as ForterQueueFactory;
 use Magento\Framework\Event\Observer;
