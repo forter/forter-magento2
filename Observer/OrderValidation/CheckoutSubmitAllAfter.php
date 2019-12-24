@@ -3,6 +3,7 @@
 namespace Forter\Forter\Observer\OrderValidation;
 
 use Forter\Forter\Model\ActionsHandler\Approve;
+use Forter\Forter\Model\ActionsHandler\Decline;
 use Forter\Forter\Model\Config;
 use Forter\Forter\Model\QueueFactory as ForterQueueFactory;
 use Magento\Framework\Event\Observer;
@@ -19,6 +20,10 @@ class CheckoutSubmitAllAfter implements \Magento\Framework\Event\ObserverInterfa
      * @var StoreManagerInterface
      */
     private $storeManager;
+    /**
+     * @var Decline
+     */
+    private $decline;
     /**
      * @var Approve
      */
@@ -45,12 +50,14 @@ class CheckoutSubmitAllAfter implements \Magento\Framework\Event\ObserverInterfa
      * @param StoreManagerInterface $storeManager
      */
     public function __construct(
+        Decline $decline,
         ForterQueueFactory $queue,
         Approve $approve,
         Config $forterConfig,
         DateTime $dateTime,
         StoreManagerInterface $storeManager
     ) {
+        $this->decline = $decline;
         $this->storeManager = $storeManager;
         $this->approve = $approve;
         $this->forterConfig = $forterConfig;
@@ -67,7 +74,7 @@ class CheckoutSubmitAllAfter implements \Magento\Framework\Event\ObserverInterfa
      */
     public function execute(Observer $observer)
     {
-        if (!$this->forterConfig->isEnabled()) {
+        if (!$this->forterConfig->isEnabled() || !$this->forterConfig->getIsPost()) {
             return false;
         }
 
@@ -83,6 +90,8 @@ class CheckoutSubmitAllAfter implements \Magento\Framework\Event\ObserverInterfa
                 $result = $this->forterConfig->getApprovePost();
             } elseif ($forterResponse->action == "not reviewed") {
                 $result = $this->forterConfig->getNotReviewPost();
+            } elseif ($forterResponse->action == "decline") {
+                return $this->decline->handlePostTransactionDescision($order);
             } else {
                 return false;
             }
