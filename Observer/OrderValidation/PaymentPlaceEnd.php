@@ -8,6 +8,7 @@ use Forter\Forter\Model\ActionsHandler\Decline;
 use Forter\Forter\Model\Config;
 use Forter\Forter\Model\RequestBuilder\Order;
 use Magento\Framework\Event\ObserverInterface;
+use Magento\Sales\Api\OrderManagementInterface;
 
 /**
  * Class PaymentPlaceEnd
@@ -39,6 +40,10 @@ class PaymentPlaceEnd implements ObserverInterface
      * @var Order
      */
     private $requestBuilderOrder;
+    /**
+     * @var OrderManagementInterface
+     */
+    private $orderManagement;
 
     /**
      * PaymentPlaceEnd constructor.
@@ -47,19 +52,22 @@ class PaymentPlaceEnd implements ObserverInterface
      * @param AbstractApi $abstractApi
      * @param Config $config
      * @param Order $requestBuilderOrder
+     * @param OrderManagementInterface $orderManagement
      */
     public function __construct(
         Decline $decline,
         Approve $approve,
         AbstractApi $abstractApi,
         Config $config,
-        Order $requestBuilderOrder
+        Order $requestBuilderOrder,
+        OrderManagementInterface $orderManagement
     ) {
         $this->decline = $decline;
         $this->approve = $approve;
         $this->abstractApi = $abstractApi;
         $this->config = $config;
         $this->requestBuilderOrder = $requestBuilderOrder;
+        $this->orderManagement = $orderManagement;
     }
 
     /**
@@ -94,6 +102,7 @@ class PaymentPlaceEnd implements ObserverInterface
         }
 
         $order->setForterStatus($response->action);
+
         if ($response->action == 'decline' && $response->status == 'success') {
             $this->decline->handlePostTransactionDescision($order);
         }

@@ -9,7 +9,6 @@ use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\CreditmemoFactory;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Service\CreditmemoService;
-use Magento\Sales\Api\OrderManagementInterface;
 
 /**
  * Class Decline
@@ -47,11 +46,6 @@ class Decline
     private $invoice;
 
     /**
-     * @var OrderManagementInterface
-     */
-    private $orderManagement;
-
-    /**
      * Decline constructor.
      * @param ManagerInterface $messageManager
      * @param Order $order
@@ -60,7 +54,6 @@ class Decline
      * @param CheckoutSession $checkoutSession
      * @param Invoice $invoice
      * @param CreditmemoService $creditmemoService
-     * @param OrderManagementInterface $orderManagement
      */
     public function __construct(
         ManagerInterface $messageManager,
@@ -69,8 +62,7 @@ class Decline
         ForterConfig $forterConfig,
         CheckoutSession $checkoutSession,
         Invoice $invoice,
-        CreditmemoService $creditmemoService,
-        OrderManagementInterface $orderManagement
+        CreditmemoService $creditmemoService
     ) {
         $this->checkoutSession = $checkoutSession;
         $this->order = $order;
@@ -79,8 +71,6 @@ class Decline
         $this->creditmemoFactory = $creditmemoFactory;
         $this->creditmemoService = $creditmemoService;
         $this->invoice = $invoice;
-        $this->orderManagement = $orderManagement;
-
     }
 
     /**
@@ -136,16 +126,16 @@ class Decline
 
     /**
      * @param $order
-     * @param $orderID
      * @return bool
      */
     private function cancelOrder($order)
     {
-        $this->orderManagement->cancel($order->getId());
+        $order->cancel()->save();
         if ($order->isCanceled()) {
             $this->addCommentToOrder($order, 'Order Cancelled by Forter');
             return true;
         }
+
         $this->addCommentToOrder($order, 'Order Cancellation attempt failed by Forter');
         return false;
     }
