@@ -45,7 +45,7 @@ class OrderSaveAfter implements ObserverInterface
         }
 
         $order = $observer->getEvent()->getOrder();
-        $order->cancel()->save();
+
         $forterResponse = $order->getForterResponse();
         $forterResponse = json_decode($forterResponse);
 
