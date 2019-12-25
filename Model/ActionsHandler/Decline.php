@@ -103,19 +103,15 @@ class Decline
         $this->messageManager->getMessages(true);
         $this->messageManager->addErrorMessage($this->forterConfig->getPostThanksMsg());
         if ($forterDecision == '1') {
-            $result = $this->cancelOrder($order);
-            if ($result) {
-                return true;
+            if ($order->canCancel()) {
+                $this->cancelOrder($order);
+            }
+            if ($order->getPayment()->canRefund()) {
+                $this->createCreditMemo($order);
             }
 
-            $result = $this->createCreditMemo($order);
-            if ($result) {
-                return true;
-            }
-
-            $result = $this->holdOrder($order);
-            if ($result) {
-                return true;
+            if ($order->canHold()) {
+                $result = $this->holdOrder($order);
             }
         } elseif ($forterDecision == '2') {
             $orderState = Order::STATE_PAYMENT_REVIEW;
