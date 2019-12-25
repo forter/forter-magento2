@@ -130,7 +130,7 @@ class Decline
      */
     private function cancelOrder($order)
     {
-        $order->cancel()->save();
+        return false;
         if ($order->isCanceled()) {
             $this->addCommentToOrder($order, 'Order Cancelled by Forter');
             return true;
