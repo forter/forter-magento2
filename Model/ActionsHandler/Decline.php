@@ -158,7 +158,9 @@ class Decline
         $invoiceobj = $this->invoice->loadByIncrementId($invoiceincrementid);
         $creditmemo = $this->creditmemoFactory->createByOrder($order);
 
-        $creditmemo->setInvoice();
+        if ($invoiceobj || isset($invoiceobj)) {
+            $creditmemo->setInvoice($invoiceobj);
+        }
 
         $this->creditmemoService->refund($creditmemo);
         $totalRefunded = $order->getTotalRefunded();
