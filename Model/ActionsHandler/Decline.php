@@ -5,7 +5,6 @@ namespace Forter\Forter\Model\ActionsHandler;
 use Forter\Forter\Model\Config as ForterConfig;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\Message\ManagerInterface;
-use Magento\Sales\Api\OrderManagementInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\CreditmemoFactory;
 use Magento\Sales\Model\Order\Invoice;
@@ -63,10 +62,8 @@ class Decline
         ForterConfig $forterConfig,
         CheckoutSession $checkoutSession,
         Invoice $invoice,
-        CreditmemoService $creditmemoService,
-        OrderManagementInterface $orderManagement
+        CreditmemoService $creditmemoService
     ) {
-        $this->orderManagement = $orderManagement;
         $this->checkoutSession = $checkoutSession;
         $this->order = $order;
         $this->messageManager = $messageManager;
@@ -133,7 +130,7 @@ class Decline
      */
     private function cancelOrder($order)
     {
-        $this->orderManagement->cancel($order->getEntityId());
+        $order->cancel()->save();
         if ($order->isCanceled()) {
             $this->addCommentToOrder($order, 'Order Cancelled by Forter');
             return true;
