@@ -104,7 +104,7 @@ class Decline
         $this->messageManager->addErrorMessage($this->forterConfig->getPostThanksMsg());
         if ($forterDecision == '1') {
             if ($order->canCancel()) {
-                $order->getPayment()->void(new \Magento\Framework\DataObject());
+                $order->cancel()->save();
             }
             if ($order->getPayment()->canRefund()) {
                 $this->createCreditMemo($order);
