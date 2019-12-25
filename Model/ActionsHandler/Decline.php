@@ -149,16 +149,16 @@ class Decline
         $invoices = $order->getInvoiceCollection();
         foreach ($invoices as $invoice) {
             $invoiceincrementid = $invoice->getIncrementId();
+            $invoiceobj = $this->invoice->loadByIncrementId($invoiceincrementid);
+            $creditmemo = $this->creditmemoFactory->createByOrder($order);
+
+            if ($invoiceobj || isset($invoiceobj)) {
+                $creditmemo->setInvoice($invoiceobj);
+            }
+
+            $this->creditmemoService->refund($creditmemo);
         }
 
-        $invoiceobj = $this->invoice->loadByIncrementId($invoiceincrementid);
-        $creditmemo = $this->creditmemoFactory->createByOrder($order);
-
-        if ($invoiceobj || isset($invoiceobj)) {
-            $creditmemo->setInvoice($invoiceobj);
-        }
-
-        $this->creditmemoService->refund($creditmemo);
         $totalRefunded = $order->getTotalRefunded();
 
         if ($totalRefunded > 0) {
