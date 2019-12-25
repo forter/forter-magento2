@@ -54,7 +54,7 @@ class OrderSaveAfter implements ObserverInterface
 
         if ($this->config->getIsPost()) {
             if ($forterResponse->action == "decline") {
-                return $this->decline->handlePostTransactionDescision($order);
+                $this->decline->handlePostTransactionDescision($order);
             }
         }
 
