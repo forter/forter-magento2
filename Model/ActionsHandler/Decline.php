@@ -5,6 +5,7 @@ namespace Forter\Forter\Model\ActionsHandler;
 use Forter\Forter\Model\Config as ForterConfig;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\Message\ManagerInterface;
+use Magento\Sales\Api\OrderManagementInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\CreditmemoFactory;
 use Magento\Sales\Model\Order\Invoice;
@@ -62,8 +63,10 @@ class Decline
         ForterConfig $forterConfig,
         CheckoutSession $checkoutSession,
         Invoice $invoice,
-        CreditmemoService $creditmemoService
+        CreditmemoService $creditmemoService,
+        OrderManagementInterface $orderManagement
     ) {
+        $this->orderManagement = $orderManagement;
         $this->checkoutSession = $checkoutSession;
         $this->order = $order;
         $this->messageManager = $messageManager;
@@ -100,19 +103,15 @@ class Decline
         $this->messageManager->getMessages(true);
         $this->messageManager->addErrorMessage($this->forterConfig->getPostThanksMsg());
         if ($forterDecision == '1') {
-            $result = $this->cancelOrder($order);
-            if ($result) {
-                return true;
+            if ($order->canCancel()) {
+                $this->cancelOrder($order);
+            }
+            if ($order->getPayment()->canRefund()) {
+                $this->createCreditMemo($order);
             }
 
-            $result = $this->createCreditMemo($order);
-            if ($result) {
-                return true;
-            }
-
-            $result = $this->holdOrder($order);
-            if ($result) {
-                return true;
+            if ($order->canHold()) {
+                $result = $this->holdOrder($order);
             }
         } elseif ($forterDecision == '2') {
             $orderState = Order::STATE_PAYMENT_REVIEW;
@@ -130,7 +129,7 @@ class Decline
      */
     private function cancelOrder($order)
     {
-        return false;
+        $this->orderManagement->cancel($order->getEntityId());
         if ($order->isCanceled()) {
             $this->addCommentToOrder($order, 'Order Cancelled by Forter');
             return true;
