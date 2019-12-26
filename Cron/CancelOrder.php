@@ -40,6 +40,12 @@ class CancelOrder
         foreach ($orderCollection as $order) {
             $order->unhold()->save();
             $this->decline->handlePostTransactionDescision($order);
+            $state = $order->getState();
+            if ($state != 'complete' || $state != 'closed' || $state != 'canceled') {
+                if ($order->canHold()) {
+                    $order->hold()->save();
+                }
+            }
         }
     }
 }

@@ -147,6 +147,7 @@ class Decline
     private function createCreditMemo($order)
     {
         $invoices = $order->getInvoiceCollection();
+        $payment = $order->getPayment();
         foreach ($invoices as $invoice) {
             $invoiceincrementid = $invoice->getIncrementId();
             $invoiceobj = $this->invoice->loadByIncrementId($invoiceincrementid);
