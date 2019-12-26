@@ -94,9 +94,9 @@ class PaymentPlaceEnd implements ObserverInterface
         }
 
         $order->setForterResponse($response);
-        $response = json_decode($response);
+        $forterResponse = json_decode($response);
 
-        if ($response->status == 'failed') {
+        if ($forterResponse->status == 'failed') {
             $order->setForterStatus('not reviewed');
             return true;
         } elseif ($forterResponse->action == "decline") {
