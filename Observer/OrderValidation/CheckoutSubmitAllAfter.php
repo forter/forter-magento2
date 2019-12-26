@@ -90,10 +90,6 @@ class CheckoutSubmitAllAfter implements \Magento\Framework\Event\ObserverInterfa
                 $result = $this->forterConfig->getApprovePost();
             } elseif ($forterResponse->action == "not reviewed") {
                 $result = $this->forterConfig->getNotReviewPost();
-            } elseif ($forterResponse->action == "decline") {
-                if ($order->canHold()) {
-                    return $this->decline->holdOrder($order);
-                }
             } else {
                 return false;
             }
