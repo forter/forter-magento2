@@ -1,11 +1,10 @@
 <?php
 
-
 namespace Forter\Forter\Cron;
 
 use Forter\Forter\Model\ActionsHandler\Decline;
-use Magento\Sales\Model\Order;
 use Magento\Sales\Api\OrderRepositoryInterface;
+use Magento\Sales\Model\Order;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollection;
 
 class CancelOrder
@@ -27,8 +26,7 @@ class CancelOrder
         OrderRepositoryInterface $orderRepository,
         OrderCollection $orderCollection,
         Decline $decline
-    )
-    {
+    ) {
         $this->orderRepository = $orderRepository;
         $this->orderCollection = $orderCollection;
         $this->decline = $decline;
@@ -41,7 +39,6 @@ class CancelOrder
             ->addFieldToFilter('status', ['in' => [Order::STATE_HOLDED]]);
         foreach ($orderCollection as $order) {
             $order->unhold()->save();
-            $order->cancel()->save();
             $this->decline->handlePostTransactionDescision($order);
         }
     }
