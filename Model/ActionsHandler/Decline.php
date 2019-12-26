@@ -174,7 +174,7 @@ class Decline
      * @param $order
      * @return bool
      */
-    private function holdOrder($order)
+    public function holdOrder($order)
     {
         $orderState = Order::STATE_HOLDED;
         $order->setState($orderState)->setStatus(Order::STATE_HOLDED);
