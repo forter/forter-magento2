@@ -61,7 +61,8 @@ class PaymentPlaceEnd implements ObserverInterface
         Config $config,
         Order $requestBuilderOrder,
         OrderManagementInterface $orderManagement
-    ) {
+    )
+    {
         $this->decline = $decline;
         $this->approve = $approve;
         $this->abstractApi = $abstractApi;
@@ -101,8 +102,34 @@ class PaymentPlaceEnd implements ObserverInterface
             return true;
         }
 
-        if ($order->canHold()) {
-            return $this->decline->holdOrder($order);
+        if ($forterResponse->action == "decline") {
+            if ($order->canHold()) {
+                $order->hold()->save();
+                $order->addStatusHistoryComment("Order Has been holded by Forter")
+                    ->setIsCustomerNotified(false)
+                    ->setEntityName('order')
+                    ->save();
+                return true;
+            }
+        } elseif ($forterResponse->action == 'approve') {
+            $result = $this->forterConfig->getApprovePost();
+        } elseif ($forterResponse->action == "not reviewed") {
+            $result = $this->forterConfig->getNotReviewPost();
+        }
+
+        $storeId = $this->storeManager->getStore()->getId();
+        $currentTime = $this->dateTime->gmtDate();
+
+        if ($result == '1') {
+            $this->queue->create()
+                ->setStoreId($storeId)
+                ->setEntityType('approve_order')
+                ->setEntityId($order->getId())
+                ->setEntityBody('approve')
+                ->setSyncDate($currentTime)
+                ->save();
+        } else {
+            return false;
         }
 
         return false;

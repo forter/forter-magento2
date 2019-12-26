@@ -7,6 +7,10 @@ use Forter\Forter\Model\ActionsHandler\Approve;
 use Forter\Forter\Model\QueueFactory;
 use Magento\Sales\Api\OrderRepositoryInterface;
 
+/**
+ * Class SendQueue
+ * @package Forter\Forter\Cron
+ */
 class SendQueue
 {
 
@@ -19,7 +23,6 @@ class SendQueue
         OrderRepositoryInterface $orderRepository,
         QueueFactory $forterQueue
     ) {
-        $this->abstractApi = $abstractApi;
         $this->approve = $approve;
         $this->forterQueue = $forterQueue;
         $this->orderRepository = $orderRepository;
@@ -28,6 +31,7 @@ class SendQueue
     /**
      * Send to forter items in Queue
      * @return boolval
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function execute()
     {
