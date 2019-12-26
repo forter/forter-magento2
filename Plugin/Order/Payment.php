@@ -1,11 +1,10 @@
 <?php
 
-
 namespace Forter\Forter\Plugin\Order;
 
-use Magento\Sales\Model\Order\Payment as MagentoPayment;
 use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\RequestBuilder\Order;
+use Magento\Sales\Model\Order\Payment as MagentoPayment;
 
 /**
  * Class Payment
@@ -52,7 +51,7 @@ class Payment
             $data = $this->requestBuilderOrder->buildTransaction($order);
             $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
             $this->abstractApi->sendApiRequest($url, json_encode($data));
-            throw new \Exception($e->getMessage());
+            throw $e;
         }
         return $result;
     }
