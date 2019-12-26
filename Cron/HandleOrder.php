@@ -7,7 +7,7 @@ use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollection;
 
-class CancelOrder
+class HandleOrder
 {
     /**
      * @var OrderRepositoryInterface
@@ -39,11 +39,25 @@ class CancelOrder
             ->addFieldToFilter('status', ['in' => [Order::STATE_HOLDED]]);
         foreach ($orderCollection as $order) {
             $order->unhold()->save();
-            $this->decline->handlePostTransactionDescision($order);
-            $state = $order->getState();
-            if ($state != 'complete' || $state != 'closed' || $state != 'canceled') {
-                if ($order->canHold()) {
-                    $order->hold()->save();
+
+            $forterResponse = $order->getForterResponse();
+            $forterResponse = json_decode($forterResponse);
+
+            if ($forterResponse->status == 'success') {
+                if ($forterResponse->action == 'approve') {
+                    $result = $this->forterConfig->getApprovePost();
+                } elseif ($forterResponse->action == "not reviewed") {
+                    $result = $this->forterConfig->getNotReviewPost();
+                } elseif ($forterResponse->action == "decline") {
+                    return $this->decline->handlePostTransactionDescision($order);
+                } else {
+                    return false;
+                }
+
+                if ($result == '1') {
+                    $this->approve->handleApproveImmediatly($order);
+                } else {
+                    return false;
                 }
             }
         }

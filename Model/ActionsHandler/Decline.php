@@ -109,15 +109,12 @@ class Decline
             if ($order->getPayment()->canRefund()) {
                 $this->createCreditMemo($order);
             }
-
-            if ($order->canHold()) {
+            $state = $order->getState();
+            if ($state != 'closed' ||  $state != 'canceled' || $state != 'complete') {
                 $result = $this->holdOrder($order);
             }
         } elseif ($forterDecision == '2') {
-            $orderState = Order::STATE_PAYMENT_REVIEW;
-            $order->setState($orderState)->setStatus(Order::STATE_PAYMENT_REVIEW);
-            $order->save();
-            $this->addCommentToOrder($order, 'Order Has been marked for Payment Review by Forter');
+            $this->markOrderPaymentReview($order);
         }
 
         return $this;
@@ -153,16 +150,15 @@ class Decline
             $creditmemo = $this->creditmemoFactory->createByOrder($order);
 
             if ($invoiceobj || isset($invoiceobj)) {
-                $refundResult = $this->createRefund($invoiceobj);
-                if (!$refundResult) {
-                    $refundResult = $this->createRefund(null);
-                }
+                $creditmemo->setInvoice($invoiceobj);
+                $this->creditmemoService->refund($creditmemo);
+                $totalRefunded = $order->getTotalRefunded();
             }
-        }
 
-        if ($order->getTotalRefunded() > 0) {
-            $this->addCommentToOrder($order, 'Order Refunded by Forter');
-            return true;
+            if ($totalRefunded > 0) {
+                $this->addCommentToOrder($order, 'Order Refunded by Forter');
+                return true;
+            }
         }
 
         $this->addCommentToOrder($order, 'Order Refund attempt failed by Forter');
@@ -195,15 +191,12 @@ class Decline
           ->save();
     }
 
-    private function createRefund($invoiceobj)
+    private function markOrderPaymentReview($order)
     {
-        $creditmemo->setInvoice($invoiceobj);
-        $this->creditmemoService->refund($creditmemo);
-        $totalRefunded = $order->getTotalRefunded();
-        if ($totalRefunded > 0) {
-            return true;
-        }
-
-        return false;
+        $orderState = Order::STATE_PAYMENT_REVIEW;
+        $order->setState($orderState)->setStatus(Order::STATE_PAYMENT_REVIEW);
+        $order->setStatus('Suspected Fraud');
+        $order->save();
+        $this->addCommentToOrder($order, 'Order Has been marked for Payment Review by Forter');
     }
 }
