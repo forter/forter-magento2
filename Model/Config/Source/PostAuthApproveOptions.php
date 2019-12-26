@@ -15,8 +15,7 @@ class PostAuthApproveOptions implements \Magento\Framework\Option\ArrayInterface
     {
         return [
             ['value' => '1', 'label' => __('Create Invoice and Capture Payments (CRON)')],
-            ['value' => '2', 'label' => __('Create Invoice and Capture Payments (IMMEDIATELY)')],
-            ['value' => '3', 'label' => __('Do Nothing')]
+            ['value' => '2', 'label' => __('Do Nothing')]
         ];
     }
 }

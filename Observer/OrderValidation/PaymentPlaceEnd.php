@@ -87,24 +87,24 @@ class PaymentPlaceEnd implements ObserverInterface
 
         try {
             $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
-            $response = $this->abstractApi->sendApiRequest($url, json_encode($data));
+            $forterResponse = $this->abstractApi->sendApiRequest($url, json_encode($data));
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
             throw new \Exception($e->getMessage());
         }
 
-        $order->setForterResponse($response);
-        $forterResponse = json_decode($response);
-
+        $order->setForterResponse($forterResponse);
+        $forterResponse = json_decode($forterResponse);
+        $order->setForterStatus($forterResponse->action);
         if ($forterResponse->status == 'failed') {
             $order->setForterStatus('not reviewed');
             return true;
-        } elseif ($forterResponse->action == "decline") {
-            if ($order->canHold()) {
-                return $this->decline->holdOrder($order);
-            }
         }
 
-        $order->setForterStatus($response->action);
+        if ($order->canHold()) {
+            return $this->decline->holdOrder($order);
+        }
+
+        return false;
     }
 }

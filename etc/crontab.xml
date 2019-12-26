@@ -5,7 +5,7 @@
         <job name="send_queue" instance="Forter\Forter\Cron\SendQueue" method="execute">
             <schedule>* * * * *</schedule>
         </job>
-        <job name="cancel_order" instance="Forter\Forter\Cron\CancelOrder" method="execute">
+        <job name="handle_order" instance="Forter\Forter\Cron\HandleOrder" method="execute">
             <schedule>* * * * *</schedule>
         </job>
     </group>
