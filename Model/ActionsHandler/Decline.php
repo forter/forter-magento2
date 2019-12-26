@@ -153,15 +153,14 @@ class Decline
             $creditmemo = $this->creditmemoFactory->createByOrder($order);
 
             if ($invoiceobj || isset($invoiceobj)) {
-                $creditmemo->setInvoice($invoiceobj);
+                $refundResult = $this->createRefund($invoiceobj);
+                if (!$refundResult) {
+                    $refundResult = $this->createRefund(null);
+                }
             }
-
-            $this->creditmemoService->refund($creditmemo);
         }
 
-        $totalRefunded = $order->getTotalRefunded();
-
-        if ($totalRefunded > 0) {
+        if ($order->getTotalRefunded() > 0) {
             $this->addCommentToOrder($order, 'Order Refunded by Forter');
             return true;
         }
@@ -194,5 +193,17 @@ class Decline
           ->setIsCustomerNotified(false)
           ->setEntityName('order')
           ->save();
+    }
+
+    private function createRefund($invoiceobj)
+    {
+        $creditmemo->setInvoice($invoiceobj);
+        $this->creditmemoService->refund($creditmemo);
+        $totalRefunded = $order->getTotalRefunded();
+        if ($totalRefunded > 0) {
+            return true;
+        }
+
+        return false;
     }
 }
