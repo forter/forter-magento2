@@ -141,7 +141,6 @@ class PaymentPlaceEnd implements ObserverInterface
                 if ($order->canHold()) {
                     $this->decline->holdOrder($order);
                     $type = 'decline';
-                    $orderId = $order->getId();
                 }
             } elseif ($result == '2') {
                 $this->decline->markOrderPaymentReview($order);
@@ -153,7 +152,6 @@ class PaymentPlaceEnd implements ObserverInterface
             $result = $this->forterConfig->getApprovePost();
             if ($result == '1') {
                 $type = 'approve';
-                $orderId = $order->getIncrementId();
             } else {
                 return true;
             }
@@ -161,7 +159,6 @@ class PaymentPlaceEnd implements ObserverInterface
             $result = $this->forterConfig->getNotReviewPost();
             if ($result == '1') {
                 $type = 'approve';
-                $orderId = $order->getIncrementId();
             } else {
                 return true;
             }
@@ -169,12 +166,12 @@ class PaymentPlaceEnd implements ObserverInterface
 
         $storeId = $order->getStore()->getId();
         $currentTime = $this->dateTime->gmtDate();
-
+        $order->save();
         if ($type) {
             $this->queue->create()
                   ->setStoreId($storeId)
                   ->setEntityType('order')
-                  ->setEntityId($orderId)
+                  ->setEntityId($order->getId())
                   ->setEntityBody($type)
                   ->setSyncDate($currentTime)
                   ->save();
