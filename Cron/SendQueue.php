@@ -7,6 +7,7 @@ use Forter\Forter\Model\ActionsHandler\Approve;
 use Forter\Forter\Model\ActionsHandler\Decline;
 use Forter\Forter\Model\QueueFactory;
 use Magento\Sales\Api\OrderRepositoryInterface;
+use Magento\Sales\Model\Order;
 
 /**
  * Class SendQueue
@@ -27,12 +28,14 @@ class SendQueue
         Approve $approve,
         Decline $decline,
         QueueFactory $forterQueue,
+        Order $order,
         OrderRepositoryInterface $orderRepository
     ) {
+        $this->orderRepository = $orderRepository;
         $this->approve = $approve;
         $this->decline = $decline;
         $this->forterQueue = $forterQueue;
-        $this->orderRepository = $orderRepository;
+        $this->order = $order;
     }
 
     /**
@@ -51,13 +54,14 @@ class SendQueue
        ->setPageSize(3)->setCurPage(1);
 
         foreach ($items as $item) {
-            $order = $this->orderRepository->get($item->getData('entity_id'));
-            if ($order->canUnhold()) {
-                $order->unhold()->save();
-            }
             if ($item->getData('entity_body') == 'approve') {
+                $order = $this->order->loadByIncrementId($item->getData('entity_id'));
                 $this->approve->handleApproveImmediatly($order);
             } elseif ($item->getData('entity_body') == 'decline') {
+                $order = $this->orderRepository->get($item->getData('entity_id'));
+                if ($order->canUnhold()) {
+                    $order->unhold()->save();
+                }
                 $this->decline->handlePostTransactionDescision($order);
             }
 
