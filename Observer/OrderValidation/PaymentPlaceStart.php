@@ -107,6 +107,8 @@ class PaymentPlaceStart implements ObserverInterface
         }
 
         if ($response->action == 'decline' && $response->status == 'success') {
+            $this->messageManager->getMessages(true);
+            $this->messageManager->addErrorMessage($this->config->getPostThanksMsg());
             $this->decline->handlePreTransactionDescision();
         }
 

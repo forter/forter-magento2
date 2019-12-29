@@ -43,8 +43,7 @@ class ModuleVersion extends Field
         Context $context,
         ForterConfig $forterConfig,
         array $data = []
-    )
-    {
+    ) {
         $this->forterConfig = $forterConfig;
         parent::__construct($context, $data);
     }
