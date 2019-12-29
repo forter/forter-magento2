@@ -7,7 +7,6 @@ use Forter\Forter\Model\ActionsHandler\Approve;
 use Forter\Forter\Model\ActionsHandler\Decline;
 use Forter\Forter\Model\QueueFactory;
 use Magento\Sales\Api\OrderRepositoryInterface;
-use Magento\Sales\Model\Order;
 
 /**
  * Class SendQueue
@@ -27,7 +26,6 @@ class SendQueue
     public function __construct(
         Approve $approve,
         Decline $decline,
-        Order $order,
         QueueFactory $forterQueue,
         OrderRepositoryInterface $orderRepository
     ) {
