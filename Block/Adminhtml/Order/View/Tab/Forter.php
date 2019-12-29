@@ -33,8 +33,7 @@ class Forter extends \Magento\Sales\Block\Adminhtml\Order\AbstractOrder implemen
         OrderInterface $orderInterface,
         Admin $adminHelper,
         array $data = []
-    )
-    {
+    ) {
         $this->orderInterface = $orderInterface;
         parent::__construct($context, $registry, $adminHelper, $data);
     }

@@ -4,8 +4,10 @@ namespace Forter\Forter\Cron;
 
 use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\ActionsHandler\Approve;
+use Forter\Forter\Model\ActionsHandler\Decline;
 use Forter\Forter\Model\QueueFactory;
 use Magento\Sales\Api\OrderRepositoryInterface;
+use Magento\Sales\Model\Order;
 
 /**
  * Class SendQueue
@@ -13,6 +15,10 @@ use Magento\Sales\Api\OrderRepositoryInterface;
  */
 class SendQueue
 {
+    /**
+     * @var Decline
+     */
+    private $decline;
 
     /**
      * @param  AbstractApi     $abstractApi
@@ -20,10 +26,13 @@ class SendQueue
      */
     public function __construct(
         Approve $approve,
-        OrderRepositoryInterface $orderRepository,
-        QueueFactory $forterQueue
+        Decline $decline,
+        Order $order,
+        QueueFactory $forterQueue,
+        OrderRepositoryInterface $orderRepository
     ) {
         $this->approve = $approve;
+        $this->decline = $decline;
         $this->forterQueue = $forterQueue;
         $this->orderRepository = $orderRepository;
     }
@@ -36,16 +45,24 @@ class SendQueue
     public function execute()
     {
         $items = $this->forterQueue
-          ->create()
-          ->getCollection()
-          ->addFieldToFilter('sync_flag', '0');
+        ->create()
+        ->getCollection()
+        ->addFieldToFilter('sync_flag', '0');
 
         $items
        ->setPageSize(3)->setCurPage(1);
 
         foreach ($items as $item) {
             $order = $this->orderRepository->get($item->getData('entity_id'));
-            $this->approve->handleApproveImmediatly($order);
+            if ($order->canUnhold()) {
+                $order->unhold()->save();
+            }
+            if ($item->getData('entity_body') == 'approve') {
+                $this->approve->handleApproveImmediatly($order);
+            } elseif ($item->getData('entity_body') == 'decline') {
+                $this->decline->handlePostTransactionDescision($order);
+            }
+
             $item->setSyncFlag('1');
             $item->save();
         }

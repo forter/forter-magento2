@@ -4,7 +4,6 @@ namespace Forter\Forter\Model\ActionsHandler;
 
 use Forter\Forter\Model\Config as ForterConfig;
 use Magento\Checkout\Model\Session as CheckoutSession;
-use Magento\Framework\Message\ManagerInterface;
 use Magento\Sales\Api\OrderManagementInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\CreditmemoFactory;
@@ -26,10 +25,6 @@ class Decline
      */
     private $order;
     /**
-     * @var ManagerInterface
-     */
-    private $messageManager;
-    /**
      * @var ForterConfig
      */
     private $forterConfig;
@@ -48,7 +43,6 @@ class Decline
 
     /**
      * Decline constructor.
-     * @param ManagerInterface $messageManager
      * @param Order $order
      * @param CreditmemoFactory $creditmemoFactory
      * @param ForterConfig $forterConfig
@@ -57,7 +51,6 @@ class Decline
      * @param CreditmemoService $creditmemoService
      */
     public function __construct(
-        ManagerInterface $messageManager,
         Order $order,
         CreditmemoFactory $creditmemoFactory,
         ForterConfig $forterConfig,
@@ -69,7 +62,6 @@ class Decline
         $this->orderManagement = $orderManagement;
         $this->checkoutSession = $checkoutSession;
         $this->order = $order;
-        $this->messageManager = $messageManager;
         $this->forterConfig = $forterConfig;
         $this->creditmemoFactory = $creditmemoFactory;
         $this->creditmemoService = $creditmemoService;
@@ -86,7 +78,6 @@ class Decline
             throw new PaymentException(__($this->forterConfig->getPreThanksMsg()));
         } elseif ($forterDecision == '2') {
             $this->checkoutSession->destroy();
-            $this->messageManager->addErrorMessage($this->forterConfig->getPreThanksMsg());
         }
 
         return $this;
@@ -99,22 +90,17 @@ class Decline
      */
     public function handlePostTransactionDescision($order)
     {
-        $forterDecision = $this->forterConfig->getDeclinePost();
-        $this->messageManager->getMessages(true);
-        $this->messageManager->addErrorMessage($this->forterConfig->getPostThanksMsg());
-        if ($forterDecision == '1') {
-            if ($order->canCancel()) {
-                $order->cancel()->save();
-            }
-            if ($order->getPayment()->canRefund()) {
-                $this->createCreditMemo($order);
-            }
-            $state = $order->getState();
-            if ($state != 'closed' ||  $state != 'canceled' || $state != 'complete') {
-                $result = $this->holdOrder($order);
-            }
-        } elseif ($forterDecision == '2') {
-            $this->markOrderPaymentReview($order);
+        if ($order->canCancel()) {
+            $order->cancel()->save();
+        }
+
+        if ($order->canCreditmemo()) {
+            $this->createCreditMemo($order);
+        }
+
+        $state = $order->getState();
+        if ($state != 'closed' &&  $state != 'canceled' && $state != 'complete') {
+            $result = $this->holdOrder($order);
         }
 
         return $this;
@@ -128,11 +114,11 @@ class Decline
     {
         $this->orderManagement->cancel($order->getEntityId());
         if ($order->isCanceled()) {
-            $this->addCommentToOrder($order, 'Order Cancelled by Forter');
+            $this->addCommentToOrder($order, 'Order Cancelled');
             return true;
         }
 
-        $this->addCommentToOrder($order, 'Order Cancellation attempt failed by Forter');
+        $this->addCommentToOrder($order, 'Order Cancellation attempt failed');
         return false;
     }
 
@@ -156,12 +142,12 @@ class Decline
             }
 
             if ($totalRefunded > 0) {
-                $this->addCommentToOrder($order, 'Order Refunded by Forter');
+                $this->addCommentToOrder($order, 'Order Refunded');
                 return true;
             }
         }
 
-        $this->addCommentToOrder($order, 'Order Refund attempt failed by Forter');
+        $this->addCommentToOrder($order, 'Order Refund attempt failed');
         return false;
     }
 
@@ -171,11 +157,11 @@ class Decline
      */
     public function holdOrder($order)
     {
-        $orderState = Order::STATE_HOLDED;
-        $order->setState($orderState)->setStatus(Order::STATE_HOLDED);
-        $order->save();
-
-        $this->addCommentToOrder($order, 'Order Has been holded by Forter');
+        $order->hold()->save();
+        $order->addStatusHistoryComment("Order Has been holded")
+          ->setIsCustomerNotified(false)
+          ->setEntityName('order')
+          ->save();
         return true;
     }
 
@@ -185,7 +171,7 @@ class Decline
      */
     private function addCommentToOrder($order, $message)
     {
-        $order->addStatusHistoryComment($message)
+        $order->addStatusHistoryComment('Forter:' . $message)
           ->setIsCustomerNotified(false)
           ->setEntityName('order')
           ->save();
@@ -197,6 +183,6 @@ class Decline
         $order->setState($orderState)->setStatus(Order::STATE_PAYMENT_REVIEW);
         $order->setStatus('Suspected Fraud');
         $order->save();
-        $this->addCommentToOrder($order, 'Order Has been marked for Payment Review by Forter');
+        $this->addCommentToOrder($order, 'Order Has been marked for Payment Review');
     }
 }
