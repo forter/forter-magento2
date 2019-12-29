@@ -56,6 +56,7 @@ class SendQueue
         foreach ($items as $item) {
             if ($item->getData('entity_body') == 'approve') {
                 $order = $this->order->loadByIncrementId($item->getData('entity_id'));
+                $order = $this->orderRepository->get($order->getId());
                 $this->approve->handleApproveImmediatly($order);
             } elseif ($item->getData('entity_body') == 'decline') {
                 $order = $this->orderRepository->get($item->getData('entity_id'));
