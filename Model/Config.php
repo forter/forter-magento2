@@ -227,7 +227,7 @@ class Config
      */
     public function isDebugEnabled()
     {
-        return (bool)$this->getConfigValue('debug');
+        return (bool)$this->getConfigValue('settings/debug');
     }
 
     /**

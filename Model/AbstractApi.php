@@ -3,6 +3,7 @@
 namespace Forter\Forter\Model;
 
 use Forter\Forter\Model\Config as ForterConfig;
+use Magento\Checkout\Model\Session;
 use Magento\Framework\HTTP\ClientInterface;
 
 /**
@@ -18,6 +19,10 @@ class AbstractApi
     /**
      * @var ClientInterface
      */
+    private $checkoutSession;
+    /**
+     * @var ClientInterface
+     */
     private $clientInterface;
     /**
      * @var Config
@@ -30,9 +35,11 @@ class AbstractApi
      * @param Config $forterConfig
      */
     public function __construct(
+        Session $checkoutSession,
         ClientInterface $clientInterface,
         ForterConfig $forterConfig
     ) {
+        $this->checkoutSession = $checkoutSession;
         $this->clientInterface = $clientInterface;
         $this->forterConfig = $forterConfig;
     }
@@ -65,10 +72,6 @@ class AbstractApi
 
                 if ($response->status) {
                     return json_encode($response);
-                }
-
-                if ($response->forterDecision == 'APPROVE') {
-                    return true;
                 }
             } while ($timeOutStatus);
 
@@ -136,9 +139,10 @@ class AbstractApi
     public function reportToForterOnCatch($e)
     {
         $url = self::ERROR_ENDPOINT;
+        $orderId = $this->checkoutSession->getQuote()->getReservedOrderId();
 
         $json = [
-       "orderID" => "5610495952",
+       "orderID" => $orderId,
        "exception" => [
          "message" => [
            "message" => $e->getMessage(),

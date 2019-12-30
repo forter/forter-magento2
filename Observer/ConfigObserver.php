@@ -50,8 +50,9 @@ class ConfigObserver implements \Magento\Framework\Event\ObserverInterface
             return false;
         }
 
-        $json = [
-            "general" => [
+        try {
+            $json = [
+              "general" => [
                 "active" => $this->forterConfig->isEnabled(),
                 "site_id" => $this->forterConfig->getSiteId(),
                 "secret_key" => $this->forterConfig->getSecretKey(),
@@ -60,8 +61,8 @@ class ConfigObserver implements \Magento\Framework\Event\ObserverInterface
                 "debug_mode" => $this->forterConfig->isDebugEnabled(),
                 "sandbox_mode" => $this->forterConfig->isSandboxMode(),
                 "log_mode" => $this->forterConfig->isLogging()
-            ],
-            "pre_post_desicion" => [
+              ],
+              "pre_post_desicion" => [
                 "pre_post_Select" => $this->forterConfig->getPrePostDesicionMsg('pre_post_Select'),
                 "pre_decline" => $this->forterConfig->getPrePostDesicionMsg('decline_pre'),
                 "pre_thanks_msg" => $this->forterConfig->getPreThanksMsg(),
@@ -69,17 +70,16 @@ class ConfigObserver implements \Magento\Framework\Event\ObserverInterface
                 "post_approve" => $this->forterConfig->getPrePostDesicionMsg('approve_post'),
                 "post_not_review" => $this->forterConfig->getPrePostDesicionMsg('not_review_post'),
                 "post_thanks_msg" => $this->forterConfig->getPostThanksMsg()
-            ],
-            "store" => [
+              ],
+              "store" => [
                 "storeId" => $this->forterConfig->getStoreId()
-            ],
-            "connection_information" => $this->forterConfig->getTimeOutSettings(),
-            "eventTime" => time()
-        ];
+              ],
+              "connection_information" => $this->forterConfig->getTimeOutSettings(),
+              "eventTime" => time()
+            ];
 
-        try {
             $url = self::SETTINGS_API_ENDPOINT;
-            $response = $this->abstractApi->sendApiRequest($url, json_encode($json));
+            $this->abstractApi->sendApiRequest($url, json_encode($json));
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
             throw new \Exception($e->getMessage());

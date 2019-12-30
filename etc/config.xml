@@ -25,6 +25,10 @@
                 <max_connection_timeout>2000</max_connection_timeout>
                 <max_request_timeout>2000</max_request_timeout>
             </connection_information>
+            <advanced_settings>
+              <enabled_account_touchpoint>1</enabled_account_touchpoint>
+              <enabled_order_fulfillment>1</enabled_order_fulfillment>
+            </advanced_settings>
         </forter>
     </default>
 </config>

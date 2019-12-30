@@ -87,23 +87,23 @@ class AccountManagement
             return false;
         }
 
-        $customer = $this->localMatchCustomerByRpToken($resetToken);
+        try {
+            $customer = $this->localMatchCustomerByRpToken($resetToken);
 
-        if ($customer) {
-            $json = [
-                "accountId" => $customer->getId(),
-                "eventTime" => time(),
-                "connectionInformation" => $this->basicInfo->getConnectionInformation($this->remoteAddress->getRemoteAddress()),
-                "passwordUpdateTrigger" => 'USER_FORGOT_PASSWORD'
-            ];
+            if ($customer) {
+                $json = [
+                  "accountId" => $customer->getId(),
+                  "eventTime" => time(),
+                  "connectionInformation" => $this->basicInfo->getConnectionInformation($this->remoteAddress->getRemoteAddress()),
+                  "passwordUpdateTrigger" => 'USER_FORGOT_PASSWORD'
+                ];
 
-            try {
                 $url = self::PASSWORD_API_ENDPOINT . $customer->getId();
-                $response = $this->abstractApi->sendApiRequest($url, json_encode($json));
-            } catch (\Exception $e) {
-                $this->abstractApi->reportToForterOnCatch($e);
-                throw new \Exception($e->getMessage());
+                $this->abstractApi->sendApiRequest($url, json_encode($json));
             }
+        } catch (\Exception $e) {
+            $this->abstractApi->reportToForterOnCatch($e);
+            throw new \Exception($e->getMessage());
         }
     }
 
@@ -124,23 +124,24 @@ class AccountManagement
         if (!$this->forterConfig->isEnabled()  || !$this->forterConfig->isAccountTouchpointEnabled()) {
             return false;
         }
-        $websiteID = $this->storemanager->getStore()->getWebsiteId();
-        $customer = $this->customer->create()->setWebsiteId($websiteID)->loadByEmail($email);
-        if ($customer) {
-            $json = [
-                "accountId" => $customer->getId(),
-                "eventTime" => time(),
-                "connectionInformation" => $this->basicInfo->getConnectionInformation($this->remoteAddress->getRemoteAddress()),
-                "passwordUpdateTrigger" => 'LOGGED_IN_USER'
-            ];
 
-            try {
+        try {
+            $websiteID = $this->storemanager->getStore()->getWebsiteId();
+            $customer = $this->customer->create()->setWebsiteId($websiteID)->loadByEmail($email);
+            if ($customer) {
+                $json = [
+                  "accountId" => $customer->getId(),
+                  "eventTime" => time(),
+                  "connectionInformation" => $this->basicInfo->getConnectionInformation($this->remoteAddress->getRemoteAddress()),
+                  "passwordUpdateTrigger" => 'LOGGED_IN_USER'
+                ];
+
                 $url = self::PASSWORD_API_ENDPOINT . $customer->getId();
-                $response = $this->abstractApi->sendApiRequest($url, json_encode($json));
-            } catch (\Exception $e) {
-                $this->abstractApi->reportToForterOnCatch($e);
-                throw new \Exception($e->getMessage());
+                $this->abstractApi->sendApiRequest($url, json_encode($json));
             }
+        } catch (\Exception $e) {
+            $this->abstractApi->reportToForterOnCatch($e);
+            throw new \Exception($e->getMessage());
         }
     }
 
@@ -159,19 +160,17 @@ class AccountManagement
             return $result;
         }
 
-        $websiteID = $this->storemanager->getStore()->getWebsiteId();
-        $customer = $this->customer->create()->setWebsiteId($websiteID)->loadByEmail($username);
-
         try {
+            $websiteID = $this->storemanager->getStore()->getWebsiteId();
+            $customer = $this->customer->create()->setWebsiteId($websiteID)->loadByEmail($username);
             $result = $proceed($username, $password);
+            $this->sendLoginAttempt('SUCCESS', $customer);
+
+            return $result;
         } catch (\Exception $e) {
             $this->sendLoginAttempt('FAILED', $customer);
             throw $e;
         }
-
-        $this->sendLoginAttempt('SUCCESS', $customer);
-
-        return $result;
     }
 
     /**
@@ -191,7 +190,7 @@ class AccountManagement
 
             if ($customer) {
                 $url = 'https://api.forter-secure.com/v2/accounts/login/' . $customer->getId();
-                $response = $this->abstractApi->sendApiRequest($url, json_encode($json));
+                $this->abstractApi->sendApiRequest($url, json_encode($json));
             }
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);

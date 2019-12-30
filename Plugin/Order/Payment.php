@@ -30,8 +30,10 @@ class Payment
      * @param AbstractApi $abstractApi
      * @param Order $requestBuilderOrder
      */
-    public function __construct(AbstractApi $abstractApi, Order $requestBuilderOrder)
-    {
+    public function __construct(
+        AbstractApi $abstractApi,
+        Order $requestBuilderOrder
+    ) {
         $this->abstractApi = $abstractApi;
         $this->requestBuilderOrder = $requestBuilderOrder;
     }

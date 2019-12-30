@@ -65,16 +65,16 @@ class CustomerRegisterSuccess implements ObserverInterface
             return false;
         }
 
-        $customer = $observer->getEvent()->getCustomer();
-        $json = [
-            "accountId" => $customer->getId(),
-            "eventTime" => time(),
-            "connectionInformation" => $this->basicInfo->getConnectionInformation($this->remoteAddress->getRemoteAddress())
-        ];
-
         try {
+            $customer = $observer->getEvent()->getCustomer();
+            $json = [
+              "accountId" => $customer->getId(),
+              "eventTime" => time(),
+              "connectionInformation" => $this->basicInfo->getConnectionInformation($this->remoteAddress->getRemoteAddress())
+            ];
+
             $url = self::API_ENDPOINT . $customer->getId();
-            $response = $this->abstractApi->sendApiRequest($url, json_encode($json));
+            $this->abstractApi->sendApiRequest($url, json_encode($json));
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
             throw new \Exception($e->getMessage());

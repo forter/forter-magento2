@@ -112,71 +112,71 @@ class PaymentPlaceEnd implements ObserverInterface
             return false;
         }
 
-        $order = $observer->getEvent()->getPayment()->getOrder();
-
         try {
+            $order = $observer->getEvent()->getPayment()->getOrder();
+
             $data = $this->requestBuilderOrder->buildTransaction($order);
             $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
             $forterResponse = $this->abstractApi->sendApiRequest($url, json_encode($data));
-        } catch (\Exception $e) {
-            $this->abstractApi->reportToForterOnCatch($e);
-            throw new \Exception($e->getMessage());
-        }
 
-        $order->setForterResponse($forterResponse);
-        $forterResponse = json_decode($forterResponse);
-        $order->setForterStatus($forterResponse->action);
+            $order->setForterResponse($forterResponse);
+            $forterResponse = json_decode($forterResponse);
+            $order->setForterStatus($forterResponse->action);
 
-        if ($forterResponse->status == 'failed') {
-            $order->setForterStatus('not reviewed');
-            return true;
-        }
+            if ($forterResponse->status == 'failed') {
+                $order->setForterStatus('not reviewed');
+                return true;
+            }
 
-        $type = null;
-        if ($forterResponse->action == "decline") {
-            $this->messageManager->getMessages(true);
-            $this->messageManager->addErrorMessage($this->forterConfig->getPostThanksMsg());
-            $result = $this->forterConfig->getDeclinePost();
-            if ($result == '1') {
-                if ($order->canHold()) {
-                    $this->decline->holdOrder($order);
-                    $type = 'decline';
+            $type = null;
+            if ($forterResponse->action == "decline") {
+                $this->messageManager->getMessages(true);
+                $this->messageManager->addErrorMessage($this->forterConfig->getPostThanksMsg());
+                $result = $this->forterConfig->getDeclinePost();
+                if ($result == '1') {
+                    if ($order->canHold()) {
+                        $this->decline->holdOrder($order);
+                        $type = 'decline';
+                    }
+                } elseif ($result == '2') {
+                    $this->decline->markOrderPaymentReview($order);
+                    return true;
+                } else {
+                    return true;
                 }
-            } elseif ($result == '2') {
-                $this->decline->markOrderPaymentReview($order);
-                return true;
-            } else {
-                return true;
+            } elseif ($forterResponse->action == 'approve') {
+                $result = $this->forterConfig->getApprovePost();
+                if ($result == '1') {
+                    $type = 'approve';
+                } else {
+                    return true;
+                }
+            } elseif ($forterResponse->action == "not reviewed") {
+                $result = $this->forterConfig->getNotReviewPost();
+                if ($result == '1') {
+                    $type = 'approve';
+                } else {
+                    return true;
+                }
             }
-        } elseif ($forterResponse->action == 'approve') {
-            $result = $this->forterConfig->getApprovePost();
-            if ($result == '1') {
-                $type = 'approve';
-            } else {
-                return true;
-            }
-        } elseif ($forterResponse->action == "not reviewed") {
-            $result = $this->forterConfig->getNotReviewPost();
-            if ($result == '1') {
-                $type = 'approve';
-            } else {
-                return true;
-            }
-        }
 
-        $storeId = $order->getStore()->getId();
-        $currentTime = $this->dateTime->gmtDate();
-        $order->save();
-        if ($type) {
-            $this->queue->create()
+            $storeId = $order->getStore()->getId();
+            $currentTime = $this->dateTime->gmtDate();
+            $order->save();
+            if ($type) {
+                $this->queue->create()
                   ->setStoreId($storeId)
                   ->setEntityType('order')
                   ->setEntityId($order->getId())
                   ->setEntityBody($type)
                   ->setSyncDate($currentTime)
                   ->save();
-        }
+            }
 
-        return false;
+            return false;
+        } catch (\Exception $e) {
+            $this->abstractApi->reportToForterOnCatch($e);
+            throw new \Exception($e->getMessage());
+        }
     }
 }
