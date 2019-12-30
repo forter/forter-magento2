@@ -111,7 +111,7 @@ class Decline
                 $result = $this->holdOrder($order);
             }
 
-            return $this;
+            return true;
         } catch (Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
             throw new \Exception($e->getMessage());
@@ -126,11 +126,11 @@ class Decline
     {
         $order->cancel()->save();
         if ($order->isCanceled()) {
-            $order->addCommentToOrder($order, 'Order Cancelled');
+            $this->addCommentToOrder($order, 'Order Cancelled');
             return true;
         }
 
-        $order->addCommentToOrder($order, 'Order Cancellation attempt failed');
+        $this->addCommentToOrder($order, 'Order Cancellation attempt failed');
         return false;
     }
 
@@ -154,12 +154,12 @@ class Decline
             }
 
             if ($totalRefunded > 0) {
-                $order->addCommentToOrder($order, $totalRefunded . ' Refunded');
+                $this->addCommentToOrder($order, $totalRefunded . ' Refunded');
                 return true;
             }
         }
 
-        $order->addCommentToOrder($order, 'Order Refund attempt failed');
+        $this->addCommentToOrder($order, 'Order Refund attempt failed');
         return false;
     }
 
