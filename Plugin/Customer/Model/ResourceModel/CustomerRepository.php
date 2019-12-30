@@ -137,7 +137,7 @@ class CustomerRepository
     private function getAddressInAccount($addresses)
     {
         if (!isset($addresses) || !$addresses) {
-            return false;
+            return [];
         }
 
         foreach ($addresses as $address) {
