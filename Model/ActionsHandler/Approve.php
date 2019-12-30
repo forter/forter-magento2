@@ -3,6 +3,7 @@
 namespace Forter\Forter\Model\ActionsHandler;
 
 use Exception;
+use Forter\Forter\Model\AbstractApi;
 use Magento\Framework\DB\TransactionFactory;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Api\InvoiceRepositoryInterface;
@@ -17,6 +18,10 @@ use Magento\Sales\Model\Service\InvoiceService;
  */
 class Approve
 {
+    /**
+      * @var AbstractApi
+      */
+    private $abstractApi;
     /**
      * @var CollectionFactory
      */
@@ -46,12 +51,14 @@ class Approve
      * @param OrderRepositoryInterface $orderRepository
      */
     public function __construct(
+        AbstractApi $abstractApi,
         CollectionFactory $invoiceCollectionFactory,
         InvoiceService $invoiceService,
         TransactionFactory $transactionFactory,
         InvoiceRepositoryInterface $invoiceRepository,
         OrderRepositoryInterface $orderRepository
     ) {
+        $this->abstractApi = $abstractApi;
         $this->_invoiceCollectionFactory = $invoiceCollectionFactory;
         $this->_invoiceService = $invoiceService;
         $this->_transactionFactory = $transactionFactory;
@@ -80,6 +87,9 @@ class Approve
                 }
 
                 if (!$order->canInvoice()) {
+                    $order->setCustomerNoteNotify(false);
+                    $order->setIsInProcess(true);
+                    $order->addStatusHistoryComment(__('Forter: Magento faild Creating invoice'), false);
                     return null;
                 }
 
@@ -88,16 +98,15 @@ class Approve
                 $invoice->register();
                 $invoice->getOrder()->setCustomerNoteNotify(false);
                 $invoice->getOrder()->setIsInProcess(true);
-                $order->addStatusHistoryComment(__('Invoice Has been Created by Forter'), false);
+                $order->addStatusHistoryComment(__('Forter: Invoice Has been Created'), false);
                 $transactionSave = $this->_transactionFactory->create()->addObject($invoice)->addObject($invoice->getOrder());
                 $transactionSave->save();
 
                 return $invoice;
             }
         } catch (Exception $e) {
-            throw new LocalizedException(
-                __($e->getMessage())
-            );
+            $this->abstractApi->reportToForterOnCatch($e);
+            throw new \Exception($e->getMessage());
         }
     }
 }

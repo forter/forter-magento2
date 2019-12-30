@@ -96,33 +96,38 @@ class CustomerRepository
             return $savedCustomer;
         }
 
-        $customerGroup = $this->groupRepository->getById($savedCustomer->getGroupId());
-        $customerAccountData = $this->customerPrepere->getCustomerAccountData(null, $savedCustomer);
-        $areaCode = ($this->state->getAreaCode() == 'frontend' ? 'END_USER' : 'MERCHANT_ADMIN');
-        $type = ($this->state->getAreaCode() == 'frontend' ? 'PRIVATE' : 'MERCHANT_EMPLOYEE');
+        try {
+            $customerGroup = $this->groupRepository->getById($savedCustomer->getGroupId());
+            $customerAccountData = $this->customerPrepere->getCustomerAccountData(null, $savedCustomer);
+            $areaCode = ($this->state->getAreaCode() == 'frontend' ? 'END_USER' : 'MERCHANT_ADMIN');
+            $type = ($this->state->getAreaCode() == 'frontend' ? 'PRIVATE' : 'MERCHANT_EMPLOYEE');
 
-        $json = [
-            "accountId" => $savedCustomer->getId(),
-            "eventTime" => time(),
-            "connectionInformation" => $this->basicInfoPrepare->getConnectionInformation($this->remoteAddress->getRemoteAddress()),
-            "accountData" => [
+            $json = [
+              "accountId" => $savedCustomer->getId(),
+              "eventTime" => time(),
+              "connectionInformation" => $this->basicInfoPrepare->getConnectionInformation($this->remoteAddress->getRemoteAddress()),
+              "accountData" => [
                 "type" => $type,
                 "statusChangeBy" => $areaCode,
                 "addressesInAccount" => $this->getAddressInAccount($savedCustomer->getAddresses()),
                 "customerEngagement" => $customerAccountData['customerEngagement'],
                 "status" => $customerAccountData['status']
-            ],
-            "merchantIdentifiers" => [
+              ],
+              "merchantIdentifiers" => [
                 'merchantId' => $this->storeManager->getStore()->getId(),
                 'merchantDomain' => $this->storeManager->getStore()->getUrl(),
                 'merchantName' => $this->storeManager->getStore()->getName()
-            ]
-        ];
+              ]
+            ];
 
-        $url = self::API_ENDPOINT . $savedCustomer->getId();
-        $response = $this->abstractApi->sendApiRequest($url, json_encode($json));
+            $url = self::API_ENDPOINT . $savedCustomer->getId();
+            $this->abstractApi->sendApiRequest($url, json_encode($json));
 
-        return $savedCustomer;
+            return $savedCustomer;
+        } catch (\Exception $e) {
+            $this->abstractApi->reportToForterOnCatch($e);
+            throw new \Exception($e->getMessage());
+        }
     }
 
     /**
@@ -134,6 +139,7 @@ class CustomerRepository
         if (!isset($addresses) || !$addresses) {
             return false;
         }
+
         foreach ($addresses as $address) {
             $street = $address->getStreet();
             $customerAddress['address1'] = $street[0];

@@ -2,6 +2,7 @@
 
 namespace Forter\Forter\Model\ActionsHandler;
 
+use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\Config as ForterConfig;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Sales\Api\OrderManagementInterface;
@@ -16,6 +17,10 @@ use Magento\Sales\Model\Service\CreditmemoService;
  */
 class Decline
 {
+    /**
+      * @var AbstractApi
+      */
+    private $abstractApi;
     /**
      * @var CheckoutSession
      */
@@ -51,6 +56,7 @@ class Decline
      * @param CreditmemoService $creditmemoService
      */
     public function __construct(
+        AbstractApi $abstractApi,
         Order $order,
         CreditmemoFactory $creditmemoFactory,
         ForterConfig $forterConfig,
@@ -59,6 +65,7 @@ class Decline
         CreditmemoService $creditmemoService,
         OrderManagementInterface $orderManagement
     ) {
+        $this->abstractApi = $abstractApi;
         $this->orderManagement = $orderManagement;
         $this->checkoutSession = $checkoutSession;
         $this->order = $order;
@@ -90,20 +97,25 @@ class Decline
      */
     public function handlePostTransactionDescision($order)
     {
-        if ($order->canCancel()) {
-            $order->cancel()->save();
-        }
+        try {
+            if ($order->canCancel()) {
+                $order->cancel()->save();
+            }
 
-        if ($order->canCreditmemo()) {
-            $this->createCreditMemo($order);
-        }
+            if ($order->canCreditmemo()) {
+                $this->createCreditMemo($order);
+            }
 
-        $state = $order->getState();
-        if ($state != 'closed' &&  $state != 'canceled' && $state != 'complete') {
-            $result = $this->holdOrder($order);
-        }
+            $state = $order->getState();
+            if ($state != 'closed' &&  $state != 'canceled' && $state != 'complete') {
+                $result = $this->holdOrder($order);
+            }
 
-        return $this;
+            return $this;
+        } catch (Exception $e) {
+            $this->abstractApi->reportToForterOnCatch($e);
+            throw new \Exception($e->getMessage());
+        }
     }
 
     /**
@@ -142,7 +154,7 @@ class Decline
             }
 
             if ($totalRefunded > 0) {
-                $this->addCommentToOrder($order, 'Order Refunded');
+                $this->addCommentToOrder($order, $totalRefunded . ' Refunded');
                 return true;
             }
         }

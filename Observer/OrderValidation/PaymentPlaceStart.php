@@ -89,29 +89,29 @@ class PaymentPlaceStart implements ObserverInterface
             return false;
         }
 
-        $order = $observer->getEvent()->getPayment()->getOrder();
-        $data = $this->requestBuilderOrder->buildTransaction($order);
-
         try {
+            $order = $observer->getEvent()->getPayment()->getOrder();
+            $data = $this->requestBuilderOrder->buildTransaction($order);
+
             $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
             $response = $this->abstractApi->sendApiRequest($url, json_encode($data));
+
+            $response = json_decode($response);
+
+            if ($response->status == 'failed') {
+                return true;
+            }
+
+            if ($response->action == 'decline' && $response->status == 'success') {
+                $this->messageManager->getMessages(true);
+                $this->messageManager->addErrorMessage($this->config->getPostThanksMsg());
+                $this->decline->handlePreTransactionDescision();
+            }
+
+            return true;
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
             throw new \Exception($e->getMessage());
         }
-
-        $response = json_decode($response);
-
-        if ($response->status == 'failed') {
-            return true;
-        }
-
-        if ($response->action == 'decline' && $response->status == 'success') {
-            $this->messageManager->getMessages(true);
-            $this->messageManager->addErrorMessage($this->config->getPostThanksMsg());
-            $this->decline->handlePreTransactionDescision();
-        }
-
-        return true;
     }
 }

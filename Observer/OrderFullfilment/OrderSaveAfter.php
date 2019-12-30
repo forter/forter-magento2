@@ -44,33 +44,33 @@ class OrderSaveAfter implements ObserverInterface
             return false;
         }
 
-        $order = $observer->getEvent()->getOrder();
+        try {
+            $order = $observer->getEvent()->getOrder();
 
-        $forterResponse = $order->getForterResponse();
-        $forterResponse = json_decode($forterResponse);
+            $forterResponse = $order->getForterResponse();
+            $forterResponse = json_decode($forterResponse);
 
-        $orderState = $order->getState();
-        $orderOrigState = $order->getOrigData('state');
+            $orderState = $order->getState();
+            $orderOrigState = $order->getOrigData('state');
 
-        if ($orderState == 'complete' && $orderOrigState != 'complete') {
-            $orderState = 'COMPLETED';
-        } elseif ($orderState == 'processing' && $orderOrigState != 'processing') {
-            $orderState = 'PROCESSING';
-        } elseif ($orderState == 'canceled' && $orderOrigState != 'canceled') {
-            $orderState = 'CANCELED_BY_MERCHANT';
-        } else {
-            return false;
-        }
+            if ($orderState == 'complete' && $orderOrigState != 'complete') {
+                $orderState = 'COMPLETED';
+            } elseif ($orderState == 'processing' && $orderOrigState != 'processing') {
+                $orderState = 'PROCESSING';
+            } elseif ($orderState == 'canceled' && $orderOrigState != 'canceled') {
+                $orderState = 'CANCELED_BY_MERCHANT';
+            } else {
+                return false;
+            }
 
-        $json = [
+            $json = [
             "orderId" => $order->getIncrementId(),
             "eventTime" => time(),
             "updatedStatus" => $orderState,
         ];
 
-        try {
             $url = self::ORDER_FULFILLMENT_STATUS_ENDPOINT . $order->getIncrementId();
-            $response = $this->abstractApi->sendApiRequest($url, json_encode($json));
+            $this->abstractApi->sendApiRequest($url, json_encode($json));
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
             throw new \Exception($e->getMessage());
