@@ -53,6 +53,7 @@ class Payment
         } else {
             switch ($payment_method) {
               case 'authorizenet_directpost':
+              case 'authorizenet_acceptjs':
                 $paymentData["creditCard"] = $this->paymentMethods->getAuthorizeNetDetails($payment);
                 break;
               case 'braintree':
