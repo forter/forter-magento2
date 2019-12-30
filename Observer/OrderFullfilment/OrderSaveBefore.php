@@ -10,7 +10,7 @@ use Magento\Framework\Event\ObserverInterface;
  * Class OrderSaveAfter
  * @package Forter\Forter\Observer\OrderFullfilment
  */
-class OrderSaveAfter implements ObserverInterface
+class OrderSaveBefore implements ObserverInterface
 {
     const ORDER_FULFILLMENT_STATUS_ENDPOINT = "https://api.forter-secure.com/v2/status/";
 
