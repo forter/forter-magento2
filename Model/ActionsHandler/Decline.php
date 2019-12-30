@@ -99,7 +99,7 @@ class Decline
     {
         try {
             if ($order->canCancel()) {
-                $order->cancel()->save();
+                $this->cancelOrder($order);
             }
 
             if ($order->canCreditmemo()) {
@@ -124,13 +124,13 @@ class Decline
      */
     private function cancelOrder($order)
     {
-        $this->orderManagement->cancel($order->getEntityId());
+        $order->cancel()->save();
         if ($order->isCanceled()) {
-            $this->addCommentToOrder($order, 'Order Cancelled');
+            $order->addCommentToOrder($order, 'Order Cancelled');
             return true;
         }
 
-        $this->addCommentToOrder($order, 'Order Cancellation attempt failed');
+        $order->addCommentToOrder($order, 'Order Cancellation attempt failed');
         return false;
     }
 
@@ -154,12 +154,12 @@ class Decline
             }
 
             if ($totalRefunded > 0) {
-                $this->addCommentToOrder($order, $totalRefunded . ' Refunded');
+                $order->addCommentToOrder($order, $totalRefunded . ' Refunded');
                 return true;
             }
         }
 
-        $this->addCommentToOrder($order, 'Order Refund attempt failed');
+        $order->addCommentToOrder($order, 'Order Refund attempt failed');
         return false;
     }
 
