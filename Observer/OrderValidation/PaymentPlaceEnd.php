@@ -120,6 +120,7 @@ class PaymentPlaceEnd implements ObserverInterface
             $forterResponse = $this->abstractApi->sendApiRequest($url, json_encode($data));
             $order->setForterResponse($forterResponse);
             $forterResponse = json_decode($forterResponse);
+
             if ($forterResponse->status == 'failed' || !isset($forterResponse->action)) {
                 $order->setForterStatus('not reviewed');
                 return true;
