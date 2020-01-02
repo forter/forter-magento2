@@ -97,6 +97,7 @@ class CustomerRepository
         }
 
         try {
+            $headers = getallheaders();
             $customerGroup = $this->groupRepository->getById($savedCustomer->getGroupId());
             $customerAccountData = $this->customerPrepere->getCustomerAccountData(null, $savedCustomer);
             $areaCode = ($this->state->getAreaCode() == 'frontend' ? 'END_USER' : 'MERCHANT_ADMIN');
@@ -105,7 +106,7 @@ class CustomerRepository
             $json = [
               "accountId" => $savedCustomer->getId(),
               "eventTime" => time(),
-              "connectionInformation" => $this->basicInfoPrepare->getConnectionInformation($this->remoteAddress->getRemoteAddress()),
+              "connectionInformation" => $this->basicInfoPrepare->getConnectionInformation($this->remoteAddress->getRemoteAddress(), $headers),
               "accountData" => [
                 "type" => $type,
                 "statusChangeBy" => $areaCode,

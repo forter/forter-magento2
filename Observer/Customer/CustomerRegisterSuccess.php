@@ -66,11 +66,12 @@ class CustomerRegisterSuccess implements ObserverInterface
         }
 
         try {
+            $headers = getallheaders();
             $customer = $observer->getEvent()->getCustomer();
             $json = [
               "accountId" => $customer->getId(),
               "eventTime" => time(),
-              "connectionInformation" => $this->basicInfo->getConnectionInformation($this->remoteAddress->getRemoteAddress())
+              "connectionInformation" => $this->basicInfo->getConnectionInformation($this->remoteAddress->getRemoteAddress(), $headers)
             ];
 
             $url = self::API_ENDPOINT . $customer->getId();

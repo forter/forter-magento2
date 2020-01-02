@@ -89,12 +89,12 @@ class AccountManagement
 
         try {
             $customer = $this->localMatchCustomerByRpToken($resetToken);
-
+            $headers = getallheaders();
             if ($customer) {
                 $json = [
                   "accountId" => $customer->getId(),
                   "eventTime" => time(),
-                  "connectionInformation" => $this->basicInfo->getConnectionInformation($this->remoteAddress->getRemoteAddress()),
+                  "connectionInformation" => $this->basicInfo->getConnectionInformation($this->remoteAddress->getRemoteAddress(), $headers),
                   "passwordUpdateTrigger" => 'USER_FORGOT_PASSWORD'
                 ];
 
@@ -126,13 +126,14 @@ class AccountManagement
         }
 
         try {
+            $headers = getallheaders();
             $websiteID = $this->storemanager->getStore()->getWebsiteId();
             $customer = $this->customer->create()->setWebsiteId($websiteID)->loadByEmail($email);
             if ($customer) {
                 $json = [
                   "accountId" => $customer->getId(),
                   "eventTime" => time(),
-                  "connectionInformation" => $this->basicInfo->getConnectionInformation($this->remoteAddress->getRemoteAddress()),
+                  "connectionInformation" => $this->basicInfo->getConnectionInformation($this->remoteAddress->getRemoteAddress(), $headers),
                   "passwordUpdateTrigger" => 'LOGGED_IN_USER'
                 ];
 
@@ -180,10 +181,12 @@ class AccountManagement
     private function sendLoginAttempt($loginStatus, $customer)
     {
         try {
+            $headers = getallheaders();
+
             $json = [
                 "accountId" => $customer->getId(),
                 "eventTime" => time(),
-                "connectionInformation" => $this->basicInfo->getConnectionInformation($this->remoteAddress->getRemoteAddress()),
+                "connectionInformation" => $this->basicInfo->getConnectionInformation($this->remoteAddress->getRemoteAddress(), $headers),
                 "loginStatus" => $loginStatus,
                 "loginMethodType" => "PASSWORD"
             ];
