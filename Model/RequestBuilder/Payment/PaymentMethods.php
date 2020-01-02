@@ -65,12 +65,26 @@ class PaymentMethods
 
     public function getBraintreeDetails($payment)
     {
-        $detailsArray = [
-        'cardBrand' => $payment->getAdditionalInformation('cc_type'),
-        'cvvResult' => $payment->getAdditionalInformation('cvvResponseCode'),
-        'avsZipResult' => $payment->getAdditionalInformation('avsPostalCodeResponseCode'),
-        'avsStreetResult' => $payment->getAdditionalInformation('avsStreetAddressResponseCode')
-      ];
+        $detailsArray =[];
+        $cc_type = $payment->getAdditionalInformation('cc_type');
+        if ($cc_type) {
+            $detailsArray['cardBrand'] = $cc_type;
+        }
+
+        $cvvResponseCode = $payment->getAdditionalInformation('cvvResponseCode');
+        if ($cvvResponseCode) {
+            $detailsArray['cvvResult'] = $cvvResponseCode;
+        }
+
+        $avsZipResult = $payment->getAdditionalInformation('avsPostalCodeResponseCode');
+        if ($avsZipResult) {
+            $detailsArray['avsZipResult'] = $avsZipResult;
+        }
+
+        $avsStreetResult = $payment->getAdditionalInformation('avsStreetAddressResponseCode');
+        if ($avsStreetResult) {
+            $detailsArray['avsStreetResult'] = $avsStreetResult;
+        }
 
         return $this->preferCcDetails($payment, $detailsArray);
     }

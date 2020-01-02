@@ -212,7 +212,13 @@ class Customer
             $accountStatus = "ACTIVE";
         }
 
-        $reviews_count = $this->getCustomerReviewsCount($customerId, $this->storeManager->getStore()->getId());
+        if ($this->storeManager->getStore()) {
+            $storeId = $this->storeManager->getStore()->getId();
+        } else {
+            $storeId = $order->getStore()->getId();
+        }
+
+        $reviews_count = $this->getCustomerReviewsCount($customerId, $storeId);
 
         $currentUserWishlist = $this->wishlistProvider->getWishlist();
         $wishlistItemsCount = $currentUserWishlist ? count($currentUserWishlist->getItemCollection()) : 0;
@@ -309,7 +315,8 @@ class Customer
         $billingDetails = [];
         $billingDetails["personalDetails"] = [
           "firstName" => $billingAddress->getFirstName(),
-          "lastName" => $billingAddress->getLastName()
+          "lastName" => $billingAddress->getLastName(),
+          "email" => $billingAddress->getEmail()
         ];
 
         if ($billingAddress) {

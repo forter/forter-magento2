@@ -52,6 +52,7 @@ class Cart
         $cartItems = [];
 
         foreach ($order->getAllItems() as $item) {
+
             //Category generation
             $product = $item->getProduct();
             $categories = $this->getProductCategories($item->getProduct());

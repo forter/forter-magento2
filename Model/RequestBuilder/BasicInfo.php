@@ -28,9 +28,8 @@ class BasicInfo
      * @param $remoteIp
      * @return array
      */
-    public function getConnectionInformation($remoteIp)
+    public function getConnectionInformation($remoteIp, $headers)
     {
-        $headers = getallheaders();
         return [
             "customerIP" => $this->getIpFromOrder($remoteIp, $headers),
             "userAgent" => (is_array($headers) && array_key_exists("User-Agent", $headers)) ? $headers['User-Agent'] : null,
@@ -65,7 +64,7 @@ class BasicInfo
      * @param $headers
      * @return false|mixed|string
      */
-    private function getIpFromOrder($remoteIp, $headers)
+    public function getIpFromOrder($remoteIp, $headers)
     {
         $xForwardedFor = array_key_exists('X-Forwarded-For', $headers) ? $headers['X-Forwarded-For'] : '';
         $hasXForwardedFor = $xForwardedFor && strlen($xForwardedFor) > 0;
