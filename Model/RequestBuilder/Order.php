@@ -123,13 +123,14 @@ class Order
      */
     public function buildTransaction($order)
     {
+        $headers = getallheaders();
         $data = [
         "orderId" => strval($order->getIncrementId()),
         "orderType" => "WEB",
         "timeSentToForter" => time()*1000,
         "checkoutTime" => time(),
         "additionalIdentifiers" => $this->basicInfoPrepare->getAdditionalIdentifiers($order),
-        "connectionInformation" => $this->basicInfoPrepare->getConnectionInformation($order->getRemoteIp()),
+        "connectionInformation" => $this->basicInfoPrepare->getConnectionInformation($order->getRemoteIp(), $headers),
         "totalAmount" => $this->cartPrepare->getTotalAmount($order),
         "cartItems" => $this->cartPrepare->generateCartItems($order),
         "primaryDeliveryDetails" => $this->customerPrepere->getPrimaryDeliveryDetails($order),
