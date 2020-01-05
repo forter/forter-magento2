@@ -102,8 +102,8 @@ class PaymentMethods
             "cardBrand" => array_key_exists("cardBrand", $detailsArray) ? $detailsArray['cardBrand'] : $payment->getCcType(),
             "bin" => $payment->getAdditionalInformation("bin"),
             "lastFourDigits" => array_key_exists("lastFourDigits", $detailsArray) ? $detailsArray['lastFourDigits'] : $payment->getCcLast4(),
-            "expirationMonth" => array_key_exists("expirationMonth", $detailsArray) ? $detailsArray['expirationMonth'] : $payment->getCcExpMonth(),
-            "expirationYear" => array_key_exists("expirationYear", $detailsArray) ? $detailsArray['expirationYear'] : $payment->getCcExpYear(),
+            "expirationMonth" => array_key_exists("expirationMonth", $detailsArray) ? $detailsArray['expirationMonth'] : (string)$payment->getCcExpMonth(),
+            "expirationYear" => array_key_exists("expirationYear", $detailsArray) ? $detailsArray['expirationYear'] : (string)$payment->getCcExpYear(),
             "countryOfIssuance" => $payment->getData("country_of_issuance"),
             "cardBank" => $payment->getEcheckBankName(),
             "verificationResults" => [
