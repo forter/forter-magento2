@@ -68,11 +68,6 @@ class PaymentMethods
     {
         $detailsArray =[];
 
-        $ccNumber = $payment->getAdditionalInformation('cc_number');
-        if ($ccNumber) {
-            $detailsArray['lastFourDigits'] = $ccNumber;
-        }
-
         $ccType = $payment->getAdditionalInformation('cc_type');
         if ($ccType) {
             $detailsArray['cardBrand'] = $ccType;
