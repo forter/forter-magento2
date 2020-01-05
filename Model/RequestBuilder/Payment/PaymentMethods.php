@@ -67,9 +67,15 @@ class PaymentMethods
     public function getBraintreeDetails($payment)
     {
         $detailsArray =[];
-        $cc_type = $payment->getAdditionalInformation('cc_type');
-        if ($cc_type) {
-            $detailsArray['cardBrand'] = $cc_type;
+
+        $ccNumber = $payment->getAdditionalInformation('cc_number');
+        if ($ccNumber) {
+            $detailsArray['lastFourDigits'] = $ccNumber;
+        }
+
+        $ccType = $payment->getAdditionalInformation('cc_type');
+        if ($ccType) {
+            $detailsArray['cardBrand'] = $ccType;
         }
 
         $cvvResponseCode = $payment->getAdditionalInformation('cvvResponseCode');
@@ -97,8 +103,8 @@ class PaymentMethods
             "cardBrand" => array_key_exists("cardBrand", $detailsArray) ? $detailsArray['cardBrand'] : $payment->getCcType(),
             "bin" => $payment->getAdditionalInformation("bin"),
             "lastFourDigits" => array_key_exists("lastFourDigits", $detailsArray) ? $detailsArray['lastFourDigits'] : $payment->getCcLast4(),
-            "expirationMonth" => array_key_exists("expirationMonth", $detailsArray) ? $detailsArray['expirationMonth'] : (string)$payment->getCcExpMonth(),
-            "expirationYear" => array_key_exists("expirationYear", $detailsArray) ? $detailsArray['expirationYear'] : (string)$payment->getCcExpYear(),
+            "expirationMonth" => array_key_exists("expirationMonth", $detailsArray) ? $detailsArray['expirationMonth'] : str_pad($payment->getCcExpMonth(), 2, "0", STR_PAD_LEFT),
+            "expirationYear" => array_key_exists("expirationYear", $detailsArray) ? $detailsArray['expirationYear'] : str_pad($payment->getCcExpYear(), 4, "0", STR_PAD_LEFT),
             "countryOfIssuance" => $payment->getData("country_of_issuance"),
             "cardBank" => $payment->getEcheckBankName(),
             "verificationResults" => [
