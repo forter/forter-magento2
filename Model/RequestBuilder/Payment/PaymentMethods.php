@@ -40,24 +40,20 @@ class PaymentMethods
     {
         $detailsArray = [];
         $authorize_data = $payment->getAdditionalInformation('authorize_cards');
-        if ($authorize_data && is_array($authorize_data)) {
-            $cards_data = array_values($authorize_data);
-            if ($cards_data && $cards_data[0]) {
-                $card_data = $cards_data[0];
-                if (isset($card_data['cc_type'])) {
-                    $detailsArray['cardBrand'] = $card_data['cc_type'];
-                }
-                if (isset($card_data['cc_last4'])) {
-                    $detailsArray['lastFourDigits'] = $payment->decrypt($card_data['cc_last4']);
-                    $detailsArray['lastFourDigits'] = isset($detailsArray['lastFourDigits']) ? $detailsArray['lastFourDigits'] : $payment->decrypt($payment->getCcLast4());
-                }
-                if (isset($card_data['cc_response_code'])) {
-                    $detailsArray['cvvResult'] = $card_data['cc_response_code'];
-                }
-                if (isset($card_data['cc_avs_result_code'])) {
-                    $detailsArray['avsFullResult'] = $card_data['cc_avs_result_code'];
-                }
-            }
+
+        $ccLast4 = $payment->getAdditionalInformation('ccLast4');
+        if ($ccLast4) {
+            $detailsArray['lastFourDigits'] = $ccLast4;
+        }
+
+        $cc_type= $payment->getAdditionalInformation('accountType');
+        if ($cc_type) {
+            $detailsArray['cardBrand'] = $cc_type;
+        }
+
+        $cvvResponseCode = $payment->getAdditionalInformation('cvvResultCode');
+        if ($cvvResponseCode) {
+            $detailsArray['cvvResult'] = $cvvResponseCode;
         }
 
         return $this->preferCcDetails($payment, $detailsArray);
@@ -91,17 +87,13 @@ class PaymentMethods
 
     public function preferCcDetails($payment, $detailsArray=[])
     {
-        $authorizationCode = array_key_exists("authorizationCode", $detailsArray) ? $detailsArray['authorizationCode'] : (
-            $payment->getCcApproval() != null ? $payment->getCcApproval() : $payment->getAdditionalInformation("processorAuthorizationCode")
-        );
-
         return [
             "nameOnCard" => array_key_exists("nameOnCard", $detailsArray) ? $detailsArray['nameOnCard'] : $payment->getCcOwner() . "",
             "cardBrand" => array_key_exists("cardBrand", $detailsArray) ? $detailsArray['cardBrand'] : $payment->getCcType(),
             "bin" => $payment->getAdditionalInformation("bin"),
             "lastFourDigits" => array_key_exists("lastFourDigits", $detailsArray) ? $detailsArray['lastFourDigits'] : $payment->getCcLast4(),
-            "expirationMonth" => array_key_exists("expirationMonth", $detailsArray) ? $detailsArray['expirationMonth'] : str_pad($payment->getCcExpMonth(), 2, "0", STR_PAD_LEFT),
-            "expirationYear" => array_key_exists("expirationYear", $detailsArray) ? $detailsArray['expirationYear'] : str_pad($payment->getCcExpYear(), 4, "20", STR_PAD_LEFT),
+            "expirationMonth" => array_key_exists("expirationMonth", $detailsArray) ? $detailsArray['expirationMonth'] : $payment->getCcExpMonth(),
+            "expirationYear" => array_key_exists("expirationYear", $detailsArray) ? $detailsArray['expirationYear'] : $payment->getCcExpYear(),
             "countryOfIssuance" => $payment->getData("country_of_issuance"),
             "cardBank" => $payment->getEcheckBankName(),
             "verificationResults" => [
