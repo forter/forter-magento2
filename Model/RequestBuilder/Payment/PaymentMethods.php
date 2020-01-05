@@ -56,6 +56,16 @@ class PaymentMethods
             $detailsArray['cvvResult'] = $cvvResponseCode;
         }
 
+        $cvvResponseCode = $payment->getAdditionalInformation('cvvResultCode');
+        if ($cvvResponseCode) {
+            $detailsArray['cvvResult'] = $cvvResponseCode;
+        }
+
+        $cvvResponseCode = $payment->getAdditionalInformation('cvvResultCode');
+        if ($cvvResponseCode) {
+            $detailsArray['cvvResult'] = $cvvResponseCode;
+        }
+
         return $this->preferCcDetails($payment, $detailsArray);
     }
 
@@ -77,9 +87,9 @@ class PaymentMethods
             $detailsArray['avsZipResult'] = $avsZipResult;
         }
 
-        $avsStreetResult = $payment->getAdditionalInformation('avsStreetAddressResponseCode');
+        $authCode = $payment->getAdditionalInformation('authCode');
         if ($avsStreetResult) {
-            $detailsArray['avsStreetResult'] = $avsStreetResult;
+            $detailsArray['authCode'] = $authCode;
         }
 
         return $this->preferCcDetails($payment, $detailsArray);
@@ -98,7 +108,7 @@ class PaymentMethods
             "cardBank" => $payment->getEcheckBankName(),
             "verificationResults" => [
                 "cvvResult" => array_key_exists("cvvResult", $detailsArray) ? $detailsArray['cvvResult'] : $payment->getCcCidStatus(),
-                "authorizationCode" => $authorizationCode,
+                "authorizationCode" => array_key_exists("authCode", $detailsArray) ? $detailsArray['authCode'] : null,
                 "processorResponseCode" => $payment->getAdditionalInformation("processorResponseCode"),
                 "processorResponseText" => $payment->getAdditionalInformation("processorResponseText"),
                 "avsStreetResult" => array_key_exists("avsStreetResult", $detailsArray) ? $detailsArray['avsStreetResult'] : null,
