@@ -56,14 +56,9 @@ class PaymentMethods
             $detailsArray['cvvResult'] = $cvvResponseCode;
         }
 
-        $cvvResponseCode = $payment->getAdditionalInformation('cvvResultCode');
-        if ($cvvResponseCode) {
-            $detailsArray['cvvResult'] = $cvvResponseCode;
-        }
-
-        $cvvResponseCode = $payment->getAdditionalInformation('cvvResultCode');
-        if ($cvvResponseCode) {
-            $detailsArray['cvvResult'] = $cvvResponseCode;
+        $authCode = $payment->getAdditionalInformation('authCode');
+        if ($authCode) {
+            $detailsArray['authCode'] = $authCode;
         }
 
         return $this->preferCcDetails($payment, $detailsArray);
@@ -87,9 +82,9 @@ class PaymentMethods
             $detailsArray['avsZipResult'] = $avsZipResult;
         }
 
-        $authCode = $payment->getAdditionalInformation('authCode');
+        $avsStreetResult = $payment->getAdditionalInformation('avsStreetAddressResponseCode');
         if ($avsStreetResult) {
-            $detailsArray['authCode'] = $authCode;
+            $detailsArray['avsStreetResult'] = $avsStreetResult;
         }
 
         return $this->preferCcDetails($payment, $detailsArray);
