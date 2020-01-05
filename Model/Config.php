@@ -359,7 +359,7 @@ class Config
      * @param $type
      * @return mixed|string
      */
-    public function getPrePostDesicionMsg($type)
+    public function getPrePostDecisionMsg($type)
     {
         $result = $this->scopeConfig->getValue('forter/immediate_post_pre_decision/' . $type);
         switch ($type) {
