@@ -43,7 +43,7 @@ class Forter extends \Magento\Sales\Block\Adminhtml\Order\AbstractOrder implemen
      */
     public function getTabLabel()
     {
-        return __('Forter Desicion');
+        return __('Forter Decision');
     }
 
     /**
@@ -51,7 +51,7 @@ class Forter extends \Magento\Sales\Block\Adminhtml\Order\AbstractOrder implemen
      */
     public function getTabTitle()
     {
-        return __('Forter Desicion');
+        return __('Forter Decision');
     }
 
     /**
