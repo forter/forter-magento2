@@ -107,10 +107,6 @@ class PaymentMethods
             $cardDetails["lastFourDigits"] = array_key_exists("lastFourDigits", $detailsArray) ? $detailsArray['lastFourDigits'] : $payment->getCcLast4();
         }
 
-        if (!array_key_exists("expirationMonth", $cardDetails) && !array_key_exists("expirationYear", $cardDetails) && !array_key_exists("lastFourDigits", $cardDetails)) {
-            return $cardDetails;
-        }
-
         $cardDetails =  [
             "nameOnCard" => array_key_exists("nameOnCard", $detailsArray) ? $detailsArray['nameOnCard'] : $payment->getCcOwner() . "",
             "cardBrand" => array_key_exists("cardBrand", $detailsArray) ? $detailsArray['cardBrand'] : $payment->getCcType(),
