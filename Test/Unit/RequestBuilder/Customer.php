@@ -1,13 +1,19 @@
 <?php
 
-namespace Forter\Forter\Test\Unit;
+namespace Forter\Forter\Test\Unit\RequestBuilder;
 
-class Customer extends \PHPUnit\Framework\TestCase
+use Forter\Forter\Model\RequestBuilder\Customer as CustomerPrepere;
+use Forter\Forter\Test\Unit\DataPrefer\ConstList;
+use Forter\Forter\Test\Unit\DataPrefer\ForterMockBuilder as ForterMock;
+use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
+use PHPUnit\Framework\TestCase;
+
+class Customer extends TestCase
 {
     protected function setUp()
     {
-        $objectManager = new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this);
-        $mockBuilder = new ForterMockBuilder();
+        $objectManager = new ObjectManager($this);
+        $mockBuilder = new ForterMock();
         $this->customerMock = $mockBuilder->buildCustomerMock();
         $sessionMock = $mockBuilder->buildSessionMock($this->customerMock);
         $orderFactoryMock = $mockBuilder->buildOrderFactoryMock();
@@ -17,7 +23,7 @@ class Customer extends \PHPUnit\Framework\TestCase
         $this->orderMock = $mockBuilder->buildOrderMock();
 
         $this->customerPrepere = $objectManager->getObject(
-            \Forter\Forter\Model\RequestBuilder\Customer::class,
+            CustomerPrepere::class,
             [
                 "session" => $sessionMock,
                 "orderFactory" => $orderFactoryMock,

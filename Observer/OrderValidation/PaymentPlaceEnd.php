@@ -124,6 +124,7 @@ class PaymentPlaceEnd implements ObserverInterface
 
             if ($forterResponse->status == 'failed' || !isset($forterResponse->action)) {
                 $order->setForterStatus('not reviewed');
+                $order->save();
                 return false;
             }
 
