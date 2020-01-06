@@ -54,14 +54,18 @@ class Payment
             switch ($payment_method) {
               case 'authorizenet_directpost':
               case 'authorizenet_acceptjs':
-                $paymentData["creditCard"] = $this->paymentMethods->getAuthorizeNetDetails($payment);
+                $cardDetails = $this->paymentMethods->getAuthorizeNetDetails($payment);
                 break;
               case 'braintree':
-                $paymentData["creditCard"] = $this->paymentMethods->getBraintreeDetails($payment);
+                $cardDetails = $this->paymentMethods->getBraintreeDetails($payment);
                 break;
               default:
-                $paymentDatap["creditCard"] = $this->paymentMethods->preferCcDetails($payment);
+                $cardDetails = $this->paymentMethods->preferCcDetails($payment);
           }
+        }
+
+        if (array_key_exists("expirationMonth", $cardDetails) || array_key_exists("expirationYear", $cardDetails) || array_key_exists("lastFourDigits", $cardDetails)) {
+            $paymentData["creditCard"] = $cardDetails;
         }
 
         $paymentData["billingDetails"] = $this->customerPreper->getBillingDetails($billingAddress);
