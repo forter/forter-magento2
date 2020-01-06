@@ -89,15 +89,20 @@ class PaymentPlaceStart implements ObserverInterface
             return false;
         }
 
-        $decision = null;
-
         try {
             $order = $observer->getEvent()->getPayment()->getOrder();
+
             $data = $this->requestBuilderOrder->buildTransaction($order);
 
             $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
             $response = $this->abstractApi->sendApiRequest($url, json_encode($data));
 
+            $order->setForterResponse($response);
+            if (isset($response->action)) {
+                $order->setForterStatus($response->action);
+            }
+
+            $order->save();
             $response = json_decode($response);
 
             if ($response->status == 'failed' || $response->action != 'decline' || !isset($response->action)) {
@@ -109,5 +114,6 @@ class PaymentPlaceStart implements ObserverInterface
         }
 
         $this->decline->handlePreTransactionDescision();
+        return true;
     }
 }
