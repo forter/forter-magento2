@@ -1,20 +1,26 @@
 <?php
 
-namespace Forter\Forter\Test\Unit;
+namespace Forter\Forter\Test\Unit\RequestBuilder;
 
-class General extends \PHPUnit\Framework\TestCase
+use Forter\Forter\Model\RequestBuilder\BasicInfo;
+use Forter\Forter\Test\Unit\DataPrefer\ConstList;
+use Forter\Forter\Test\Unit\DataPrefer\ForterMockBuilder as ForterMock;
+use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
+use PHPUnit\Framework\TestCase;
+
+class General extends TestCase
 {
     protected function setUp()
     {
-        $objectManager = new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this);
-        $mockBuilder = new ForterMockBuilder();
+        $objectManager = new ObjectManager($this);
+        $mockBuilder = new ForterMock();
 
         $cookieManagerInterfaceMock = $mockBuilder->buildCookieManagerInterfaceMock();
 
         $this->orderMock = $mockBuilder->buildOrderMock();
 
         $this->basicinfo = $objectManager->getObject(
-            \Forter\Forter\Model\RequestBuilder\BasicInfo::class,
+            BasicInfo::class,
             [
                 "cookieManager" => $cookieManagerInterfaceMock
             ]

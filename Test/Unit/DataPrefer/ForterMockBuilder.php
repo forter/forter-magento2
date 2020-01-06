@@ -1,6 +1,6 @@
 <?php
 
-namespace Forter\Forter\Test\Unit;
+namespace Forter\Forter\Test\Unit\DataPrefer;
 
 class ForterMockBuilder extends \PHPUnit\Framework\TestCase
 {
@@ -19,6 +19,16 @@ class ForterMockBuilder extends \PHPUnit\Framework\TestCase
         $customerMock->method("getCreatedAt")->willReturn(ConstList::CUSTOMER_CREATION_DATE);
 
         return $customerMock;
+    }
+
+    /**
+     * Gets partners model mock
+     *
+     * @return \PHPUnit_Framework_MockObject_MockObject|\Magento\Framework\HTTP\Client\Curl
+     */
+    public function getCurlMock($methods)
+    {
+        return $this->createPartialMock(\Magento\Framework\HTTP\Client\Curl::class, $methods, []);
     }
 
     public function buildReviewMock()
@@ -73,6 +83,25 @@ class ForterMockBuilder extends \PHPUnit\Framework\TestCase
         $storeMock->method("getName")->willReturn(ConstList::STORE_NAME);
         $storeMock->method("getId")->willReturn(ConstList::STORE_ID);
         $storeMock->method("getUrl")->willReturn(ConstList::STORE_URL);
+
+        return $storeMock;
+    }
+
+    public function buildForterConfigMock()
+    {
+        $storeMock = $this->getMockBuilder(\Forter\Forter\Model\Config::class)
+            ->disableOriginalConstructor()
+            ->setMethods(["getStoreId","isEnabled","getTimeOutSettings","getSiteId","getApiVersion","getModuleVersion","getSecretKey","log"])
+            ->getMock();
+
+        $storeMock->method("getStoreId")->willReturn(ConstList::STORE_ID);
+        $storeMock->method("isEnabled")->willReturn(true);
+        $storeMock->method("getTimeOutSettings")->willReturn(ConstList::TIME_OUT_SETTINGS);
+        $storeMock->method("getSiteId")->willReturn(ConstList::SITE_ID);
+        $storeMock->method("getApiVersion")->willReturn(ConstList::API_ID);
+        $storeMock->method("getModuleVersion")->willReturn(ConstList::MODULE_ID);
+        $storeMock->method("getModuleVersion")->willReturn(ConstList::SECRET_KEY);
+        $storeMock->method("log")->willReturn(true);
 
         return $storeMock;
     }
@@ -192,6 +221,21 @@ class ForterMockBuilder extends \PHPUnit\Framework\TestCase
         $orderMock->method("getCouponCode")->willReturn(ConstList::COUPONCODE);
         $orderMock->method("getDiscountAmount")->willReturn(ConstList::DISCOUNTAMOUNT);
         $orderMock->method("getDiscountDescription")->willReturn(ConstList::DISCOUNTDESCRIPTION);
+
+        $items = [
+            new \Magento\Framework\DataObject(
+                [
+                  'id' => ConstList::PRODUCT_ID,
+                  'name' => ConstList::PRODUCT_NAME,
+                  'qty_ordered' => ConstList::PRODUCT_QTY_ORDERED,
+                  'price' => ConstList::PRODUCT_PRICE,
+                  'is_virtual' => ConstList::PRODUCT_IS_VIRTUAL,
+                  'gift_message_available' => ConstList::PRODUCT_GIFT_MESSAGE_AVAILABLE
+                ]
+            )
+        ];
+
+        $orderMock->expects($this->once())->method('getAllItems')->will($this->returnValue($items));
 
         return $orderMock;
     }

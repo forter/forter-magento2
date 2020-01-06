@@ -1,10 +1,10 @@
 <?php
 
-namespace Forter\Forter\Test\Unit;
+namespace Forter\Forter\Test\Unit\DataPrefer;
 
 class ConstList
 {
-    const FORTER_COOKIE = "f1o2r3t4e5r6t7o8k9e0n1c2o3o4k5i6e";
+    const FORTER_COOKIE = "7cb7ee292dff4c87a43eaefe0d495c4b_1578229007705__UDF43_9ck";
 
     const CUSTOMER_LOCKED = true;
     const CUSTOMER_ADDRESS_BY_ID = null;
@@ -54,7 +54,7 @@ class ConstList
     const CURRENCYCODE = "ILS";
 
     const ORDER_REAL_ORDER_ID = "500";
-    const ORDER_REMOTE_IP = "123.123.123.123";
+    const ORDER_REMOTE_IP = "127.0.0.1";
     const ORDER_GRAND_TOTAL = 1337;
     const ORDER_METHOD = "Elimination";
     const COUPONCODE ="GO_FORTER_GO";
@@ -67,10 +67,26 @@ class ConstList
     const GUEST = "GUEST";
     const SUSPENDED = "SUSPENDED";
 
-    const USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0 Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:42.0) Gecko/20100101 Firefox/42.0.";
+    const USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.79 Safari/537.36";
 
     const REVIEW_COUNT = 3;
 
-    const ORDER_ITEM_STORE_ID = '1';
-    const PRODUCT_ID = '1';
+    const MODULE_ID = '1.0';
+    const API_ID = '2.6';
+    const SITE_ID = '194d494d2557';
+    const SECRET_KEY = '30a0af07fe3414b731c094690223fa74927d7e17';
+
+    const TIME_OUT_SETTINGS  = [
+      "base_connection_timeout" => '1000',
+      "base_request_timeout" => '2000',
+      "max_connection_timeout" => '8000',
+      "max_request_timeout" => '16000'
+    ];
+
+    const PRODUCT_ID = 4;
+    const PRODUCT_NAME = 'name_test';
+    const PRODUCT_QTY_ORDERED = 3;
+    const PRODUCT_PRICE = 36;
+    const PRODUCT_IS_VIRTUAL = false;
+    const PRODUCT_GIFT_MESSAGE_AVAILABLE = true;
 }

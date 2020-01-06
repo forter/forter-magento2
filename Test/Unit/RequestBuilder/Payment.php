@@ -1,13 +1,18 @@
 <?php
 
-namespace Forter\Forter\Test\Unit;
+namespace Forter\Forter\Test\Unit\RequestBuilder;
 
-class Payment extends \PHPUnit\Framework\TestCase
+use Forter\Forter\Test\Unit\DataPrefer\ConstList;
+use Forter\Forter\Test\Unit\DataPrefer\ForterMockBuilder as ForterMock;
+use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
+use PHPUnit\Framework\TestCase;
+
+class Payment extends TestCase
 {
     protected function setUp()
     {
-        $objectManager = new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this);
-        $mockBuilder = new ForterMockBuilder();
+        $objectManager = new ObjectManager($this);
+        $mockBuilder = new ForterMock();
         $this->customerMock = $mockBuilder->buildCustomerMock();
         $sessionMock = $mockBuilder->buildSessionMock($this->customerMock);
         $orderFactoryMock = $mockBuilder->buildOrderFactoryMock();
@@ -57,7 +62,7 @@ class Payment extends \PHPUnit\Framework\TestCase
             "cardBank" => ConstList::PAYMENT_ECHECKBANKNAME,
             "verificationResults" => [
               "cvvResult" => null,
-              "authorizationCode" => ConstList::PAYMENT_PROCESSOR_AUTHORIZATION_CODE,
+              "authorizationCode" => null,
               "processorResponseCode" => ConstList::PAYMENT_PROCESSOR_RESPONSE_CODE,
               "processorResponseText" => ConstList::PAYMENT_PROCESSOR_RESPONSE_TEXT,
               "avsStreetResult" => ConstList::PAYMENT_AVS_STREET_ADDRESS_RESPONSE_CODE,

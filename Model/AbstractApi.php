@@ -4,7 +4,7 @@ namespace Forter\Forter\Model;
 
 use Forter\Forter\Model\Config as ForterConfig;
 use Magento\Checkout\Model\Session;
-use Magento\Framework\HTTP\ClientInterface;
+use Magento\Framework\HTTP\Client\Curl as ClientInterface;
 
 /**
  * Class AbstractApi
@@ -68,9 +68,10 @@ class AbstractApi
                 $response = $this->clientInterface->getBody();
                 $this->forterConfig->log('Response Body:' . $response, 'debug');
                 $this->forterConfig->log('Response Header:' . json_encode($this->clientInterface->getHeaders()));
+
                 $response = json_decode($response);
 
-                if ($response->status) {
+                if (isset($response->status) || isset($response->forterDecision)) {
                     return json_encode($response);
                 }
             } while ($timeOutStatus);
