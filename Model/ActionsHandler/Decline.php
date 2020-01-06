@@ -182,17 +182,16 @@ class Decline
      */
     private function addCommentToOrder($order, $message)
     {
-        $order->addStatusHistoryComment('Forter:' . $message)
+        $order->addStatusHistoryComment('Forter: ' . $message)
           ->setIsCustomerNotified(false)
           ->setEntityName('order')
           ->save();
     }
 
-    private function markOrderPaymentReview($order)
+    public function markOrderPaymentReview($order)
     {
         $orderState = Order::STATE_PAYMENT_REVIEW;
         $order->setState($orderState)->setStatus(Order::STATE_PAYMENT_REVIEW);
-        $order->setStatus('Suspected Fraud');
         $order->save();
         $this->addCommentToOrder($order, 'Order Has been marked for Payment Review');
     }
