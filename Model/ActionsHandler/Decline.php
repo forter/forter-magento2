@@ -84,8 +84,6 @@ class Decline
         $forterDecision = $this->forterConfig->getDeclinePre();
         if ($forterDecision == '1') {
             throw new PaymentException(__($this->forterConfig->getPreThanksMsg()));
-        } elseif ($forterDecision == '2') {
-            $this->checkoutSession->destroy();
         }
 
         return $this;

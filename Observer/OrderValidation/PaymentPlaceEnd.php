@@ -48,7 +48,7 @@ class PaymentPlaceEnd implements ObserverInterface
     /**
      * @var Config
      */
-    private $config;
+    private $forterConfig;
     /**
      * @var Order
      */
