@@ -95,18 +95,6 @@ class PaymentMethods
     {
         $cardDetails = [];
 
-        if (array_key_exists("expirationMonth", $detailsArray) || $payment->getCcExpMonth()) {
-            $cardDetails["expirationMonth"] = array_key_exists("expirationMonth", $detailsArray) ? $detailsArray['expirationMonth'] : str_pad($payment->getCcExpMonth(), 2, "0", STR_PAD_LEFT);
-        }
-
-        if (array_key_exists("expirationYear", $detailsArray) || $payment->getCcExpYear()) {
-            $cardDetails["expirationYear"] = array_key_exists("expirationMonth", $detailsArray) ? $detailsArray['expirationYear'] : str_pad($payment->getCcExpYear(), 2, "0", STR_PAD_LEFT);
-        }
-
-        if (array_key_exists("lastFourDigits", $detailsArray) || $payment->getCcLast4()) {
-            $cardDetails["lastFourDigits"] = array_key_exists("lastFourDigits", $detailsArray) ? $detailsArray['lastFourDigits'] : $payment->getCcLast4();
-        }
-
         $cardDetails =  [
             "nameOnCard" => array_key_exists("nameOnCard", $detailsArray) ? $detailsArray['nameOnCard'] : $payment->getCcOwner() . "",
             "cardBrand" => array_key_exists("cardBrand", $detailsArray) ? $detailsArray['cardBrand'] : $payment->getCcType(),
@@ -128,6 +116,18 @@ class PaymentMethods
             ],
             "fullResponsePayload" => $payment->getAdditionalInformation()
         ];
+
+        if (array_key_exists("expirationMonth", $detailsArray) || $payment->getCcExpMonth()) {
+            $cardDetails["expirationMonth"] = array_key_exists("expirationMonth", $detailsArray) ? $detailsArray['expirationMonth'] : str_pad($payment->getCcExpMonth(), 2, "0", STR_PAD_LEFT);
+        }
+
+        if (array_key_exists("expirationYear", $detailsArray) || $payment->getCcExpYear()) {
+            $cardDetails["expirationYear"] = array_key_exists("expirationMonth", $detailsArray) ? $detailsArray['expirationYear'] : str_pad($payment->getCcExpYear(), 2, "0", STR_PAD_LEFT);
+        }
+
+        if (array_key_exists("lastFourDigits", $detailsArray) || $payment->getCcLast4()) {
+            $cardDetails["lastFourDigits"] = array_key_exists("lastFourDigits", $detailsArray) ? $detailsArray['lastFourDigits'] : $payment->getCcLast4();
+        }
 
         return $cardDetails;
     }
