@@ -53,11 +53,9 @@ class OrderSaveBefore implements ObserverInterface
             $orderState = $order->getState();
             $orderOrigState = $order->getOrigData('state');
 
-            if ($orderOrigState == 'holded') {
-                return false;
-            } elseif ($orderState == 'complete' && $orderOrigState != 'complete') {
+            if ($orderState == 'complete' && $orderOrigState != 'complete') {
                 $orderState = 'COMPLETED';
-            } elseif ($orderState == 'processing' && $orderOrigState != 'processing' && $orderOrigState != 'new') {
+            } elseif ($orderState == 'processing' && $orderOrigState != 'processing') {
                 $orderState = 'PROCESSING';
             } elseif ($orderState == 'canceled' && $orderOrigState != 'canceled') {
                 $orderState = 'CANCELED_BY_MERCHANT';
