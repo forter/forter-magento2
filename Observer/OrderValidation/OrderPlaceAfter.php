@@ -51,9 +51,7 @@ class OrderPlaceAfter implements ObserverInterface
         try {
             $order = $observer->getEvent()->getOrder();
             $status = $order->getForterStatus();
-
             if ($status == "decline") {
-                $this->messageManager->getMessages(true);
                 $this->messageManager->addErrorMessage($this->forterConfig->getPostThanksMsg());
             }
 
