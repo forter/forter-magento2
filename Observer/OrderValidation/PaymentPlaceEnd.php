@@ -118,13 +118,12 @@ class PaymentPlaceEnd implements ObserverInterface
             $data = $this->requestBuilderOrder->buildTransaction($order);
             $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
             $forterResponse = $this->abstractApi->sendApiRequest($url, json_encode($data));
+
             $order->setForterResponse($forterResponse);
-            $order->save();
             $forterResponse = json_decode($forterResponse);
 
             if ($forterResponse->status == 'failed' || !isset($forterResponse->action)) {
                 $order->setForterStatus('not reviewed');
-                $order->save();
                 return false;
             }
 
@@ -163,7 +162,7 @@ class PaymentPlaceEnd implements ObserverInterface
 
             $storeId = $order->getStore()->getId();
             $currentTime = $this->dateTime->gmtDate();
-            $order->save();
+
             if ($type) {
                 $this->queue->create()
                   ->setStoreId($storeId)

@@ -103,7 +103,6 @@ class PaymentPlaceStart implements ObserverInterface
             if (isset($response->action)) {
                 $order->setForterStatus($response->action);
             }
-            $order->save();
 
             if ($response->status == 'failed' || $response->action != 'decline' || !isset($response->action)) {
                 return true;
