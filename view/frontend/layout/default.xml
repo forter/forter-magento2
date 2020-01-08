@@ -4,5 +4,9 @@
         <referenceContainer name="before.body.end">
             <block class="Forter\Forter\Block\Forter" name="forter.javascript" template="forter.phtml" ifconfig="forter/settings/enabled" />
         </referenceContainer>
+        <referenceContainer name="page.messages">
+          <block class="Magento\Framework\View\Element\Template" name="ajax.message.placeholder" template="Magento_Theme::html/messages.phtml"></block>
+          <block class="Magento\Framework\View\Element\Messages" name="messages" as="messages" template="Magento_Theme::messages.phtml"></block>
+        </referenceContainer>
     </body>
 </page>
