@@ -62,10 +62,9 @@ class Payment
               default:
                 $cardDetails = $this->paymentMethods->preferCcDetails($payment);
           }
-        }
-
-        if (array_key_exists("expirationMonth", $cardDetails) || array_key_exists("expirationYear", $cardDetails) || array_key_exists("lastFourDigits", $cardDetails)) {
-            $paymentData["creditCard"] = $cardDetails;
+            if (array_key_exists("expirationMonth", $cardDetails) || array_key_exists("expirationYear", $cardDetails) || array_key_exists("lastFourDigits", $cardDetails)) {
+                $paymentData["creditCard"] = $cardDetails;
+            }
         }
 
         $paymentData["billingDetails"] = $this->customerPreper->getBillingDetails($billingAddress);
