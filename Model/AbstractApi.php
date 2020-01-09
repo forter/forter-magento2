@@ -49,7 +49,7 @@ class AbstractApi
      * @param $data
      * @return bool|false|string
      */
-    public function sendApiRequest($url, $data)
+    public function sendApiRequest($url, $data, $type='post')
     {
         if (!$this->forterConfig->isEnabled()) {
             return false;
@@ -64,7 +64,13 @@ class AbstractApi
                 $this->setCurlOptions(strlen($data), $tries);
                 $this->forterConfig->log('Request Url:' . $url);
                 $this->forterConfig->log('Request Body:' . $data);
-                $this->clientInterface->post($url, $data);
+
+                if ($type == 'post') {
+                    $this->clientInterface->post($url, $data);
+                } elseif ($type == 'get') {
+                    $this->clientInterface->get($url);
+                }
+
                 $response = $this->clientInterface->getBody();
                 $this->forterConfig->log('Response Body:' . $response, 'debug');
                 $this->forterConfig->log('Response Header:' . json_encode($this->clientInterface->getHeaders()));
