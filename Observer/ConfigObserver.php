@@ -4,6 +4,8 @@ namespace Forter\Forter\Observer;
 
 use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\Config;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\App\Config\Storage\WriterInterface;
 use Magento\Framework\Event\Observer;
 
 /**
@@ -12,9 +14,7 @@ use Magento\Framework\Event\Observer;
  */
 class ConfigObserver implements \Magento\Framework\Event\ObserverInterface
 {
-    /**
-     *
-     */
+    const Test_Api = "https://api.forter-secure.com/credentials/test";
     const SETTINGS_API_ENDPOINT = 'https://api.forter-secure.com/ext/settings/';
     /**
      * @var AbstractApi
@@ -31,9 +31,11 @@ class ConfigObserver implements \Magento\Framework\Event\ObserverInterface
      * @param Config $forterConfig
      */
     public function __construct(
+        WriterInterface $writeInterface,
         AbstractApi $abstractApi,
         Config $forterConfig
     ) {
+        $this->writeInterface = $writeInterface;
         $this->abstractApi = $abstractApi;
         $this->forterConfig = $forterConfig;
     }
@@ -51,6 +53,18 @@ class ConfigObserver implements \Magento\Framework\Event\ObserverInterface
         }
 
         try {
+            $url = self::Test_Api;
+            $response = $this->abstractApi->sendApiRequest($url, null, 'get');
+            $response = json_decode($response);
+            if ($response->status == 'failed') {
+                $this->writeInterface->save(
+                    'forter/settings/enabled',
+                    false,
+                    $scope = ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
+                    $scopeId = 0
+                );
+                throw new \Exception('Alexandre genral error message on credentials come here');
+            }
             $json = [
               "general" => [
                 "active" => $this->forterConfig->isEnabled(),
