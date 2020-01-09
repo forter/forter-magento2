@@ -48,22 +48,9 @@ class ConfigObserver implements \Magento\Framework\Event\ObserverInterface
      */
     public function execute(Observer $observer)
     {
-        if (!$this->forterConfig->isEnabled()) {
-            return false;
-        }
-
         try {
-            $url = self::Test_Api;
-            $response = $this->abstractApi->sendApiRequest($url, null, 'get');
-            $response = json_decode($response);
-            if ($response->status == 'failed') {
-                $this->writeInterface->save(
-                    'forter/settings/enabled',
-                    false,
-                    $scope = ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
-                    $scopeId = 0
-                );
-                throw new \Exception('Alexandre genral error message on credentials come here');
+            if (!$this->validateCredentials()) {
+                return false;
             }
             $json = [
               "general" => [
@@ -98,5 +85,29 @@ class ConfigObserver implements \Magento\Framework\Event\ObserverInterface
             $this->abstractApi->reportToForterOnCatch($e);
             throw new \Exception($e->getMessage());
         }
+    }
+
+    private function validateCredentials()
+    {
+        if (!$this->forterConfig->isEnabled()) {
+            throw new \Exception('Active extension to save details');
+            return false;
+        }
+
+        $url = self::Test_Api;
+        $response = $this->abstractApi->sendApiRequest($url, null, 'get');
+        $response = json_decode($response);
+        if ($response->status == 'failed') {
+            $this->writeInterface->save(
+                'forter/settings/enabled',
+                false,
+                $scope = ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
+                $scopeId = 0
+            );
+            throw new \Exception('Alexandre genral error message on credentials come here');
+            return false;
+        }
+
+        return true;
     }
 }
