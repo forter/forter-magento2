@@ -107,7 +107,6 @@ class PaymentPlaceStart implements ObserverInterface
             }
 
             $order->setForterStatus($response->action);
-            $order->save();
 
             if ($response->action != 'decline') {
                 return true;
