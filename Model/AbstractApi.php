@@ -51,10 +51,6 @@ class AbstractApi
      */
     public function sendApiRequest($url, $data, $type='post')
     {
-        if (!$this->forterConfig->isEnabled()) {
-            return false;
-        }
-
         try {
             $tries = 1;
 

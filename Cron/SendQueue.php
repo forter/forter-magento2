@@ -48,7 +48,7 @@ class SendQueue
         ->addFieldToFilter('sync_flag', '0');
 
         $items
-       ->setPageSize(3)->setCurPage(1);
+       ->setPageSize(15)->setCurPage(1);
 
         foreach ($items as $item) {
             $order = $this->orderRepository->get($item->getData('entity_id'));
