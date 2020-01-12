@@ -47,7 +47,7 @@ class AbstractApi
     /**
      * @param $url
      * @param $data
-     * @return bool|false|string
+     * @return string
      */
     public function sendApiRequest($url, $data, $type='post')
     {
