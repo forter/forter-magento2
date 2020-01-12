@@ -62,29 +62,40 @@ class AbstractApi
                 $tries++;
                 $timeOutStatus = $this->calcTimeOut($tries);
                 $this->setCurlOptions(strlen($data), $tries);
+                $this->forterConfig->log('Request attempt number:' . $tries);
                 $this->forterConfig->log('Request Url:' . $url);
                 $this->forterConfig->log('Request Body:' . $data);
 
-                if ($type == 'post') {
-                    $this->clientInterface->post($url, $data);
-                } elseif ($type == 'get') {
-                    $this->clientInterface->get($url);
-                }
+                try {
+                    if ($type == 'post') {
+                        $this->clientInterface->post($url, $data);
+                    } elseif ($type == 'get') {
+                        $this->clientInterface->get($url);
+                    }
+                    $response = $this->clientInterface->getBody();
+                    $this->forterConfig->log('Response Body:' . $response, 'debug');
+                    $this->forterConfig->log('Response Header:' . json_encode($this->clientInterface->getHeaders()));
 
-                $response = $this->clientInterface->getBody();
-                $this->forterConfig->log('Response Body:' . $response, 'debug');
-                $this->forterConfig->log('Response Header:' . json_encode($this->clientInterface->getHeaders()));
+                    $response = json_decode($response);
 
-                $response = json_decode($response);
-
-                if (isset($response->status) || isset($response->forterDecision)) {
-                    return json_encode($response);
+                    if (isset($response->status) || isset($response->forterDecision)) {
+                        return json_encode($response);
+                    }
+                } catch (\Exception $e) {
+                    $this->forterConfig->log('Error:' . $e->getMessage());
                 }
             } while ($timeOutStatus);
 
-            return false;
+            return json_encode([
+                "status" => "failed",
+                "message" => "maximum retries reached, please see logs"
+            ]);
         } catch (\Exception $e) {
             $this->forterConfig->log('Error:' . $e->getMessage());
+            return json_encode([
+                "status" => "failed",
+                "message" => "an error occurred, please see logs"
+            ]);
         }
     }
 
