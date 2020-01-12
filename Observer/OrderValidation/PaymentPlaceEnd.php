@@ -128,7 +128,6 @@ class PaymentPlaceEnd implements ObserverInterface
             }
 
             $order->setForterStatus($forterResponse->action);
-            $order->save();
 
             $type = null;
             if ($forterResponse->action == "decline") {
@@ -163,6 +162,8 @@ class PaymentPlaceEnd implements ObserverInterface
 
             $storeId = $order->getStore()->getId();
             $currentTime = $this->dateTime->gmtDate();
+
+            $order->save();
 
             if ($type) {
                 $this->queue->create()

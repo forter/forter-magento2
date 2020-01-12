@@ -4,7 +4,6 @@ namespace Forter\Forter\Observer;
 
 use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\Config;
-use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\Config\Storage\WriterInterface;
 use Magento\Framework\Event\Observer;
 
@@ -52,6 +51,7 @@ class ConfigObserver implements \Magento\Framework\Event\ObserverInterface
             if (!$this->validateCredentials()) {
                 return false;
             }
+
             $json = [
               "general" => [
                 "active" => $this->forterConfig->isEnabled(),
@@ -89,22 +89,11 @@ class ConfigObserver implements \Magento\Framework\Event\ObserverInterface
 
     private function validateCredentials()
     {
-        if (!$this->forterConfig->isEnabled()) {
-            throw new \Exception('Active extension to save details');
-            return false;
-        }
-
         $url = self::Test_Api;
         $response = $this->abstractApi->sendApiRequest($url, null, 'get');
         $response = json_decode($response);
         if ($response->status == 'failed') {
-            $this->writeInterface->save(
-                'forter/settings/enabled',
-                false,
-                $scope = ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
-                $scopeId = 0
-            );
-            throw new \Exception('Alexandre genral error message on credentials come here');
+            throw new \Exception('Site ID and Secret Key are incorrect');
             return false;
         }
 
