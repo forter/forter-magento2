@@ -91,6 +91,10 @@ class ConfigObserver implements \Magento\Framework\Event\ObserverInterface
         $response = json_decode($response);
         if ($response->status == 'failed') {
             throw new \Exception('Site ID and Secret Key are incorrect');
+<<<<<<< HEAD
+=======
+            return false;
+>>>>>>> FOR-16
         }
     }
 }
