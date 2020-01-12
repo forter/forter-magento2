@@ -100,11 +100,15 @@ class PaymentPlaceStart implements ObserverInterface
             $order->setForterResponse($response);
 
             $response = json_decode($response);
-            if (isset($response->action)) {
-                $order->setForterStatus($response->action);
+
+            if ($response->status != 'success' || !isset($response->action)) {
+                $order->setForterStatus('error');
+                return false;
             }
 
-            if ($response->status == 'failed' || $response->action != 'decline' || !isset($response->action)) {
+            $order->setForterStatus($response->action);
+
+            if ($response->action != 'decline') {
                 return true;
             }
         } catch (\Exception $e) {
