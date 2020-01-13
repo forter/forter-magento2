@@ -163,6 +163,8 @@ class PaymentPlaceEnd implements ObserverInterface
             $storeId = $order->getStore()->getId();
             $currentTime = $this->dateTime->gmtDate();
 
+            $order->save();
+
             if ($type) {
                 $this->queue->create()
                   ->setStoreId($storeId)

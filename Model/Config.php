@@ -191,6 +191,9 @@ class Config
      */
     public function isEnabled()
     {
+        if (!$this->getSecretKey() || !$this->getSiteId()) {
+            return false;
+        }
         return (bool)$this->getConfigValue('settings/enabled');
     }
 
