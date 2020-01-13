@@ -76,7 +76,7 @@ class Order extends TestCase
      */
     public function testBuildTransaction()
     {
-        $response = $this->orderPrepere->buildTransaction($this->orderMock);
+        $response = $this->orderPrepere->buildTransaction($this->orderMock, 'AFTER_PAYMENT_ACTION');
 
         $this->assertEquals(isset($response['orderId']), true);
         $this->assertEquals(isset($response['orderType']), true);

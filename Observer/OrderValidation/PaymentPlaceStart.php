@@ -92,7 +92,7 @@ class PaymentPlaceStart implements ObserverInterface
         try {
             $order = $observer->getEvent()->getPayment()->getOrder();
 
-            $data = $this->requestBuilderOrder->buildTransaction($order);
+            $data = $this->requestBuilderOrder->buildTransaction($order, 'BEFORE_PAYMENT_ACTION');
 
             $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
             $response = $this->abstractApi->sendApiRequest($url, json_encode($data));

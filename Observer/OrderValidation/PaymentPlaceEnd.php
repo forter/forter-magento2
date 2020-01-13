@@ -115,7 +115,7 @@ class PaymentPlaceEnd implements ObserverInterface
         try {
             $order = $observer->getEvent()->getPayment()->getOrder();
 
-            $data = $this->requestBuilderOrder->buildTransaction($order);
+            $data = $this->requestBuilderOrder->buildTransaction($order, 'AFTER_PAYMENT_ACTION');
             $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
             $forterResponse = $this->abstractApi->sendApiRequest($url, json_encode($data));
 
