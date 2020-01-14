@@ -65,7 +65,7 @@ class Payment
                 return $proceed();
             }
             $order = $subject->getOrder();
-            $data = $this->requestBuilderOrder->buildTransaction($order);
+            $data = $this->requestBuilderOrder->buildTransaction($order, 'PAYMENT_ACTION_FAILURE');
             $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
             $this->abstractApi->sendApiRequest($url, json_encode($data));
             throw $e;

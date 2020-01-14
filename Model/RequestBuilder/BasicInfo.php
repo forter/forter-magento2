@@ -26,6 +26,7 @@ class BasicInfo
 
     /**
      * @param $remoteIp
+     * @param $headers
      * @return array
      */
     public function getConnectionInformation($remoteIp, $headers)
@@ -41,9 +42,10 @@ class BasicInfo
 
     /**
      * @param $order
+     * @param $orderStage
      * @return array
      */
-    public function getAdditionalIdentifiers($order)
+    public function getAdditionalIdentifiers($order, $orderStage)
     {
         $store = $order->getStore();
         $payment = $order->getPayment();
@@ -55,6 +57,9 @@ class BasicInfo
                 'merchantId' => $store->getId(),
                 'merchantDomain' => $store->getUrl(),
                 'merchantName' => $store->getName()
+            ],
+            'magentoAdditionalOrderData' => [
+                'magentoOrderStage' => $orderStage
             ]
         ];
     }

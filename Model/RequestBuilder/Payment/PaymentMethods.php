@@ -73,6 +73,11 @@ class PaymentMethods
             $detailsArray['cardBrand'] = $ccType;
         }
 
+        $authResult = $payment->getAdditionalInformation('processorAuthorizationCode');
+        if ($ccType) {
+            $detailsArray['authCode'] = $authResult;
+        }
+
         $cvvResponseCode = $payment->getAdditionalInformation('cvvResponseCode');
         if ($cvvResponseCode) {
             $detailsArray['cvvResult'] = $cvvResponseCode;

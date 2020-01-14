@@ -119,9 +119,10 @@ class Order
 
     /**
      * @param $order
+     * @param $orderStage
      * @return array
      */
-    public function buildTransaction($order)
+    public function buildTransaction($order, $orderStage)
     {
         $headers = getallheaders();
         $data = [
@@ -129,7 +130,7 @@ class Order
         "orderType" => "WEB",
         "timeSentToForter" => time()*1000,
         "checkoutTime" => time(),
-        "additionalIdentifiers" => $this->basicInfoPrepare->getAdditionalIdentifiers($order),
+        "additionalIdentifiers" => $this->basicInfoPrepare->getAdditionalIdentifiers($order, $orderStage),
         "connectionInformation" => $this->basicInfoPrepare->getConnectionInformation($order->getRemoteIp(), $headers),
         "totalAmount" => $this->cartPrepare->getTotalAmount($order),
         "cartItems" => $this->cartPrepare->generateCartItems($order),
@@ -145,6 +146,12 @@ class Order
             $data['additionalInformation'] = [
               'debug' => $order->debug()
           ];
+        }
+        $phoneWebId = $order->getForterWebId(); // field to be created by the merchant as instructed in documentation
+        if ($phoneWebId) {
+            $data['phoneOrderInformation'] = array(
+                "customerWebId" => $phoneWebId
+            );
         }
         return $data;
     }
