@@ -10,12 +10,20 @@
 
 namespace Forter\Forter\Model\RequestBuilder\Payment;
 
+use Magento\Framework\Encryption\Encryptor;
+
 /**
  * Class Payment
  * @package Forter\Forter\Model\RequestBuilder
  */
 class PaymentMethods
 {
+    public function __construct(
+        Encryptor $crypt
+    ) {
+        $this->crypt = $crypt;
+    }
+
     public function getPaypalDetails($payment)
     {
         return [
@@ -99,11 +107,11 @@ class PaymentMethods
     public function preferCcDetails($payment, $detailsArray=[])
     {
         $cardDetails = [];
-
+        $bin = $this->crypt->decrypt($payment->getCcNumberEnc());
         $cardDetails =  [
             "nameOnCard" => array_key_exists("nameOnCard", $detailsArray) ? $detailsArray['nameOnCard'] : $payment->getCcOwner() . "",
             "cardBrand" => array_key_exists("cardBrand", $detailsArray) ? $detailsArray['cardBrand'] : $payment->getCcType(),
-            "bin" => $payment->getAdditionalInformation("bin"),
+            "bin" => $bin,
             "countryOfIssuance" => $payment->getData("country_of_issuance"),
             "cardBank" => $payment->getEcheckBankName(),
             "verificationResults" => [
