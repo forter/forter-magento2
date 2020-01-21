@@ -98,7 +98,6 @@ class CustomerRepository
 
         try {
             $headers = getallheaders();
-            $customerGroup = $this->groupRepository->getById($savedCustomer->getGroupId());
             $customerAccountData = $this->customerPrepere->getCustomerAccountData(null, $savedCustomer);
             $areaCode = ($this->state->getAreaCode() == 'frontend' ? 'END_USER' : 'MERCHANT_ADMIN');
             $type = ($this->state->getAreaCode() == 'frontend' ? 'PRIVATE' : 'MERCHANT_EMPLOYEE');

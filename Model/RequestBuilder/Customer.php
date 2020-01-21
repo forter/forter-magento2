@@ -281,7 +281,7 @@ class Customer
             "address2" => $address_2,
             "zip" => $address->getPostCode(),
             "city" => $address->getCity(),
-            "region" => $address->getRegion(),
+            "region" => (string)$address->getRegion(),
             "country" => $address->getCountryId(),
             "company" => $address->getCompany(),
             "savedData" => [
