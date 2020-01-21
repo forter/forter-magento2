@@ -6,9 +6,12 @@
   <type name="Magento\Customer\Model\ResourceModel\CustomerRepository">
      <plugin name="forter_customer_after_save" type="Forter\Forter\Plugin\Customer\Model\ResourceModel\CustomerRepository" sortOrder="10" disabled="false"/>
  </type>
-    <type name="Magento\Sales\Model\Order\Payment">
-        <plugin name="forter_payment_around_place" type="Forter\Forter\Plugin\Order\Payment" sortOrder="10" disabled="false"/>
-    </type>
+ <type name="Magento\Sales\Model\Order\Payment">
+     <plugin name="forter_payment_around_place" type="Forter\Forter\Plugin\Order\Payment" sortOrder="10" disabled="false"/>
+ </type>
+ <type name="Magento\Braintree\Gateway\Response\CardDetailsHandler">
+     <plugin name="forter_card_details_handler" type="Forter\Forter\Plugin\Braintree\Gateway\Response\CardDetailsHandler" />
+ </type>
  <virtualType name="Magento\Sales\Model\ResourceModel\Order\Grid" type="Magento\Sales\Model\ResourceModel\Grid">
     <arguments>
         <argument name="columns" xsi:type="array">

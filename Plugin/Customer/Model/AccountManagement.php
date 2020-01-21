@@ -5,12 +5,14 @@ namespace Forter\Forter\Plugin\Customer\Model;
 use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\Config;
 use Forter\Forter\Model\RequestBuilder\BasicInfo;
+use Forter\Forter\Model\RequestBuilder\Customer as CustomerPrepere;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Model\AccountManagement as AccountManagementOriginal;
 use Magento\Customer\Model\CustomerFactory;
 use Magento\Customer\Model\Session;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\App\ObjectManager;
+use Magento\Framework\App\State;
 use Magento\Framework\HTTP\PhpEnvironment\RemoteAddress;
 use Magento\Framework\Message\ManagerInterface;
 use Magento\Store\Model\StoreManagerInterface;
@@ -25,7 +27,14 @@ class AccountManagement
      *
      */
     const PASSWORD_API_ENDPOINT = 'https://api.forter-secure.com/v2/accounts/reset-password/';
-
+    /**
+     * @var CustomerPrepere
+     */
+    private $customerPrepere;
+    /**
+     * @var State
+     */
+    private $state;
     /**
      * @var ManagerInterface
      */
@@ -34,7 +43,9 @@ class AccountManagement
     /**
      * AccountManagement constructor.
      * @param Session $customerSession
+     * @param State $state
      * @param CustomerFactory $customer
+     * @param CustomerPrepere $customerPrepere
      * @param StoreManagerInterface $store
      * @param AbstractApi $abstractApi
      * @param BasicInfo $basicInfo
@@ -45,7 +56,9 @@ class AccountManagement
      * @param CustomerRepositoryInterface $customerRepository
      */
     public function __construct(
+        State $state,
         Session $customerSession,
+        CustomerPrepere $customerPrepere,
         CustomerFactory $customer,
         StoreManagerInterface $store,
         AbstractApi $abstractApi,
@@ -57,6 +70,8 @@ class AccountManagement
         CustomerRepositoryInterface $customerRepository
     ) {
         $this->customerSession = $customerSession;
+        $this->customerPrepere = $customerPrepere;
+        $this->state = $state;
         $this->customer = $customer;
         $this->customerRepository = $customerRepository;
         $this->messageManager = $messageManager;
@@ -89,6 +104,7 @@ class AccountManagement
 
         try {
             $customer = $this->localMatchCustomerByRpToken($resetToken);
+
             $headers = getallheaders();
             if ($customer) {
                 $json = [
@@ -182,11 +198,21 @@ class AccountManagement
     {
         try {
             $headers = getallheaders();
+            $customerAccountData = $this->customerPrepere->getCustomerAccountData(null, $customer);
+            $areaCode = ($this->state->getAreaCode() == 'frontend' ? 'END_USER' : 'MERCHANT_ADMIN');
+            $type = ($this->state->getAreaCode() == 'frontend' ? 'PRIVATE' : 'MERCHANT_EMPLOYEE');
 
             $json = [
                 "accountId" => $customer->getId(),
                 "eventTime" => time(),
                 "connectionInformation" => $this->basicInfo->getConnectionInformation($this->remoteAddress->getRemoteAddress(), $headers),
+                "accountData" => [
+                  "type" => $type,
+                  "statusChangeBy" => $areaCode,
+                  "addressesInAccount" => $this->getAddressInAccount($customer->getAddresses()),
+                  "customerEngagement" => $customerAccountData['customerEngagement'],
+                  "status" => $customerAccountData['status']
+                ],
                 "loginStatus" => $loginStatus,
                 "loginMethodType" => "PASSWORD"
             ];
@@ -235,5 +261,31 @@ class AccountManagement
         }
         //Unique customer found.
         return $found->getItems()[0];
+    }
+
+    /**
+     * @param $addresses
+     * @return array|bool
+     */
+    private function getAddressInAccount($addresses)
+    {
+        if (!isset($addresses) || !$addresses) {
+            return [];
+        }
+
+        foreach ($addresses as $address) {
+            $street = $address->getStreet();
+            $customerAddress['address1'] = $street[0];
+            $customerAddress['city'] = $address->getCity();
+            $customerAddress['country'] = $address->getCountryId();
+            $customerAddress['address2'] = (isset($street[1]) ? $street[1] : "");
+            $customerAddress['zip'] = $address->getPostcode();
+            $customerAddress['region'] = (string)$address->getRegionId();
+            $customerAddress['company'] = $address->getCompany();
+
+            $addressInAccount[] = $customerAddress;
+        }
+
+        return $addressInAccount;
     }
 }

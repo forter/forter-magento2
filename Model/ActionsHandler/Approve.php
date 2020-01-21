@@ -74,6 +74,12 @@ class Approve
     public function handleApproveImmediatly($order)
     {
         try {
+            $paymentBaseAmountAuthorized = $order->getPayment()->getBaseAmountAuthorized();
+
+            if (!$paymentBaseAmountAuthorized || !($paymentBaseAmountAuthorized > 0)) {
+                return false;
+            }
+
             if ($order) {
                 $invoices = $this->_invoiceCollectionFactory->create()
                     ->addAttributeToFilter('order_id', ['eq' => $order->getId()]);
