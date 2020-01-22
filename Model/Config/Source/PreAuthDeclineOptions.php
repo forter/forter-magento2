@@ -15,7 +15,7 @@ class PreAuthDeclineOptions implements \Magento\Framework\Option\ArrayInterface
     {
         return [
             ['value' => '0', 'label' => __('Do Nothing')],
-            ['value' => '1', 'label' => __('Payment exception (stay in checkout page with error message)')]
+            ['value' => '1', 'label' => __('Show Payment Error to User (stay in checkout page with error message)')]
         ];
     }
 }

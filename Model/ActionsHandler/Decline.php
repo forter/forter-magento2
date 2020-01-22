@@ -112,6 +112,7 @@ class Decline
 
             return true;
         } catch (Exception $e) {
+            $this->addCommentToOrder($order, 'Order Cancellation attempt failed. Internal Error');
             $this->abstractApi->reportToForterOnCatch($e);
             throw new \Exception($e->getMessage());
         }
