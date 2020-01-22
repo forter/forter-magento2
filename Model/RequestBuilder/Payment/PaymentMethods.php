@@ -111,7 +111,7 @@ class PaymentMethods
         $cardDetails =  [
             "nameOnCard" => array_key_exists("nameOnCard", $detailsArray) ? $detailsArray['nameOnCard'] : $payment->getCcOwner() . "",
             "cardBrand" => array_key_exists("cardBrand", $detailsArray) ? $detailsArray['cardBrand'] : $payment->getCcType(),
-            "bin" => $bin,
+            "bin" => $bin ? $bin : null,
             "countryOfIssuance" => $payment->getData("country_of_issuance"),
             "cardBank" => $payment->getEcheckBankName(),
             "verificationResults" => [
