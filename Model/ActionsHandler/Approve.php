@@ -89,7 +89,7 @@ class Approve
                 if ((int)$invoices->count() !== 0) {
                     $invoices = $invoices->getFirstItem();
                     $invoice = $this->_invoiceRepository->get($invoices->getId());
-                    $order->addStatusHistoryComment(__('Forter: Magento Failed to Create Invoice. Invoice Already Created for This Order'), false);
+                    $order->addStatusHistoryComment(__('Forter: Invoice Already Created for This Order'), false);
                     return $invoice;
                 }
 
