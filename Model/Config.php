@@ -218,7 +218,7 @@ class Config
      */
     public function isSandboxMode()
     {
-        return (bool)$this->getConfigValue('settings/sandbox_mode');
+        return (bool)$this->getConfigValue('settings/enhanced_data_mode');
     }
 
     /**
@@ -354,7 +354,7 @@ class Config
      */
     public function getIsPost()
     {
-        $prePostSelect = $this->scopeConfig->getValue('forter/immediate_post_pre_decision/pre_post_Select');
+        $prePostSelect = $this->scopeConfig->getValue('forter/immediate_post_pre_decision/pre_post_select');
         return ($prePostSelect == '2' ? true : false);
     }
 
@@ -366,7 +366,7 @@ class Config
     {
         $result = $this->scopeConfig->getValue('forter/immediate_post_pre_decision/' . $type);
         switch ($type) {
-            case 'pre_post_Select':
+            case 'pre_post_select':
                 return ($result == '1' ? 'Before Payment Action (pre-authorization)' : 'After Payment Action (post-authorization)');
             case 'decline_pre':
                 if ($result == '0') {

@@ -89,13 +89,14 @@ class Approve
                 if ((int)$invoices->count() !== 0) {
                     $invoices = $invoices->getFirstItem();
                     $invoice = $this->_invoiceRepository->get($invoices->getId());
+                    $order->addStatusHistoryComment(__('Forter: Invoice Already Created for This Order'), false);
                     return $invoice;
                 }
 
                 if (!$order->canInvoice()) {
                     $order->setCustomerNoteNotify(false);
                     $order->setIsInProcess(true);
-                    $order->addStatusHistoryComment(__('Forter: Magento faild Creating invoice'), false);
+                    $order->addStatusHistoryComment(__('Forter: Magento Failed to Create Invoice. Order Cannot Be Invoiced'), false);
                     return null;
                 }
 
@@ -111,6 +112,7 @@ class Approve
                 return $invoice;
             }
         } catch (Exception $e) {
+            $order->addStatusHistoryComment(__('Forter: Magento Failed to Create Invoice. Internal Error'), false);
             $this->abstractApi->reportToForterOnCatch($e);
             throw new \Exception($e->getMessage());
         }

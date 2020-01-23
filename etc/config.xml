@@ -4,26 +4,25 @@
         <forter>
             <settings>
                 <enabled>0</enabled>
-                <site_id>0</site_id>
                 <debug_mode>0</debug_mode>
                 <api_version>2.0</api_version>
-                <sandbox_mode>0</sandbox_mode>
+                <enhanced_data_mode>0</enhanced_data_mode>
                 <log_mode>0</log_mode>
             </settings>
             <immediate_post_pre_decision>
-              <pre_post_Select>2</pre_post_Select>
+              <pre_post_select>2</pre_post_select>
               <decline_pre>1</decline_pre>
-              <pre_thanks_msg></pre_thanks_msg>
+              <pre_thanks_msg>We are sorry, but we could not process your order at this time.</pre_thanks_msg>
               <decline_post>1</decline_post>
               <not_review_post>3</not_review_post>
               <approve_post>1</approve_post>
-              <post_thanks_msg></post_thanks_msg>
+              <post_thanks_msg>We are sorry, but we could not process your order at this time.</post_thanks_msg>
             </immediate_post_pre_decision>
             <connection_information>
                 <base_connection_timeout>2000</base_connection_timeout>
                 <base_request_timeout>2000</base_request_timeout>
-                <max_connection_timeout>2000</max_connection_timeout>
-                <max_request_timeout>2000</max_request_timeout>
+                <max_connection_timeout>4000</max_connection_timeout>
+                <max_request_timeout>4000</max_request_timeout>
             </connection_information>
             <advanced_settings>
               <enabled_account_touchpoint>1</enabled_account_touchpoint>
