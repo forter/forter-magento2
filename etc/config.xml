@@ -7,7 +7,7 @@
                 <debug_mode>0</debug_mode>
                 <api_version>2.0</api_version>
                 <enhanced_data_mode>0</enhanced_data_mode>
-                <log_mode>0</log_mode>
+                <sandbox_mode>0</sandbox_mode>
             </settings>
             <immediate_post_pre_decision>
               <pre_post_select>2</pre_post_select>

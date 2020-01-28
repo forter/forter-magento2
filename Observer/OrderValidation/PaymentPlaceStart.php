@@ -85,6 +85,11 @@ class PaymentPlaceStart implements ObserverInterface
      */
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
+        $payment = $observer->getEvent()->getPayment()->getCcLast4();
+        $writer = new \Zend\Log\Writer\Stream(BP . '/var/log/test-for.log');
+        $logger = new \Zend\Log\Logger();
+        $logger->addWriter($writer);
+        $logger->info('test +' . $payment);
         if (!$this->config->isEnabled() || $this->config->getIsPost()) {
             return false;
         }

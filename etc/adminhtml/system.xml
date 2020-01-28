@@ -48,13 +48,6 @@
                       Please toggle this option to "Yes" in Sandbox Environment. More data will be sent to Forter's API calls to help Forter to support the integration
                   </comment>
               </field>
-              <field id="log_mode" translate="label" type="select" sortOrder="8" showInDefault="1" showInWebsite="1" showInStore="1">
-                  <label>Logging Mode</label>
-                  <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                  <comment>
-                     The extension will Log Errors,Requests,Response
-                  </comment>
-              </field>
             </group>
             <group id="immediate_post_pre_decision" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
               <label>Order Validation Settings</label>
