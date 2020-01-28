@@ -127,15 +127,14 @@ class PaymentMethods
         $cardDetails =  [
             "nameOnCard" => array_key_exists("nameOnCard", $detailsArray) ? $detailsArray['nameOnCard'] : $payment->getCcOwner() . "",
             "cardBrand" => array_key_exists("cardBrand", $detailsArray) ? $detailsArray['cardBrand'] : $payment->getCcType() . "",
-            "bin" => $bin,
+            "bin" => array_key_exists('bin', $detailsArray) ? $detailsArray['bin'] : $payment->getAdditionalInformation('bin'),
             "countryOfIssuance" => $payment->getData("country_of_issuance"),
             "cardBank" => $payment->getEcheckBankName(),
             "verificationResults" => [
                 "cvvResult" => array_key_exists("cvvResult", $detailsArray) ? $detailsArray['cvvResult'] : $payment->getCcCidStatus() . "",
                 "authorizationCode" => array_key_exists("authCode", $detailsArray) ? $detailsArray['authCode'] : "",
-                "processorResponseCode" => $payment->getAdditionalInformation("processorResponseCode") ? $payment->getAdditionalInformation("processorResponseCode") : "",
-                "processorResponseText" => $payment->getAdditionalInformation("processorResponseText") ? $payment->getAdditionalInformation("processorResponseText") : "",
-                "avsStreetResult" => array_key_exists("avsStreetResult", $detailsArray) ? $detailsArray['avsStreetResult'] : "",
+                "processorResponseCode" => array_key_exists('processorResponseCode', $detailsArray) ? $detailsArray['processorResponseCode'] : $payment->getAdditionalInformation("processorResponseCode"),
+                "processorResponseText" => array_key_exists('processorResponseText', $detailsArray) ? $detailsArray['processorResponseText'] : $payment->getAdditionalInformation("processorResponseText"),                "avsStreetResult" => array_key_exists("avsStreetResult", $detailsArray) ? $detailsArray['avsStreetResult'] : "",
                 "avsZipResult" => array_key_exists("avsZipResult", $detailsArray) ? $detailsArray['avsZipResult'] : "",
                 "avsFullResult" => array_key_exists("avsFullResult", $detailsArray) ? $detailsArray['avsFullResult'] : $payment->getCcAvsStatus() . ""
             ],

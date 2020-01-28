@@ -87,7 +87,7 @@ class Customer
             "deliveryType" => $order->getShippingMethod() ? "PHYSICAL" : "DIGITAL",
             "deliveryMethod" => substr(str_replace($this::SHIPPING_METHOD_PREFIX, "", $order->getShippingDescription()), 0, 45),
             "deliveryPrice" => [
-                "amountLocalCurrency" => strval($order->getShippingAmount()) . "",
+                "amountLocalCurrency" => strval($order->getShippingAmount()),
                 "currency" => $order->getOrderCurrency()->getCurrencyCode() . ""
             ]
         ];
@@ -177,7 +177,7 @@ class Customer
             "firstName" => $customer->getFirstname() . "",
             "lastName" => $customer->getLastname() . "",
             "email" => $customer->getEmail() . "",
-            "accountId" => $customer->getId() . "",
+            "accountId" => $customer->getId(),
             "created" => strtotime($customer->getCreatedAt()) . "",
             "pastOrdersCount" => $ordersCount,
             "pastOrdersSum" => $ordersSum

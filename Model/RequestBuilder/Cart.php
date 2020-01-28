@@ -37,7 +37,7 @@ class Cart
     {
         return [
             "amountUSD" => null,
-            "amountLocalCurrency" => strval($order->getGrandTotal()) . "",
+            "amountLocalCurrency" => strval($order->getGrandTotal()),
             "currency" => $order->getOrderCurrency()->getCurrencyCode() . ""
         ];
     }
@@ -67,11 +67,11 @@ class Cart
             $cartItems[] = [
                 "basicItemData" => [
                     "price" => [
-                        "amountLocalCurrency" => strval($item->getPrice()) . "",
+                        "amountLocalCurrency" => strval($item->getPrice()),
                         "currency" => $order->getOrderCurrency()->getCurrencyCode() . ""
                     ],
                     "value" => [
-                        "amountLocalCurrency" => strval($item->getPrice()) . "",
+                        "amountLocalCurrency" => strval($item->getPrice()),
                         "currency" => $order->getOrderCurrency()->getCurrencyCode() . ""
                     ],
                     "productId" => $item->getProductId(),
@@ -103,7 +103,7 @@ class Cart
         return [
             "couponCodeUsed" => $order->getCouponCode() . "",
             "couponDiscountAmount" => [
-                "amountLocalCurrency" => strval($order->getDiscountAmount()) . "",
+                "amountLocalCurrency" => strval($order->getDiscountAmount()),
                 "currency" => $order->getOrderCurrency()->getCurrencyCode() . ""
             ],
             "discountType" => $order->getDiscountDescription() ? $order->getDiscountDescription() : ""
