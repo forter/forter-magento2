@@ -131,10 +131,10 @@ class PaymentPlaceEnd implements ObserverInterface
 
             $type = null;
             if ($forterResponse->action == "decline") {
-                $this->messageManager->addErrorMessage($this->forterConfig->getPostThanksMsg());
                 $result = $this->forterConfig->getDeclinePost();
                 if ($result == '1') {
                     if ($order->canHold()) {
+                        $this->messageManager->addErrorMessage($this->forterConfig->getPostThanksMsg());
                         $this->decline->holdOrder($order);
                         $type = 'decline';
                     }

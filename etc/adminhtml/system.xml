@@ -110,6 +110,10 @@
               </field>
               <field id="post_thanks_msg" translate="label" type="textarea" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
                   <label>Custom Error Message (post-authorization)</label>
+                  <comment>
+                      In cases of Forter decline, The error message will be shown to the user if the "Cancel Order" option is selected.
+                      To prevent showing an error message, leave this field blank.
+                  </comment>
                   <depends>
                     <field id="pre_post_select">2</field>
                   </depends>

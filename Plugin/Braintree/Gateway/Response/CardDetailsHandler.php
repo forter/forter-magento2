@@ -43,9 +43,13 @@ class CardDetailsHandler
             $creditCard = $transaction->creditCard;
 
             $cc_bin = $creditCard['bin'];
-            $payment->setCcNumberEnc($this->crypt->encrypt($cc_bin));
-            if ($creditCard['countryOfIssuance'] != null && $creditCard['countryOfIssuance'] != 'Unknown') {
-                $payment->setData("country_of_issuance", $creditCard['countryOfIssuance']);
+            $country_of_issuance = $creditCard['countryOfIssuance'];
+            $name_on_card = $creditCard['cardholderName'];
+
+            $payment->setAdditionalInformation('forter_cc_bin', $cc_bin);
+            $payment->setAdditionalInformation('forter_cc_owner', $name_on_card);
+            if ($country_of_issuance != null && $country_of_issuance != 'Unknown') {
+                $payment->setAdditionalInformation("forter_cc_country", $country_of_issuance);
             }
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);

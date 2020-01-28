@@ -101,24 +101,41 @@ class PaymentMethods
             $detailsArray['avsStreetResult'] = $avsStreetResult;
         }
 
+        // field below come from the plugin Plugin/Braintree/Gateway/Response/CardDetailsHandler.php
+        $forter_cc_bin = $payment->getAdditionalInformation('forter_cc_bin');
+        if ($forter_cc_bin) {
+            $detailsArray['bin'] = $forter_cc_bin;
+        }
+
+        // field below come from the plugin Plugin/Braintree/Gateway/Response/CardDetailsHandler.php
+        $forter_cc_owner = $payment->getAdditionalInformation('forter_cc_owner');
+        if ($forter_cc_owner) {
+            $detailsArray['nameOnCard'] = $forter_cc_owner;
+        }
+
+        // field below come from the plugin Plugin/Braintree/Gateway/Response/CardDetailsHandler.php
+        $forter_cc_country = $payment->getAdditionalInformation('forter_cc_country');
+        if ($forter_cc_country) {
+            $detailsArray['countryOfIssuance'] = $forter_cc_country;
+        }
+
         return $this->preferCcDetails($payment, $detailsArray);
     }
 
     public function preferCcDetails($payment, $detailsArray=[])
     {
-        $cardDetails = [];
-        $bin = $this->crypt->decrypt($payment->getCcNumberEnc());
         $cardDetails =  [
-            "nameOnCard" => array_key_exists("nameOnCard", $detailsArray) ? $detailsArray['nameOnCard'] : $payment->getCcOwner() . "",
-            "cardBrand" => array_key_exists("cardBrand", $detailsArray) ? $detailsArray['cardBrand'] : $payment->getCcType(),
-            "bin" => $bin ? $bin : null,
-            "countryOfIssuance" => $payment->getData("country_of_issuance"),
-            "cardBank" => $payment->getEcheckBankName(),
+            "nameOnCard" => array_key_exists('nameOnCard', $detailsArray) ? $detailsArray['nameOnCard'] : $payment->getCcOwner() . '',
+            "cardBrand" => array_key_exists('cardBrand', $detailsArray) ? $detailsArray['cardBrand'] : $payment->getCcType(),
+            "lastFourDigits" => array_key_exists("lastFourDigits", $detailsArray) ? $detailsArray['lastFourDigits'] : $payment->getCcLast4(),
+            "bin" => array_key_exists('bin', $detailsArray) ? $detailsArray['bin'] : $payment->getAdditionalInformation('bin'),
+            "countryOfIssuance" => array_key_exists('countryOfIssuance', $detailsArray) ? $detailsArray['countryOfIssuance'] : $payment->getAdditionalInformation('country_of_issuance'),
+            "cardBank" => array_key_exists("cardBank", $detailsArray) ? $detailsArray['cardBank'] : $payment->getEcheckBankName(),
             "verificationResults" => [
                 "cvvResult" => array_key_exists("cvvResult", $detailsArray) ? $detailsArray['cvvResult'] : $payment->getCcCidStatus(),
-                "authorizationCode" => array_key_exists("authCode", $detailsArray) ? $detailsArray['authCode'] : null,
-                "processorResponseCode" => $payment->getAdditionalInformation("processorResponseCode"),
-                "processorResponseText" => $payment->getAdditionalInformation("processorResponseText"),
+                "authorizationCode" => array_key_exists("authCode", $detailsArray) ? $detailsArray['authCode'] : $payment->getAdditionalInformation('auth_code'),
+                "processorResponseCode" => array_key_exists('processorResponseCode', $detailsArray) ? $detailsArray['processorResponseCode'] : $payment->getAdditionalInformation("processorResponseCode"),
+                "processorResponseText" => array_key_exists('processorResponseText', $detailsArray) ? $detailsArray['processorResponseText'] : $payment->getAdditionalInformation("processorResponseText"),
                 "avsStreetResult" => array_key_exists("avsStreetResult", $detailsArray) ? $detailsArray['avsStreetResult'] : null,
                 "avsZipResult" => array_key_exists("avsZipResult", $detailsArray) ? $detailsArray['avsZipResult'] : null,
                 "avsFullResult" => array_key_exists("avsFullResult", $detailsArray) ? $detailsArray['avsFullResult'] : $payment->getCcAvsStatus()
@@ -136,10 +153,6 @@ class PaymentMethods
 
         if (array_key_exists("expirationYear", $detailsArray) || $payment->getCcExpYear()) {
             $cardDetails["expirationYear"] = array_key_exists("expirationMonth", $detailsArray) ? $detailsArray['expirationYear'] : str_pad($payment->getCcExpYear(), 2, "0", STR_PAD_LEFT);
-        }
-
-        if (array_key_exists("lastFourDigits", $detailsArray) || $payment->getCcLast4()) {
-            $cardDetails["lastFourDigits"] = array_key_exists("lastFourDigits", $detailsArray) ? $detailsArray['lastFourDigits'] : $payment->getCcLast4();
         }
 
         return $cardDetails;
