@@ -106,9 +106,7 @@ class Decline
             }
 
             $state = $order->getState();
-            if ($state != 'closed' &&  $state != 'canceled' && $state != 'complete') {
-                $result = $this->holdOrder($order);
-            }
+            $result = $this->holdOrder($order);
 
             return true;
         } catch (Exception $e) {
