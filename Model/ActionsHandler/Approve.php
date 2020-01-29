@@ -4,6 +4,7 @@ namespace Forter\Forter\Model\ActionsHandler;
 
 use Exception;
 use Forter\Forter\Model\AbstractApi;
+use Forter\Forter\Model\Config as ForterConfig;
 use Magento\Framework\DB\TransactionFactory;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Api\InvoiceRepositoryInterface;
@@ -18,6 +19,10 @@ use Magento\Sales\Model\Service\InvoiceService;
  */
 class Approve
 {
+    /**
+     * @var ForterConfig
+     */
+    private $forterConfig;
     /**
       * @var AbstractApi
       */
@@ -46,6 +51,7 @@ class Approve
     /**
      * @param CollectionFactory $invoiceCollectionFactory
      * @param InvoiceService $invoiceService
+     * @param ForterConfig $forterConfig
      * @param TransactionFactory $transactionFactory
      * @param InvoiceRepositoryInterface $invoiceRepository
      * @param OrderRepositoryInterface $orderRepository
@@ -54,11 +60,13 @@ class Approve
         AbstractApi $abstractApi,
         CollectionFactory $invoiceCollectionFactory,
         InvoiceService $invoiceService,
+        ForterConfig $forterConfig,
         TransactionFactory $transactionFactory,
         InvoiceRepositoryInterface $invoiceRepository,
         OrderRepositoryInterface $orderRepository
     ) {
         $this->abstractApi = $abstractApi;
+        $this->forterConfig = $forterConfig;
         $this->_invoiceCollectionFactory = $invoiceCollectionFactory;
         $this->_invoiceService = $invoiceService;
         $this->_transactionFactory = $transactionFactory;
@@ -96,7 +104,7 @@ class Approve
                 if (!$order->canInvoice()) {
                     $order->setCustomerNoteNotify(false);
                     $order->setIsInProcess(true);
-                    $order->addStatusHistoryComment(__('Forter: Magento Failed to Create Invoice. Order Cannot Be Invoiced'), false);
+                    $this->forterConfig->addCommentToOrder($order, 'Magento faild Creating invoice');
                     return null;
                 }
 
@@ -105,7 +113,7 @@ class Approve
                 $invoice->register();
                 $invoice->getOrder()->setCustomerNoteNotify(false);
                 $invoice->getOrder()->setIsInProcess(true);
-                $order->addStatusHistoryComment(__('Forter: Invoice Has been Created'), false);
+                $this->forterConfig->addCommentToOrder($order, 'Invoice Has been Created');
                 $transactionSave = $this->_transactionFactory->create()->addObject($invoice)->addObject($invoice->getOrder());
                 $transactionSave->save();
 

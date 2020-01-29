@@ -109,7 +109,7 @@ class CustomerRepository
               "accountData" => [
                 "type" => $type,
                 "statusChangeBy" => $areaCode,
-                "addressesInAccount" => $this->getAddressInAccount($savedCustomer->getAddresses()),
+                "addressesInAccount" => $this->forterConfig->getAddressInAccount($savedCustomer->getAddresses()),
                 "customerEngagement" => $customerAccountData['customerEngagement'],
                 "status" => $customerAccountData['status']
               ],
@@ -128,31 +128,5 @@ class CustomerRepository
             $this->abstractApi->reportToForterOnCatch($e);
             throw new \Exception($e->getMessage());
         }
-    }
-
-    /**
-     * @param $addresses
-     * @return array|bool
-     */
-    private function getAddressInAccount($addresses)
-    {
-        if (!isset($addresses) || !$addresses) {
-            return [];
-        }
-
-        foreach ($addresses as $address) {
-            $street = $address->getStreet();
-            $customerAddress['address1'] = $street[0];
-            $customerAddress['city'] = $address->getCity();
-            $customerAddress['country'] = $address->getCountryId();
-            $customerAddress['address2'] = (isset($street[1]) ? $street[1] : "");
-            $customerAddress['zip'] = $address->getPostcode();
-            $customerAddress['region'] = $address->getRegionId();
-            $customerAddress['company'] = $address->getCompany();
-
-            $addressInAccount[] = $customerAddress;
-        }
-
-        return $addressInAccount;
     }
 }

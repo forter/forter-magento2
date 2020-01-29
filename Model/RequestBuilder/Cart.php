@@ -38,7 +38,7 @@ class Cart
         return [
             "amountUSD" => null,
             "amountLocalCurrency" => strval($order->getGrandTotal()),
-            "currency" => $order->getOrderCurrency()->getCurrencyCode()
+            "currency" => $order->getOrderCurrency()->getCurrencyCode() . ""
         ];
     }
 
@@ -68,16 +68,16 @@ class Cart
                 "basicItemData" => [
                     "price" => [
                         "amountLocalCurrency" => strval($item->getPrice()),
-                        "currency" => $order->getOrderCurrency()->getCurrencyCode()
+                        "currency" => $order->getOrderCurrency()->getCurrencyCode() . ""
                     ],
                     "value" => [
                         "amountLocalCurrency" => strval($item->getPrice()),
-                        "currency" => $order->getOrderCurrency()->getCurrencyCode()
+                        "currency" => $order->getOrderCurrency()->getCurrencyCode() . ""
                     ],
                     "productId" => $item->getProductId(),
-                    "name" => $item->getName(),
+                    "name" => $item->getName() . "",
                     "type" => $item->getData("is_virtual") ? "NON_TANGIBLE" : "TANGIBLE",
-                    "quantity" => (double)$item->getQtyOrdered(),
+                    "quantity" => (double)$item->getQtyOrdered() ,
                     "category" => $categories
                 ],
                 "itemSpecificData" => [
@@ -101,12 +101,12 @@ class Cart
         }
 
         return [
-            "couponCodeUsed" => $order->getCouponCode(),
+            "couponCodeUsed" => $order->getCouponCode() . "",
             "couponDiscountAmount" => [
                 "amountLocalCurrency" => strval($order->getDiscountAmount()),
-                "currency" => $order->getOrderCurrency()->getCurrencyCode()
+                "currency" => $order->getOrderCurrency()->getCurrencyCode() . ""
             ],
-            "discountType" => $order->getDiscountDescription() ? $order->getDiscountDescription() : null
+            "discountType" => $order->getDiscountDescription() ? $order->getDiscountDescription() : ""
         ];
     }
 

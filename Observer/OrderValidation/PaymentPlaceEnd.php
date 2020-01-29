@@ -8,6 +8,7 @@ use Forter\Forter\Model\ActionsHandler\Decline;
 use Forter\Forter\Model\Config;
 use Forter\Forter\Model\QueueFactory as ForterQueueFactory;
 use Forter\Forter\Model\RequestBuilder\Order;
+use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Message\ManagerInterface;
 use Magento\Framework\Stdlib\DateTime\DateTime;
@@ -65,6 +66,10 @@ class PaymentPlaceEnd implements ObserverInterface
      * @var DateTime
      */
     private $dateTime;
+    /**
+     * @var CustomerSession
+     */
+    private $customerSession;
 
     /**
      * PaymentPlaceEnd constructor.
@@ -73,10 +78,12 @@ class PaymentPlaceEnd implements ObserverInterface
      * @param Approve $approve
      * @param AbstractApi $abstractApi
      * @param Config $config
+     * @param CustomerSession $customerSession
      * @param Order $requestBuilderOrder
      * @param OrderManagementInterface $orderManagement
      */
     public function __construct(
+        CustomerSession $customerSession,
         ManagerInterface $messageManager,
         ForterQueueFactory $queue,
         Decline $decline,
@@ -88,6 +95,7 @@ class PaymentPlaceEnd implements ObserverInterface
         OrderManagementInterface $orderManagement,
         StoreManagerInterface $storeManager
     ) {
+        $this->customerSession = $customerSession;
         $this->messageManager = $messageManager;
         $this->dateTime = $dateTime;
         $this->storeManager = $storeManager;
@@ -131,6 +139,8 @@ class PaymentPlaceEnd implements ObserverInterface
 
             $type = null;
             if ($forterResponse->action == "decline") {
+                $this->customerSession->setForterMessage($this->forterConfig->getPostThanksMsg());
+
                 $result = $this->forterConfig->getDeclinePost();
                 if ($result == '1') {
                     if ($order->canHold()) {

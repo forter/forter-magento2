@@ -126,11 +126,11 @@ class Decline
     {
         $order->cancel()->save();
         if ($order->isCanceled()) {
-            $this->addCommentToOrder($order, 'Order Cancelled');
+            $this->forterConfig->addCommentToOrder($order, 'Order Cancelled');
             return true;
         }
 
-        $this->addCommentToOrder($order, 'Order Cancellation attempt failed');
+        $this->forterConfig->addCommentToOrder($order, 'Order Cancellation attempt failed');
         return false;
     }
 
@@ -154,12 +154,12 @@ class Decline
             }
 
             if ($totalRefunded > 0) {
-                $this->addCommentToOrder($order, $totalRefunded . ' Refunded');
+                $this->forterConfig->addCommentToOrder($order, $totalRefunded . ' Refunded');
                 return true;
             }
         }
 
-        $this->addCommentToOrder($order, 'Order Refund attempt failed');
+        $this->forterConfig->addCommentToOrder($order, 'Order Refund attempt failed');
         return false;
     }
 
@@ -170,23 +170,9 @@ class Decline
     public function holdOrder($order)
     {
         $order->hold()->save();
-        $order->addStatusHistoryComment("Order Has been holded")
-          ->setIsCustomerNotified(false)
-          ->setEntityName('order')
-          ->save();
-        return true;
-    }
+        $this->forterConfig->addCommentToOrder($order, "Order Has been holded");
 
-    /**
-     * @param $order
-     * @param $message
-     */
-    private function addCommentToOrder($order, $message)
-    {
-        $order->addStatusHistoryComment('Forter: ' . $message)
-          ->setIsCustomerNotified(false)
-          ->setEntityName('order')
-          ->save();
+        return true;
     }
 
     public function markOrderPaymentReview($order)
@@ -194,6 +180,6 @@ class Decline
         $orderState = Order::STATE_PAYMENT_REVIEW;
         $order->setState($orderState)->setStatus(Order::STATE_PAYMENT_REVIEW);
         $order->save();
-        $this->addCommentToOrder($order, 'Order Has been marked for Payment Review');
+        $this->forterConfig->addCommentToOrder($order, 'Order Has been marked for Payment Review');
     }
 }

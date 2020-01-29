@@ -34,9 +34,9 @@ class BasicInfo
         return [
             "customerIP" => $this->getIpFromOrder($remoteIp, $headers),
             "userAgent" => (is_array($headers) && array_key_exists("User-Agent", $headers)) ? $headers['User-Agent'] : null,
-            "forterTokenCookie" => $this->cookieManager->getCookie("forterToken"),
+            "forterTokenCookie" => $this->cookieManager->getCookie("forterToken") . "",
             "merchantDeviceIdentifier" => null,
-            "fullHeaders" => json_encode($headers)
+            "fullHeaders" => json_encode($headers) . ""
         ];
     }
 
@@ -54,9 +54,9 @@ class BasicInfo
             'additionalOrderId' => $order->getRealOrderId(),
             'paymentGatewayId' => $payment ? strval($payment->getTransactionId()) : "",
             'merchant' => [
-                'merchantId' => $store->getId(),
-                'merchantDomain' => $store->getUrl(),
-                'merchantName' => $store->getName()
+              'merchantId' => $store->getId(),
+              'merchantDomain' => $store->getUrl() . "",
+              'merchantName' => $store->getName() . ""
             ],
             'magentoAdditionalOrderData' => [
                 'magentoOrderStage' => $orderStage

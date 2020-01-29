@@ -204,9 +204,9 @@ class Config
      * @return bool
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function isLogging()
+    public function isDebugEnabled()
     {
-        return (bool)$this->getConfigValue('settings/log_mode');
+        return (bool)$this->getConfigValue('settings/debug_mode');
     }
 
     /**
@@ -219,18 +219,6 @@ class Config
     public function isSandboxMode()
     {
         return (bool)$this->getConfigValue('settings/enhanced_data_mode');
-    }
-
-    /**
-     * Return bool value depends of that if payment method debug mode
-     * is enabled or not.
-     *
-     * @return bool
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
-     */
-    public function isDebugEnabled()
-    {
-        return (bool)$this->getConfigValue('settings/debug');
     }
 
     /**
@@ -252,7 +240,7 @@ class Config
      */
     public function log($message, $type = "debug", $data = [], $prefix = '[Forter] ')
     {
-        if (!$this->isLogging()) {
+        if (!$this->isDebugEnabled()) {
             return false;
         }
 
@@ -356,6 +344,44 @@ class Config
     {
         $prePostSelect = $this->scopeConfig->getValue('forter/immediate_post_pre_decision/pre_post_select');
         return ($prePostSelect == '2' ? true : false);
+    }
+
+    /**
+     * @param $addresses
+     * @return array|bool
+     */
+    public function getAddressInAccount($addresses)
+    {
+        if (!isset($addresses) || !$addresses) {
+            return [];
+        }
+
+        foreach ($addresses as $address) {
+            $street = $address->getStreet();
+            $customerAddress['address1'] = $street[0] . "";
+            $customerAddress['city'] = $address->getCity() . "";
+            $customerAddress['country'] = $address->getCountryId() . "";
+            $customerAddress['address2'] = (isset($street[1]) ? $street[1] : "");
+            $customerAddress['zip'] = $address->getPostcode() . "";
+            $customerAddress['region'] = (string)$address->getRegionId() . "";
+            $customerAddress['company'] = $address->getCompany() . "";
+
+            $addressInAccount[] = $customerAddress;
+        }
+
+        return (isset($addressInAccount)) ? $addressInAccount : null;
+    }
+
+    /**
+     * @param $order
+     * @param $message
+     */
+    public function addCommentToOrder($order, $message)
+    {
+        $order->addStatusHistoryComment('Forter: ' . $message)
+          ->setIsCustomerNotified(false)
+          ->setEntityName('order')
+          ->save();
     }
 
     /**

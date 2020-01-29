@@ -88,7 +88,7 @@ class Customer
             "deliveryMethod" => substr(str_replace($this::SHIPPING_METHOD_PREFIX, "", $order->getShippingDescription()), 0, 45),
             "deliveryPrice" => [
                 "amountLocalCurrency" => strval($order->getShippingAmount()),
-                "currency" => $order->getOrderCurrency()->getCurrencyCode()
+                "currency" => $order->getOrderCurrency()->getCurrencyCode() . ""
             ]
         ];
     }
@@ -105,14 +105,14 @@ class Customer
         $primaryRecipient = [];
         if ($shippingAddress) {
             $personalDetails = [
-                "firstName" => $shippingAddress->getFirstname(),
-                "lastName" => $shippingAddress->getLastname(),
-                "email" => $shippingAddress->getEmail()
+                "firstName" => $shippingAddress->getFirstname() . "",
+                "lastName" => $shippingAddress->getLastname() . "",
+                "email" => $shippingAddress->getEmail() . ""
             ];
             if ($shippingAddress->getTelephone()) {
                 $phone = [
                     [
-                        "phone" => $shippingAddress->getTelephone()
+                        "phone" => $shippingAddress->getTelephone() . ""
                     ]
                 ];
             }
@@ -121,16 +121,16 @@ class Customer
             if ($billingAddress->getTelephone()) {
                 $phone = [
                     [
-                        "phone" => $billingAddress->getTelephone()
+                        "phone" => $billingAddress->getTelephone() . ""
                     ]
                 ];
             }
             $personalDetails = [
-                "firstName" => $billingAddress->getFirstName(),
-                "lastName" => $billingAddress->getLastName(),
-                "middleInitials" => $billingAddress->getMiddleName(),
-                "prefix" => $billingAddress->getPrefix(),
-                "suffix" => $billingAddress->getSuffix()
+                "firstName" => $billingAddress->getFirstName() . "",
+                "lastName" => $billingAddress->getLastName() . "",
+                "middleInitials" => $billingAddress->getMiddleName() . "",
+                "prefix" => $billingAddress->getPrefix() . "",
+                "suffix" => $billingAddress->getSuffix() . ""
             ];
         }
         $primaryRecipient["personalDetails"] = $personalDetails;
@@ -154,9 +154,9 @@ class Customer
         if (!$customer) {
             $billingAddress = $order->getBillingAddress();
             return [
-                "firstName" => $billingAddress->getFirstname(),
-                "lastName" => $billingAddress->getLastname(),
-                "email" => $billingAddress->getEmail()
+                "firstName" => $billingAddress->getFirstname() . "",
+                "lastName" => $billingAddress->getLastname() . "",
+                "email" => $billingAddress->getEmail() . ""
             ];
         }
 
@@ -174,11 +174,11 @@ class Customer
         $ordersCount = $totalOrders->getTotalCount();
 
         return [
-            "firstName" => $customer->getFirstname(),
-            "lastName" => $customer->getLastname(),
-            "email" => $customer->getEmail(),
+            "firstName" => $customer->getFirstname() . "",
+            "lastName" => $customer->getLastname() . "",
+            "email" => $customer->getEmail() . "",
             "accountId" => $customer->getId(),
-            "created" => strtotime($customer->getCreatedAt()),
+            "created" => strtotime($customer->getCreatedAt()) . "",
             "pastOrdersCount" => $ordersCount,
             "pastOrdersSum" => $ordersSum
         ];
@@ -277,13 +277,13 @@ class Customer
         $address_2 = (!is_null($street_address) && array_key_exists('1', $street_address)) ? $street_address['1'] : null;
 
         return [
-            "address1" => $address_1,
-            "address2" => $address_2,
-            "zip" => $address->getPostCode(),
-            "city" => $address->getCity(),
-            "region" => (string)$address->getRegion(),
-            "country" => $address->getCountryId(),
-            "company" => $address->getCompany(),
+            "address1" => $address_1 . "",
+            "address2" => $address_2 . "",
+            "zip" => $address->getPostCode() . "",
+            "city" => $address->getCity() . "",
+            "region" => (string)$address->getRegion() . "",
+            "country" => $address->getCountryId() . "",
+            "company" => $address->getCompany() . "",
             "savedData" => [
                 "usedSavedData" => $address->getCustomerAddressId() != null,
                 "choseToSaveData" => false  // Default value because this field is required and is not easy enough to get.
@@ -314,9 +314,9 @@ class Customer
     {
         $billingDetails = [];
         $billingDetails["personalDetails"] = [
-          "firstName" => $billingAddress->getFirstName(),
-          "lastName" => $billingAddress->getLastName(),
-          "email" => $billingAddress->getEmail()
+          "firstName" => $billingAddress->getFirstName() . "",
+          "lastName" => $billingAddress->getLastName() . "",
+          "email" => $billingAddress->getEmail() . ""
         ];
 
         if ($billingAddress) {
@@ -325,7 +325,7 @@ class Customer
             if ($billingAddress->getTelephone()) {
                 $billingDetails["phone"] = [
                   [
-                      "phone" => $billingAddress->getTelephone()
+                      "phone" => $billingAddress->getTelephone() . ""
                   ]
               ];
             }

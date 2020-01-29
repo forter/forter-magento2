@@ -61,7 +61,7 @@ class ConfigObserver implements \Magento\Framework\Event\ObserverInterface
                 "api_version" => $this->forterConfig->getApiVersion(),
                 "debug_mode" => $this->forterConfig->isDebugEnabled(),
                 "enhanced_data_mode" => $this->forterConfig->isSandboxMode(),
-                "log_mode" => $this->forterConfig->isLogging()
+                "sandbox_mode" => $this->forterConfig->isSandboxMode()
               ],
               "pre_post_decision" => [
                 "pre_post_select" => $this->forterConfig->getPrePostDecisionMsg('pre_post_select'),
