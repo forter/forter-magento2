@@ -124,10 +124,11 @@ class PaymentMethods
 
     public function preferCcDetails($payment, $detailsArray=[])
     {
+        $bin = $this->crypt->decrypt($payment->getCcNumberEnc());
         $cardDetails =  [
             "nameOnCard" => array_key_exists("nameOnCard", $detailsArray) ? $detailsArray['nameOnCard'] : $payment->getCcOwner() . "",
             "cardBrand" => array_key_exists("cardBrand", $detailsArray) ? $detailsArray['cardBrand'] : $payment->getCcType() . "",
-            "bin" => array_key_exists('bin', $detailsArray) ? $detailsArray['bin'] : $payment->getAdditionalInformation('bin'),
+            "bin" => $bin ? $bin : null,
             "countryOfIssuance" => $payment->getData("country_of_issuance"),
             "cardBank" => $payment->getEcheckBankName(),
             "verificationResults" => [
@@ -151,6 +152,10 @@ class PaymentMethods
 
         if (array_key_exists("expirationYear", $detailsArray) || $payment->getCcExpYear()) {
             $cardDetails["expirationYear"] = array_key_exists("expirationMonth", $detailsArray) ? $detailsArray['expirationYear'] : str_pad($payment->getCcExpYear(), 2, "0", STR_PAD_LEFT);
+        }
+
+        if (array_key_exists("lastFourDigits", $detailsArray) || $payment->getCcLast4()) {
+            $cardDetails["lastFourDigits"] = array_key_exists("lastFourDigits", $detailsArray) ? $detailsArray['lastFourDigits'] : $payment->getCcLast4();
         }
 
         return $cardDetails;
