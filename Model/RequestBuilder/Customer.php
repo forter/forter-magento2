@@ -178,7 +178,7 @@ class Customer
             "lastName" => $customer->getLastname() . "",
             "email" => $customer->getEmail() . "",
             "accountId" => $customer->getId(),
-            "created" => strtotime($customer->getCreatedAt()) . "",
+            "created" => strtotime($customer->getCreatedAt()),
             "pastOrdersCount" => $ordersCount,
             "pastOrdersSum" => $ordersSum
         ];
