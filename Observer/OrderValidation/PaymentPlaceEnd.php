@@ -94,7 +94,8 @@ class PaymentPlaceEnd implements ObserverInterface
         Order $requestBuilderOrder,
         OrderManagementInterface $orderManagement,
         StoreManagerInterface $storeManager
-    ) {
+    )
+    {
         $this->customerSession = $customerSession;
         $this->messageManager = $messageManager;
         $this->dateTime = $dateTime;
@@ -110,14 +111,11 @@ class PaymentPlaceEnd implements ObserverInterface
 
     /**
      * @param \Magento\Framework\Event\Observer $observer
-     * @return bool|void
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
         if (!$this->forterConfig->isEnabled() || !$this->forterConfig->getIsPost()) {
-            return false;
+            return;
         }
 
         try {
@@ -132,62 +130,68 @@ class PaymentPlaceEnd implements ObserverInterface
 
             if ($forterResponse->status != 'success' || !isset($forterResponse->action)) {
                 $order->setForterStatus('error');
-                return false;
+                return;
             }
 
             $order->setForterStatus($forterResponse->action);
-
-            $type = null;
-            if ($forterResponse->action == "decline") {
-                $this->customerSession->setForterMessage($this->forterConfig->getPostThanksMsg());
-
-                $result = $this->forterConfig->getDeclinePost();
-                if ($result == '1') {
-                    if ($order->canHold()) {
-                        $this->decline->holdOrder($order);
-                        $type = 'decline';
-                    }
-                } elseif ($result == '2') {
-                    $this->decline->markOrderPaymentReview($order);
-                    return true;
-                } else {
-                    return true;
-                }
-            } elseif ($forterResponse->action == 'approve') {
-                $result = $this->forterConfig->getApprovePost();
-                if ($result == '1') {
-                    $type = 'approve';
-                } else {
-                    return true;
-                }
-            } elseif ($forterResponse->action == "not reviewed") {
-                $result = $this->forterConfig->getNotReviewPost();
-                if ($result == '1') {
-                    $type = 'approve';
-                } else {
-                    return true;
-                }
-            }
-
-            $storeId = $order->getStore()->getId();
-            $currentTime = $this->dateTime->gmtDate();
-
-            $order->save();
-
-            if ($type) {
-                $this->queue->create()
-                  ->setStoreId($storeId)
-                  ->setEntityType('order')
-                  ->setEntityId($order->getId())
-                  ->setEntityBody($type)
-                  ->setSyncDate($currentTime)
-                  ->save();
-            }
-
-            return false;
+            $this->handleResponse($forterResponse->action, $order);
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
-            throw new \Exception($e->getMessage());
         }
+    }
+
+    public function handleResponse($forterDecision, $order)
+    {
+        if ($forterDecision == "decline") {
+            $this->handleDecline($order);
+        } elseif ($forterDecision == 'approve') {
+            $this->handleApprove($order);
+        } elseif ($forterDecision == "not reviewed") {
+            $this->handleNotReviewed($order);
+        }
+    }
+
+    public function handleDecline($order)
+    {
+        $result = $this->forterConfig->getDeclinePost();
+        if ($result == '1') {
+            $this->customerSession->setForterMessage($this->forterConfig->getPostThanksMsg());
+            if ($order->canHold()) {
+                $this->decline->holdOrder($order);
+                $this->setMessageToQueue($order, 'decline');
+            }
+        } elseif ($result == '2') {
+            $this->decline->markOrderPaymentReview($order);
+        }
+    }
+
+    public function handleApprove($order)
+    {
+        $result = $this->forterConfig->getApprovePost();
+        if ($result == '1') {
+            $this->setMessageToQueue($order, 'approve');
+        }
+    }
+
+    public function handleNotReviewed($order)
+    {
+        $result = $this->forterConfig->getNotReviewPost();
+        if ($result == '1') {
+            $this->setMessageToQueue($order, 'approve');
+        }
+    }
+
+    public function setMessageToQueue($order, $type)
+    {
+        $storeId = $order->getStore()->getId();
+        $currentTime = $this->dateTime->gmtDate();
+        $this->forterConfig->log('Increment ID:' . $order->getIncrementId());
+        $this->queue->create()
+            ->setStoreId($storeId)
+            ->setEntityType('order')
+            ->setIncrementId($order->getIncrementId()) //TODO need to make this field a text in the table not int
+            ->setEntityBody($type)
+            ->setSyncDate($currentTime)
+            ->save();
     }
 }
