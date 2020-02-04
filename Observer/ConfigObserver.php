@@ -48,9 +48,7 @@ class ConfigObserver implements \Magento\Framework\Event\ObserverInterface
     public function execute(Observer $observer)
     {
         try {
-            if (!$this->validateCredentials()) {
-                return false;
-            }
+            $this->validateCredentials();
 
             $json = [
               "general" => [
@@ -83,7 +81,6 @@ class ConfigObserver implements \Magento\Framework\Event\ObserverInterface
             $this->abstractApi->sendApiRequest($url, json_encode($json));
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
-            throw new \Exception($e->getMessage());
         }
     }
 
@@ -94,9 +91,6 @@ class ConfigObserver implements \Magento\Framework\Event\ObserverInterface
         $response = json_decode($response);
         if ($response->status == 'failed') {
             throw new \Exception('Site ID and Secret Key are incorrect');
-            return false;
         }
-
-        return true;
     }
 }

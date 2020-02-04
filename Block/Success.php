@@ -22,10 +22,6 @@ class Success extends \Magento\Framework\View\Element\Template
     public function getMsg()
     {
         $msg = $this->customerSession->getForterMessage();
-        $writer = new \Zend\Log\Writer\Stream(BP . '/var/log/test11.log');
-        $logger = new \Zend\Log\Logger();
-        $logger->addWriter($writer);
-        $logger->info($msg);
         if (!$msg) {
             return false;
         }

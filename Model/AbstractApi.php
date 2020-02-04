@@ -169,6 +169,6 @@ class AbstractApi
        ]
      ];
 
-        $response = $this->sendApiRequest($url, json_encode($json));
+        $this->sendApiRequest($url, json_encode($json));
     }
 }

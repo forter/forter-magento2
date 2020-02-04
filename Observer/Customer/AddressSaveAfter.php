@@ -84,13 +84,12 @@ class AddressSaveAfter implements ObserverInterface
 
     /**
      * @param \Magento\Framework\Event\Observer $observer
-     * @return bool|void
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
         if (!$this->forterConfig->isEnabled() || !$this->forterConfig->isAccountTouchpointEnabled()) {
-            return false;
+            return;
         }
 
         try {
@@ -123,10 +122,8 @@ class AddressSaveAfter implements ObserverInterface
             $url = self::API_ENDPOINT . $customer->getId();
             $this->abstractApi->sendApiRequest($url, json_encode($json));
 
-            return true;
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
-            throw new \Exception($e->getMessage());
         }
     }
 }

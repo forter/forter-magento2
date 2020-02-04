@@ -53,23 +53,30 @@ class Payment
      */
     public function aroundPlace(MagentoPayment $subject, callable $proceed)
     {
-        if (!$this->forterConfig->isEnabled()) {
-            return false;
-        }
-
         try {
             $result = $proceed();
+            return $result;
         } catch (\Exception $e) {
+            $this->notifyForterOfPaymentFailure($e, $subject);
+            throw $e;
+        }
+    }
+
+    public function notifyForterOfPaymentFailure($e, $subject)
+    {
+        try {
+            if(!$this->forterConfig->isEnabled()) {
+                return;
+            }
             if ($e->getMessage() == $this->forterConfig->getPreThanksMsg()) {
-                throw $e;
-                return $proceed();
+                return;
             }
             $order = $subject->getOrder();
             $data = $this->requestBuilderOrder->buildTransaction($order, 'PAYMENT_ACTION_FAILURE');
             $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
             $this->abstractApi->sendApiRequest($url, json_encode($data));
-            throw $e;
+        } catch(\Exception $e) {
+            $this->abstractApi->reportToForterOnCatch($e);
         }
-        return $result;
     }
 }

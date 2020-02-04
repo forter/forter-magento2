@@ -89,7 +89,6 @@ class AccountManagement
      * @param $email
      * @param $resetToken
      * @param null $newPassword
-     * @return bool
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function beforeResetPassword(
@@ -99,7 +98,7 @@ class AccountManagement
         $newPassword = null
     ) {
         if (!$this->forterConfig->isEnabled() || !$this->forterConfig->isAccountTouchpointEnabled()) {
-            return false;
+            return;
         }
 
         try {
@@ -119,7 +118,6 @@ class AccountManagement
             }
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
-            throw new \Exception($e->getMessage());
         }
     }
 
@@ -158,7 +156,6 @@ class AccountManagement
             }
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
-            throw new \Exception($e->getMessage());
         }
     }
 

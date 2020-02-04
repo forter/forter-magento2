@@ -91,8 +91,6 @@ class Decline
 
     /**
      * @param $order
-     * @return $this|bool
-     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function handlePostTransactionDescision($order)
     {
@@ -108,12 +106,9 @@ class Decline
             if ($order->canHold()) {
                 $this->holdOrder($order);
             }
-
-            return true;
         } catch (Exception $e) {
             $this->addCommentToOrder($order, 'Order Cancellation attempt failed. Internal Error');
             $this->abstractApi->reportToForterOnCatch($e);
-            throw new \Exception($e->getMessage());
         }
     }
 

@@ -18,7 +18,7 @@ $forterResponse = json_decode($forterResponse);
 <section class="admin__page-section">
     <div class="admin__page-section-content">
         <div class="admin__page-section-item-title invoice_item_title">
-            <span class="title"><?php echo __("Forter Status"); ?></span>
+            <span class="title"><?php echo __("Forter API Request Status"); ?></span>
         </div>
         <div class="admin__page-section-item-content invoice_item_content">
             <div class=""><?php echo $forterResponse->status; ?></div>
@@ -31,7 +31,7 @@ $forterResponse = json_decode($forterResponse);
 <section class="admin__page-section">
     <div class="admin__page-section-content">
         <div class="admin__page-section-item-title invoice_item_title">
-            <span class="title"><?php echo __("Forter Action"); ?></span>
+            <span class="title"><?php echo __("Forter Action (Decision)"); ?></span>
         </div>
         <div class="admin__page-section-item-content invoice_item_content">
             <div class=""><?php echo $forterResponse->action;?></div>

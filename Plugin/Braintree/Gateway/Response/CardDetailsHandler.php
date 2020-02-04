@@ -6,7 +6,6 @@ use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\Config;
 use Magento\Braintree\Gateway\Response\CardDetailsHandler as OrigCardDetailsHandler;
 use Magento\Braintree\Gateway\SubjectReader;
-use Magento\Framework\Encryption\Encryptor;
 
 class CardDetailsHandler
 {
@@ -19,13 +18,11 @@ class CardDetailsHandler
     public function __construct(
         Config $forterConfig,
         SubjectReader $subjectReader,
-        Encryptor $crypt,
         AbstractApi $abstractApi
     ) {
         $this->forterConfig = $forterConfig;
         $this->subjectReader = $subjectReader;
         $this->abstractApi = $abstractApi;
-        $this->crypt = $crypt;
     }
 
     public function beforeHandle(OrigCardDetailsHandler $cardDetailsHandler, array $handlingSubject, array $response)
@@ -53,7 +50,6 @@ class CardDetailsHandler
             }
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
-            throw new \Exception($e->getMessage());
         }
     }
 }
