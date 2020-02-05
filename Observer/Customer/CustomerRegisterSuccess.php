@@ -56,13 +56,12 @@ class CustomerRegisterSuccess implements ObserverInterface
 
     /**
      * @param \Magento\Framework\Event\Observer $observer
-     * @return bool|void
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
         if (!$this->forterConfig->isEnabled() || !$this->forterConfig->isAccountTouchpointEnabled()) {
-            return false;
+            return;
         }
 
         try {
@@ -78,7 +77,6 @@ class CustomerRegisterSuccess implements ObserverInterface
             $this->abstractApi->sendApiRequest($url, json_encode($json));
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
-            throw new \Exception($e->getMessage());
         }
     }
 }

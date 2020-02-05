@@ -91,8 +91,6 @@ class Decline
 
     /**
      * @param $order
-     * @return $this|bool
-     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function handlePostTransactionDescision($order)
     {
@@ -105,36 +103,32 @@ class Decline
                 $this->createCreditMemo($order);
             }
 
-            $state = $order->getState();
-            $result = $this->holdOrder($order);
-
-            return true;
+            if ($order->canHold()) {
+                $this->holdOrder($order);
+            }
         } catch (Exception $e) {
             $this->addCommentToOrder($order, 'Order Cancellation attempt failed. Internal Error');
             $this->abstractApi->reportToForterOnCatch($e);
-            throw new \Exception($e->getMessage());
         }
     }
 
     /**
      * @param $order
-     * @return bool
      */
     private function cancelOrder($order)
     {
         $order->cancel()->save();
         if ($order->isCanceled()) {
             $this->forterConfig->addCommentToOrder($order, 'Order Cancelled');
-            return true;
+            return;
         }
 
         $this->forterConfig->addCommentToOrder($order, 'Order Cancellation attempt failed');
-        return false;
+        return;
     }
 
     /**
      * @param $order
-     * @return bool
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     private function createCreditMemo($order)
@@ -153,24 +147,21 @@ class Decline
 
             if ($totalRefunded > 0) {
                 $this->forterConfig->addCommentToOrder($order, $totalRefunded . ' Refunded');
-                return true;
+                return;
             }
         }
 
         $this->forterConfig->addCommentToOrder($order, 'Order Refund attempt failed');
-        return false;
+        return;
     }
 
     /**
      * @param $order
-     * @return bool
      */
     public function holdOrder($order)
     {
         $order->hold()->save();
         $this->forterConfig->addCommentToOrder($order, "Order Has been holded");
-
-        return true;
     }
 
     public function markOrderPaymentReview($order)

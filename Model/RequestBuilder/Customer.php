@@ -16,6 +16,7 @@ use Magento\Review\Model\Review;
 use Magento\Sales\Model\OrderFactory;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Wishlist\Controller\WishlistProviderInterface;
+use Magento\Customer\Api\CustomerRepositoryInterface;
 
 /**
  * Class Customer
@@ -67,7 +68,8 @@ class Customer
         Session $session,
         WishlistProviderInterface $wishlistProvider,
         StoreManagerInterface $storeManager,
-        Subscriber $subscriber
+        Subscriber $subscriber,
+        CustomerRepositoryInterface $customerRepository
     ) {
         $this->session = $session;
         $this->wishlistProvider = $wishlistProvider;
@@ -75,6 +77,7 @@ class Customer
         $this->review = $review;
         $this->storeManager = $storeManager;
         $this->subscriber = $subscriber;
+        $this->customerRepository = $customerRepository;
     }
 
     /**
@@ -257,7 +260,7 @@ class Customer
             return $this->session->getCustomerData();
         } elseif ($order->getCustomerId()) {
             // If can't get customer from session - for example in cases of order send failure
-            return $this->customerRepositoryInterface->getById($order->getCustomerId());
+            return $this->customerRepository->getById($order->getCustomerId());
         } else {
             return null;
         }

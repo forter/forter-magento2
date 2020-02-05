@@ -77,7 +77,6 @@ class Approve
     /**
      * @param $order
      * @return \Magento\Sales\Api\Data\InvoiceInterface|Invoice|null
-     * @throws LocalizedException
      */
     public function handleApproveImmediatly($order)
     {
@@ -122,7 +121,6 @@ class Approve
         } catch (Exception $e) {
             $order->addStatusHistoryComment(__('Forter: Magento Failed to Create Invoice. Internal Error'), false);
             $this->abstractApi->reportToForterOnCatch($e);
-            throw new \Exception($e->getMessage());
         }
     }
 }

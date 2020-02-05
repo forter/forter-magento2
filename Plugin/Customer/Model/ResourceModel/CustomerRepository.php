@@ -126,7 +126,6 @@ class CustomerRepository
             return $savedCustomer;
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
-            throw new \Exception($e->getMessage());
         }
     }
 }

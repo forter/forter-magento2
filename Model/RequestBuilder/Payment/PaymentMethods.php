@@ -10,20 +10,12 @@
 
 namespace Forter\Forter\Model\RequestBuilder\Payment;
 
-use Magento\Framework\Encryption\Encryptor;
-
 /**
  * Class Payment
  * @package Forter\Forter\Model\RequestBuilder
  */
 class PaymentMethods
 {
-    public function __construct(
-        Encryptor $crypt
-    ) {
-        $this->crypt = $crypt;
-    }
-
     public function getPaypalDetails($payment)
     {
         return [
@@ -47,7 +39,6 @@ class PaymentMethods
     public function getAuthorizeNetDetails($payment)
     {
         $detailsArray = [];
-        $authorize_data = $payment->getAdditionalInformation('authorize_cards');
 
         $ccLast4 = $payment->getAdditionalInformation('ccLast4');
         if ($ccLast4) {
@@ -124,13 +115,12 @@ class PaymentMethods
 
     public function preferCcDetails($payment, $detailsArray=[])
     {
-        $bin = $this->crypt->decrypt($payment->getCcNumberEnc());
         $cardDetails =  [
             "nameOnCard" => array_key_exists("nameOnCard", $detailsArray) ? $detailsArray['nameOnCard'] : $payment->getCcOwner() . "",
             "cardBrand" => array_key_exists("cardBrand", $detailsArray) ? $detailsArray['cardBrand'] : $payment->getCcType() . "",
-            "bin" => $bin ? $bin : null,
-            "countryOfIssuance" => $payment->getData("country_of_issuance"),
-            "cardBank" => $payment->getEcheckBankName(),
+            "bin" => array_key_exists('bin', $detailsArray) ? $detailsArray['bin'] : $payment->getAdditionalInformation('bin'),
+            "countryOfIssuance" => array_key_exists('countryOfIssuance', $detailsArray) ? $detailsArray['countryOfIssuance'] : $payment->getAdditionalInformation('country_of_issuance'),
+            "cardBank" => array_key_exists("cardBank", $detailsArray) ? $detailsArray['cardBank'] : $payment->getEcheckBankName(),
             "verificationResults" => [
                 "cvvResult" => array_key_exists("cvvResult", $detailsArray) ? $detailsArray['cvvResult'] : $payment->getCcCidStatus() . "",
                 "authorizationCode" => array_key_exists("authCode", $detailsArray) ? $detailsArray['authCode'] : "",

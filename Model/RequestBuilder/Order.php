@@ -35,10 +35,6 @@ class Order
     /**
      * @var PaymentPrepere
      */
-    private $cartPrepere;
-    /**
-     * @var PaymentPrepere
-     */
     private $basicInfoPrepare;
     /**
      * @var CustomerPrepere

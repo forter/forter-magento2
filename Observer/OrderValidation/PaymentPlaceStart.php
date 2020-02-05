@@ -80,13 +80,12 @@ class PaymentPlaceStart implements ObserverInterface
 
     /**
      * @param \Magento\Framework\Event\Observer $observer
-     * @return bool|void
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
         if (!$this->config->isEnabled() || $this->config->getIsPost()) {
-            return false;
+            return;
         }
 
         try {
@@ -103,20 +102,18 @@ class PaymentPlaceStart implements ObserverInterface
 
             if ($response->status != 'success' || !isset($response->action)) {
                 $order->setForterStatus('error');
-                return false;
+                return;
             }
 
             $order->setForterStatus($response->action);
 
             if ($response->action != 'decline') {
-                return true;
+                return;
             }
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
-            throw new \Exception($e->getMessage());
         }
 
         $this->decline->handlePreTransactionDescision();
-        return true;
     }
 }

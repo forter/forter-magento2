@@ -48,10 +48,10 @@ class InstallSchema implements InstallSchemaInterface
                 'Entity Type'
             )
             ->addColumn(
-                'entity_id',
-                \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
-                null,
-                ['unsigned' => true, 'nullable' => true],
+                'increment_id',
+                \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                50,
+                ['nullable' => true],
                 'Entity ID'
             )
             ->addColumn(
