@@ -21,8 +21,8 @@
             <connection_information>
                 <base_connection_timeout>2000</base_connection_timeout>
                 <base_request_timeout>2000</base_request_timeout>
-                <max_connection_timeout>4000</max_connection_timeout>
-                <max_request_timeout>4000</max_request_timeout>
+                <max_connection_timeout>7000</max_connection_timeout>
+                <max_request_timeout>7000</max_request_timeout>
             </connection_information>
             <advanced_settings>
               <enabled_account_touchpoint>1</enabled_account_touchpoint>
