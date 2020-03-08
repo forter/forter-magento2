@@ -1,9 +1,21 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
     <event name="sales_order_payment_place_end">
-        <observer name="sales_order_payment_place_end_observer_forter" instance="Forter\Forter\Observer\PaymentPlaceEnd" />
+        <observer name="sales_order_payment_place_end_observer_forter" instance="Forter\Forter\Observer\OrderValidation\PaymentPlaceEnd" />
     </event>
     <event name="sales_order_payment_place_start">
-      <observer name="sales_order_payment_place_before_observer_forter" instance="Forter\Forter\Observer\PaymentPlaceStart" />
+        <observer name="sales_order_payment_place_before_observer_forter" instance="Forter\Forter\Observer\OrderValidation\PaymentPlaceStart" />
+    </event>
+    <event name="customer_address_save_after">
+        <observer name="customer_address_save_after_observer_forter" instance="Forter\Forter\Observer\Customer\AddressSaveAfter" />
+    </event>
+    <event name="sales_order_save_before">
+        <observer name="sales_order_save_before_observer_forter" instance="Forter\Forter\Observer\OrderFullfilment\OrderSaveBefore" />
+    </event>
+    <event name="customer_register_success">
+        <observer name="customer_register_success_observer_forter" instance="Forter\Forter\Observer\Customer\CustomerRegisterSuccess" />
+    </event>
+    <event name="admin_system_config_changed_section_forter">
+      <observer name="admin_system_config_changed_section_forter" instance="Forter\Forter\Observer\ConfigObserver"/>
     </event>
 </config>
