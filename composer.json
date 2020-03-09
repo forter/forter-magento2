@@ -1,0 +1,26 @@
+{
+  "name": "forter/magento2-module-forter",
+  "description": "Forter Fraud Prevention For Magento 2",
+  "require": {
+    "php": ">=5.6"
+  },
+  "type": "magento2-module",
+  "version": "2.0.0",
+  "license": [
+    "Forter Custom License"
+  ],
+  "authors": [{
+    "name": "Forter Dev",
+    "email": "support@forter.com",
+    "role": "Developer",
+    "homepage": "https://www.forter.com/"
+  }],
+  "autoload": {
+    "files": [
+      "registration.php"
+    ],
+    "psr-4": {
+      "Forter\\Forter\\": ""
+    }
+  }
+}
