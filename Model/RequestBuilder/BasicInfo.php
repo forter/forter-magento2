@@ -36,7 +36,7 @@ class BasicInfo
             "userAgent" => (is_array($headers) && array_key_exists("User-Agent", $headers)) ? $headers['User-Agent'] : null,
             "forterTokenCookie" => $this->cookieManager->getCookie("forterToken") . "",
             "merchantDeviceIdentifier" => null,
-            "fullHeaders" => json_encode($headers) . ""
+            "fullHeaders" => substr(json_encode($headers) . "", 0, 4000)
         ];
     }
 
