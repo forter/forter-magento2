@@ -130,10 +130,7 @@ class Customer
             }
             $personalDetails = [
                 "firstName" => $billingAddress->getFirstName() . "",
-                "lastName" => $billingAddress->getLastName() . "",
-                "middleInitials" => $billingAddress->getMiddleName() . "",
-                "prefix" => $billingAddress->getPrefix() . "",
-                "suffix" => $billingAddress->getSuffix() . ""
+                "lastName" => $billingAddress->getLastName() . ""
             ];
         }
         $primaryRecipient["personalDetails"] = $personalDetails;
