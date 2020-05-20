@@ -84,6 +84,13 @@ class Cart
                     "physicalGoods" => [
                         "wrapAsGift" => $item->getData("gift_message_available") ? true : false
                     ]
+                ],
+                "beneficiaries" => [
+                    "personalDetails" => [ // recipient info located in the product_options object of item data
+                        "firstName" => $item->getInfoBuyRequest("giftcard_recipient_name") . "",
+                        "lastName" => "",
+                        "email" => $item->getInfoBuyRequest("giftcard_recipient_email") . ""
+                    ]
                 ]
             ];
         }
