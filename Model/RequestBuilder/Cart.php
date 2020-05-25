@@ -87,9 +87,9 @@ class Cart
                 ],
                 "beneficiaries" => [
                     "personalDetails" => [ // recipient info located in the product_options object of item data
-                        "firstName" => $item->getProductOptions()->getGiftCardRecipientName() . "",
+                        "firstName" => $item->getProductOptions() ? $item->getProductOptions()->getGiftCardRecipientName() : "",
                         "lastName" => "",
-                        "email" => $item->getProductOptions()->getGiftcardRecipientEmail() . ""
+                        "email" => $item->getProductOptions() ? $item->getProductOptions()->getGiftcardRecipientEmail() : ""
                     ]
                 ]
             ];
