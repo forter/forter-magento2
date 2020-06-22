@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<widgets xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:forter:Magento_Widget:etc/widget.xsd">
+    <widget class="Forter\Forter\Block\Widget\Phone" id="forter_forter_phone">
+        <label>Phone Order</label>
+        <description>Forter Phone Order</description>
+        <parameters>
+            <parameter name="phone" sort_order="10" visible="true" xsi:type="text">
+                <label>Forter Phone Order Widget</label>
+            </parameter>
+        </parameters>
+    </widget>
+</widgets>
