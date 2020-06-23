@@ -1,9 +1,19 @@
-<?php if($block->getData('header')): ?>
-    <h2><?php echo $block->getData('header'); ?></h2>
-<?php endif; ?>
-<?php if($block->getData('content-css')): ?>
-    <?php echo html_entity_decode($block->getData('content-css')); ?>
-<?php endif; ?>
-<?php if($block->getData('content-html')): ?>
-    <?php echo html_entity_decode($block->getData('content-html')); ?>
-<?php endif; ?>
+<?php
+
+if($block->getData('span-title')) {
+    $title = $block->getData('span-title');
+}
+?>
+
+<?php //if($block->getData('color-1')): ?>
+<!--    --><?php //echo html_entity_decode($block->getData('color-1')); ?>
+<?php //endif; ?>
+<?php //if($block->getData('color-2')): ?>
+<!--    --><?php //echo html_entity_decode($block->getData('color-2')); ?>
+<?php //endif; ?>
+
+
+<div class="forter_webId" style="color: <?php echo $block->getData('color-1'); ?>;">
+    <span><?php echo $title; ?></span>
+    <span class="forter_code"></span>
+</div>
