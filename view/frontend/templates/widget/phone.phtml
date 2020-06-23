@@ -1,11 +1,22 @@
 <?php
-
-if($block->getData('span-title')) {
-    $title = $block->getData('span-title');
+$isEnabled = $block->isEnabled();
+if($isEnabled == true) {
+    $url = "url(https://fonts.googleapis.com/css?family=";
+    $font1 =  $block->getData('font-1');
+    $font2 =  $block->getData('font-2');
+    $font1Url = $url . $font1 . ")";
+    $font2Url = $url . $font2 . ")";
+    $font1Name = str_replace("+", "", $font1);
+    $font2Name = str_replace("+", "", $font2);
 }
 ?>
-
-<div class="forter_webId" style="color: <?php echo $block->getData('color-1'); ?>; font-family: <?php echo $block->getData('font-1'); ?>;">
-    <span><?php echo $title; ?></span>
-    <span class="forter_code" style="color: <?php echo $block->getData('color-2'); ?>; font-family: <?php echo $block->getData('font-2'); ?>"></span>
-</div>
+<?php if($isEnabled == true) : ?>
+    <style>
+        @import <?php echo $font1Url; ?>
+        @import <?php echo $font2Url; ?>
+    </style>
+    <div class="forter_webId" style="color: <?php echo $block->getData('color-1'); ?>; font-family: <?php echo $font1Name; ?>, 'sans-serif';">
+        <span><?php echo $block->getData('span-title'); ?></span>
+        <span class="forter_code" style="color: <?php echo $block->getData('color-2'); ?>; font-family: <?php echo $font2Name; ?>, 'sans-serif';">Unpredictable</span>
+    </div>
+<?php endif; ?>
