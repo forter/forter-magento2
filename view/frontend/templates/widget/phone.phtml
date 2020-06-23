@@ -5,15 +5,7 @@ if($block->getData('span-title')) {
 }
 ?>
 
-<?php //if($block->getData('color-1')): ?>
-<!--    --><?php //echo html_entity_decode($block->getData('color-1')); ?>
-<?php //endif; ?>
-<?php //if($block->getData('color-2')): ?>
-<!--    --><?php //echo html_entity_decode($block->getData('color-2')); ?>
-<?php //endif; ?>
-
-
-<div class="forter_webId" style="color: <?php echo $block->getData('color-1'); ?>;">
+<div class="forter_webId" style="color: <?php echo $block->getData('color-1'); ?>; font-family: <?php echo $block->getData('font-1'); ?>;">
     <span><?php echo $title; ?></span>
-    <span class="forter_code"></span>
+    <span class="forter_code" style="color: <?php echo $block->getData('color-2'); ?>; font-family: <?php echo $block->getData('font-2'); ?>"></span>
 </div>
