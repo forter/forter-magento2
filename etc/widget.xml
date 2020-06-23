@@ -1,11 +1,19 @@
 <?xml version="1.0" ?>
-<widgets xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:forter:Magento_Widget:etc/widget.xsd">
+<widgets xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Widget:etc/widget.xsd">
     <widget class="Forter\Forter\Block\Widget\Phone" id="forter_forter_phone">
         <label>Phone Order</label>
         <description>Forter Phone Order</description>
         <parameters>
-            <parameter name="phone" sort_order="10" visible="true" xsi:type="text">
-                <label>Forter Phone Order Widget</label>
+            <parameter name="header" visible="true" xsi:type="text" sort_order="9">
+                <label>Widget Header on page</label>
+            </parameter>
+            <parameter name="content-css" xsi:type="text" visible="true" sort_order="10">
+                <label>CSS widget content</label>
+            </parameter>
+            <parameter name="content-html" xsi:type="block" required="true" visible="true" sort_order="11">
+                <label>HTML widget content</label>
+                <block class="Forter\Forter\Block\Widget\Html" />
             </parameter>
         </parameters>
     </widget>
