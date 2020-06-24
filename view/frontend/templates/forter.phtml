@@ -8,6 +8,8 @@ function t(t,e){for(var n=t.split(""),r=0;r<n.length;++r)n[r]=String.fromCharCod
 require(["jquery"], function ($) {
   $(function () {
     $(document).on('ftr:customerWebIdReady', function (ev, webId) {
+    console.log(webId);
+    console.log(ev);
     var visualWebIdSplit = webId.replace(/(.{3})/g, "$1 ").trim();
     $(".forter_webId").html('<span>Customer WebID:</span> ' + visualWebIdSplit);
   });
