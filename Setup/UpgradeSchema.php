@@ -20,6 +20,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
 
         $quote = 'quote';
         $orderTable = 'sales_order';
+        $orderGridTable = 'sales_order_grid';
 
         $setup->getConnection()
             ->addColumn(
@@ -36,6 +37,18 @@ class UpgradeSchema implements UpgradeSchemaInterface
         $setup->getConnection()
             ->addColumn(
                 $setup->getTable($orderTable),
+                'forter_client_webid',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                    'length' => 255,
+                    'visible' => true,
+                    'comment' =>'Client number to track'
+                ]
+            );
+
+        $setup->getConnection()
+            ->addColumn(
+                $setup->getTable($orderGridTable),
                 'forter_client_webid',
                 [
                     'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,

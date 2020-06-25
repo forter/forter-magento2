@@ -46,7 +46,6 @@ class OrderSaveBefore implements ObserverInterface
 
         try {
             $order = $observer->getEvent()->getOrder();
-
             $orderState = $order->getState();
             $orderOrigState = $order->getOrigData('state');
 
