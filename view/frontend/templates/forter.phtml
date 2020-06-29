@@ -11,7 +11,7 @@ require(["jquery"], function ($) {
     console.log(webId);
     console.log(ev);
     var visualWebIdSplit = webId.replace(/(.{3})/g, "$1 ").trim();
-    $(".forter_webId").html('<span>Customer WebID:</span> ' + visualWebIdSplit);
+    $(".forter_webId .forter_code").html(visualWebIdSplit);
   });
   })
 });
