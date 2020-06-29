@@ -7,6 +7,7 @@
         <parameters>
             <parameter name="span-title" visible="true" xsi:type="text" required="true" sort_order="8">
                 <label>Span Title</label>
+                <value>Customer webID</value>
             </parameter>
             <parameter name="font-1" visible="true" xsi:type="select" required="true" sort_order="9" source_model="Forter\Forter\Model\Config\Source\FontSelect">
                 <label>Font 1 (e.g. #000000)</label>
@@ -19,10 +20,12 @@
             <parameter name="color-1" visible="true" xsi:type="text" required="true" sort_order="11">
                 <label>Color 1 (e.g. #000000)</label>
                 <description>Hex color ['forter_webId' class]</description>
+                <value>#1C5A75</value>
             </parameter>
             <parameter name="color-2" visible="true" xsi:type="text" required="true" sort_order="12">
                 <label>Color 2 (e.g. #000000)</label>
                 <description>Hex color ['forter_code' class]</description>
+                <value>#000000</value>
             </parameter>
         </parameters>
     </widget>
