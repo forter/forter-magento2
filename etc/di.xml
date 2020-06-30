@@ -23,7 +23,7 @@
  <virtualType name="Magento\Sales\Model\ResourceModel\Order\Grid" type="Magento\Sales\Model\ResourceModel\Grid">
     <arguments>
         <argument name="columns" xsi:type="array">
-            <item name="forter_client_webid" xsi:type="string">sales_order.forter_client_webid</item>
+            <item name="forter_web_id" xsi:type="string">sales_order.forter_web_id</item>
         </argument>
     </arguments>
 </virtualType>

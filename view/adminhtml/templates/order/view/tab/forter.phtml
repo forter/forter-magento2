@@ -9,14 +9,14 @@ $forterResponse = json_decode($forterResponse);
 //check order was made from admin site
 if (empty($order->getRemoteIp()) == true ) {
     $adminOrder = true;
-    $clientNumber = $order->getForterClientWebid();
+    $clientNumber = $order->getForterWebId();
 }
 ?>
 <?php if($adminOrder == true): ?>
     <section class="admin__page-section">
         <div class="admin__page-section-title invoice_title">
             <span class="title"><?php echo __("Client number to track"); ?></span>
-            <br><br><input type="text" id="forter_client_webid" name="forter_client_webid" value="<?php echo $clientNumber;?>" readonly><br><br>
+            <br><br><input type="text" id="forter_web_id" name="forter_web_id" value="<?php echo $clientNumber;?>" readonly><br><br>
         </div>
     </section>
 <?php endif; ?>

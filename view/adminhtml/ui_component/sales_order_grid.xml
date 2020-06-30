@@ -14,7 +14,7 @@
             </item>
         </argument>
     </column>
-      <column name="forter_client_webid">
+      <column name="forter_web_id">
           <argument name="data" xsi:type="array">
               <item name="config" xsi:type="array">
                   <item name="visible" xsi:type="boolean">true</item>

@@ -47,7 +47,7 @@ class Save extends SaveOrder
                 ->createOrder();
 
             //get forter client number
-            $forterNumber = $this->getRequest()->getPost('forter_client_webid');
+            $forterNumber = $this->getRequest()->getPost('forter_web_id');
             $order->setForterClientWebid($forterNumber)->save();
 
             $this->_getSession()->clearStorage();
