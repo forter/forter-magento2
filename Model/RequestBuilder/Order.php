@@ -121,9 +121,14 @@ class Order
     public function buildTransaction($order, $orderStage)
     {
         $headers = getallheaders();
+        if(!null($order->getForterWebId())) {
+            $orderType = "PHONE";
+        } else {
+            $orderType = "WEB";
+        }
         $data = [
         "orderId" => strval($order->getIncrementId()),
-        "orderType" => "WEB",
+        "orderType" => $orderType,
         "timeSentToForter" => time()*1000,
         "checkoutTime" => time(),
         "additionalIdentifiers" => $this->basicInfoPrepare->getAdditionalIdentifiers($order, $orderStage),
