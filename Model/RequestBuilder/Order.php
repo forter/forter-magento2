@@ -121,14 +121,10 @@ class Order
     public function buildTransaction($order, $orderStage)
     {
         $headers = getallheaders();
-        if(!null($order->getForterWebId())) {
-            $orderType = "PHONE";
-        } else {
-            $orderType = "WEB";
-        }
+
         $data = [
         "orderId" => strval($order->getIncrementId()),
-        "orderType" => $orderType,
+        "orderType" => $this->getOrderType($order),
         "timeSentToForter" => time()*1000,
         "checkoutTime" => time(),
         "additionalIdentifiers" => $this->basicInfoPrepare->getAdditionalIdentifiers($order, $orderStage),
@@ -155,5 +151,21 @@ class Order
             );
         }
         return $data;
+    }
+
+    /**
+     * Returns order type according to 'forter_web_id' attribute.
+     * @param $order
+     * @return string
+     */
+    private function getOrderType($order)
+    {
+        if($order->getForterWebId()) {
+            $orderType = "PHONE";
+        } else {
+            $orderType = "WEB";
+        }
+
+        return $orderType;
     }
 }
