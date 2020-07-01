@@ -160,7 +160,7 @@ class Order
      */
     private function getOrderType($order)
     {
-        if($order->getForterWebId()) {
+        if($order->getForterWebId() && $order->getForterWebId() != "") {
             $orderType = "PHONE";
         } else {
             $orderType = "WEB";
