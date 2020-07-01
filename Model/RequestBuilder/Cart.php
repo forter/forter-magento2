@@ -56,7 +56,6 @@ class Cart
             //Category generation
             $product = $item->getProduct();
             $categories = $this->getProductCategories($item->getProduct());
-            $beneficiaries = $this->getBeneficiaries($item);
             $totalDiscount += $item->getDiscountAmount();
             $itemIds[] = $item->getProductId();
 
@@ -88,13 +87,6 @@ class Cart
                 ]
             ];
 
-            if ($beneficiaries) {
-                $personalDetails = [
-                    "personalDetails" => $beneficiaries
-                ];
-                $singleCartItem["beneficiaries"] = [$personalDetails];
-            }
-
             $cartItems[] = $singleCartItem;
         }
         return $cartItems;
@@ -117,28 +109,6 @@ class Cart
                 "currency" => $order->getOrderCurrency()->getCurrencyCode() . ""
             ],
             "discountType" => $order->getDiscountDescription() ? $order->getDiscountDescription() : ""
-        ];
-    }
-
-    /**
-     * @param $item
-     * @return array|null
-     */
-    private function getBeneficiaries($item)
-    {
-        $productOptions = $item->getProductOptions();
-        if (!$productOptions) {
-            return null;
-        }
-        $giftCardName = $productOptions['giftcard_recipient_name'];
-        $giftCardEmail = $productOptions['giftcard_recipient_email'];
-        if (!$giftCardName || !$giftCardEmail) {
-            return null;
-        }
-
-        return [
-            "firstName" => $giftCardName,
-            "email" => $giftCardEmail
         ];
     }
 
