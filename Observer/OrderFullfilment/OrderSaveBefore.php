@@ -20,7 +20,7 @@ class OrderSaveBefore implements ObserverInterface
     private $config;
 
     /**
-     * @var
+     * @var \Magento\Framework\App\RequestInterface
      */
     protected $request;
 
