@@ -20,17 +20,25 @@ class OrderSaveBefore implements ObserverInterface
     private $config;
 
     /**
+     * @var
+     */
+    protected $request;
+
+    /**
      * OrderSaveAfter constructor.
      * @param AbstractApi $abstractApi
      * @param Config $config
 
      */
     public function __construct(
+        \Magento\Framework\App\RequestInterface $request,
         AbstractApi $abstractApi,
         Config $config
+
     ) {
         $this->abstractApi = $abstractApi;
         $this->config = $config;
+        $this->request = $request;
     }
 
     /**
@@ -41,12 +49,17 @@ class OrderSaveBefore implements ObserverInterface
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
         if (!$this->config->isEnabled() || !$this->config->isOrderFulfillmentEnable()) {
-            return false;
+//            return false;
         }
 
+        //get forter client number
+        $forterNumber = ($this->request->getPost('forter_web_id') != "") ? $this->request->getPost('forter_web_id') : "";
+        $order = $observer->getEvent()->getOrder();
+        $order->setForterWebId($forterNumber);
+
         try {
-            $order = $observer->getEvent()->getOrder();
             $orderState = $order->getState();
+
             $orderOrigState = $order->getOrigData('state');
 
             if ($orderState == 'complete' && $orderOrigState != 'complete') {
@@ -64,7 +77,6 @@ class OrderSaveBefore implements ObserverInterface
             "eventTime" => time(),
             "updatedStatus" => $orderState,
         ];
-
             $url = self::ORDER_FULFILLMENT_STATUS_ENDPOINT . $order->getIncrementId();
             $this->abstractApi->sendApiRequest($url, json_encode($json));
         } catch (\Exception $e) {
