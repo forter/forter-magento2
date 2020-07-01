@@ -10,7 +10,7 @@ class Phone extends Template implements BlockInterface {
     /**
      *
      */
-    const XML_IS_ENABLED = 'forter/settings/enabled';
+    const XML_IS_ENABLED = 'forter/settings/widget_enabled';
 
     /**
      * @var string
@@ -42,6 +42,10 @@ class Phone extends Template implements BlockInterface {
         parent::__construct($context, $data);
     }
 
+    /**
+     * Check if Forter Widget Extension is enabled.
+     * @return mixed
+     */
     public function isEnabled()
     {
         $storeScope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE;
@@ -49,5 +53,4 @@ class Phone extends Template implements BlockInterface {
 
         return $isEnabled;
     }
-
 }

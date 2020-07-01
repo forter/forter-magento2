@@ -18,12 +18,12 @@ class UpgradeSchema implements UpgradeSchemaInterface
     {
         $setup->startSetup();
 
-        $quote = 'quote';
         $orderTable = 'sales_order';
+        $orderGridTable = 'sales_order_grid';
 
         $setup->getConnection()
             ->addColumn(
-                $setup->getTable($quote),
+                $setup->getTable($orderTable),
                 'forter_web_id',
                 [
                     'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
@@ -35,7 +35,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
 
         $setup->getConnection()
             ->addColumn(
-                $setup->getTable($orderTable),
+                $setup->getTable($orderGridTable),
                 'forter_web_id',
                 [
                     'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,

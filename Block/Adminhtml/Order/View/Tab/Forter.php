@@ -15,9 +15,19 @@ class Forter extends \Magento\Sales\Block\Adminhtml\Order\AbstractOrder implemen
     \Magento\Backend\Block\Widget\Tab\TabInterface
 {
     /**
+     *
+     */
+    const XML_IS_ENABLED = 'forter/settings/widget_enabled';
+
+    /**
      * order Object
      */
     protected $orderInterface;
+
+    /**
+     * @var \Magento\Framework\App\Config\ScopeConfigInterface
+     */
+    protected $scopeConfig;
 
     /**
      * invoice constructor.
@@ -28,6 +38,7 @@ class Forter extends \Magento\Sales\Block\Adminhtml\Order\AbstractOrder implemen
      * @param array $data
      */
     public function __construct(
+        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         Context $context,
         Registry $registry,
         OrderInterface $orderInterface,
@@ -35,6 +46,7 @@ class Forter extends \Magento\Sales\Block\Adminhtml\Order\AbstractOrder implemen
         array $data = []
     ) {
         $this->orderInterface = $orderInterface;
+        $this->scopeConfig = $scopeConfig;
         parent::__construct($context, $registry, $adminHelper, $data);
     }
 
@@ -86,5 +98,17 @@ class Forter extends \Magento\Sales\Block\Adminhtml\Order\AbstractOrder implemen
     {
         $order_id = $this->getRequest()->getParam('order_id');
         return $this->orderInterface->load($order_id);
+    }
+
+    /**
+     * Check if Forter Widget Extension is enabled.
+     * @return mixed
+     */
+    public function isEnabled()
+    {
+        $storeScope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE;
+        $isEnabled = $this->scopeConfig->getValue(self::XML_IS_ENABLED, $storeScope);
+
+        return $isEnabled;
     }
 }
