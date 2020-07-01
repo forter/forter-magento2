@@ -16,7 +16,7 @@ if (empty($order->getRemoteIp()) == true ) {
     <section class="admin__page-section">
         <div class="admin__page-section-title invoice_title">
             <span class="title"><?php echo __("Client number to track"); ?></span>
-            <br><br><input type="text" id="forter_web_id" name="forter_web_id" value="<?php echo $clientNumber;?>" readonly><br><br>
+            <br><br><label for="forter_web_id" class="admin__field-label"><?php echo $clientNumber;?></label><br><br>
         </div>
     </section>
 <?php endif; ?>
