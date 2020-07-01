@@ -49,7 +49,7 @@ class OrderSaveBefore implements ObserverInterface
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
         if (!$this->config->isEnabled() || !$this->config->isOrderFulfillmentEnable()) {
-//            return false;
+            return false;
         }
 
         //get forter client number
