@@ -20,25 +20,18 @@ class OrderSaveBefore implements ObserverInterface
     private $config;
 
     /**
-     * @var \Magento\Framework\App\RequestInterface
-     */
-    protected $request;
-
-    /**
      * OrderSaveAfter constructor.
      * @param AbstractApi $abstractApi
      * @param Config $config
 
      */
     public function __construct(
-        \Magento\Framework\App\RequestInterface $request,
         AbstractApi $abstractApi,
         Config $config
 
     ) {
         $this->abstractApi = $abstractApi;
         $this->config = $config;
-        $this->request = $request;
     }
 
     /**
@@ -48,18 +41,13 @@ class OrderSaveBefore implements ObserverInterface
      */
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
-        //get forter client number
-        $forterNumber = ($this->request->getPost('forter_web_id') != "") ? $this->request->getPost('forter_web_id') : "";
-        $order = $observer->getEvent()->getOrder();
-        $order->setForterWebId($forterNumber);
-
         if (!$this->config->isEnabled() || !$this->config->isOrderFulfillmentEnable()) {
             return false;
         }
 
         try {
+            $order = $observer->getEvent()->getOrder();
             $orderState = $order->getState();
-
             $orderOrigState = $order->getOrigData('state');
 
             if ($orderState == 'complete' && $orderOrigState != 'complete') {

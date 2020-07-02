@@ -74,6 +74,11 @@ class Order
     private $forterConfig;
 
     /**
+     * @var \Magento\Framework\App\RequestInterface
+     */
+    protected $request;
+
+    /**
      * Order constructor.
      * @param BasicInfoPrepare $basicInfoPrepare
      * @param CartPrepare  $cartPrepare
@@ -88,6 +93,7 @@ class Order
      * @param Config $forterConfig
      */
     public function __construct(
+        \Magento\Framework\App\RequestInterface $request,
         CartPrepere $cartPrepare,
         BasicInfoPrepere $basicInfoPrepare,
         CustomerPrepere $customerPrepere,
@@ -111,6 +117,7 @@ class Order
         $this->wishlistProvider = $wishlistProvider;
         $this->subscriber = $subscriber;
         $this->forterConfig = $forterConfig;
+        $this->request = $request;
     }
 
     /**
@@ -121,6 +128,10 @@ class Order
     public function buildTransaction($order, $orderStage)
     {
         $headers = getallheaders();
+
+        //get forter client number
+        $forterNumber = ($this->request->getPost('forter_web_id') != "") ? $this->request->getPost('forter_web_id') : "";
+        $order->setForterWebId($forterNumber);
 
         $data = [
         "orderId" => strval($order->getIncrementId()),
@@ -144,8 +155,9 @@ class Order
               'debug' => $order->debug()
           ];
         }
+
         $phoneWebId = $order->getForterWebId(); // field to be created by the merchant as instructed in documentation
-        if ($phoneWebId) {
+        if ($phoneWebId != '') {
             $data['phoneOrderInformation'] = array(
                 "customerWebId" => $phoneWebId
             );
