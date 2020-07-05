@@ -10,10 +10,6 @@
             <resource>Forter_Forter::config</resource>
             <group id="settings" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
               <label>Basic Settings</label>
-                <field id="widget_enabled" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Enable Forter Widget Extension</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                </field>
               <field id="enabled" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
                   <label>Enable Forter Fraud Solution</label>
                   <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
@@ -155,6 +151,10 @@
               </field>
               <field id="enabled_order_fulfillment" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
                   <label>Enable Order Fulfillment</label>
+                  <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+              </field>
+              <field id="phone_order_enabled" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                  <label>Enable Phone Order</label>
                   <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
               </field>
             </group>

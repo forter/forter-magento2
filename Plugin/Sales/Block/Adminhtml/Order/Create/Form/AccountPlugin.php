@@ -5,7 +5,7 @@ class AccountPlugin
     /**
      *
      */
-    const XML_IS_ENABLED = 'forter/settings/widget_enabled';
+    const PHONE_ORDER_IS_ENABLED = 'forter/advanced_settings/phone_order_enabled';
 
     /**
      * @var \Magento\Framework\App\Config\ScopeConfigInterface
@@ -30,21 +30,21 @@ class AccountPlugin
      */
     public function afterToHtml(\Magento\Sales\Block\Adminhtml\Order\Create\Form\Account $subject, $html)
     {
-        if ($this->isEnabled()) {
+        if ($this->isPhoneOrderEnabled()) {
             $newBlockHtml = $subject->getLayout()->createBlock('\Magento\Framework\View\Element\Template')->setTemplate('Forter_Forter::order/view/account.phtml')->toHtml();
 
-            return $html.$newBlockHtml;
+            return $html . $newBlockHtml;
         }
     }
 
     /**
-     * Check if Forter Widget Extension is enabled.
+     * Check if Forter Phone Order Widget is enabled.
      * @return mixed
      */
-    private function isEnabled()
+    private function isPhoneOrderEnabled()
     {
         $storeScope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE;
-        $isEnabled = $this->scopeConfig->getValue(self::XML_IS_ENABLED, $storeScope);
+        $isEnabled = $this->scopeConfig->getValue(self::PHONE_ORDER_IS_ENABLED, $storeScope);
 
         return $isEnabled;
     }

@@ -5,12 +5,13 @@ use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
 use Magento\Widget\Block\BlockInterface;
 
-class Phone extends Template implements BlockInterface {
+class Phone extends Template implements BlockInterface
+{
 
     /**
      *
      */
-    const XML_IS_ENABLED = 'forter/settings/widget_enabled';
+    const PHONE_ORDER_IS_ENABLED = 'forter/advanced_settings/phone_order_enabled';
 
     /**
      * @var string
@@ -43,13 +44,13 @@ class Phone extends Template implements BlockInterface {
     }
 
     /**
-     * Check if Forter Widget Extension is enabled.
+     * Check if Forter Phone Order Widget is enabled.
      * @return mixed
      */
-    public function isEnabled()
+    public function isPhoneOrderEnabled()
     {
         $storeScope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE;
-        $isEnabled = $this->scopeConfig->getValue(self::XML_IS_ENABLED, $storeScope);
+        $isEnabled = $this->scopeConfig->getValue(self::PHONE_ORDER_IS_ENABLED, $storeScope);
 
         return $isEnabled;
     }

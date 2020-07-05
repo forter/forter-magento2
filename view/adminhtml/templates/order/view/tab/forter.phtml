@@ -6,21 +6,8 @@ $adminOrder = false;
 $order = $this->getOrder();
 $forterResponse = $order->getData('forter_response');
 $forterResponse = json_decode($forterResponse);
-$isEnabled = $block->isEnabled();
-//check order was made from admin site
-if (empty($order->getRemoteIp()) == true ) {
-    $adminOrder = true;
-    $clientNumber = $order->getForterWebId();
-}
+
 ?>
-<?php if($adminOrder == true && $isEnabled == true): ?>
-    <section class="admin__page-section">
-        <div class="admin__page-section-title invoice_title">
-            <span class="title"><?php echo __("Client number to track"); ?></span>
-            <br><br><label for="forter_web_id" class="admin__field-label"><?php echo $clientNumber;?></label><br><br>
-        </div>
-    </section>
-<?php endif; ?>
 
 <section class="admin__page-section">
     <div class="admin__page-section-title invoice_title">

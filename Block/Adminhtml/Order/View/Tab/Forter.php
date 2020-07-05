@@ -17,7 +17,7 @@ class Forter extends \Magento\Sales\Block\Adminhtml\Order\AbstractOrder implemen
     /**
      *
      */
-    const XML_IS_ENABLED = 'forter/settings/widget_enabled';
+    const PHONE_ORDER_IS_ENABLED = 'forter/advanced_settings/phone_order_enabled';
 
     /**
      * order Object
@@ -98,17 +98,5 @@ class Forter extends \Magento\Sales\Block\Adminhtml\Order\AbstractOrder implemen
     {
         $order_id = $this->getRequest()->getParam('order_id');
         return $this->orderInterface->load($order_id);
-    }
-
-    /**
-     * Check if Forter Widget Extension is enabled.
-     * @return mixed
-     */
-    public function isEnabled()
-    {
-        $storeScope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE;
-        $isEnabled = $this->scopeConfig->getValue(self::XML_IS_ENABLED, $storeScope);
-
-        return $isEnabled;
     }
 }
