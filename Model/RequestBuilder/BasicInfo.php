@@ -33,7 +33,8 @@ class BasicInfo
     {
         return [
             "customerIP" => $this->getIpFromOrder($remoteIp, $headers),
-            "userAgent" => (is_array($headers) && array_key_exists("User-Agent", $headers)) ? $headers['User-Agent'] : "",
+            //"userAgent" => (is_array($headers) && array_key_exists("User-Agent", $headers)) ? $headers['User-Agent'] : "",
+            "userAgent" => $this->getUserAgentFromHeaders($headers),
             "forterTokenCookie" => $this->cookieManager->getCookie("forterToken") . "",
             "merchantDeviceIdentifier" => null,
             "fullHeaders" => substr(json_encode($headers) . "", 0, 4000)
@@ -83,5 +84,24 @@ class BasicInfo
             return substr($xForwardedFor, 0, $indexOfComa);
         }
         return $remoteIp;
+    }
+
+    /**
+     * @param $remoteIp
+     * @param $headers
+     * @return false|mixed|string
+     */
+    public function getUserAgentFromHeaders($headers)
+    {
+      if (is_array($headers)) {
+          if (array_key_exists("User-Agent", $headers)) {
+              return $headers['User-Agent'];
+          }
+
+          if (array_key_exists("user-agent", $headers)) {
+              return $headers['user-agent'];
+          }
+      }
+      return "";
     }
 }
