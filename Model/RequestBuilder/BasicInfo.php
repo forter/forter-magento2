@@ -33,7 +33,6 @@ class BasicInfo
     {
         return [
             "customerIP" => $this->getIpFromOrder($remoteIp, $headers),
-            //"userAgent" => (is_array($headers) && array_key_exists("User-Agent", $headers)) ? $headers['User-Agent'] : "",
             "userAgent" => $this->getUserAgentFromHeaders($headers),
             "forterTokenCookie" => $this->cookieManager->getCookie("forterToken") . "",
             "merchantDeviceIdentifier" => null,
