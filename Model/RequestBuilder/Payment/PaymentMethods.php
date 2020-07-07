@@ -92,19 +92,19 @@ class PaymentMethods
             $detailsArray['avsStreetResult'] = $avsStreetResult;
         }
 
-        // field below come from the plugin Plugin/Braintree/Gateway/Response/CardDetailsHandler.php
+        // field below come from the plugin Plugin/Braintree/Gateway/Response/CardDetailsHandler.php up to Forter 2.0.8
         $forter_cc_bin = $payment->getAdditionalInformation('forter_cc_bin');
         if ($forter_cc_bin) {
             $detailsArray['bin'] = $forter_cc_bin;
         }
 
-        // field below come from the plugin Plugin/Braintree/Gateway/Response/CardDetailsHandler.php
+        // field below come from the plugin Plugin/Braintree/Gateway/Response/CardDetailsHandler.php up to Forter 2.0.8
         $forter_cc_owner = $payment->getAdditionalInformation('forter_cc_owner');
         if ($forter_cc_owner) {
             $detailsArray['nameOnCard'] = $forter_cc_owner;
         }
 
-        // field below come from the plugin Plugin/Braintree/Gateway/Response/CardDetailsHandler.php
+        // field below come from the plugin Plugin/Braintree/Gateway/Response/CardDetailsHandler.php up to Forter 2.0.8
         $forter_cc_country = $payment->getAdditionalInformation('forter_cc_country');
         if ($forter_cc_country) {
             $detailsArray['countryOfIssuance'] = $forter_cc_country;
