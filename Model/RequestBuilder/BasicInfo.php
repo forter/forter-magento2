@@ -87,9 +87,8 @@ class BasicInfo
     }
 
     /**
-     * @param $remoteIp
      * @param $headers
-     * @return false|mixed|string
+     * @return string
      */
     public function getUserAgentFromHeaders($headers)
     {
