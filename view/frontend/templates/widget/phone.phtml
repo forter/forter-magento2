@@ -12,11 +12,12 @@ if ($isEnabled == true) {
 ?>
 <?php if ($isEnabled == true) : ?>
     <style>
-        @import <?php echo $font1Url; ?>
-        @import <?php echo $font2Url; ?>
+        @import <?php echo $font1Url?>;
+        @import <?php echo $font2Url?>;
+        .forter_webId{display:none;}
     </style>
     <div class="forter_webId" style="color: <?php echo $block->getData('color-1'); ?>; font-family: <?php echo $font1Name; ?>, 'sans-serif';">
         <span><?php echo $block->getData('span-title'); ?></span>
-        <span class="forter_code" style="color: <?php echo $block->getData('color-2'); ?>; font-family: <?php echo $font2Name; ?>, 'sans-serif';">Unpredictable</span>
+        <span class="forter_code" style="color: <?php echo $block->getData('color-2'); ?>; font-family: <?php echo $font2Name; ?>, 'sans-serif';"></span>
     </div>
 <?php endif; ?>

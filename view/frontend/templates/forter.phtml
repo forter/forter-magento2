@@ -8,10 +8,13 @@ function t(t,e){for(var n=t.split(""),r=0;r<n.length;++r)n[r]=String.fromCharCod
 require(["jquery"], function ($) {
   $(function () {
     $(document).on('ftr:customerWebIdReady', function (ev, webId) {
-    console.log(webId);
-    console.log(ev);
     var visualWebIdSplit = webId.replace(/(.{3})/g, "$1 ").trim();
-    $(".forter_webId .forter_code").html(visualWebIdSplit);
+    if(visualWebIdSplit){
+      $(".forter_webId .forter_code").html(visualWebIdSplit);
+      $(".forter_webId .forter_code").show();
+    } else {
+      console.log('Forter: Invalid Web Id');
+    }
   });
   })
 });
