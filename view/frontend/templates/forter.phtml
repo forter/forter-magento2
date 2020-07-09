@@ -11,7 +11,7 @@ require(["jquery"], function ($) {
     var visualWebIdSplit = webId.replace(/(.{3})/g, "$1 ").trim();
     if(visualWebIdSplit){
       $(".forter_webId .forter_code").html(visualWebIdSplit);
-      $(".forter_webId .forter_code").show();
+      $(".forter_webId").show();
     } else {
       console.log('Forter: Invalid Web Id');
     }
