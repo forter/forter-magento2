@@ -16,6 +16,7 @@ use Forter\Forter\Model\RequestBuilder\Customer as CustomerPrepere;
 use Forter\Forter\Model\RequestBuilder\Payment as PaymentPrepere;
 use Magento\Catalog\Model\CategoryFactory;
 use Magento\Customer\Model\Session;
+use Magento\Framework\App\RequestInterface;
 use Magento\Newsletter\Model\Subscriber;
 use Magento\Review\Model\Review;
 use Magento\Sales\Model\OrderFactory;
@@ -93,7 +94,7 @@ class Order
      * @param Config $forterConfig
      */
     public function __construct(
-        \Magento\Framework\App\RequestInterface $request,
+        RequestInterface $request,
         CartPrepere $cartPrepare,
         BasicInfoPrepere $basicInfoPrepare,
         CustomerPrepere $customerPrepere,
@@ -130,7 +131,8 @@ class Order
         $headers = getallheaders();
 
         //get forter client number
-        $forterNumber = ($this->request->getPost('forter_web_id') != "") ? $this->request->getPost('forter_web_id') : "";
+        $forterWebId = $this->request->getPost('forter_web_id');
+        $forterNumber = ($forterWebId != "") ? $forterWebId : "";
         $order->setForterWebId($forterNumber);
 
         $data = [
@@ -158,9 +160,9 @@ class Order
 
         $phoneWebId = $order->getForterWebId(); // field to be created by the merchant as instructed in documentation
         if ($phoneWebId != '') {
-            $data['phoneOrderInformation'] = array(
+            $data['phoneOrderInformation'] = [
                 "customerWebId" => $phoneWebId
-            );
+            ];
         }
         return $data;
     }
@@ -172,7 +174,7 @@ class Order
      */
     private function getOrderType($order)
     {
-        if($order->getForterWebId() && $order->getForterWebId() != "") {
+        if ($order->getForterWebId() && $order->getForterWebId() != "") {
             $orderType = "PHONE";
         } else {
             $orderType = "WEB";
