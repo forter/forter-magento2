@@ -14,5 +14,17 @@
             </item>
         </argument>
     </column>
+      <column name="forter_web_id">
+          <argument name="data" xsi:type="array">
+              <item name="config" xsi:type="array">
+                  <item name="visible" xsi:type="boolean">true</item>
+                  <item name="label" xsi:type="string" translate="true">Client number to track</item>
+                  <item name="filter" xsi:type="string">text</item>
+                  <item name="editor" xsi:type="string">text</item>
+                  <item name="sortable" xsi:type="string">false</item>
+                  <item name="sortOrder" xsi:type="number">41</item>
+              </item>
+          </argument>
+      </column>
   </columns>
 </listing>

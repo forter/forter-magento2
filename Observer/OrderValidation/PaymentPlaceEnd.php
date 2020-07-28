@@ -94,8 +94,7 @@ class PaymentPlaceEnd implements ObserverInterface
         Order $requestBuilderOrder,
         OrderManagementInterface $orderManagement,
         StoreManagerInterface $storeManager
-    )
-    {
+    ) {
         $this->customerSession = $customerSession;
         $this->messageManager = $messageManager;
         $this->dateTime = $dateTime;

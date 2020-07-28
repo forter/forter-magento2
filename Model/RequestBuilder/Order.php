@@ -16,6 +16,7 @@ use Forter\Forter\Model\RequestBuilder\Customer as CustomerPrepere;
 use Forter\Forter\Model\RequestBuilder\Payment as PaymentPrepere;
 use Magento\Catalog\Model\CategoryFactory;
 use Magento\Customer\Model\Session;
+use Magento\Framework\App\RequestInterface;
 use Magento\Newsletter\Model\Subscriber;
 use Magento\Review\Model\Review;
 use Magento\Sales\Model\OrderFactory;
@@ -74,6 +75,11 @@ class Order
     private $forterConfig;
 
     /**
+     * @var \Magento\Framework\App\RequestInterface
+     */
+    protected $request;
+
+    /**
      * Order constructor.
      * @param BasicInfoPrepare $basicInfoPrepare
      * @param CartPrepare  $cartPrepare
@@ -88,6 +94,7 @@ class Order
      * @param Config $forterConfig
      */
     public function __construct(
+        RequestInterface $request,
         CartPrepere $cartPrepare,
         BasicInfoPrepere $basicInfoPrepare,
         CustomerPrepere $customerPrepere,
@@ -111,6 +118,7 @@ class Order
         $this->wishlistProvider = $wishlistProvider;
         $this->subscriber = $subscriber;
         $this->forterConfig = $forterConfig;
+        $this->request = $request;
     }
 
     /**
@@ -121,9 +129,15 @@ class Order
     public function buildTransaction($order, $orderStage)
     {
         $headers = getallheaders();
+
+        //get forter client number
+        $forterWebId = $this->request->getPost('forter_web_id');
+        $forterNumber = ($forterWebId != "") ? $forterWebId : "";
+        $order->setForterWebId($forterNumber);
+
         $data = [
         "orderId" => strval($order->getIncrementId()),
-        "orderType" => "WEB",
+        "orderType" => $this->getOrderType($order),
         "timeSentToForter" => time()*1000,
         "checkoutTime" => time(),
         "additionalIdentifiers" => $this->basicInfoPrepare->getAdditionalIdentifiers($order, $orderStage),
@@ -143,12 +157,29 @@ class Order
               'debug' => $order->debug()
           ];
         }
+
         $phoneWebId = $order->getForterWebId(); // field to be created by the merchant as instructed in documentation
-        if ($phoneWebId) {
-            $data['phoneOrderInformation'] = array(
+        if ($phoneWebId != '') {
+            $data['phoneOrderInformation'] = [
                 "customerWebId" => $phoneWebId
-            );
+            ];
         }
         return $data;
+    }
+
+    /**
+     * Returns order type according to 'forter_web_id' attribute.
+     * @param $order
+     * @return string
+     */
+    private function getOrderType($order)
+    {
+        if ($order->getForterWebId() && $order->getForterWebId() != "") {
+            $orderType = "PHONE";
+        } else {
+            $orderType = "WEB";
+        }
+
+        return $orderType;
     }
 }

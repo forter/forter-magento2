@@ -15,9 +15,19 @@ class Forter extends \Magento\Sales\Block\Adminhtml\Order\AbstractOrder implemen
     \Magento\Backend\Block\Widget\Tab\TabInterface
 {
     /**
+     *
+     */
+    const PHONE_ORDER_IS_ENABLED = 'forter/advanced_settings/phone_order_enabled';
+
+    /**
      * order Object
      */
     protected $orderInterface;
+
+    /**
+     * @var \Magento\Framework\App\Config\ScopeConfigInterface
+     */
+    protected $scopeConfig;
 
     /**
      * invoice constructor.
@@ -28,6 +38,7 @@ class Forter extends \Magento\Sales\Block\Adminhtml\Order\AbstractOrder implemen
      * @param array $data
      */
     public function __construct(
+        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         Context $context,
         Registry $registry,
         OrderInterface $orderInterface,
@@ -35,6 +46,7 @@ class Forter extends \Magento\Sales\Block\Adminhtml\Order\AbstractOrder implemen
         array $data = []
     ) {
         $this->orderInterface = $orderInterface;
+        $this->scopeConfig = $scopeConfig;
         parent::__construct($context, $registry, $adminHelper, $data);
     }
 

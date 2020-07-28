@@ -28,6 +28,7 @@ class OrderSaveBefore implements ObserverInterface
     public function __construct(
         AbstractApi $abstractApi,
         Config $config
+
     ) {
         $this->abstractApi = $abstractApi;
         $this->config = $config;
@@ -46,7 +47,6 @@ class OrderSaveBefore implements ObserverInterface
 
         try {
             $order = $observer->getEvent()->getOrder();
-
             $orderState = $order->getState();
             $orderOrigState = $order->getOrigData('state');
 
@@ -65,7 +65,6 @@ class OrderSaveBefore implements ObserverInterface
             "eventTime" => time(),
             "updatedStatus" => $orderState,
         ];
-
             $url = self::ORDER_FULFILLMENT_STATUS_ENDPOINT . $order->getIncrementId();
             $this->abstractApi->sendApiRequest($url, json_encode($json));
         } catch (\Exception $e) {
