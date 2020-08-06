@@ -73,6 +73,18 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 ]
             );
 
+        $setup->getConnection()
+            ->addColumn(
+                $setup->getTable($orderTable),
+                'forter_client_details',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                    'length' => 500,
+                    'visible' => true,
+                    'comment' =>'Forter Client Details'
+                ]
+            );
+
         $setup->endSetup();
     }
 }
