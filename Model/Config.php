@@ -347,6 +347,15 @@ class Config
     }
 
     /**
+     * @return bool
+     */
+    public function getIsCron()
+    {
+        $prePostSelect = $this->scopeConfig->getValue('forter/immediate_post_pre_decision/pre_post_select');
+        return ($prePostSelect == '3' ? true : false);
+    }
+
+    /**
      * @param $addresses
      * @return array|bool
      */

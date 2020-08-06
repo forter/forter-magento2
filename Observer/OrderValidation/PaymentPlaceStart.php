@@ -54,6 +54,10 @@ class PaymentPlaceStart implements ObserverInterface
      * @var BasicInfo
      */
     private $basicInfo;
+    /**
+     * @var \Magento\Framework\ObjectManagerInterface
+     */
+    protected $objectManager;
 
     /**
      * PaymentPlaceStart constructor.
@@ -66,6 +70,7 @@ class PaymentPlaceStart implements ObserverInterface
      * @param Item $modelCartItem
      */
     public function __construct(
+        \Magento\Framework\ObjectManagerInterface $objectManager,
         Decline $decline,
         ManagerInterface $messageManager,
         CheckoutSession $checkoutSession,
@@ -83,6 +88,7 @@ class PaymentPlaceStart implements ObserverInterface
         $this->config = $config;
         $this->requestBuilderOrder = $requestBuilderOrder;
         $this->basicInfo = $basicInfo;
+        $this->objectManager = $objectManager;
     }
 
     /**
@@ -102,9 +108,20 @@ class PaymentPlaceStart implements ObserverInterface
 
             //collect forter payment details and save into db
             $headers = getallheaders();
-            $connectionInformation = $this->basicInfo->getConnectionInformation("192.44.33.1", $headers);
+            $mockBuilder = new ForterMock();
+            $mockObject = $mockBuilder->buildOrderMock();
+            $orderIp = $mockObject->getRemoteIp();
+            $connectionInformation = $this->basicInfo->getConnectionInformation($orderIp, $headers);
             $order->setForterClientDetails(json_encode($connectionInformation));
             $order->save();
+
+            //save forter record
+            if ($this->config->getIsCron()) {
+                $queue = $this->objectManager->create('Forter\Forter\Model\Queue');
+                $queue->setEntityType('pre_sync_order');
+                $queue->setSyncFlag(0);
+                $queue->save();
+            }
 
             $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
             $response = $this->abstractApi->sendApiRequest($url, json_encode($data));
