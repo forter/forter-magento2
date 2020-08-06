@@ -10,6 +10,7 @@ use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Message\ManagerInterface;
 use Magento\Quote\Model\Quote\Item;
+use Forter\Forter\Model\RequestBuilder\BasicInfo;
 
 /**
  * Class PaymentPlaceStart
@@ -49,6 +50,10 @@ class PaymentPlaceStart implements ObserverInterface
      * @var Order
      */
     private $requestBuilderOrder;
+    /**
+     * @var BasicInfo
+     */
+    private $basicInfo;
 
     /**
      * PaymentPlaceStart constructor.
@@ -67,7 +72,8 @@ class PaymentPlaceStart implements ObserverInterface
         AbstractApi $abstractApi,
         Config $config,
         Order $requestBuilderOrder,
-        Item $modelCartItem
+        Item $modelCartItem,
+        BasicInfo $basicInfo
     ) {
         $this->decline = $decline;
         $this->checkoutSession = $checkoutSession;
@@ -76,6 +82,7 @@ class PaymentPlaceStart implements ObserverInterface
         $this->messageManager = $messageManager;
         $this->config = $config;
         $this->requestBuilderOrder = $requestBuilderOrder;
+        $this->basicInfo = $basicInfo;
     }
 
     /**
@@ -92,6 +99,12 @@ class PaymentPlaceStart implements ObserverInterface
             $order = $observer->getEvent()->getPayment()->getOrder();
 
             $data = $this->requestBuilderOrder->buildTransaction($order, 'BEFORE_PAYMENT_ACTION');
+
+            //collect forter payment details and save into db
+            $headers = getallheaders();
+            $connectionInformation = $this->basicInfo->getConnectionInformation("192.44.33.1", $headers);
+            $order->setForterClientDetails(json_encode($connectionInformation));
+            $order->save();
 
             $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
             $response = $this->abstractApi->sendApiRequest($url, json_encode($data));
