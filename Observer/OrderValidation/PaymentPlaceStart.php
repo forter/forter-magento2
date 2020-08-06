@@ -11,6 +11,7 @@ use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Message\ManagerInterface;
 use Magento\Quote\Model\Quote\Item;
 use Forter\Forter\Model\RequestBuilder\BasicInfo;
+use Forter\Forter\Test\Unit\DataPrefer\ForterMockBuilder as ForterMock;
 
 /**
  * Class PaymentPlaceStart
