@@ -10,13 +10,14 @@
 
 namespace Forter\Forter\Model\RequestBuilder;
 
+use Forter\Forter\Model\Config as ForterConfig;
+use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Model\Session;
 use Magento\Newsletter\Model\Subscriber;
 use Magento\Review\Model\Review;
 use Magento\Sales\Model\OrderFactory;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Wishlist\Controller\WishlistProviderInterface;
-use Magento\Customer\Api\CustomerRepositoryInterface;
 
 /**
  * Class Customer
@@ -53,6 +54,10 @@ class Customer
      * @var Subscriber
      */
     private $subscriber;
+    /**
+     * @var Config
+     */
+    private $forterConfig;
 
     /**
      * Customer constructor.
@@ -61,6 +66,7 @@ class Customer
      * @param Session $session
      * @param StoreManagerInterface $storeManager
      * @param Subscriber $subscriber
+     * @param Config $forterConfig
      */
     public function __construct(
         OrderFactory $orderFactory,
@@ -69,7 +75,8 @@ class Customer
         WishlistProviderInterface $wishlistProvider,
         StoreManagerInterface $storeManager,
         Subscriber $subscriber,
-        CustomerRepositoryInterface $customerRepository
+        CustomerRepositoryInterface $customerRepository,
+        ForterConfig $forterConfig
     ) {
         $this->session = $session;
         $this->wishlistProvider = $wishlistProvider;
@@ -78,6 +85,7 @@ class Customer
         $this->storeManager = $storeManager;
         $this->subscriber = $subscriber;
         $this->customerRepository = $customerRepository;
+        $this->forterConfig = $forterConfig;
     }
 
     /**
@@ -220,8 +228,12 @@ class Customer
 
         $reviews_count = $this->getCustomerReviewsCount($customerId, $storeId);
 
-        $currentUserWishlist = $this->wishlistProvider->getWishlist();
-        $wishlistItemsCount = $currentUserWishlist ? count($currentUserWishlist->getItemCollection()) : 0;
+        if (!$this->forterConfig->getIsCron()) {
+            $currentUserWishlist = $this->wishlistProvider->getWishlist();
+            $wishlistItemsCount = $currentUserWishlist ? count($currentUserWishlist->getItemCollection()) : 0;
+        } else {
+            $wishlistItemsCount = 0;
+        }
 
         $checkSubscriber = $this->subscriber->loadByCustomerId($customerId);
 

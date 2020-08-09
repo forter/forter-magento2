@@ -128,7 +128,11 @@ class Order
      */
     public function buildTransaction($order, $orderStage)
     {
-        $headers = getallheaders();
+        if (getallheaders()) {
+            $connectionInformation = $this->basicInfoPrepare->getConnectionInformation($order->getRemoteIp(), $headers);
+        } else {
+            $connectionInformation = json_decode($order->getForterClientDetails());
+        }
 
         //get forter client number
         $forterWebId = $this->request->getPost('forter_web_id');
@@ -141,7 +145,7 @@ class Order
         "timeSentToForter" => time()*1000,
         "checkoutTime" => time(),
         "additionalIdentifiers" => $this->basicInfoPrepare->getAdditionalIdentifiers($order, $orderStage),
-        "connectionInformation" => $this->basicInfoPrepare->getConnectionInformation($order->getRemoteIp(), $headers),
+        "connectionInformation" => $connectionInformation,
         "totalAmount" => $this->cartPrepare->getTotalAmount($order),
         "cartItems" => $this->cartPrepare->generateCartItems($order),
         "primaryDeliveryDetails" => $this->customerPrepere->getPrimaryDeliveryDetails($order),

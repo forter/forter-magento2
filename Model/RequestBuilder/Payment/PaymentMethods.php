@@ -113,6 +113,38 @@ class PaymentMethods
         return $this->preferCcDetails($payment, $detailsArray);
     }
 
+    public function getAdyenDetails($payment)
+    {
+        $ccType = $payment->getAdditionalInformation('cc_type');
+        if ($ccType) {
+            $detailsArray['cardBrand'] = $ccType;
+        }
+
+        $adyenExpiryDate = $payment->getAdditionalInformation('adyen_expiry_date');
+        if ($adyenExpiryDate) {
+            $date = explode("/", $adyenExpiryDate);
+            $detailsArray['expirationMonth'] = $date[0];
+            $detailsArray['expirationYear'] = $date[1];
+        }
+
+        $forter_cc_bin = $payment->getAdditionalInformation('adyen_card_bin');
+        if ($forter_cc_bin) {
+            $detailsArray['bin'] = $forter_cc_bin;
+        }
+
+        $authCode = $payment->getAdditionalInformation('adyen_auth_code');
+        if ($authCode) {
+            $detailsArray['authCode'] = $authCode;
+        }
+
+        $avsFullResult = $payment->getAdditionalInformation('adyen_avs_result');
+        if ($avsFullResult) {
+            $detailsArray['avsFullResult'] = $avsFullResult;
+        }
+
+        return $this->preferCcDetails($payment, $detailsArray);
+    }
+
     public function preferCcDetails($payment, $detailsArray=[])
     {
         $cardDetails =  [
@@ -125,7 +157,8 @@ class PaymentMethods
                 "cvvResult" => array_key_exists("cvvResult", $detailsArray) ? $detailsArray['cvvResult'] : $payment->getCcCidStatus() . "",
                 "authorizationCode" => array_key_exists("authCode", $detailsArray) ? $detailsArray['authCode'] : "",
                 "processorResponseCode" => array_key_exists('processorResponseCode', $detailsArray) ? $detailsArray['processorResponseCode'] : $payment->getAdditionalInformation("processorResponseCode"),
-                "processorResponseText" => array_key_exists('processorResponseText', $detailsArray) ? $detailsArray['processorResponseText'] : $payment->getAdditionalInformation("processorResponseText"),                "avsStreetResult" => array_key_exists("avsStreetResult", $detailsArray) ? $detailsArray['avsStreetResult'] : "",
+                "processorResponseText" => array_key_exists('processorResponseText', $detailsArray) ? $detailsArray['processorResponseText'] : $payment->getAdditionalInformation("processorResponseText"),
+                "avsStreetResult" => array_key_exists("avsStreetResult", $detailsArray) ? $detailsArray['avsStreetResult'] : "",
                 "avsZipResult" => array_key_exists("avsZipResult", $detailsArray) ? $detailsArray['avsZipResult'] : "",
                 "avsFullResult" => array_key_exists("avsFullResult", $detailsArray) ? $detailsArray['avsFullResult'] : $payment->getCcAvsStatus() . ""
             ],
