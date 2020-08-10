@@ -112,7 +112,7 @@ class SendQueue
                         ->setStoreId($storeId)
                         ->setEntityType('order')
                         ->setIncrementId($order->getIncrementId())
-                        ->setEntityBody($response->status)
+                        ->setEntityBody($forterResponse->status)
                         ->setSyncDate($currentTime)
                         ->save();
                     }
