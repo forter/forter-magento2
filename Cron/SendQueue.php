@@ -108,7 +108,7 @@ class SendQueue
                         $storeId = $order->getStore()->getId();
                         $currentTime = $this->dateTime->gmtDate();
                         $this->forterConfig->log('Increment ID:' . $order->getIncrementId());
-                        $this->$forterQueue->create()
+                        $this->forterQueue->create()
                         ->setStoreId($storeId)
                         ->setEntityType('order')
                         ->setIncrementId($order->getIncrementId())
