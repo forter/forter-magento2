@@ -112,7 +112,7 @@ class SendQueue
                         ->setStoreId($storeId)
                         ->setEntityType('order')
                         ->setIncrementId($order->getIncrementId())
-                        ->setEntityBody($forterResponse->status)
+                        ->setEntityBody($order->getForterStatus())
                         ->setSyncDate($currentTime)
                         ->save();
                     }
@@ -134,7 +134,7 @@ class SendQueue
         $response = $this->abstractApi->sendApiRequest($url, json_encode($data));
         $order->setForterResponse($response);
         $response = json_decode($response);
-        $order->setForterStatus($response->status);
+        $order->setForterStatus($response->action);
         $order->save();
 
         return $response->status ? true : false;
