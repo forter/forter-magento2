@@ -6,7 +6,7 @@ use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\ActionsHandler\Approve;
 use Forter\Forter\Model\ActionsHandler\Decline;
 use Forter\Forter\Model\Config;
-use Forter\Forter\Model\Queue;
+use Forter\Forter\Model\QueueFactory;
 use Forter\Forter\Model\RequestBuilder\Order;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\Stdlib\DateTime\DateTime;
