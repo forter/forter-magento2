@@ -91,6 +91,8 @@ class SendQueue
                 return;
             }
 
+            $method = $order->getPayment()->getMethod();
+
             if ($item->getData('entity_body') == 'approve') {
                 $this->approve->handleApproveImmediatly($order);
             } elseif ($item->getData('entity_body') == 'decline') {
@@ -98,25 +100,22 @@ class SendQueue
                     $order->unhold()->save();
                 }
                 $this->decline->handlePostTransactionDescision($order);
-            } else {
-                $method = $order->getPayment()->getMethod();
-                if ($method == 'adyen_cc' && $order->getPayment()->getAdyenPspReference()) {
-                    $item->setSyncFlag('1');
-                    $item->save();
-                    $forterResponse = $this->handleAdyenMethod($order);
+            } elseif ($method == 'adyen_cc' && $order->getPayment()->getAdyenPspReference()) {
+                $item->setSyncFlag('1');
+                $item->save();
+                $forterResponse = $this->handleAdyenMethod($order);
 
-                    if ($forterResponse) {
-                        $storeId = $order->getStore()->getId();
-                        $currentTime = $this->dateTime->gmtDate();
-                        $this->forterConfig->log('Increment ID:' . $order->getIncrementId());
-                        $this->forterQueue->create()
+                if ($forterResponse) {
+                    $storeId = $order->getStore()->getId();
+                    $currentTime = $this->dateTime->gmtDate();
+                    $this->forterConfig->log('Increment ID:' . $order->getIncrementId());
+                    $this->forterQueue->create()
                         ->setStoreId($storeId)
                         ->setEntityType('order')
                         ->setIncrementId($order->getIncrementId())
                         ->setEntityBody($order->getForterStatus())
                         ->setSyncDate($currentTime)
                         ->save();
-                    }
                 }
 
                 return;
