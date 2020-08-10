@@ -101,10 +101,11 @@ class SendQueue
             } else {
                 $method = $order->getPayment()->getMethod();
                 if ($method == 'adyen_cc' && $order->getPayment()->getAdyenPspReference()) {
+                    $item->setSyncFlag('1');
+                    $item->save();
                     $forterResponse = $this->handleAdyenMethod($order);
 
                     if ($forterResponse) {
-                        $item->setSyncFlag('1');
                         $storeId = $order->getStore()->getId();
                         $currentTime = $this->dateTime->gmtDate();
                         $this->forterConfig->log('Increment ID:' . $order->getIncrementId());
