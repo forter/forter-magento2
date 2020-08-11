@@ -17,7 +17,7 @@ use Magento\Newsletter\Model\Subscriber;
 use Magento\Review\Model\Review;
 use Magento\Sales\Model\OrderFactory;
 use Magento\Store\Model\StoreManagerInterface;
-use Magento\Wishlist\Model\Wishlist;
+use Magento\Wishlist\Controller\WishlistProviderInterface;
 
 /**
  * Class Customer
@@ -35,9 +35,9 @@ class Customer
      */
     private $storeManager;
     /**
-     * @var Wishlist
+     * @var WishlistProviderInterface
      */
-    private $wishlist;
+    private $wishlistProvider;
     /**
      * @var Session
      */
@@ -72,14 +72,14 @@ class Customer
         OrderFactory $orderFactory,
         Review $review,
         Session $session,
-        Wishlist $wishlist,
+        WishlistProviderInterface $wishlistProvider,
         StoreManagerInterface $storeManager,
         Subscriber $subscriber,
         CustomerRepositoryInterface $customerRepository,
         ForterConfig $forterConfig
     ) {
         $this->session = $session;
-        $this->wishlist = $wishlist;
+        $this->wishlistProvider = $wishlistProvider;
         $this->orderFactory = $orderFactory;
         $this->review = $review;
         $this->storeManager = $storeManager;
@@ -229,7 +229,7 @@ class Customer
         $reviews_count = $this->getCustomerReviewsCount($customerId, $storeId);
 
         if (!$this->forterConfig->getIsCron()) {
-            $currentUserWishlist = $this->wishlist->loadByCustomerId($customerId);
+            $currentUserWishlist = $this->wishlistProvider->getWishlist();
             $wishlistItemsCount = $currentUserWishlist ? count($currentUserWishlist->getItemCollection()) : 0;
         } else {
             $wishlistItemsCount = 0;
