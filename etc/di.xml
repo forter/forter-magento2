@@ -8,10 +8,10 @@
   </type>
   <type name="Magento\Sales\Model\Order\Payment">
     <plugin name="forter_payment_around_place" type="Forter\Forter\Plugin\Order\Payment" sortOrder="10" disabled="false"/>
-  </type>
-  <type name="Magento\Sales\Block\Adminhtml\Order\Create\Form\Account">
-    <plugin name="after_order_create_form_account" type="Forter\Forter\Plugin\Sales\Block\Adminhtml\Order\Create\Form\AccountPlugin" sortOrder="2"/>
-  </type>
+ </type>
+ <type name="Magento\Sales\Block\Adminhtml\Order\Create\Form\Account">
+     <plugin name="after_order_create_form_account" type="Forter\Forter\Plugin\Sales\Block\Adminhtml\Order\Create\Form\AccountPlugin" sortOrder="2"/>
+ </type>
  <virtualType name="Magento\Sales\Model\ResourceModel\Order\Grid" type="Magento\Sales\Model\ResourceModel\Grid">
     <arguments>
         <argument name="columns" xsi:type="array">
