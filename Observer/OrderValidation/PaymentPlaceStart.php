@@ -112,7 +112,7 @@ class PaymentPlaceStart implements ObserverInterface
         try {
             $order = $observer->getEvent()->getPayment()->getOrder();
 
-            if ($this->config->getIsCron() && $order->getPayment()->getMethod() == 'adyen_cc') {
+            if ($this->config->getIsCron()) {
                 $connectionInformation = $this->basicInfo->getConnectionInformation($order->getRemoteIp(), getallheaders());
                 $order->setForterClientDetails(json_encode($connectionInformation));
                 $currentTime = $this->dateTime->gmtDate();

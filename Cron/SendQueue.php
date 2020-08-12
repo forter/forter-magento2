@@ -93,50 +93,64 @@ class SendQueue
 
             $method = $order->getPayment()->getMethod();
 
-            if ($item->getData('entity_body') == 'approve') {
+            if ($item->getEnityType() == 'order' && $item->getData('entity_body') == 'approve') {
                 $this->approve->handleApproveImmediatly($order);
-            } elseif ($item->getData('entity_body') == 'decline') {
+            } elseif ($item->getEnityType() == 'order' &&  $item->getData('entity_body') == 'decline') {
                 if ($order->canUnhold()) {
                     $order->unhold()->save();
                 }
                 $this->decline->handlePostTransactionDescision($order);
-            } elseif ($method == 'adyen_cc' && $order->getPayment()->getAdyenPspReference()) {
-                $item->setSyncFlag('1');
-                $item->save();
-                $forterResponse = $this->handleAdyenMethod($order);
-
-                if ($forterResponse) {
-                    $storeId = $order->getStore()->getId();
-                    $currentTime = $this->dateTime->gmtDate();
-                    $this->forterConfig->log('Increment ID:' . $order->getIncrementId());
-                    $this->forterQueue->create()
-                        ->setStoreId($storeId)
-                        ->setEntityType('order')
-                        ->setIncrementId($order->getIncrementId())
-                        ->setEntityBody($order->getForterStatus())
-                        ->setSyncDate($currentTime)
-                        ->save();
+            } elseif ($item->getEnityType() == 'pre_sync_order') {
+                if ($method == 'adyen_cc' && !$order->getPayment()->getAdyenPspReference()) {
+                    return;
+                } else {
+                    $this->handlePreSyncOrder($order, $item);
+                    return;
                 }
-
-                return;
             }
-
-            $item->setSyncFlag('1');
-            $item->save();
         }
     }
 
     private function handleAdyenMethod($order)
     {
-        $data = $this->requestBuilderOrder->buildTransaction($order, 'AFTER_PAYMENT_ACTION');
-        $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
+        try {
+            $data = $this->requestBuilderOrder->buildTransaction($order, 'AFTER_PAYMENT_ACTION');
+            $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
 
-        $response = $this->abstractApi->sendApiRequest($url, json_encode($data));
-        $order->setForterResponse($response);
-        $response = json_decode($response);
-        $order->setForterStatus($response->action);
-        $order->save();
+            $response = $this->abstractApi->sendApiRequest($url, json_encode($data));
 
-        return $response->status ? true : false;
+            if ($response->status != 'success' || !isset($response->action)) {
+                $order->setForterStatus('error');
+                $order->save();
+                return false;
+            } else {
+                $order->setForterResponse($response);
+                $response = json_decode($response);
+                $order->setForterStatus($response->action);
+                return $response->status ? true : false;
+            }
+        } catch (\Exception $e) {
+            $this->abstractApi->reportToForterOnCatch($e);
+        }
+    }
+
+    private function handlePreSyncOrder($order, $item)
+    {
+        $item->setSyncFlag('1');
+        $item->save();
+        $forterResponse = $this->handleAdyenMethod($order);
+
+        if ($forterResponse) {
+            $storeId = $order->getStore()->getId();
+            $currentTime = $this->dateTime->gmtDate();
+            $this->forterConfig->log('Increment ID:' . $order->getIncrementId());
+            $this->forterQueue->create()
+              ->setStoreId($storeId)
+              ->setEntityType('order')
+              ->setIncrementId($order->getIncrementId())
+              ->setEntityBody($order->getForterStatus())
+              ->setSyncDate($currentTime)
+              ->save();
+        }
     }
 }

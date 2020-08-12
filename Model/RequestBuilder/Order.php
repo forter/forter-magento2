@@ -128,7 +128,8 @@ class Order
      */
     public function buildTransaction($order, $orderStage)
     {
-        if (getallheaders()) {
+        $headers = getallheaders();
+        if ($headers) {
             $connectionInformation = $this->basicInfoPrepare->getConnectionInformation($order->getRemoteIp(), $headers);
         } else {
             $connectionInformation = json_decode($order->getForterClientDetails());
