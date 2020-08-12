@@ -5,10 +5,13 @@ namespace Forter\Forter\Observer\OrderValidation;
 use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\ActionsHandler\Decline;
 use Forter\Forter\Model\Config;
+use Forter\Forter\Model\Queue;
+use Forter\Forter\Model\RequestBuilder\BasicInfo;
 use Forter\Forter\Model\RequestBuilder\Order;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Message\ManagerInterface;
+use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magento\Quote\Model\Quote\Item;
 
 /**
@@ -42,6 +45,10 @@ class PaymentPlaceStart implements ObserverInterface
      */
     private $messageManager;
     /**
+     * @var Queue
+     */
+    private $queue;
+    /**
      * @var Config
      */
     private $config;
@@ -49,6 +56,14 @@ class PaymentPlaceStart implements ObserverInterface
      * @var Order
      */
     private $requestBuilderOrder;
+    /**
+     * @var DateTime
+     */
+    private $dateTime;
+    /**
+     * @var BasicInfo
+     */
+    private $basicInfo;
 
     /**
      * PaymentPlaceStart constructor.
@@ -61,21 +76,27 @@ class PaymentPlaceStart implements ObserverInterface
      * @param Item $modelCartItem
      */
     public function __construct(
+        Queue $queue,
         Decline $decline,
         ManagerInterface $messageManager,
         CheckoutSession $checkoutSession,
         AbstractApi $abstractApi,
+        DateTime $dateTime,
         Config $config,
         Order $requestBuilderOrder,
-        Item $modelCartItem
+        Item $modelCartItem,
+        BasicInfo $basicInfo
     ) {
+        $this->queue = $queue;
         $this->decline = $decline;
+        $this->dateTime = $dateTime;
         $this->checkoutSession = $checkoutSession;
         $this->modelCartItem = $modelCartItem;
         $this->abstractApi = $abstractApi;
         $this->messageManager = $messageManager;
         $this->config = $config;
         $this->requestBuilderOrder = $requestBuilderOrder;
+        $this->basicInfo = $basicInfo;
     }
 
     /**
@@ -90,6 +111,20 @@ class PaymentPlaceStart implements ObserverInterface
 
         try {
             $order = $observer->getEvent()->getPayment()->getOrder();
+
+            if ($this->config->getIsCron()) {
+                $connectionInformation = $this->basicInfo->getConnectionInformation($order->getRemoteIp(), getallheaders());
+                $order->setForterClientDetails(json_encode($connectionInformation));
+                $currentTime = $this->dateTime->gmtDate();
+
+                $this->queue->setEntityType('pre_sync_order');
+                $this->queue->setStoreId($this->config->getStoreId());
+                $this->queue->setIncrementId($order->getIncrementId());
+                $this->queue->setSyncFlag(0);
+                $this->queue->setSyncDate($currentTime);
+                $this->queue->save();
+                return;
+            }
 
             $data = $this->requestBuilderOrder->buildTransaction($order, 'BEFORE_PAYMENT_ACTION');
 

@@ -59,6 +59,9 @@ class Payment
               case 'braintree':
                 $cardDetails = $this->paymentMethods->getBraintreeDetails($payment);
                 break;
+              case 'adyen_cc':
+                $cardDetails = $this->paymentMethods->getAdyenDetails($payment);
+                break;
               default:
                 $cardDetails = $this->paymentMethods->preferCcDetails($payment);
           }

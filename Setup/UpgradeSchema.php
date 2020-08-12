@@ -1,9 +1,9 @@
 <?php
 namespace Forter\Forter\Setup;
 
-use Magento\Framework\Setup\UpgradeSchemaInterface;
-use Magento\Framework\Setup\SchemaSetupInterface;
 use Magento\Framework\Setup\ModuleContextInterface;
+use Magento\Framework\Setup\SchemaSetupInterface;
+use Magento\Framework\Setup\UpgradeSchemaInterface;
 
 class UpgradeSchema implements UpgradeSchemaInterface
 {
@@ -42,6 +42,18 @@ class UpgradeSchema implements UpgradeSchemaInterface
                     'length' => 255,
                     'visible' => true,
                     'comment' =>'Client number to track'
+                ]
+            );
+
+        $setup->getConnection()
+            ->addColumn(
+                $setup->getTable($orderTable),
+                'forter_client_details',
+                [
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                    'length' => 500,
+                    'visible' => true,
+                    'comment' =>'Forter Client Details'
                 ]
             );
 
