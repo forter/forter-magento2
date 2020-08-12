@@ -19,9 +19,6 @@ use Magento\Framework\HTTP\PhpEnvironment\RemoteAddress;
 use Magento\Framework\Message\ManagerInterface;
 use Magento\Framework\Phrase;
 use Magento\Store\Model\StoreManagerInterface;
-use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\Exception\State\ExpiredException;
-use Magento\Framework\Phrase;
 
 /**
  * Class AccountManagement
