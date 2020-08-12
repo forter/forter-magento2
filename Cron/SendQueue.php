@@ -93,21 +93,23 @@ class SendQueue
 
             $method = $order->getPayment()->getMethod();
 
-            if ($item->getEnityType() == 'order' && $item->getData('entity_body') == 'approve') {
+            if ($item->getEntityType() == 'order' && $item->getData('entity_body') == 'approve') {
                 $this->approve->handleApproveImmediatly($order);
-            } elseif ($item->getEnityType() == 'order' &&  $item->getData('entity_body') == 'decline') {
+            } elseif ($item->getEntityType() == 'order' &&  $item->getData('entity_body') == 'decline') {
                 if ($order->canUnhold()) {
                     $order->unhold()->save();
                 }
                 $this->decline->handlePostTransactionDescision($order);
-            } elseif ($item->getEnityType() == 'pre_sync_order') {
-                if ($method == 'adyen_cc' && !$order->getPayment()->getAdyenPspReference()) {
-                    return;
-                } else {
+            } elseif ($item->getEntityType() == 'pre_sync_order') {
+                if ($method == 'adyen_cc' && $order->getPayment()->getAdyenPspReference()) {
                     $this->handlePreSyncOrder($order, $item);
-                    return;
                 }
+
+                return;
             }
+
+            $item->setSyncFlag('1');
+            $item->save();
         }
     }
 
@@ -118,16 +120,16 @@ class SendQueue
             $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
 
             $response = $this->abstractApi->sendApiRequest($url, json_encode($data));
+            $responseArray = json_decode($response);
 
-            if ($response->status != 'success' || !isset($response->action)) {
+            if ($responseArray->status != 'success' || !isset($responseArray->action)) {
                 $order->setForterStatus('error');
                 $order->save();
                 return false;
             } else {
                 $order->setForterResponse($response);
-                $response = json_decode($response);
-                $order->setForterStatus($response->action);
-                return $response->status ? true : false;
+                $order->setForterStatus($responseArray->action);
+                return $responseArray->status ? true : false;
             }
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
