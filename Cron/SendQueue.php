@@ -88,7 +88,7 @@ class SendQueue
             if (!$order) {
                 // order does not exist, remove from queue
                 $item->setSyncFlag('1');
-                return;
+                continue;
             }
 
             $method = $order->getPayment()->getMethod();
@@ -105,7 +105,7 @@ class SendQueue
                     $this->handlePreSyncOrder($order, $item);
                 }
 
-                return;
+                continue;
             }
 
             $item->setSyncFlag('1');
@@ -129,6 +129,7 @@ class SendQueue
             } else {
                 $order->setForterResponse($response);
                 $order->setForterStatus($responseArray->action);
+                $order->save();
                 return $responseArray->status ? true : false;
             }
         } catch (\Exception $e) {

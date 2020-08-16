@@ -28,7 +28,6 @@ class OrderSaveBefore implements ObserverInterface
     public function __construct(
         AbstractApi $abstractApi,
         Config $config
-
     ) {
         $this->abstractApi = $abstractApi;
         $this->config = $config;
