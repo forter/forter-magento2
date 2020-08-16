@@ -122,16 +122,17 @@ class SendQueue
             $response = $this->abstractApi->sendApiRequest($url, json_encode($data));
             $responseArray = json_decode($response);
 
+            $order->setForterResponse($response);
+
             if ($responseArray->status != 'success' || !isset($responseArray->action)) {
                 $order->setForterStatus('error');
                 $order->save();
                 return false;
-            } else {
-                $order->setForterResponse($response);
-                $order->setForterStatus($responseArray->action);
-                $order->save();
-                return $responseArray->status ? true : false;
             }
+
+            $order->setForterStatus($responseArray->action);
+            $order->save();
+            return $responseArray->status ? true : false;
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }
