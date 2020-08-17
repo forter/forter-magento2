@@ -332,6 +332,22 @@ class Config
     /**
      * @return mixed
      */
+    public function getApproveCron()
+    {
+        return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/approve_cron');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDeclineCron()
+    {
+        return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/decline_cron');
+    }
+
+    /**
+     * @return mixed
+     */
     public function getNotReviewPost()
     {
         return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/not_review_post');
