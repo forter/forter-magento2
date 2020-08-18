@@ -87,7 +87,7 @@
                     <field id="pre_post_select">2</field>
                   </depends>
               </field>
-                <field id="approve_post" translate="Module" type="select" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+              <field id="approve_post" translate="Module" type="select" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
                   <label>Action On Approve (post-authorization)</label>
                   <source_model>Forter\Forter\Model\Config\Source\PostAuthApproveOptions</source_model>
                   <depends>
@@ -109,6 +109,31 @@
                   </comment>
                   <depends>
                     <field id="pre_post_select">2</field>
+                  </depends>
+              </field>
+              <field id="approve_cron" translate="Module" type="select" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                  <label>Action On Approve (By Cron)</label>
+                  <source_model>Forter\Forter\Model\Config\Source\CronAuthApproveOptions</source_model>
+                  <depends>
+                      <field id="pre_post_select">3</field>
+                  </depends>
+              </field>
+              <field id="decline_cron" translate="Module" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                  <label>Action On Decline (By Cron)</label>
+                  <comment>
+                      If "Cancel Order, Void or Refund Payment" is selected,
+                      the extension will immediately try set the order to a "hold" state and then cancel it in a cron job.
+                  </comment>
+                  <source_model>Forter\Forter\Model\Config\Source\CronAuthDeclineOptions</source_model>
+                  <depends>
+                    <field id="pre_post_select">3</field>
+                  </depends>
+              </field>
+              <field id="not_review_cron" translate="Module" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                  <label>Action On Not Reviewed (By Cron)</label>
+                  <source_model>Forter\Forter\Model\Config\Source\CronAuthNotReviewedOptions</source_model>
+                  <depends>
+                    <field id="pre_post_select">3</field>
                   </depends>
               </field>
             </group>
