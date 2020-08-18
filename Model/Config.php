@@ -348,6 +348,14 @@ class Config
     /**
      * @return mixed
      */
+    public function getNotReviewCron()
+    {
+        return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/not_review_cron');
+    }
+
+    /**
+     * @return mixed
+     */
     public function getNotReviewPost()
     {
         return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/not_review_post');

@@ -99,11 +99,13 @@ class SendQueue
                 }
 
                 $this->handlePreSyncMethod($order, $item);
+                $item->setSyncFlag('1');
             } elseif ($item->getEntityType() == 'order') {
                 $this->handleForterResponse($order, $item->getData('entity_body'));
                 $item->setSyncFlag('1');
-                $item->save();
             }
+
+            $item->save();
         }
     }
 
@@ -129,9 +131,6 @@ class SendQueue
             $order->setForterStatus($responseArray->action);
             $order->save();
 
-            $item->setSyncFlag('1');
-            $item->save();
-
             return $responseArray->status ? true : false;
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
@@ -143,6 +142,10 @@ class SendQueue
         if ($this->forterConfig->getIsCron() == true) {
             if ($response == 'approve') {
                 if ($this->forterConfig->getApproveCron() == '1') {
+                    $this->approve->handleApproveImmediatly($order);
+                }
+            } elseif ($response == 'not reviewed') {
+                if ($this->forterConfig->getNotReviewCron() == '1') {
                     $this->approve->handleApproveImmediatly($order);
                 }
             } elseif ($response == 'decline') {

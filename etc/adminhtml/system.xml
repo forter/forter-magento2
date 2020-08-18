@@ -129,6 +129,13 @@
                     <field id="pre_post_select">3</field>
                   </depends>
               </field>
+              <field id="not_review_cron" translate="Module" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                  <label>Action On Not Reviewed (By Cron)</label>
+                  <source_model>Forter\Forter\Model\Config\Source\CronAuthNotReviewedOptions</source_model>
+                  <depends>
+                    <field id="pre_post_select">3</field>
+                  </depends>
+              </field>
             </group>
             <group id="connection_information" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
               <label>Connection Information</label>
