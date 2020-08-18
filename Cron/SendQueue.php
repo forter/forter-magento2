@@ -99,7 +99,7 @@ class SendQueue
                 }
 
                 $this->handlePreSyncMethod($order, $item);
-            } else {
+            } elseif ($item->getEntityType() == 'order') {
                 $this->handleForterResponse($order, $item->getData('entity_body'));
                 $item->setSyncFlag('1');
                 $item->save();
@@ -141,22 +141,31 @@ class SendQueue
     private function handleForterResponse($order, $response)
     {
         if ($this->forterConfig->getIsCron() == true) {
-            if ($this->forterConfig->getApproveCron() == 2 || $this->forterConfig->getDeclineCron() == 3) {
-                return;
-            } elseif ($this->forterConfig->getDeclineCron() == 2) {
-                $this->decline->markOrderPaymentReview();
-                return;
+            if ($response == 'approve') {
+                if ($this->forterConfig->getApproveCron() == '1') {
+                    $this->approve->handleApproveImmediatly($order);
+                }
+            } elseif ($response == 'decline') {
+                switch ($this->forterConfig->getDeclineCron()) {
+                case 1:
+                    $this->decline->handlePostTransactionDescision($order);
+                    return;
+                case 2:
+                    $this->decline->markOrderPaymentReview();
+                    return;
+              }
             }
-        }
 
-        if ($response == 'approve') {
-            $this->approve->handleApproveImmediatly($order);
-        } elseif ($response == 'decline') {
-            if ($order->canUnhold()) {
-                $order->unhold()->save();
+            return;
+        } else {
+            if ($response == 'approve') {
+                $this->approve->handleApproveImmediatly($order);
+            } elseif ($response == 'decline') {
+                if ($order->canUnhold()) {
+                    $order->unhold()->save();
+                }
+                $this->decline->handlePostTransactionDescision($order);
             }
-
-            $this->decline->handlePostTransactionDescision($order);
         }
     }
 }
