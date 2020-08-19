@@ -73,7 +73,13 @@ class SendQueue
         $items = $this->forterQueue
         ->create()
         ->getCollection()
-        ->addFieldToFilter('sync_flag', '0');
+        ->addFieldToFilter('sync_flag', '0')
+        ->addFieldToFilter(
+            'sync_date',
+            [
+            'from' => date('Y-m-d H:i:s', strtotime('-24 hour')),
+            'to' => date('Y-m-d H:i:s', strtotime(now()))]
+        );
 
         $items->setPageSize(15)->setCurPage(1);
 
@@ -139,7 +145,7 @@ class SendQueue
 
     private function handleForterResponse($order, $response)
     {
-        if ($this->forterConfig->getIsCron() == true) {
+        if ($this->forterConfig->getIsCron()) {
             if ($response == 'approve') {
                 if ($this->forterConfig->getApproveCron() == '1') {
                     $this->approve->handleApproveImmediatly($order);
