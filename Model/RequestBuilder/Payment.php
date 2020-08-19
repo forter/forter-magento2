@@ -61,7 +61,9 @@ class Payment
         }
 
         if (array_key_exists("expirationMonth", $cardDetails) || array_key_exists("expirationYear", $cardDetails) || array_key_exists("lastFourDigits", $cardDetails)) {
-            $paymentData["creditCard"] = $cardDetails;
+            if (strpos($payment_method, 'paypal') === false) {
+                $paymentData["creditCard"] = $cardDetails;
+            }
         }
 
         $paymentData["billingDetails"] = $this->customerPreper->getBillingDetails($billingAddress);
