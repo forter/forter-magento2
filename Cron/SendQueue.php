@@ -70,8 +70,6 @@ class SendQueue
      */
     public function execute()
     {
-        $now = $this->dateTime->timestamp();
-
         $items = $this->forterQueue
         ->create()
         ->getCollection()
@@ -79,8 +77,8 @@ class SendQueue
         ->addFieldToFilter(
             'sync_date',
             [
-            'from' => date('Y-m-d' . ' 00:00:00', $now),
-            'to' => date('Y-m-d' . ' 23:59:59', $now)]
+            'from' => date('Y-m-d H:i:s', strtotime('-24 hour')),
+            'to' => date('Y-m-d H:i:s', strtotime(now()))]
         );
 
         $items->setPageSize(15)->setCurPage(1);
