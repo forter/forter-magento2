@@ -65,6 +65,7 @@ class Payment
                 $paymentData["creditCard"] = $cardDetails;
             }
         }
+
         $paymentData["billingDetails"] = $this->customerPreper->getBillingDetails($billingAddress);
         $paymentData["paymentMethodNickname"] = $payment->getMethod();
         $paymentData["amount"] = [
