@@ -78,7 +78,7 @@ class SendQueue
             'sync_date',
             [
             'from' => date('Y-m-d H:i:s', strtotime('-24 hour')),
-            'to' => date('Y-m-d H:i:s', $this->dateTime->gmtDate())]
+            'to' => date('Y-m-d H:i:s', strtotime($this->dateTime->gmtDate()))]
         );
 
         $items->setPageSize(15)->setCurPage(1);
