@@ -50,22 +50,21 @@ class Payment
         // If paypal:
         if (strpos($payment_method, 'paypal') !== false) {
             $paymentData["paypal"] = $this->paymentMethods->getPaypalDetails($payment);
-        } elseif (strpos($payment_method, 'adyen') !== false) {
-            $cardDetails = $this->paymentMethods->getAdyenDetails($payment);
-        } elseif (strpos($payment_method, 'authorizenet') !== false) {
-            $cardDetails = $this->paymentMethods->getAuthorizeNetDetails($payment);
-        } elseif (strpos($payment_method, 'braintree') !== false) {
-            $cardDetails = $this->paymentMethods->getBraintreeDetails($payment);
         } else {
-            $cardDetails = $this->paymentMethods->preferCcDetails($payment);
-        }
+            if (strpos($payment_method, 'adyen') !== false) {
+                $cardDetails = $this->paymentMethods->getAdyenDetails($payment);
+            } elseif (strpos($payment_method, 'authorizenet') !== false) {
+                $cardDetails = $this->paymentMethods->getAuthorizeNetDetails($payment);
+            } elseif (strpos($payment_method, 'braintree') !== false) {
+                $cardDetails = $this->paymentMethods->getBraintreeDetails($payment);
+            } else {
+                $cardDetails = $this->paymentMethods->preferCcDetails($payment);
+            }
 
-        if (array_key_exists("expirationMonth", $cardDetails) || array_key_exists("expirationYear", $cardDetails) || array_key_exists("lastFourDigits", $cardDetails)) {
-            if (strpos($payment_method, 'paypal') === false) {
+            if (array_key_exists("expirationMonth", $cardDetails) || array_key_exists("expirationYear", $cardDetails) || array_key_exists("lastFourDigits", $cardDetails)) {
                 $paymentData["creditCard"] = $cardDetails;
             }
         }
-
         $paymentData["billingDetails"] = $this->customerPreper->getBillingDetails($billingAddress);
         $paymentData["paymentMethodNickname"] = $payment->getMethod();
         $paymentData["amount"] = [
