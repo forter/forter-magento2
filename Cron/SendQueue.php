@@ -73,7 +73,13 @@ class SendQueue
         $items = $this->forterQueue
         ->create()
         ->getCollection()
-        ->addFieldToFilter('sync_flag', '0');
+        ->addFieldToFilter('sync_flag', '0')
+        ->addFieldToFilter(
+            'sync_date',
+            [
+            'from' => date('Y-m-d H:i:s', strtotime('-24 hour')),
+            'to' => date('Y-m-d H:i:s', strtotime($this->dateTime->gmtDate()))]
+        );
 
         $items->setPageSize(15)->setCurPage(1);
 
@@ -93,27 +99,23 @@ class SendQueue
 
             $method = $order->getPayment()->getMethod();
 
-            if ($item->getEntityType() == 'order' && $item->getData('entity_body') == 'approve') {
-                $this->approve->handleApproveImmediatly($order);
-            } elseif ($item->getEntityType() == 'order' &&  $item->getData('entity_body') == 'decline') {
-                if ($order->canUnhold()) {
-                    $order->unhold()->save();
-                }
-                $this->decline->handlePostTransactionDescision($order);
-            } elseif ($item->getEntityType() == 'pre_sync_order') {
-                if ($method == 'adyen_cc' && $order->getPayment()->getAdyenPspReference()) {
-                    $this->handlePreSyncOrder($order, $item);
+            if ($item->getEntityType() == 'pre_sync_order') {
+                if (strpos($method, 'adyen') !== false && !$order->getPayment()->getAdyenPspReference()) {
+                    continue;
                 }
 
-                continue;
+                $this->handlePreSyncMethod($order, $item);
+                $item->setSyncFlag('1');
+            } elseif ($item->getEntityType() == 'order') {
+                $this->handleForterResponse($order, $item->getData('entity_body'));
+                $item->setSyncFlag('1');
             }
 
-            $item->setSyncFlag('1');
             $item->save();
         }
     }
 
-    private function handleAdyenMethod($order)
+    private function handlePreSyncMethod($order, $item)
     {
         try {
             $data = $this->requestBuilderOrder->buildTransaction($order, 'AFTER_PAYMENT_ACTION');
@@ -130,31 +132,49 @@ class SendQueue
                 return false;
             }
 
+            $this->handleForterResponse($order, $responseArray->action);
+
             $order->setForterStatus($responseArray->action);
             $order->save();
+
             return $responseArray->status ? true : false;
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }
     }
 
-    private function handlePreSyncOrder($order, $item)
+    private function handleForterResponse($order, $response)
     {
-        $item->setSyncFlag('1');
-        $item->save();
-        $forterResponse = $this->handleAdyenMethod($order);
+        if ($this->forterConfig->getIsCron()) {
+            if ($response == 'approve') {
+                if ($this->forterConfig->getApproveCron() == '1') {
+                    $this->approve->handleApproveImmediatly($order);
+                }
+            } elseif ($response == 'not reviewed') {
+                if ($this->forterConfig->getNotReviewCron() == '1') {
+                    $this->approve->handleApproveImmediatly($order);
+                }
+            } elseif ($response == 'decline') {
+                switch ($this->forterConfig->getDeclineCron()) {
+                case 1:
+                    $this->decline->handlePostTransactionDescision($order);
+                    return;
+                case 2:
+                    $this->decline->markOrderPaymentReview();
+                    return;
+              }
+            }
 
-        if ($forterResponse) {
-            $storeId = $order->getStore()->getId();
-            $currentTime = $this->dateTime->gmtDate();
-            $this->forterConfig->log('Increment ID:' . $order->getIncrementId());
-            $this->forterQueue->create()
-              ->setStoreId($storeId)
-              ->setEntityType('order')
-              ->setIncrementId($order->getIncrementId())
-              ->setEntityBody($order->getForterStatus())
-              ->setSyncDate($currentTime)
-              ->save();
+            return;
+        } else {
+            if ($response == 'approve') {
+                $this->approve->handleApproveImmediatly($order);
+            } elseif ($response == 'decline') {
+                if ($order->canUnhold()) {
+                    $order->unhold()->save();
+                }
+                $this->decline->handlePostTransactionDescision($order);
+            }
         }
     }
 }
