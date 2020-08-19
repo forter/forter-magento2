@@ -50,6 +50,12 @@ class Payment
         // If paypal:
         if (strpos($payment_method, 'paypal') !== false) {
             $paymentData["paypal"] = $this->paymentMethods->getPaypalDetails($payment);
+        } elseif (strpos($payment_method, 'adyen') !== false) {
+            $cardDetails = $this->paymentMethods->getAdyenDetails($payment);
+        } elseif (strpos($payment_method, 'authorizenet') !== false) {
+            $cardDetails = $this->paymentMethods->getAuthorizeNetDetails($payment);
+        } elseif (strpos($payment_method, 'braintree') !== false) {
+            $cardDetails = $this->paymentMethods->getBraintreeDetails($payment);
         } else {
             if (strpos($payment_method, 'adyen') !== false) {
                 $cardDetails = $this->paymentMethods->getAdyenDetails($payment);
