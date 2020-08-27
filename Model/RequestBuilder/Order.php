@@ -22,6 +22,7 @@ use Magento\Newsletter\Model\Subscriber;
 use Magento\Review\Model\Review;
 use Magento\Sales\Model\OrderFactory;
 use Magento\Wishlist\Controller\WishlistProviderInterface;
+use Magento\Framework\App\ObjectManager;
 
 /**
  * Class Order
@@ -113,7 +114,7 @@ class Order
         WishlistProviderInterface $wishlistProvider,
         Subscriber $subscriber,
         ForterConfig $forterConfig,
-        GiftCardPrepere $giftCardPrepere
+        GiftCardPrepere $giftCardPrepere = null
     ) {
         $this->basicInfoPrepare = $basicInfoPrepare;
         $this->cartPrepare = $cartPrepare;
@@ -127,7 +128,7 @@ class Order
         $this->subscriber = $subscriber;
         $this->forterConfig = $forterConfig;
         $this->request = $request;
-        $this->giftCardPrepere = $giftCardPrepere;
+        $this->giftCardPrepere = $giftCardPrepere ? $giftCardPrepere : ObjectManager::getInstance()->get(GiftCardPrepere::class);
     }
 
     /**

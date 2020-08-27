@@ -19,22 +19,14 @@ class GiftCard {
     /**
      * @param \Magento\Sales\Model\Order\Item $item
      *
-     * @return bool
-     */
-    public function isGiftCard($item)
-    {
-        $productOptions = $item->getProductOptions();
-
-        return $productOptions !== null && !empty($productOptions["giftcard_recipient_name"]) && !empty($productOptions["giftcard_recipient_email"]);
-    }
-
-    /**
-     * @param \Magento\Sales\Model\Order\Item $item
-     *
-     * @return array
+     * @return array|null
      */
     public function getGiftCardBeneficiaries($item)
     {
+        if (!$this->isGiftCard($item)) {
+            return null;
+        }
+
         $data          = $this->formatData($item);
         $beneficiaries = [
             "personalDetails" => [
@@ -71,6 +63,18 @@ class GiftCard {
         }
 
         return null;
+    }
+
+    /**
+     * @param \Magento\Sales\Model\Order\Item $item
+     *
+     * @return bool
+     */
+    private function isGiftCard($item)
+    {
+        $productOptions = $item->getProductOptions();
+
+        return $productOptions !== null && !empty($productOptions["giftcard_recipient_name"]) && !empty($productOptions["giftcard_recipient_email"]);
     }
 
     /**
