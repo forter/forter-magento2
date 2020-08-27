@@ -87,7 +87,7 @@ class GiftCard {
             "firstName" => !empty($name[0]) ? (string)$name[0] : "",
             "lastName"  => !empty($name[1]) ? (string)$name[1] : "",
             "email"     => (string)$productOptions["giftcard_recipient_email"],
-            "message"   => !empty($productOptions["giftcard_message"]) ? $productOptions["giftcard_message"] : ""
+            "message"   => !empty($productOptions["giftcard_message"]) ? (string)$productOptions["giftcard_message"] : ""
         ];
     }
 }
