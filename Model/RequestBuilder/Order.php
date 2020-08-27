@@ -13,6 +13,7 @@ use Forter\Forter\Model\Config as ForterConfig;
 use Forter\Forter\Model\RequestBuilder\BasicInfo as BasicInfoPrepere;
 use Forter\Forter\Model\RequestBuilder\Cart as CartPrepere;
 use Forter\Forter\Model\RequestBuilder\Customer as CustomerPrepere;
+use Forter\Forter\Model\RequestBuilder\GiftCard as GiftCardPrepere;
 use Forter\Forter\Model\RequestBuilder\Payment as PaymentPrepere;
 use Magento\Catalog\Model\CategoryFactory;
 use Magento\Customer\Model\Session;
@@ -80,6 +81,11 @@ class Order
     protected $request;
 
     /**
+     * @var GiftCardPrepere
+     */
+    protected $giftCardPrepere;
+
+    /**
      * Order constructor.
      * @param BasicInfoPrepare $basicInfoPrepare
      * @param CartPrepare  $cartPrepare
@@ -92,6 +98,7 @@ class Order
      * @param WishlistProviderInterface $wishlistProvider
      * @param Subscriber $subscriber
      * @param Config $forterConfig
+     * @param GiftCardPrepere $giftCardPrepere
      */
     public function __construct(
         RequestInterface $request,
@@ -105,7 +112,8 @@ class Order
         Review $review,
         WishlistProviderInterface $wishlistProvider,
         Subscriber $subscriber,
-        ForterConfig $forterConfig
+        ForterConfig $forterConfig,
+        GiftCardPrepere $giftCardPrepere
     ) {
         $this->basicInfoPrepare = $basicInfoPrepare;
         $this->cartPrepare = $cartPrepare;
@@ -119,6 +127,7 @@ class Order
         $this->subscriber = $subscriber;
         $this->forterConfig = $forterConfig;
         $this->request = $request;
+        $this->giftCardPrepere = $giftCardPrepere;
     }
 
     /**
@@ -129,10 +138,16 @@ class Order
     public function buildTransaction($order, $orderStage)
     {
         $headers = getallheaders();
+        $primaryRecipient = $this->customerPrepere->getPrimaryRecipient($order);
+
         if ($headers) {
             $connectionInformation = $this->basicInfoPrepare->getConnectionInformation($order->getRemoteIp(), $headers);
         } else {
             $connectionInformation = json_decode($order->getForterClientDetails());
+        }
+
+        if ($giftCardRecipient = $this->giftCardPrepere->getGiftCardPrimaryRecipient($order)) {
+            $primaryRecipient["personalDetails"] = $giftCardRecipient;
         }
 
         //get forter client number
@@ -150,7 +165,7 @@ class Order
         "totalAmount" => $this->cartPrepare->getTotalAmount($order),
         "cartItems" => $this->cartPrepare->generateCartItems($order),
         "primaryDeliveryDetails" => $this->customerPrepere->getPrimaryDeliveryDetails($order),
-        "primaryRecipient" => $this->customerPrepere->getPrimaryRecipient($order),
+        "primaryRecipient" => $primaryRecipient,
         "accountOwner" => $this->customerPrepere->getAccountOwnerInfo($order),
         "customerAccountData" => $this->customerPrepere->getCustomerAccountData($order, null),
         "totalDiscount" => $this->cartPrepare->getTotalDiscount($order),
