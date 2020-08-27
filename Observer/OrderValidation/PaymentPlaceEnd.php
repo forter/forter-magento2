@@ -133,8 +133,6 @@ class PaymentPlaceEnd implements ObserverInterface
             }
 
             $order->setForterStatus($forterResponse->action);
-            // TESTING NO EMAIL FOR ALL
-            $order->setCanSendNewEmailFlag(false);
             $this->handleResponse($forterResponse->action, $order);
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
