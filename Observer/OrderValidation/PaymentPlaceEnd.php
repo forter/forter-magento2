@@ -156,10 +156,12 @@ class PaymentPlaceEnd implements ObserverInterface
         if ($result == '1') {
             $this->customerSession->setForterMessage($this->forterConfig->getPostThanksMsg());
             if ($order->canHold()) {
+                $order->setCanSendNewEmailFlag(false);
                 $this->decline->holdOrder($order);
                 $this->setMessageToQueue($order, 'decline');
             }
         } elseif ($result == '2') {
+            $order->setCanSendNewEmailFlag(false);
             $this->decline->markOrderPaymentReview($order);
         }
     }
