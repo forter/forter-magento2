@@ -115,6 +115,8 @@ class PaymentMethods
 
     public function getAdyenDetails($payment)
     {
+        $detailsArray = [];
+
         $ccType = $payment->getAdditionalInformation('cc_type');
         if ($ccType) {
             $detailsArray['cardBrand'] = $ccType;
