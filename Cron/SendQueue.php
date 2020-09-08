@@ -77,11 +77,12 @@ class SendQueue
         ->addFieldToFilter(
             'sync_date',
             [
-            'from' => date('Y-m-d H:i:s', strtotime('-24 hour')),
-            'to' => date('Y-m-d H:i:s', strtotime($this->dateTime->gmtDate()))]
+              'from' => date('Y-m-d H:i:s', strtotime('-7 days')),
+              'to' => date('Y-m-d H:i:s', strtotime($this->dateTime->gmtDate()))
+            ]
         );
 
-        $items->setPageSize(15)->setCurPage(1);
+        $items->setPageSize(10000)->setCurPage(1);
 
         foreach ($items as $item) {
             $searchCriteria = $this->searchCriteriaBuilder
