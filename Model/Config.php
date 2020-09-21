@@ -332,25 +332,9 @@ class Config
     /**
      * @return mixed
      */
-    public function getPendingPost()
-    {
-        return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/pending_post');
-    }
-
-    /**
-     * @return mixed
-     */
     public function getApproveCron()
     {
         return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/approve_cron');
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getPendingCron()
-    {
-        return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/pending_cron');
     }
 
     /**

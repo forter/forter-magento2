@@ -178,12 +178,10 @@ class PaymentPlaceEnd implements ObserverInterface
 
     public function handlePending($order)
     {
-        $result = $this->forterConfig->getApprovePost();
-        if ($result == '1') {
-            $this->setMessageToQueue($order, 'holded');
-            $order->hold()->save();
-        }
+        $this->setMessageToQueue($order, 'pending');
+        $order->hold()->save();
     }
+
 
     public function handleNotReviewed($order)
     {
