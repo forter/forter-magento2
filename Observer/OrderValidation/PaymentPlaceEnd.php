@@ -147,6 +147,8 @@ class PaymentPlaceEnd implements ObserverInterface
             $this->handleApprove($order);
         } elseif ($forterDecision == "not reviewed") {
             $this->handleNotReviewed($order);
+        }elseif ($forterDecision == "pending") {
+            $this->handlePending($order);
         }
     }
 
@@ -173,6 +175,12 @@ class PaymentPlaceEnd implements ObserverInterface
             $this->setMessageToQueue($order, 'approve');
         }
     }
+
+    public function handlePending($order)
+    {
+        $order->hold()->save();
+    }
+
 
     public function handleNotReviewed($order)
     {
