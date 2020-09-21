@@ -178,7 +178,6 @@ class PaymentPlaceEnd implements ObserverInterface
 
     public function handlePending($order)
     {
-        $this->setMessageToQueue($order, 'pending');
         $order->hold()->save();
     }
 
