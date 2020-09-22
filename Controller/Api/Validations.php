@@ -1,13 +1,6 @@
 <?php
 namespace Forter\Forter\Controller\Api;
 
-use Forter\Forter\Model\Config;
-use Magento\Framework\Stdlib\DateTime\DateTime;
-use Forter\Forter\Model\ActionsHandler\Decline as Decline;
-use Forter\Forter\Model\ActionsHandler\Approve as Approve;
-use Magento\Customer\Model\Session as CustomerSession;
-use Forter\Forter\Model\QueueFactory as ForterQueueFactory;
-
 /**
  * Class Validations
  * @package Forter\Forter\Controller\Api
@@ -81,13 +74,13 @@ class Validations extends \Magento\Framework\App\Action\Action
      * @param \Magento\Sales\Api\OrderRepositoryInterface $orderRepository
      */
     public function __construct(
-        Decline $decline,
-        DateTime $dateTime,
-        Config $forterConfig,
-        Approve $approve,
-        ForterQueueFactory $queue,
+        \Forter\Forter\Model\ActionsHandler\Decline $decline,
+        \Magento\Framework\Stdlib\DateTime\DateTime $dateTime,
+        \Forter\Forter\Model\Config $forterConfig,
+        \Forter\Forter\Model\ActionsHandler\Approve $approve,
+        \Forter\Forter\Model\QueueFactory $queue,
         \Psr\Log\LoggerInterface $logger,
-        CustomerSession $customerSession,
+        \Magento\Customer\Model\Session $customerSession,
         \Magento\Framework\App\Action\Context $context,
         \Magento\Framework\View\Result\PageFactory $pageFactory,
         \Magento\Sales\Api\OrderRepositoryInterface $orderRepository)
@@ -219,9 +212,10 @@ class Validations extends \Magento\Framework\App\Action\Action
         if ($forter_action == "decline") {
             $this->decline->handlePostTransactionDescision($order);
         } elseif ($forter_action == "approve") {
-            $this->approve->handleApprove($order);
+            $this->approve->handleApproveImmediatly($order);
         } elseif ($forter_action == "not reviewed") {
-            $this->handleNotReviewed($order);
+            //this is temporary solution, need to customise handleNotReviewed function
+            $this->handleApprove($order);
         } else {
             throw new Exception("Forter: Unsupported action from Forter");
         }
