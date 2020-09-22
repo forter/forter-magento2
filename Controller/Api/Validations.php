@@ -1,6 +1,12 @@
 <?php
 namespace Forter\Forter\Controller\Api;
 
+use Forter\Forter\Model\Config;
+use Magento\Framework\Stdlib\DateTime\DateTime;
+use Forter\Forter\Model\ActionsHandler\Decline;
+use Magento\Customer\Model\Session as CustomerSession;
+use Forter\Forter\Model\QueueFactory as ForterQueueFactory;
+
 /**
  * Class Validations
  * @package Forter\Forter\Controller\Api
@@ -15,6 +21,10 @@ class Validations extends \Magento\Framework\App\Action\Action
     const FORTER_RESPONSE_NOT_REVIEWED = 'not reviewed';
     const FORTER_RESPONSE_PENDING_APPROVE = 'pending';
 
+    /**
+     * @var Config
+     */
+    protected $forterConfig;
 
     /**
      * @var \Magento\Framework\View\Result\PageFactory
@@ -29,7 +39,27 @@ class Validations extends \Magento\Framework\App\Action\Action
     /**
      * @var
      */
-    private $logger;
+    protected $logger;
+
+    /**
+     * @var DateTime
+     */
+    protected $dateTime;
+
+    /**
+     * @var ForterQueueFactory
+     */
+    protected $queue;
+
+    /**
+     * @var CustomerSession
+     */
+    protected $customerSession;
+
+    /**
+     * @var Decline
+     */
+    protected $decline;
 
     /**
      * Validations constructor.
@@ -38,14 +68,24 @@ class Validations extends \Magento\Framework\App\Action\Action
      * @param \Magento\Framework\View\Result\PageFactory $pageFactory
      */
     public function __construct(
-        \Magento\Framework\App\Action\Context $context,
-        \Magento\Sales\Api\OrderRepositoryInterface $orderRepository,
+        Decline $decline,
+        DateTime $dateTime,
+        Config $forterConfig,
+        ForterQueueFactory $queue,
         \Psr\Log\LoggerInterface $logger,
-        \Magento\Framework\View\Result\PageFactory $pageFactory)
+        CustomerSession $customerSession,
+        \Magento\Framework\App\Action\Context $context,
+        \Magento\Framework\View\Result\PageFactory $pageFactory,
+        \Magento\Sales\Api\OrderRepositoryInterface $orderRepository)
     {
-        $this->_pageFactory = $pageFactory;
+        $this->queue = $queue;
         $this->logger = $logger;
+        $this->decline = $decline;
+        $this->dateTime = $dateTime;
+        $this->_pageFactory = $pageFactory;
+        $this->forterConfig = $forterConfig;
         $this->orderRepository = $orderRepository;
+        $this->customerSession = $customerSession;
         return parent::__construct($context);
     }
 
@@ -95,7 +135,7 @@ class Validations extends \Magento\Framework\App\Action\Action
             }
 
             // handle action
-            $this->handleAutoCaptureCallback($jsonRequest->action, $jsonRequest->reason, $order);
+            $this->handleAutoCaptureCallback($jsonRequest->action, $order);
 
         } catch (Exception $e) {
             $this->logger->critical('Error message', ['exception' => $e]);
@@ -159,46 +199,79 @@ class Validations extends \Magento\Framework\App\Action\Action
      * @param $forter_message
      * @param $order
      */
-    public function handleAutoCaptureCallback($forter_action, $forter_message, $order)
+    public function handleAutoCaptureCallback($forter_action, $order)
     {
         if ($forter_action == "decline") {
-            $this->handleResponseDecline($order, $forter_message);
+            $this->handleDecline($order);
         } elseif ($forter_action == "approve") {
-            $this->handleResponseApprove($order, $forter_message);
+            $this->handleApprove($order);
         } elseif ($forter_action == "not reviewed") {
-            $this->handleResponseNotReviewed($order, $forter_message);
+            $this->handleNotReviewed($order);
         } else {
             throw new Exception("Forter: Unsupported action from Forter");
         }
     }
 
-
     /**
      * @param $order
-     * @param $message
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function handleResponseDecline($order, $message)
+    public function handleNotReviewed($order)
     {
-        //will be updated soon according to M2 structure
+        $result = $this->forterConfig->getNotReviewPost();
+        if ($result == '1') {
+            $this->setMessageToQueue($order, 'approve');
+        }
     }
 
     /**
      * @param $order
-     * @param $message
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function handleResponseApprove($order, $message)
+    public function handleApprove($order)
     {
-        //will be updated soon according to M2 structure
+        $result = $this->forterConfig->getApprovePost();
+        if ($result == '1') {
+            $this->setMessageToQueue($order, 'approve');
+        }
     }
 
     /**
      * @param $order
-     * @param $message
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function handleResponseNotReviewed($order, $message)
+    public function handleDecline($order)
     {
-        $order->setForterStatus(self::FORTER_STATUS_NOT_REVIEWED);
-        $order->addStatusHistoryComment("Forter: {$message}", false);
-        $order->save();
+        $result = $this->forterConfig->getDeclinePost();
+        if ($result == '1') {
+            $this->customerSession->setForterMessage($this->forterConfig->getPostThanksMsg());
+            if ($order->canHold()) {
+                $order->setCanSendNewEmailFlag(false);
+                $this->decline->holdOrder($order);
+                $this->setMessageToQueue($order, 'decline');
+            }
+        } elseif ($result == '2') {
+            $order->setCanSendNewEmailFlag(false);
+            $this->decline->markOrderPaymentReview($order);
+        }
+    }
+
+    /**
+     * @param $order
+     * @param $type
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function setMessageToQueue($order, $type)
+    {
+        $storeId = $order->getStore()->getId();
+        $currentTime = $this->dateTime->gmtDate();
+        $this->forterConfig->log('Increment ID:' . $order->getIncrementId());
+        $this->queue->create()
+            ->setStoreId($storeId)
+            ->setEntityType('order')
+            ->setIncrementId($order->getIncrementId())
+            ->setEntityBody($type)
+            ->setSyncDate($currentTime)
+            ->save();
     }
 }
