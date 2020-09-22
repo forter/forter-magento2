@@ -14,9 +14,6 @@ class Validations extends \Magento\Framework\App\Action\Action
     const FORTER_RESPONSE_APPROVE = 'approve';
     const FORTER_RESPONSE_NOT_REVIEWED = 'not reviewed';
     const FORTER_RESPONSE_PENDING_APPROVE = 'pending';
-    const FORTER_STATUS_PENDING = 0;
-    const FORTER_STATUS_PENDING_APPROVE = -4;
-    const FORTER_STATUS_DECLINED = -1;
 
 
     /**
@@ -93,7 +90,7 @@ class Validations extends \Magento\Framework\App\Action\Action
                 throw new Exception("Forter: Order was never sent to Forter [id={$orderId}]");
             }
 
-            if (!in_array($order->getForterStatus(), array(self::FORTER_STATUS_PENDING, self::FORTER_STATUS_PENDING_APPROVE))) {
+            if (!$order->getForterStatus()) {
                 throw new Exception("Forter: Order status does not allow action.[id={$orderId}, status={$order->getForterStatus()}");
             }
 
@@ -164,14 +161,14 @@ class Validations extends \Magento\Framework\App\Action\Action
      */
     public function handleAutoCaptureCallback($forter_action, $forter_message, $order)
     {
-        if ($forter_action == self::FORTER_RESPONSE_DECLINE) {
+        if ($forter_action == "decline") {
             $this->handleResponseDecline($order, $forter_message);
-        } elseif ($forter_action == self::FORTER_RESPONSE_APPROVE) {
+        } elseif ($forter_action == "approve") {
             $this->handleResponseApprove($order, $forter_message);
-        } elseif ($forter_action == self::FORTER_RESPONSE_NOT_REVIEWED) {
+        } elseif ($forter_action == "not reviewed") {
             $this->handleResponseNotReviewed($order, $forter_message);
         } else {
-            Mage::throwException("Forter: Unsupported action from Forter");
+            throw new Exception("Forter: Unsupported action from Forter");
         }
     }
 
@@ -200,6 +197,8 @@ class Validations extends \Magento\Framework\App\Action\Action
      */
     public function handleResponseNotReviewed($order, $message)
     {
-        //will be updated soon according to M2 structure
+        $order->setForterStatus(self::FORTER_STATUS_NOT_REVIEWED);
+        $order->addStatusHistoryComment("Forter: {$message}", false);
+        $order->save();
     }
 }
