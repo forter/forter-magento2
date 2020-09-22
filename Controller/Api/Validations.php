@@ -7,6 +7,18 @@ namespace Forter\Forter\Controller\Api;
  */
 class Validations extends \Magento\Framework\App\Action\Action
 {
+    const XML_FORTER_SECRET_KEY = "forter_settings_secret_key";
+    const XML_FORTER_SITE_ID = "forter_settings_site_id";
+    const FORTER_RESPONSE_DECLINE = 'decline';
+    const FORTER_RESPONSE_PENDING = 'resending';
+    const FORTER_RESPONSE_APPROVE = 'approve';
+    const FORTER_RESPONSE_NOT_REVIEWED = 'not reviewed';
+    const FORTER_RESPONSE_PENDING_APPROVE = 'pending';
+    const FORTER_STATUS_PENDING = 0;
+    const FORTER_STATUS_PENDING_APPROVE = -4;
+    const FORTER_STATUS_DECLINED = -1;
+
+
     /**
      * @var \Magento\Framework\View\Result\PageFactory
      */
@@ -50,23 +62,23 @@ class Validations extends \Magento\Framework\App\Action\Action
         try {
             // validate call from forter
             $request = $this->getRequest();
-            $siteid = $request->getHeader("X-Forter-SiteID");
+            $siteId = $request->getHeader("X-Forter-SiteID");
             $key = $request->getHeader("X-Forter-Token");
             $hash = $request->getHeader("X-Forter-Signature");
             $postData = isset($GLOBALS['HTTP_RAW_POST_DATA']) ? $GLOBALS['HTTP_RAW_POST_DATA'] : file_get_contents("php://input");
 
-//            if ($hash != $this->_getHelper()->calculateHash($siteid, $key, $post_data)) {
-//                throw new Exception("Forter: Invalid call");
-//            }
+            if ($hash != $this->calculateHash($siteId, $key, $postData)) {
+                throw new Exception("Forter: Invalid call");
+            }
 
-//            if ($siteid != $this->_getHelper()->getSiteID()) {
-//                throw new Exception("Forter: Invalid call");
-//            }
+            if ($siteId != $this->getSiteId()) {
+                throw new Exception("Forter: Invalid call");
+            }
 
-            $json_request = json_decode($postData);
-//            if (is_null($json_request)) {
-//                throw new Exception("Forter: Invalid call");
-//            }
+            $jsonRequest = json_decode($postData);
+            if (is_null($jsonRequest)) {
+                throw new Exception("Forter: Invalid call");
+            }
 
             // load order
             $orderId = $request->getParam('order_id');
@@ -81,12 +93,12 @@ class Validations extends \Magento\Framework\App\Action\Action
                 throw new Exception("Forter: Order was never sent to Forter [id={$orderId}]");
             }
 
-//            if (!in_array($order->getForterStatus(), array(Forter_Extension_Helper_Data::FORTER_STATUS_PENDING, Forter_Extension_Helper_Data::FORTER_STATUS_PENDING_APPROVE))) {
-//                throw new Exception("Forter: Order status does not allow action.[id={$order_id}, status={$order->getForterStatus()}");
-//            }
+            if (!in_array($order->getForterStatus(), array(self::FORTER_STATUS_PENDING, self::FORTER_STATUS_PENDING_APPROVE))) {
+                throw new Exception("Forter: Order status does not allow action.[id={$orderId}, status={$order->getForterStatus()}");
+            }
 
             // handle action
-//            $this->_getHelper()->handleAutoCaptureCallback($json_request->action, $json_request->reason, $order);
+            $this->handleAutoCaptureCallback($jsonRequest->action, $jsonRequest->reason, $order);
 
         } catch (Exception $e) {
             $this->logger->critical('Error message', ['exception' => $e]);
@@ -109,5 +121,85 @@ class Validations extends \Magento\Framework\App\Action\Action
     public function getOrder($id)
     {
         return $this->orderRepository->get($id);
+    }
+
+    /**
+     * @param $siteId
+     * @param $token
+     * @param $body
+     * @return string
+     */
+    public function calculateHash($siteId, $token, $body)
+    {
+        $secert = $this->getSecretKey();
+        return hash('sha256', $secert . $token . $siteId . $body);
+    }
+
+    /**
+     * @param null $storeId
+     * @return mixed
+     */
+    public function getSecretKey($storeId = null)
+    {
+        $secretKey = $this->scopeConfig->getValue(self::XML_FORTER_SECRET_KEY, $storeId);
+
+        return $secretKey;
+    }
+
+    /**
+     * @param null $storeId
+     * @return mixed
+     */
+    public function getSiteId($storeId = null)
+    {
+        $siteId = $this->scopeConfig->getValue(self::XML_FORTER_SITE_ID, $storeId);
+
+        return $siteId;
+    }
+
+    /**
+     * @param $forter_action
+     * @param $forter_message
+     * @param $order
+     */
+    public function handleAutoCaptureCallback($forter_action, $forter_message, $order)
+    {
+        if ($forter_action == self::FORTER_RESPONSE_DECLINE) {
+            $this->handleResponseDecline($order, $forter_message);
+        } elseif ($forter_action == self::FORTER_RESPONSE_APPROVE) {
+            $this->handleResponseApprove($order, $forter_message);
+        } elseif ($forter_action == self::FORTER_RESPONSE_NOT_REVIEWED) {
+            $this->handleResponseNotReviewed($order, $forter_message);
+        } else {
+            Mage::throwException("Forter: Unsupported action from Forter");
+        }
+    }
+
+
+    /**
+     * @param $order
+     * @param $message
+     */
+    public function handleResponseDecline($order, $message)
+    {
+        //will be updated soon according to M2 structure
+    }
+
+    /**
+     * @param $order
+     * @param $message
+     */
+    public function handleResponseApprove($order, $message)
+    {
+        //will be updated soon according to M2 structure
+    }
+
+    /**
+     * @param $order
+     * @param $message
+     */
+    public function handleResponseNotReviewed($order, $message)
+    {
+        //will be updated soon according to M2 structure
     }
 }
