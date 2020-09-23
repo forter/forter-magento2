@@ -92,7 +92,6 @@ class AccountManagement
      * @param $email
      * @param $resetToken
      * @param null $newPassword
-     * @return bool
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function beforeResetPassword(
