@@ -146,10 +146,12 @@ class SendQueue
 
     private function handleForterResponse($order, $response)
     {
+        if ($response == 'pending') {
+            $order->hold()->save();
+        }
+
         if ($this->forterConfig->getIsCron()) {
-            if ($response == 'pending') {
-                $order->hold()->save();
-            } elseif ($response == 'approve') {
+            if ($response == 'approve') {
                 if ($this->forterConfig->getApproveCron() == '1') {
                     $this->approve->handleApproveImmediatly($order);
                 }
