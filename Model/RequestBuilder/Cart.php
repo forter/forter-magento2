@@ -10,6 +10,7 @@
 
 namespace Forter\Forter\Model\RequestBuilder;
 
+use Forter\Forter\Model\RequestBuilder\GiftCard as GiftCardPrepere;
 use Magento\Catalog\Model\CategoryFactory;
 
 /**
@@ -18,15 +19,27 @@ use Magento\Catalog\Model\CategoryFactory;
  */
 class Cart
 {
+    /**
+     * @var CategoryFactory
+     */
+    private $categoryFactory;
+
+    /**
+     * @var GiftCardPrepere
+     */
+    private $giftCardPrepere;
 
     /**
      * Cart constructor.
      * @param CategoryFactory $categoryFactory
+     * @param GiftCardPrepere $giftCardPrepere
      */
     public function __construct(
-        CategoryFactory $categoryFactory
+        CategoryFactory $categoryFactory,
+        GiftCardPrepere $giftCardPrepere
     ) {
         $this->categoryFactory = $categoryFactory;
+        $this->giftCardPrepere = $giftCardPrepere;
     }
 
     /**
@@ -86,6 +99,10 @@ class Cart
                     ]
                 ]
             ];
+
+            if ($this->giftCardPrepere->getGiftCardBeneficiaries($item)) {
+                $singleCartItem['beneficiaries'] = $this->giftCardPrepere->getGiftCardBeneficiaries($item);
+            }
 
             $cartItems[] = $singleCartItem;
         }
