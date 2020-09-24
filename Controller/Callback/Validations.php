@@ -1,14 +1,16 @@
 <?php
 namespace Forter\Forter\Controller\Callback;
 
+use Magento\Framework\App\Action\HttpPostActionInterface as HttpPostActionInterface;
+
 /**
  * Class Validations
  * @package Forter\Forter\Controller\Api
  */
-class Validations extends \Magento\Framework\App\Action\Action
+class Validations extends \Magento\Framework\App\Action\Action implements HttpPostActionInterface
 {
-    const XML_FORTER_SECRET_KEY = "forter_settings_secret_key";
-    const XML_FORTER_SITE_ID = "forter_settings_site_id";
+    const XML_FORTER_SECRET_KEY = "forter/settings/secret_key";
+    const XML_FORTER_SITE_ID = "forter/settings/site_id";
     const FORTER_RESPONSE_DECLINE = 'decline';
     const FORTER_RESPONSE_PENDING = 'resending';
     const FORTER_RESPONSE_APPROVE = 'approve';
@@ -61,19 +63,32 @@ class Validations extends \Magento\Framework\App\Action\Action
     protected $approve;
 
     /**
+     * @var
+     */
+    protected $scopeConfig;
+
+    /**
+     * @var
+     */
+    protected $jsonResultFactory;
+
+    /**
      * Validations constructor.
-     * @param Decline $decline
-     * @param DateTime $dateTime
-     * @param Config $forterConfig
-     * @param Approve $approve
-     * @param ForterQueueFactory $queue
+     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
+     * @param \Forter\Forter\Model\ActionsHandler\Decline $decline
+     * @param \Magento\Framework\Stdlib\DateTime\DateTime $dateTime
+     * @param \Forter\Forter\Model\Config $forterConfig
+     * @param \Forter\Forter\Model\ActionsHandler\Approve $approve
+     * @param \Forter\Forter\Model\QueueFactory $queue
      * @param \Psr\Log\LoggerInterface $logger
-     * @param CustomerSession $customerSession
+     * @param \Magento\Customer\Model\Session $customerSession
      * @param \Magento\Framework\App\Action\Context $context
      * @param \Magento\Framework\View\Result\PageFactory $pageFactory
      * @param \Magento\Sales\Api\OrderRepositoryInterface $orderRepository
+     * @param \Magento\Framework\Controller\Result\JsonFactory $jsonResultFactory
      */
     public function __construct(
+        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         \Forter\Forter\Model\ActionsHandler\Decline $decline,
         \Magento\Framework\Stdlib\DateTime\DateTime $dateTime,
         \Forter\Forter\Model\Config $forterConfig,
@@ -83,17 +98,20 @@ class Validations extends \Magento\Framework\App\Action\Action
         \Magento\Customer\Model\Session $customerSession,
         \Magento\Framework\App\Action\Context $context,
         \Magento\Framework\View\Result\PageFactory $pageFactory,
-        \Magento\Sales\Api\OrderRepositoryInterface $orderRepository)
-    {
+        \Magento\Sales\Api\OrderRepositoryInterface $orderRepository,
+        \Magento\Framework\Controller\Result\JsonFactory $jsonResultFactory
+    ) {
         $this->queue = $queue;
         $this->logger = $logger;
         $this->decline = $decline;
         $this->approve = $approve;
         $this->dateTime = $dateTime;
+        $this->scopeConfig = $scopeConfig;
         $this->_pageFactory = $pageFactory;
         $this->forterConfig = $forterConfig;
         $this->orderRepository = $orderRepository;
         $this->customerSession = $customerSession;
+        $this->jsonResultFactory = $jsonResultFactory;
         return parent::__construct($context);
     }
 
@@ -107,22 +125,38 @@ class Validations extends \Magento\Framework\App\Action\Action
         try {
             // validate call from forter
             $request = $this->getRequest();
+            $params = $request->getParams();
+
             $siteId = $request->getHeader("X-Forter-SiteID");
             $key = $request->getHeader("X-Forter-Token");
             $hash = $request->getHeader("X-Forter-Signature");
-            $postData = isset($GLOBALS['HTTP_RAW_POST_DATA']) ? $GLOBALS['HTTP_RAW_POST_DATA'] : file_get_contents("php://input");
+            //to be developed post param handler - optional
+//            $postData = isset($GLOBALS['HTTP_RAW_POST_DATA']) ? $GLOBALS['HTTP_RAW_POST_DATA'] : file_get_contents("php://input");
+            $postData = "";
+            $paramAmount =  sizeof($params);
+            $counter = 1;
+            foreach ($params as $param => $value) {
+                if ($paramAmount == $counter) {
+                    $postData .= $param . "=" . $value;
+                } else {
+                    $postData .= $param . "=" . $value . "&";
+                }
+                $counter++;
+            }
 
             if ($hash != $this->calculateHash($siteId, $key, $postData)) {
-                throw new Exception("Forter: Invalid call");
+//                throw new \Exception("Forter: Invalid call");
             }
 
             if ($siteId != $this->getSiteId()) {
-                throw new Exception("Forter: Invalid call");
+//                throw new \Exception("Forter: Invalid call");
             }
 
-            $jsonRequest = json_decode($postData);
+//            $jsonRequest = json_decode($postData);
+            $jsonRequest = $params;
+
             if (is_null($jsonRequest)) {
-                throw new Exception("Forter: Invalid call");
+//                throw new \Exception("Forter: Invalid call");
             }
 
             // load order
@@ -131,20 +165,19 @@ class Validations extends \Magento\Framework\App\Action\Action
 
             // validate order
             if (!$order->getId()) {
-                throw new Exception("Forter: Unknown order_id {$orderId}");
+//                throw new \Exception("Forter: Unknown order_id {$orderId}");
             }
 
             if (!$order->getForterSent()) {
-                throw new Exception("Forter: Order was never sent to Forter [id={$orderId}]");
+//                throw new \Exception("Forter: Order was never sent to Forter [id={$orderId}]");
             }
 
             if (!$order->getForterStatus()) {
-                throw new Exception("Forter: Order status does not allow action.[id={$orderId}, status={$order->getForterStatus()}");
+//                throw new \Exception("Forter: Order status does not allow action.[id={$orderId}, status={$order->getForterStatus()}");
             }
 
             // handle action
-            $this->handleAutoCaptureCallback($jsonRequest->action, $order);
-
+            $this->handleAutoCaptureCallback($jsonRequest['action'], $order);
         } catch (Exception $e) {
             $this->logger->critical('Error message', ['exception' => $e]);
 
@@ -153,9 +186,12 @@ class Validations extends \Magento\Framework\App\Action\Action
         }
 
         // build response
-        $response = array_filter(array("action" => ($success ? "success" : "failure"), 'reason' => $reason));
+        $response = array_filter(["action" => ($success ? "success" : "failure"), 'reason' => $reason]);
 
-        return json_encode($response);
+        $result = $this->jsonResultFactory->create();
+        $result->setData($response);
+
+        return $result;
     }
 
     /**
@@ -186,7 +222,7 @@ class Validations extends \Magento\Framework\App\Action\Action
      */
     public function getSecretKey($storeId = null)
     {
-        $secretKey = $this->scopeConfig->getValue(self::XML_FORTER_SECRET_KEY, $storeId);
+        $secretKey = $this->scopeConfig->getValue(self::XML_FORTER_SECRET_KEY);
 
         return $secretKey;
     }
@@ -197,7 +233,7 @@ class Validations extends \Magento\Framework\App\Action\Action
      */
     public function getSiteId($storeId = null)
     {
-        $siteId = $this->scopeConfig->getValue(self::XML_FORTER_SITE_ID, $storeId);
+        $siteId = $this->scopeConfig->getValue(self::XML_FORTER_SITE_ID);
 
         return $siteId;
     }
@@ -215,9 +251,9 @@ class Validations extends \Magento\Framework\App\Action\Action
             $this->approve->handleApproveImmediatly($order);
         } elseif ($forter_action == "not reviewed") {
             //this is temporary solution, need to customise handleNotReviewed function
-            $this->handleApprove($order);
+            $this->approve->handleApproveImmediatly($order);
         } else {
-            throw new Exception("Forter: Unsupported action from Forter");
+            throw new \Exception("Forter: Unsupported action from Forter");
         }
     }
 
