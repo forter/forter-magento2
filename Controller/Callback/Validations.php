@@ -245,7 +245,9 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
      */
     public function handleAutoCaptureCallback($forter_action, $order)
     {
+        $order->unhold()->save();
         if ($forter_action == "decline") {
+            
             $this->decline->handlePostTransactionDescision($order);
         } elseif ($forter_action == "approve") {
             $this->approve->handleApproveImmediatly($order);

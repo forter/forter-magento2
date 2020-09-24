@@ -51,7 +51,7 @@ class BasicInfo
         $payment = $order->getPayment();
 
         return [
-            'additionalOrderId' => $order->getRealOrderId(),
+            'additionalOrderId' => $order->getId(),
             'paymentGatewayId' => $payment ? strval($payment->getTransactionId()) : "",
             'merchant' => [
               'merchantId' => $store->getId(),
