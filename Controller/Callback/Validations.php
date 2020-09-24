@@ -1,11 +1,13 @@
 <?php
 namespace Forter\Forter\Controller\Callback;
 
+use Magento\Framework\App\Action\HttpPostActionInterface as HttpPostActionInterface;
+
 /**
  * Class Validations
  * @package Forter\Forter\Controller\Api
  */
-class Validations extends \Magento\Framework\App\Action\Action
+class Validations extends \Magento\Framework\App\Action\Action implements HttpPostActionInterface
 {
     const XML_FORTER_SECRET_KEY = "forter/settings/secret_key";
     const XML_FORTER_SITE_ID = "forter/settings/site_id";
@@ -143,18 +145,18 @@ class Validations extends \Magento\Framework\App\Action\Action
             }
 
             if ($hash != $this->calculateHash($siteId, $key, $postData)) {
-//                throw new Exception("Forter: Invalid call");
+//                throw new \Exception("Forter: Invalid call");
             }
 
             if ($siteId != $this->getSiteId()) {
-//                throw new Exception("Forter: Invalid call");
+//                throw new \Exception("Forter: Invalid call");
             }
 
 //            $jsonRequest = json_decode($postData);
             $jsonRequest = $params;
 
             if (is_null($jsonRequest)) {
-//                throw new Exception("Forter: Invalid call");
+//                throw new \Exception("Forter: Invalid call");
             }
 
             // load order
@@ -163,15 +165,15 @@ class Validations extends \Magento\Framework\App\Action\Action
 
             // validate order
             if (!$order->getId()) {
-//                throw new Exception("Forter: Unknown order_id {$orderId}");
+//                throw new \Exception("Forter: Unknown order_id {$orderId}");
             }
 
             if (!$order->getForterSent()) {
-//                throw new Exception("Forter: Order was never sent to Forter [id={$orderId}]");
+//                throw new \Exception("Forter: Order was never sent to Forter [id={$orderId}]");
             }
 
             if (!$order->getForterStatus()) {
-//                throw new Exception("Forter: Order status does not allow action.[id={$orderId}, status={$order->getForterStatus()}");
+//                throw new \Exception("Forter: Order status does not allow action.[id={$orderId}, status={$order->getForterStatus()}");
             }
 
             // handle action
@@ -251,7 +253,7 @@ class Validations extends \Magento\Framework\App\Action\Action
             //this is temporary solution, need to customise handleNotReviewed function
             $this->approve->handleApproveImmediatly($order);
         } else {
-            throw new Exception("Forter: Unsupported action from Forter");
+            throw new \Exception("Forter: Unsupported action from Forter");
         }
     }
 
