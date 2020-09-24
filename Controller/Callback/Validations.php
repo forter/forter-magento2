@@ -1,5 +1,5 @@
 <?php
-namespace Forter\Forter\Controller\Api;
+namespace Forter\Forter\Controller\Callback;
 
 /**
  * Class Validations
