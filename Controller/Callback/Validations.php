@@ -66,17 +66,24 @@ class Validations extends \Magento\Framework\App\Action\Action
     protected $scopeConfig;
 
     /**
+     * @var
+     */
+    protected $jsonResultFactory;
+
+    /**
      * Validations constructor.
-     * @param Decline $decline
-     * @param DateTime $dateTime
-     * @param Config $forterConfig
-     * @param Approve $approve
-     * @param ForterQueueFactory $queue
+     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
+     * @param \Forter\Forter\Model\ActionsHandler\Decline $decline
+     * @param \Magento\Framework\Stdlib\DateTime\DateTime $dateTime
+     * @param \Forter\Forter\Model\Config $forterConfig
+     * @param \Forter\Forter\Model\ActionsHandler\Approve $approve
+     * @param \Forter\Forter\Model\QueueFactory $queue
      * @param \Psr\Log\LoggerInterface $logger
-     * @param CustomerSession $customerSession
+     * @param \Magento\Customer\Model\Session $customerSession
      * @param \Magento\Framework\App\Action\Context $context
      * @param \Magento\Framework\View\Result\PageFactory $pageFactory
      * @param \Magento\Sales\Api\OrderRepositoryInterface $orderRepository
+     * @param \Magento\Framework\Controller\Result\JsonFactory $jsonResultFactory
      */
     public function __construct(
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
@@ -89,7 +96,8 @@ class Validations extends \Magento\Framework\App\Action\Action
         \Magento\Customer\Model\Session $customerSession,
         \Magento\Framework\App\Action\Context $context,
         \Magento\Framework\View\Result\PageFactory $pageFactory,
-        \Magento\Sales\Api\OrderRepositoryInterface $orderRepository)
+        \Magento\Sales\Api\OrderRepositoryInterface $orderRepository,
+        \Magento\Framework\Controller\Result\JsonFactory $jsonResultFactory)
     {
         $this->queue = $queue;
         $this->logger = $logger;
@@ -101,6 +109,7 @@ class Validations extends \Magento\Framework\App\Action\Action
         $this->forterConfig = $forterConfig;
         $this->orderRepository = $orderRepository;
         $this->customerSession = $customerSession;
+        $this->jsonResultFactory = $jsonResultFactory;
         return parent::__construct($context);
     }
 
@@ -141,14 +150,16 @@ class Validations extends \Magento\Framework\App\Action\Action
 //                throw new Exception("Forter: Invalid call");
             }
 
-            $jsonRequest = json_decode($postData);
+//            $jsonRequest = json_decode($postData);
+            $jsonRequest = $params;
 
             if (is_null($jsonRequest)) {
 //                throw new Exception("Forter: Invalid call");
             }
 
             // load order
-            $orderId = $request->getParam('order_id');
+//            $orderId = $request->getParam('order_id');
+            $orderId = 559; //this is for test only (id is compatible with https://forter.tempurl.co.il/)
             $order = $this->getOrder($orderId);
 
             // validate order
@@ -165,7 +176,7 @@ class Validations extends \Magento\Framework\App\Action\Action
             }
 
             // handle action
-            $this->handleAutoCaptureCallback($jsonRequest->action, $order);
+            $this->handleAutoCaptureCallback($jsonRequest['action'], $order);
 
         } catch (Exception $e) {
             $this->logger->critical('Error message', ['exception' => $e]);
@@ -177,7 +188,10 @@ class Validations extends \Magento\Framework\App\Action\Action
         // build response
         $response = array_filter(array("action" => ($success ? "success" : "failure"), 'reason' => $reason));
 
-        return json_encode($response);
+        $result = $this->jsonResultFactory->create();
+        $result->setData($response);
+
+        return $result;
     }
 
     /**
