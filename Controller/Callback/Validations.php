@@ -97,8 +97,8 @@ class Validations extends \Magento\Framework\App\Action\Action
         \Magento\Framework\App\Action\Context $context,
         \Magento\Framework\View\Result\PageFactory $pageFactory,
         \Magento\Sales\Api\OrderRepositoryInterface $orderRepository,
-        \Magento\Framework\Controller\Result\JsonFactory $jsonResultFactory)
-    {
+        \Magento\Framework\Controller\Result\JsonFactory $jsonResultFactory
+    ) {
         $this->queue = $queue;
         $this->logger = $logger;
         $this->decline = $decline;
@@ -158,8 +158,7 @@ class Validations extends \Magento\Framework\App\Action\Action
             }
 
             // load order
-//            $orderId = $request->getParam('order_id');
-            $orderId = 559; //this is for test only (id is compatible with https://forter.tempurl.co.il/)
+            $orderId = $request->getParam('order_id');
             $order = $this->getOrder($orderId);
 
             // validate order
@@ -177,7 +176,6 @@ class Validations extends \Magento\Framework\App\Action\Action
 
             // handle action
             $this->handleAutoCaptureCallback($jsonRequest['action'], $order);
-
         } catch (Exception $e) {
             $this->logger->critical('Error message', ['exception' => $e]);
 
@@ -186,7 +184,7 @@ class Validations extends \Magento\Framework\App\Action\Action
         }
 
         // build response
-        $response = array_filter(array("action" => ($success ? "success" : "failure"), 'reason' => $reason));
+        $response = array_filter(["action" => ($success ? "success" : "failure"), 'reason' => $reason]);
 
         $result = $this->jsonResultFactory->create();
         $result->setData($response);
@@ -251,7 +249,7 @@ class Validations extends \Magento\Framework\App\Action\Action
             $this->approve->handleApproveImmediatly($order);
         } elseif ($forter_action == "not reviewed") {
             //this is temporary solution, need to customise handleNotReviewed function
-            $this->handleApprove($order);
+            $this->approve->handleApproveImmediatly($order);
         } else {
             throw new Exception("Forter: Unsupported action from Forter");
         }
