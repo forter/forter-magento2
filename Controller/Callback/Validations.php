@@ -73,6 +73,11 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
     protected $jsonResultFactory;
 
     /**
+     * @var \Magento\Framework\UrlInterface
+     */
+    protected $url;
+
+    /**
      * Validations constructor.
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
      * @param \Forter\Forter\Model\ActionsHandler\Decline $decline
@@ -80,6 +85,7 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
      * @param \Forter\Forter\Model\Config $forterConfig
      * @param \Forter\Forter\Model\ActionsHandler\Approve $approve
      * @param \Forter\Forter\Model\QueueFactory $queue
+     * @param \Magento\Framework\UrlInterface $url
      * @param \Psr\Log\LoggerInterface $logger
      * @param \Magento\Customer\Model\Session $customerSession
      * @param \Magento\Framework\App\Action\Context $context
@@ -94,6 +100,7 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
         \Forter\Forter\Model\Config $forterConfig,
         \Forter\Forter\Model\ActionsHandler\Approve $approve,
         \Forter\Forter\Model\QueueFactory $queue,
+        \Magento\Framework\UrlInterface $url,
         \Psr\Log\LoggerInterface $logger,
         \Magento\Customer\Model\Session $customerSession,
         \Magento\Framework\App\Action\Context $context,
@@ -101,6 +108,7 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
         \Magento\Sales\Api\OrderRepositoryInterface $orderRepository,
         \Magento\Framework\Controller\Result\JsonFactory $jsonResultFactory
     ) {
+        $this->url = $url;
         $this->queue = $queue;
         $this->logger = $logger;
         $this->decline = $decline;
@@ -120,78 +128,86 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
      */
     public function execute()
     {
-        $success = true;
-        $reason = null;
-        try {
-            // validate call from forter
-            $request = $this->getRequest();
-            $params = $request->getParams();
+        $request = $this->getRequest();
+        $method = $request->getMethod();
+        if ($method == "POST") {
+            $success = true;
+            $reason = null;
+            try {
+                // validate call from forter
+                $requestParams = $request->getParams();
+                $bodyRawParams = json_decode($request->getContent(), true);
+                $params = array_merge($requestParams, $bodyRawParams);
 
-            $siteId = $request->getHeader("X-Forter-SiteID");
-            $key = $request->getHeader("X-Forter-Token");
-            $hash = $request->getHeader("X-Forter-Signature");
-            //to be developed post param handler - optional
+                $siteId = $request->getHeader("X-Forter-SiteID");
+                $key = $request->getHeader("X-Forter-Token");
+                $hash = $request->getHeader("X-Forter-Signature");
+                //to be developed post param handler - optional
 //            $postData = isset($GLOBALS['HTTP_RAW_POST_DATA']) ? $GLOBALS['HTTP_RAW_POST_DATA'] : file_get_contents("php://input");
-            $postData = "";
-            $paramAmount =  sizeof($params);
-            $counter = 1;
-            foreach ($params as $param => $value) {
-                if ($paramAmount == $counter) {
-                    $postData .= $param . "=" . $value;
-                } else {
-                    $postData .= $param . "=" . $value . "&";
+                $postData = "";
+                $paramAmount =  sizeof($params);
+                $counter = 1;
+                foreach ($params as $param => $value) {
+                    if ($paramAmount == $counter) {
+                        $postData .= $param . "=" . $value;
+                    } else {
+                        $postData .= $param . "=" . $value . "&";
+                    }
+                    $counter++;
                 }
-                $counter++;
-            }
 
-            if ($hash != $this->calculateHash($siteId, $key, $postData)) {
+                if ($hash != $this->calculateHash($siteId, $key, $postData)) {
 //                throw new \Exception("Forter: Invalid call");
-            }
+                }
 
-            if ($siteId != $this->getSiteId()) {
+                if ($siteId != $this->getSiteId()) {
 //                throw new \Exception("Forter: Invalid call");
-            }
+                }
 
 //            $jsonRequest = json_decode($postData);
-            $jsonRequest = $params;
+                $jsonRequest = $params;
 
-            if (is_null($jsonRequest)) {
+                if (is_null($jsonRequest)) {
 //                throw new \Exception("Forter: Invalid call");
-            }
+                }
 
-            // load order
-            $orderId = $request->getParam('order_id');
-            $order = $this->getOrder($orderId);
+                // load order
+                $orderId = $request->getParam('order_id');
+                $order = $this->getOrder($orderId);
 
-            // validate order
-            if (!$order->getId()) {
+                // validate order
+                if (!$order->getId()) {
 //                throw new \Exception("Forter: Unknown order_id {$orderId}");
-            }
+                }
 
-            if (!$order->getForterSent()) {
+                if (!$order->getForterSent()) {
 //                throw new \Exception("Forter: Order was never sent to Forter [id={$orderId}]");
-            }
+                }
 
-            if (!$order->getForterStatus()) {
+                if (!$order->getForterStatus()) {
 //                throw new \Exception("Forter: Order status does not allow action.[id={$orderId}, status={$order->getForterStatus()}");
+                }
+
+                // handle action
+                $this->handleAutoCaptureCallback($jsonRequest['action'], $order);
+            } catch (Exception $e) {
+                $this->logger->critical('Error message', ['exception' => $e]);
+
+                $success = false;
+                $reason = $e->getMessage();
             }
 
-            // handle action
-            $this->handleAutoCaptureCallback($jsonRequest['action'], $order);
-        } catch (Exception $e) {
-            $this->logger->critical('Error message', ['exception' => $e]);
+            // build response
+            $response = array_filter(["action" => ($success ? "success" : "failure"), 'reason' => $reason]);
 
-            $success = false;
-            $reason = $e->getMessage();
+            $result = $this->jsonResultFactory->create();
+            $result->setData($response);
+
+            return $result;
+        } else {
+            $norouteUrl = $this->url->getUrl('noroute');
+            $this->getResponse()->setRedirect($norouteUrl);
         }
-
-        // build response
-        $response = array_filter(["action" => ($success ? "success" : "failure"), 'reason' => $reason]);
-
-        $result = $this->jsonResultFactory->create();
-        $result->setData($response);
-
-        return $result;
     }
 
     /**
@@ -247,7 +263,7 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
     {
         $order->unhold()->save();
         if ($forter_action == "decline") {
-            
+
             $this->decline->handlePostTransactionDescision($order);
         } elseif ($forter_action == "approve") {
             $this->approve->handleApproveImmediatly($order);
