@@ -61,6 +61,11 @@ class Validations extends \Magento\Framework\App\Action\Action
     protected $approve;
 
     /**
+     * @var
+     */
+    protected $scopeConfig;
+
+    /**
      * Validations constructor.
      * @param Decline $decline
      * @param DateTime $dateTime
@@ -74,6 +79,7 @@ class Validations extends \Magento\Framework\App\Action\Action
      * @param \Magento\Sales\Api\OrderRepositoryInterface $orderRepository
      */
     public function __construct(
+        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         \Forter\Forter\Model\ActionsHandler\Decline $decline,
         \Magento\Framework\Stdlib\DateTime\DateTime $dateTime,
         \Forter\Forter\Model\Config $forterConfig,
@@ -90,6 +96,7 @@ class Validations extends \Magento\Framework\App\Action\Action
         $this->decline = $decline;
         $this->approve = $approve;
         $this->dateTime = $dateTime;
+        $this->scopeConfig = $scopeConfig;
         $this->_pageFactory = $pageFactory;
         $this->forterConfig = $forterConfig;
         $this->orderRepository = $orderRepository;
@@ -107,6 +114,8 @@ class Validations extends \Magento\Framework\App\Action\Action
         try {
             // validate call from forter
             $request = $this->getRequest();
+
+//            return json_encode(array('test'));
             $siteId = $request->getHeader("X-Forter-SiteID");
             $key = $request->getHeader("X-Forter-Token");
             $hash = $request->getHeader("X-Forter-Signature");
@@ -154,6 +163,9 @@ class Validations extends \Magento\Framework\App\Action\Action
 
         // build response
         $response = array_filter(array("action" => ($success ? "success" : "failure"), 'reason' => $reason));
+
+        print_r($response);
+        die;
 
         return json_encode($response);
     }
