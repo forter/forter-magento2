@@ -131,8 +131,8 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
     public function execute()
     {
         //module enable check
-        $moduleEnabled = self::XML_FORTER_EXTENSION_ENABLED;
-        $controllerEnabled = self::XML_FORTER_DECISION_ENABLED;
+        $moduleEnabled = $siteId = $this->scopeConfig->getValue(self::XML_FORTER_EXTENSION_ENABLED);
+        $controllerEnabled = $siteId = $this->scopeConfig->getValue(self::XML_FORTER_DECISION_ENABLED);
         if ($moduleEnabled == 0 || $controllerEnabled == 0) {
             return null;
         }

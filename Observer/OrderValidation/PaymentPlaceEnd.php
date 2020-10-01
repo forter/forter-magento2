@@ -21,9 +21,7 @@ use Magento\Store\Model\StoreManagerInterface;
  */
 class PaymentPlaceEnd implements ObserverInterface
 {
-    /**
-     *
-     */
+    const XML_FORTER_HOLD_ORDER = "forter/settings/enabled_hold_order";
     const VALIDATION_API_ENDPOINT = 'https://api.forter-secure.com/v2/orders/';
 
     /**
