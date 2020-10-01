@@ -181,6 +181,10 @@
                         Please consult Forter about this feature. If decision changes, the actions will be based on the configuration set on “After Payment Action”
                     </comment>
                 </field>
+                <field id="enabled_hold_order" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Hold order on Pending Decision</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
                 <field id="enabled_order_fulfillment" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Enable Order Fulfillment</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
