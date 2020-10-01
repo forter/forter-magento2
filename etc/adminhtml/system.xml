@@ -9,179 +9,190 @@
             <tab>forter</tab>
             <resource>Forter_Forter::config</resource>
             <group id="settings" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
-              <label>Basic Settings</label>
-              <field id="enabled" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
-                  <label>Enable Forter Fraud Solution</label>
-                  <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-              </field>
-              <field id="site_id" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
-                  <label>Site ID</label>
-              </field>
-              <field id='secret_key' translate='label' type='obscure' sortOrder='3' showInDefault='1' showInWebsite='1' showInStore='1'>
-                <label>Secret Key</label>
-                <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
-                <comment>
-                  <![CDATA[Get your credentials <a href="https://portal.forter.com/settings/general">here</a>.]]>
-                </comment>
-              </field>
-              <field id="api_version" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
-                  <label>Forter API Version</label>
-                  <comment>
-                      Only change if instructed by Forter.
-                  </comment>
-              </field>
-              <field id="module_version" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
-                <label>Extension Version</label>
-                <frontend_model>Forter\Forter\Block\Adminhtml\System\Config\ModuleVersion</frontend_model>
-              </field>
-              <field id="debug_mode" translate="label" type="select" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
-                  <label>Debug Mode</label>
-                  <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                  <comment>
-                    Data related to the forter extensions will be logged to the logs files
-                  </comment>
-              </field>
-              <field id="enhanced_data_mode" translate="label" type="select" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
-                  <label>Enhanced Data Mode</label>
-                  <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                  <comment>
-                      Please toggle this option to "Yes" in Sandbox Environment. More data will be sent to Forter's API calls to help Forter to support the integration
-                  </comment>
-              </field>
+                <label>Basic Settings</label>
+                <field id="enabled" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Forter Fraud Solution</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="site_id" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Site ID</label>
+                </field>
+                <field id='secret_key' translate='label' type='obscure' sortOrder='3' showInDefault='1' showInWebsite='1' showInStore='1'>
+                    <label>Secret Key</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                    <comment>
+                        <![CDATA[Get your credentials <a href="https://portal.forter.com/settings/general">here</a>.]]>
+                    </comment>
+                </field>
+                <field id="api_version" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Forter API Version</label>
+                    <comment>
+                        Only change if instructed by Forter.
+                    </comment>
+                </field>
+                <field id="module_version" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Extension Version</label>
+                    <frontend_model>Forter\Forter\Block\Adminhtml\System\Config\ModuleVersion</frontend_model>
+                </field>
+                <field id="debug_mode" translate="label" type="select" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Debug Mode</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>
+                        Data related to the forter extensions will be logged to the logs files
+                    </comment>
+                </field>
+                <field id="enhanced_data_mode" translate="label" type="select" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enhanced Data Mode</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>
+                        Please toggle this option to "Yes" in Sandbox Environment. More data will be sent to Forter's API calls to help Forter to support the integration
+                    </comment>
+                </field>
             </group>
             <group id="immediate_post_pre_decision" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
-              <label>Order Validation Settings</label>
-              <field id="pre_post_select" translate="Module" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
-                  <label>Order Validation Location</label>
-                  <source_model>Forter\Forter\Model\Config\Source\PrePostSelect</source_model>
-                  <comment>
-                      Default is "After Payment Action (post-authorization)".
-                      The option "Before Payment Action (pre-authorization)" may not be available for all payment methods.
-                      Please contact Forter in case of questions.
-                  </comment>
-              </field>
-              <field id="decline_pre" translate="Module" type="select" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
-                  <label>Action On Decline (pre-authorization)</label>
-                  <source_model>Forter\Forter\Model\Config\Source\PreAuthDeclineOptions</source_model>
-                  <comment>
-                      On "Approve" or "Not Reviewed" we the action will be the payment gateway default
-                  </comment>
-                  <depends>
-                    <field id="pre_post_select">1</field>
-                  </depends>
-              </field>
-              <field id="pre_thanks_msg" translate="label" type="textarea" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
-                  <label>Custom Error Message (pre-authorization)</label>
-                  <depends>
-                    <field id="pre_post_select">1</field>
-                  </depends>
-              </field>
-              <field id="decline_post" translate="Module" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
-                  <label>Action On Decline (post-authorization)</label>
-                  <comment>
-                      If "Cancel Order, Void or Refund Payment" is selected,
-                      the extension will immediately set the order to a "hold" state and then cancel it in a cron job.
-                  </comment>
-                  <source_model>Forter\Forter\Model\Config\Source\PostAuthDeclineOptions</source_model>
-                  <depends>
-                    <field id="pre_post_select">2</field>
-                  </depends>
-              </field>
-              <field id="approve_post" translate="Module" type="select" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
-                  <label>Action On Approve (post-authorization)</label>
-                  <source_model>Forter\Forter\Model\Config\Source\PostAuthApproveOptions</source_model>
-                  <depends>
-                      <field id="pre_post_select">2</field>
-                  </depends>
-              </field>
-              <field id="not_review_post" translate="Module" type="select" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
-                  <label>Action On Not Reviewed (post-authorization)</label>
-                  <source_model>Forter\Forter\Model\Config\Source\PostAuthApproveOptions</source_model>
-                  <depends>
-                    <field id="pre_post_select">2</field>
-                  </depends>
-              </field>
-              <field id="post_thanks_msg" translate="label" type="textarea" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
-                  <label>Custom Error Message (post-authorization)</label>
-                  <comment>
-                      In cases of Forter decline, The error message will be shown to the user if the "Cancel Order" option is selected.
-                      To prevent showing an error message, leave this field blank.
-                  </comment>
-                  <depends>
-                    <field id="pre_post_select">2</field>
-                  </depends>
-              </field>
-              <field id="approve_cron" translate="Module" type="select" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
-                  <label>Action On Approve (By Cron)</label>
-                  <source_model>Forter\Forter\Model\Config\Source\CronAuthApproveOptions</source_model>
-                  <depends>
-                      <field id="pre_post_select">3</field>
-                  </depends>
-              </field>
-              <field id="decline_cron" translate="Module" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
-                  <label>Action On Decline (By Cron)</label>
-                  <comment>
-                      If "Cancel Order, Void or Refund Payment" is selected,
-                      the extension will immediately try set the order to a "hold" state and then cancel it in a cron job.
-                  </comment>
-                  <source_model>Forter\Forter\Model\Config\Source\CronAuthDeclineOptions</source_model>
-                  <depends>
-                    <field id="pre_post_select">3</field>
-                  </depends>
-              </field>
-              <field id="not_review_cron" translate="Module" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
-                  <label>Action On Not Reviewed (By Cron)</label>
-                  <source_model>Forter\Forter\Model\Config\Source\CronAuthNotReviewedOptions</source_model>
-                  <depends>
-                    <field id="pre_post_select">3</field>
-                  </depends>
-              </field>
+                <label>Order Validation Settings</label>
+                <field id="pre_post_select" translate="Module" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Order Validation Location</label>
+                    <source_model>Forter\Forter\Model\Config\Source\PrePostSelect</source_model>
+                    <comment>
+                        Default is "After Payment Action (post-authorization)".
+                        The option "Before Payment Action (pre-authorization)" may not be available for all payment methods.
+                        Please contact Forter in case of questions.
+                    </comment>
+                </field>
+                <field id="decline_pre" translate="Module" type="select" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Action On Decline (pre-authorization)</label>
+                    <source_model>Forter\Forter\Model\Config\Source\PreAuthDeclineOptions</source_model>
+                    <comment>
+                        On "Approve" or "Not Reviewed" we the action will be the payment gateway default
+                    </comment>
+                    <depends>
+                        <field id="pre_post_select">1</field>
+                    </depends>
+                </field>
+                <field id="pre_thanks_msg" translate="label" type="textarea" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Custom Error Message (pre-authorization)</label>
+                    <depends>
+                        <field id="pre_post_select">1</field>
+                    </depends>
+                </field>
+                <field id="decline_post" translate="Module" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Action On Decline (post-authorization)</label>
+                    <comment>
+                        If "Cancel Order, Void or Refund Payment" is selected,
+                        the extension will immediately set the order to a "hold" state and then cancel it in a cron job.
+                    </comment>
+                    <source_model>Forter\Forter\Model\Config\Source\PostAuthDeclineOptions</source_model>
+                    <depends>
+                        <field id="pre_post_select">2</field>
+                    </depends>
+                </field>
+                <field id="approve_post" translate="Module" type="select" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Action On Approve (post-authorization)</label>
+                    <source_model>Forter\Forter\Model\Config\Source\PostAuthApproveOptions</source_model>
+                    <depends>
+                        <field id="pre_post_select">2</field>
+                    </depends>
+                </field>
+                <field id="not_review_post" translate="Module" type="select" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Action On Not Reviewed (post-authorization)</label>
+                    <source_model>Forter\Forter\Model\Config\Source\PostAuthApproveOptions</source_model>
+                    <depends>
+                        <field id="pre_post_select">2</field>
+                    </depends>
+                </field>
+                <field id="post_thanks_msg" translate="label" type="textarea" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Custom Error Message (post-authorization)</label>
+                    <comment>
+                        In cases of Forter decline, The error message will be shown to the user if the "Cancel Order" option is selected.
+                        To prevent showing an error message, leave this field blank.
+                    </comment>
+                    <depends>
+                        <field id="pre_post_select">2</field>
+                    </depends>
+                </field>
+                <field id="approve_cron" translate="Module" type="select" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Action On Approve (By Cron)</label>
+                    <source_model>Forter\Forter\Model\Config\Source\CronAuthApproveOptions</source_model>
+                    <depends>
+                        <field id="pre_post_select">3</field>
+                    </depends>
+                </field>
+                <field id="decline_cron" translate="Module" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Action On Decline (By Cron)</label>
+                    <comment>
+                        If "Cancel Order, Void or Refund Payment" is selected,
+                        the extension will immediately try set the order to a "hold" state and then cancel it in a cron job.
+                    </comment>
+                    <source_model>Forter\Forter\Model\Config\Source\CronAuthDeclineOptions</source_model>
+                    <depends>
+                        <field id="pre_post_select">3</field>
+                    </depends>
+                </field>
+                <field id="not_review_cron" translate="Module" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Action On Not Reviewed (By Cron)</label>
+                    <source_model>Forter\Forter\Model\Config\Source\CronAuthNotReviewedOptions</source_model>
+                    <depends>
+                        <field id="pre_post_select">3</field>
+                    </depends>
+                </field>
             </group>
             <group id="connection_information" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
-              <label>Connection Information</label>
-              <field id="base_connection_timeout" translate="label comment" sortOrder="1" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
-                  <label>Base Connection timeout</label>
-                  <validate>required-entry validate-digits validate-not-negative-number validate-digits-range digits-range-1000-20000</validate>
-                  <comment>
-                      Need to be a number between 1,000 to 20,000
-                  </comment>
-              </field>
-              <field id="base_request_timeout" translate="label comment" sortOrder="2" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
-                  <label>Base Request timeout</label>
-                  <validate>required-entry validate-digits validate-not-negative-number validate-digits-range digits-range-1500-20000</validate>
-                  <comment>
-                      Need to be a number between 1,500 to 20,000
-                  </comment>
-              </field>
-              <field id="max_connection_timeout" translate="label comment" sortOrder="3" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
-                <label>Max Connection timeout</label>
-                <validate>required-entry validate-digits validate-not-negative-number validate-digits-range digits-range-1000-20000</validate>
-                <comment>
-                    Need to be a number between 1000 to 20,000
-                </comment>
-              </field>
-              <field id="max_request_timeout" translate="label comment" sortOrder="4" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
-                <label>Max Request timeout</label>
-                <validate>required-entry validate-digits validate-not-negative-number validate-digits-range digits-range-1500-20000</validate>
-                <comment>
-                    Need to be a number between 1,500 to 20,000
-                </comment>
-              </field>
+                <label>Connection Information</label>
+                <field id="base_connection_timeout" translate="label comment" sortOrder="1" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Base Connection timeout</label>
+                    <validate>required-entry validate-digits validate-not-negative-number validate-digits-range digits-range-1000-20000</validate>
+                    <comment>
+                        Need to be a number between 1,000 to 20,000
+                    </comment>
+                </field>
+                <field id="base_request_timeout" translate="label comment" sortOrder="2" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Base Request timeout</label>
+                    <validate>required-entry validate-digits validate-not-negative-number validate-digits-range digits-range-1500-20000</validate>
+                    <comment>
+                        Need to be a number between 1,500 to 20,000
+                    </comment>
+                </field>
+                <field id="max_connection_timeout" translate="label comment" sortOrder="3" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Max Connection timeout</label>
+                    <validate>required-entry validate-digits validate-not-negative-number validate-digits-range digits-range-1000-20000</validate>
+                    <comment>
+                        Need to be a number between 1000 to 20,000
+                    </comment>
+                </field>
+                <field id="max_request_timeout" translate="label comment" sortOrder="4" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Max Request timeout</label>
+                    <validate>required-entry validate-digits validate-not-negative-number validate-digits-range digits-range-1500-20000</validate>
+                    <comment>
+                        Need to be a number between 1,500 to 20,000
+                    </comment>
+                </field>
             </group>
             <group id="advanced_settings" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
-              <label>Advanced Settings</label>
-              <field id="enabled_account_touchpoint" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
-                  <label>Enable Account Touchpoint</label>
-                  <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-              </field>
-              <field id="enabled_order_fulfillment" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
-                  <label>Enable Order Fulfillment</label>
-                  <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-              </field>
-              <field id="phone_order_enabled" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
-                  <label>Enable Phone Order</label>
-                  <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-              </field>
+                <label>Advanced Settings</label>
+                <field id="enabled_account_touchpoint" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Account Touchpoint</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="enabled_decision_controller" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Decision Change Controller</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>
+                        Please consult Forter about this feature. If decision changes, the actions will be based on the configuration set on “After Payment Action”
+                    </comment>
+                </field>
+                <field id="enabled_hold_order" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Hold order on Pending Decision</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="enabled_order_fulfillment" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Order Fulfillment</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="phone_order_enabled" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Phone Order</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
             </group>
         </section>
     </system>

@@ -14,6 +14,7 @@ use Magento\Framework\Message\ManagerInterface;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magento\Sales\Api\OrderManagementInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use \Magento\Framework\App\Config\ScopeConfigInterface;
 
 /**
  * Class PaymentPlaceEnd
@@ -21,9 +22,7 @@ use Magento\Store\Model\StoreManagerInterface;
  */
 class PaymentPlaceEnd implements ObserverInterface
 {
-    /**
-     *
-     */
+    const XML_FORTER_HOLD_ORDER = "forter/settings/enabled_hold_order";
     const VALIDATION_API_ENDPOINT = 'https://api.forter-secure.com/v2/orders/';
 
     /**
@@ -70,19 +69,28 @@ class PaymentPlaceEnd implements ObserverInterface
      * @var CustomerSession
      */
     private $customerSession;
+    /**
+     * @var
+     */
+    private $scopeConfig;
 
     /**
      * PaymentPlaceEnd constructor.
+     * @param ScopeConfigInterface $scopeConfig
+     * @param CustomerSession $customerSession
      * @param ManagerInterface $messageManager
+     * @param ForterQueueFactory $queue
      * @param Decline $decline
      * @param Approve $approve
+     * @param DateTime $dateTime
      * @param AbstractApi $abstractApi
-     * @param Config $config
-     * @param CustomerSession $customerSession
+     * @param Config $forterConfig
      * @param Order $requestBuilderOrder
      * @param OrderManagementInterface $orderManagement
+     * @param StoreManagerInterface $storeManager
      */
     public function __construct(
+        ScopeConfigInterface $scopeConfig,
         CustomerSession $customerSession,
         ManagerInterface $messageManager,
         ForterQueueFactory $queue,
@@ -101,6 +109,7 @@ class PaymentPlaceEnd implements ObserverInterface
         $this->storeManager = $storeManager;
         $this->decline = $decline;
         $this->approve = $approve;
+        $this->scopeConfig = $scopeConfig;
         $this->abstractApi = $abstractApi;
         $this->forterConfig = $forterConfig;
         $this->requestBuilderOrder = $requestBuilderOrder;
@@ -141,13 +150,14 @@ class PaymentPlaceEnd implements ObserverInterface
 
     public function handleResponse($forterDecision, $order)
     {
+        $holdEnabled = $this->scopeConfig->getValue(self::XML_FORTER_HOLD_ORDER);
         if ($forterDecision == "decline") {
             $this->handleDecline($order);
         } elseif ($forterDecision == 'approve') {
             $this->handleApprove($order);
         } elseif ($forterDecision == "not reviewed") {
             $this->handleNotReviewed($order);
-        } elseif ($forterDecision == "pending") {
+        } elseif ($forterDecision == "pending" && $holdEnabled == 1) {
             $order->hold()->save();
         }
     }

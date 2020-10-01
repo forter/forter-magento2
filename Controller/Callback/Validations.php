@@ -9,6 +9,9 @@ use Magento\Framework\App\Action\HttpPostActionInterface as HttpPostActionInterf
  */
 class Validations extends \Magento\Framework\App\Action\Action implements HttpPostActionInterface
 {
+    const XML_FORTER_DECISION_ENABLED = "forter/settings/enabled_decision_controller";
+    const XML_FORTER_HOLD_ORDER = "forter/settings/enabled_hold_order";
+    const XML_FORTER_EXTENSION_ENABLED = "forter/settings/enabled";
     const XML_FORTER_SECRET_KEY = "forter/settings/secret_key";
     const XML_FORTER_SITE_ID = "forter/settings/site_id";
     const FORTER_RESPONSE_DECLINE = 'decline';
@@ -58,11 +61,6 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
     protected $decline;
 
     /**
-     * @var Approve
-     */
-    protected $approve;
-
-    /**
      * @var
      */
     protected $scopeConfig;
@@ -80,10 +78,8 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
     /**
      * Validations constructor.
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
-     * @param \Forter\Forter\Model\ActionsHandler\Decline $decline
      * @param \Magento\Framework\Stdlib\DateTime\DateTime $dateTime
      * @param \Forter\Forter\Model\Config $forterConfig
-     * @param \Forter\Forter\Model\ActionsHandler\Approve $approve
      * @param \Forter\Forter\Model\QueueFactory $queue
      * @param \Magento\Framework\UrlInterface $url
      * @param \Psr\Log\LoggerInterface $logger
@@ -98,7 +94,6 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
         \Forter\Forter\Model\ActionsHandler\Decline $decline,
         \Magento\Framework\Stdlib\DateTime\DateTime $dateTime,
         \Forter\Forter\Model\Config $forterConfig,
-        \Forter\Forter\Model\ActionsHandler\Approve $approve,
         \Forter\Forter\Model\QueueFactory $queue,
         \Magento\Framework\UrlInterface $url,
         \Psr\Log\LoggerInterface $logger,
@@ -112,7 +107,6 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
         $this->queue = $queue;
         $this->logger = $logger;
         $this->decline = $decline;
-        $this->approve = $approve;
         $this->dateTime = $dateTime;
         $this->scopeConfig = $scopeConfig;
         $this->_pageFactory = $pageFactory;
@@ -128,6 +122,12 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
      */
     public function execute()
     {
+        //module enable check
+        $moduleEnabled = $this->scopeConfig->getValue(self::XML_FORTER_EXTENSION_ENABLED);
+        $controllerEnabled = $this->scopeConfig->getValue(self::XML_FORTER_DECISION_ENABLED);
+        if ($moduleEnabled == 0 || $controllerEnabled == 0) {
+            return null;
+        }
         $request = $this->getRequest();
         $method = $request->getMethod();
         if ($method == "POST") {
@@ -189,7 +189,7 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
                 }
 
                 // handle action
-                $this->handleAutoCaptureCallback($jsonRequest['action'], $order);
+                $this->handlePostDecisionCallback($jsonRequest['action'], $order);
             } catch (Exception $e) {
                 $this->logger->critical('Error message', ['exception' => $e]);
 
@@ -255,21 +255,21 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
     }
 
     /**
-     * @param $forter_action
-     * @param $forter_message
+     * @param $forterDecision
      * @param $order
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function handleAutoCaptureCallback($forter_action, $order)
+    public function handlePostDecisionCallback($forterDecision, $order)
     {
-        $order->unhold()->save();
-        if ($forter_action == "decline") {
-
-            $this->decline->handlePostTransactionDescision($order);
-        } elseif ($forter_action == "approve") {
-            $this->approve->handleApproveImmediatly($order);
-        } elseif ($forter_action == "not reviewed") {
-            //this is temporary solution, need to customise handleNotReviewed function
-            $this->approve->handleApproveImmediatly($order);
+        $holdEnabled = $this->scopeConfig->getValue(self::XML_FORTER_HOLD_ORDER);
+        if ($forterDecision == "decline") {
+            $this->handleDecline($order);
+        } elseif ($forterDecision == 'approve') {
+            $this->handleApprove($order);
+        } elseif ($forterDecision == "not reviewed") {
+            $this->handleNotReviewed($order);
+        } elseif ($forterDecision == "pending" && $holdEnabled == 1) {
+            $order->hold()->save();
         } else {
             throw new \Exception("Forter: Unsupported action from Forter");
         }
@@ -277,7 +277,36 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
 
     /**
      * @param $order
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function handleDecline($order)
+    {
+        $result = $this->forterConfig->getDeclinePost();
+        if ($result == '1') {
+            $this->customerSession->setForterMessage($this->forterConfig->getPostThanksMsg());
+            if ($order->canHold()) {
+                $order->setCanSendNewEmailFlag(false);
+                $this->decline->holdOrder($order);
+                $this->setMessageToQueue($order, 'decline');
+            }
+        } elseif ($result == '2') {
+            $order->setCanSendNewEmailFlag(false);
+            $this->decline->markOrderPaymentReview($order);
+        }
+    }
+
+    /**
+     * @param $order
+     */
+    public function handleApprove($order)
+    {
+        $result = $this->forterConfig->getApprovePost();
+        if ($result == '1') {
+            $this->setMessageToQueue($order, 'approve');
+        }
+    }
+
+    /**
+     * @param $order
      */
     public function handleNotReviewed($order)
     {
@@ -285,5 +314,24 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
         if ($result == '1') {
             $this->setMessageToQueue($order, 'approve');
         }
+    }
+
+    /**
+     * @param $order
+     * @param $type
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function setMessageToQueue($order, $type)
+    {
+        $storeId = $order->getStore()->getId();
+        $currentTime = $this->dateTime->gmtDate();
+        $this->forterConfig->log('Increment ID:' . $order->getIncrementId());
+        $this->queue->create()
+            ->setStoreId($storeId)
+            ->setEntityType('order')
+            ->setIncrementId($order->getIncrementId()) //TODO need to make this field a text in the table not int
+            ->setEntityBody($type)
+            ->setSyncDate($currentTime)
+            ->save();
     }
 }
