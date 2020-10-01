@@ -14,6 +14,7 @@ use Magento\Framework\Message\ManagerInterface;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magento\Sales\Api\OrderManagementInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use \Magento\Framework\App\Config\ScopeConfigInterface;
 
 /**
  * Class PaymentPlaceEnd
@@ -68,19 +69,28 @@ class PaymentPlaceEnd implements ObserverInterface
      * @var CustomerSession
      */
     private $customerSession;
+    /**
+     * @var
+     */
+    private $scopeConfig;
 
     /**
      * PaymentPlaceEnd constructor.
+     * @param ScopeConfigInterface $scopeConfig
+     * @param CustomerSession $customerSession
      * @param ManagerInterface $messageManager
+     * @param ForterQueueFactory $queue
      * @param Decline $decline
      * @param Approve $approve
+     * @param DateTime $dateTime
      * @param AbstractApi $abstractApi
-     * @param Config $config
-     * @param CustomerSession $customerSession
+     * @param Config $forterConfig
      * @param Order $requestBuilderOrder
      * @param OrderManagementInterface $orderManagement
+     * @param StoreManagerInterface $storeManager
      */
     public function __construct(
+        ScopeConfigInterface $scopeConfig,
         CustomerSession $customerSession,
         ManagerInterface $messageManager,
         ForterQueueFactory $queue,
@@ -99,6 +109,7 @@ class PaymentPlaceEnd implements ObserverInterface
         $this->storeManager = $storeManager;
         $this->decline = $decline;
         $this->approve = $approve;
+        $this->scopeConfig = $scopeConfig;
         $this->abstractApi = $abstractApi;
         $this->forterConfig = $forterConfig;
         $this->requestBuilderOrder = $requestBuilderOrder;
@@ -146,7 +157,11 @@ class PaymentPlaceEnd implements ObserverInterface
         } elseif ($forterDecision == "not reviewed") {
             $this->handleNotReviewed($order);
         } elseif ($forterDecision == "pending") {
-            $order->hold()->save();
+            $holdEnabled = $this->scopeConfig->getValue(self::XML_FORTER_HOLD_ORDER);
+            if ($holdEnabled == 1) {
+                $order->hold()->save();
+
+            }
         }
     }
 
