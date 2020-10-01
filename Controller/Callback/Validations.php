@@ -189,7 +189,7 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
                 }
 
                 // handle action
-                $this->handleAutoCaptureCallback($jsonRequest['action'], $order);
+                $this->handlePostDecisionCallback($jsonRequest['action'], $order);
             } catch (Exception $e) {
                 $this->logger->critical('Error message', ['exception' => $e]);
 
@@ -259,7 +259,7 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
      * @param $forter_message
      * @param $order
      */
-    public function handleAutoCaptureCallback($forter_action, $order)
+    public function handlePostDecisionCallback($forter_action, $order)
     {
         $order->unhold()->save();
         if ($forter_action == "decline") {
