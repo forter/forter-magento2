@@ -150,18 +150,15 @@ class PaymentPlaceEnd implements ObserverInterface
 
     public function handleResponse($forterDecision, $order)
     {
+        $holdEnabled = $this->scopeConfig->getValue(self::XML_FORTER_HOLD_ORDER);
         if ($forterDecision == "decline") {
             $this->handleDecline($order);
         } elseif ($forterDecision == 'approve') {
             $this->handleApprove($order);
         } elseif ($forterDecision == "not reviewed") {
             $this->handleNotReviewed($order);
-        } elseif ($forterDecision == "pending") {
-            $holdEnabled = $this->scopeConfig->getValue(self::XML_FORTER_HOLD_ORDER);
-            if ($holdEnabled == 1) {
-                $order->hold()->save();
-
-            }
+        } elseif ($forterDecision == "pending" && $holdEnabled == 1) {
+            $order->hold()->save();
         }
     }
 
