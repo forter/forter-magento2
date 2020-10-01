@@ -9,6 +9,8 @@ use Magento\Framework\App\Action\HttpPostActionInterface as HttpPostActionInterf
  */
 class Validations extends \Magento\Framework\App\Action\Action implements HttpPostActionInterface
 {
+    const XML_FORTER_DECISION_ENABLED = "forter/settings/enabled_decision_controller";
+    const XML_FORTER_EXTENSION_ENABLED = "forter/settings/enabled";
     const XML_FORTER_SECRET_KEY = "forter/settings/secret_key";
     const XML_FORTER_SITE_ID = "forter/settings/site_id";
     const FORTER_RESPONSE_DECLINE = 'decline';
@@ -128,6 +130,12 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
      */
     public function execute()
     {
+        //module enable check
+        $moduleEnabled = self::XML_FORTER_EXTENSION_ENABLED;
+        $controllerEnabled = self::XML_FORTER_DECISION_ENABLED;
+        if ($moduleEnabled == 0 || $controllerEnabled == 0) {
+            return null;
+        }
         $request = $this->getRequest();
         $method = $request->getMethod();
         if ($method == "POST") {
