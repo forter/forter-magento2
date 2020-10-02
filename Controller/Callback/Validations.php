@@ -9,8 +9,8 @@ use Magento\Framework\App\Action\HttpPostActionInterface as HttpPostActionInterf
  */
 class Validations extends \Magento\Framework\App\Action\Action implements HttpPostActionInterface
 {
-    const XML_FORTER_DECISION_ENABLED = "forter/settings/enabled_decision_controller";
-    const XML_FORTER_HOLD_ORDER = "forter/settings/enabled_hold_order";
+    const XML_FORTER_DECISION_ENABLED = "forter/advanced_settings/enabled_decision_controller";
+    const XML_FORTER_HOLD_ORDER = "forter/advanced_settings/enabled_hold_order";
     const XML_FORTER_EXTENSION_ENABLED = "forter/settings/enabled";
     const XML_FORTER_SECRET_KEY = "forter/settings/secret_key";
     const XML_FORTER_SITE_ID = "forter/settings/site_id";
