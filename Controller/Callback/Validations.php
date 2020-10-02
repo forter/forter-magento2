@@ -122,7 +122,6 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
      */
     public function execute()
     {
-        //module enable check
         $moduleEnabled = $this->scopeConfig->getValue(self::XML_FORTER_EXTENSION_ENABLED);
         $controllerEnabled = $this->scopeConfig->getValue(self::XML_FORTER_DECISION_ENABLED);
         if ($moduleEnabled == 0 || $controllerEnabled == 0) {
@@ -134,7 +133,6 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
             $success = true;
             $reason = null;
             try {
-                // validate call from forter
                 $requestParams = $request->getParams();
                 $bodyRawParams = json_decode($request->getContent(), true);
                 $params = array_merge($requestParams, $bodyRawParams);
@@ -142,7 +140,6 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
                 $siteId = $request->getHeader("X-Forter-SiteID");
                 $key = $request->getHeader("X-Forter-Token");
                 $hash = $request->getHeader("X-Forter-Signature");
-                //to be developed post param handler - optional
 //            $postData = isset($GLOBALS['HTTP_RAW_POST_DATA']) ? $GLOBALS['HTTP_RAW_POST_DATA'] : file_get_contents("php://input");
                 $postData = "";
                 $paramAmount =  sizeof($params);
@@ -196,10 +193,7 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
                 $success = false;
                 $reason = $e->getMessage();
             }
-
-            // build response
             $response = array_filter(["action" => ($success ? "success" : "failure"), 'reason' => $reason]);
-
             $result = $this->jsonResultFactory->create();
             $result->setData($response);
 
@@ -329,7 +323,7 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
         $this->queue->create()
             ->setStoreId($storeId)
             ->setEntityType('order')
-            ->setIncrementId($order->getIncrementId()) //TODO need to make this field a text in the table not int
+            ->setIncrementId($order->getIncrementId())
             ->setEntityBody($type)
             ->setSyncDate($currentTime)
             ->save();
