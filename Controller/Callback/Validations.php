@@ -290,8 +290,6 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
      */
     public function handleApprove($order)
     {
-        $order->setState("complete")->setStatus("complete");
-        $order->save();
         $result = $this->forterConfig->getApprovePost();
         if ($result == '1') {
             $this->setMessageToQueue($order, 'approve');
@@ -303,8 +301,6 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
      */
     public function handleNotReviewed($order)
     {
-        $order->setState("complete")->setStatus("complete");
-        $order->save();
         $result = $this->forterConfig->getNotReviewPost();
         if ($result == '1') {
             $this->setMessageToQueue($order, 'approve');
