@@ -15,11 +15,6 @@ class Forter extends \Magento\Sales\Block\Adminhtml\Order\AbstractOrder implemen
     \Magento\Backend\Block\Widget\Tab\TabInterface
 {
     /**
-     *
-     */
-    const PHONE_ORDER_IS_ENABLED = 'forter/advanced_settings/phone_order_enabled';
-
-    /**
      * order Object
      */
     protected $orderInterface;
