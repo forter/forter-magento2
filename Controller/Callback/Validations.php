@@ -165,11 +165,11 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
 //                throw new \Exception("Forter: Invalid call");
                 }
 
-                // load order
                 $orderId = $request->getParam('order_id');
                 $order = $this->getOrder($orderId);
+                $order->setForterResponse($jsonRequest['status']);
+                $order->setForterStatus($jsonRequest['action']);
 
-                // validate order
                 if (!$order->getId()) {
 //                throw new \Exception("Forter: Unknown order_id {$orderId}");
                 }
@@ -324,7 +324,7 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
         $this->queue->create()
             ->setStoreId($storeId)
             ->setEntityType('order')
-            ->setIncrementId($order->getIncrementId()) //TODO need to make this field a text in the table not int
+            ->setIncrementId($order->getIncrementId())
             ->setEntityBody($type)
             ->setSyncDate($currentTime)
             ->save();
