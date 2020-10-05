@@ -140,7 +140,6 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
                 $siteId = $request->getHeader("X-Forter-SiteID");
                 $key = $request->getHeader("X-Forter-Token");
                 $hash = $request->getHeader("X-Forter-Signature");
-//            $postData = isset($GLOBALS['HTTP_RAW_POST_DATA']) ? $GLOBALS['HTTP_RAW_POST_DATA'] : file_get_contents("php://input");
                 $postData = "";
                 $paramAmount =  sizeof($params);
                 $counter = 1;
@@ -160,8 +159,6 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
                 if ($siteId != $this->getSiteId()) {
 //                throw new \Exception("Forter: Invalid call");
                 }
-
-//            $jsonRequest = json_decode($postData);
                 $jsonRequest = $params;
 
                 if (is_null($jsonRequest)) {
@@ -185,7 +182,6 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
 //                throw new \Exception("Forter: Order status does not allow action.[id={$orderId}, status={$order->getForterStatus()}");
                 }
 
-                // handle action
                 $this->handlePostDecisionCallback($jsonRequest['action'], $order);
             } catch (Exception $e) {
                 $this->logger->critical('Error message', ['exception' => $e]);
@@ -193,10 +189,11 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
                 $success = false;
                 $reason = $e->getMessage();
             }
+
             $response = array_filter(["action" => ($success ? "success" : "failure"), 'reason' => $reason]);
+
             $result = $this->jsonResultFactory->create();
             $result->setData($response);
-
             return $result;
         } else {
             $norouteUrl = $this->url->getUrl('noroute');
@@ -293,6 +290,8 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
      */
     public function handleApprove($order)
     {
+        $order->setState("complete")->setStatus("complete");
+        $order->save();
         $result = $this->forterConfig->getApprovePost();
         if ($result == '1') {
             $this->setMessageToQueue($order, 'approve');
@@ -304,6 +303,8 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
      */
     public function handleNotReviewed($order)
     {
+        $order->setState("complete")->setStatus("complete");
+        $order->save();
         $result = $this->forterConfig->getNotReviewPost();
         if ($result == '1') {
             $this->setMessageToQueue($order, 'approve');
@@ -323,7 +324,7 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
         $this->queue->create()
             ->setStoreId($storeId)
             ->setEntityType('order')
-            ->setIncrementId($order->getIncrementId())
+            ->setIncrementId($order->getIncrementId()) //TODO need to make this field a text in the table not int
             ->setEntityBody($type)
             ->setSyncDate($currentTime)
             ->save();
