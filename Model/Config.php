@@ -210,6 +210,18 @@ class Config
     }
 
     /**
+     * Return bool value depends of that if the Desicion Contoller Enabled
+     * is enabled or not.
+     *
+     * @return bool
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function isDecisionControllerEnabled()
+    {
+        return (bool)$this->getConfigValue('advanced_settings/enabled_decision_controller');
+    }
+
+    /**
      * Return bool value depends of that if payment method sandbox mode
      * is enabled or not.
      *

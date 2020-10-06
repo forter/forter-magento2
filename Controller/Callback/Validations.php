@@ -1,7 +1,20 @@
 <?php
 namespace Forter\Forter\Controller\Callback;
 
+use Forter\Forter\Model\AbstractApi;
+use Forter\Forter\Model\ActionsHandler\Decline;
+use Forter\Forter\Model\Config;
+use Forter\Forter\Model\QueueFactory;
+use Magento\Customer\Model\Session;
+use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Action\HttpPostActionInterface as HttpPostActionInterface;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\Controller\Result\JsonFactory;
+use Magento\Framework\Stdlib\DateTime\DateTime;
+use Magento\Framework\UrlInterface;
+use Magento\Framework\View\Result\PageFactory;
+use Magento\Sales\Api\OrderRepositoryInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Class Validations
@@ -9,17 +22,11 @@ use Magento\Framework\App\Action\HttpPostActionInterface as HttpPostActionInterf
  */
 class Validations extends \Magento\Framework\App\Action\Action implements HttpPostActionInterface
 {
-    const XML_FORTER_DECISION_ENABLED = "forter/advanced_settings/enabled_decision_controller";
-    const XML_FORTER_HOLD_ORDER = "forter/advanced_settings/enabled_hold_order";
-    const XML_FORTER_EXTENSION_ENABLED = "forter/settings/enabled";
-    const XML_FORTER_SECRET_KEY = "forter/settings/secret_key";
-    const XML_FORTER_SITE_ID = "forter/settings/site_id";
-    const FORTER_RESPONSE_DECLINE = 'decline';
-    const FORTER_RESPONSE_PENDING = 'resending';
-    const FORTER_RESPONSE_APPROVE = 'approve';
-    const FORTER_RESPONSE_NOT_REVIEWED = 'not reviewed';
-    const FORTER_RESPONSE_PENDING_APPROVE = 'pending';
 
+    /**
+      * @var AbstractApi
+      */
+    protected $abstractApi;
     /**
      * @var Config
      */
@@ -90,22 +97,22 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
      * @param \Magento\Framework\Controller\Result\JsonFactory $jsonResultFactory
      */
     public function __construct(
-        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
-        \Forter\Forter\Model\ActionsHandler\Decline $decline,
-        \Magento\Framework\Stdlib\DateTime\DateTime $dateTime,
-        \Forter\Forter\Model\Config $forterConfig,
-        \Forter\Forter\Model\QueueFactory $queue,
-        \Magento\Framework\UrlInterface $url,
-        \Psr\Log\LoggerInterface $logger,
-        \Magento\Customer\Model\Session $customerSession,
-        \Magento\Framework\App\Action\Context $context,
-        \Magento\Framework\View\Result\PageFactory $pageFactory,
-        \Magento\Sales\Api\OrderRepositoryInterface $orderRepository,
-        \Magento\Framework\Controller\Result\JsonFactory $jsonResultFactory
+        AbstractApi $abstractApi,
+        ScopeConfigInterface $scopeConfig,
+        Decline $decline,
+        DateTime $dateTime,
+        Config $forterConfig,
+        QueueFactory $queue,
+        UrlInterface $url,
+        LoggerInterface $logger,
+        Session $customerSession,
+        Context $context,
+        PageFactory $pageFactory,
+        OrderRepositoryInterface $orderRepository,
+        JsonFactory $jsonResultFactory
     ) {
         $this->url = $url;
         $this->queue = $queue;
-        $this->logger = $logger;
         $this->decline = $decline;
         $this->dateTime = $dateTime;
         $this->scopeConfig = $scopeConfig;
@@ -114,6 +121,7 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
         $this->orderRepository = $orderRepository;
         $this->customerSession = $customerSession;
         $this->jsonResultFactory = $jsonResultFactory;
+        $this->abstractApi = $abstractApi;
         return parent::__construct($context);
     }
 
@@ -122,83 +130,52 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
      */
     public function execute()
     {
-        $moduleEnabled = $this->scopeConfig->getValue(self::XML_FORTER_EXTENSION_ENABLED);
-        $controllerEnabled = $this->scopeConfig->getValue(self::XML_FORTER_DECISION_ENABLED);
-        if ($moduleEnabled == 0 || $controllerEnabled == 0) {
-            return null;
+        if (!$this->forterConfig->isEnabled() || !$this->forterConfig->isDecisionControllerEnabled()) {
+            return;
         }
-        $request = $this->getRequest();
+
         $method = $request->getMethod();
-        if ($method == "POST") {
-            $success = true;
-            $reason = null;
-            try {
-                $requestParams = $request->getParams();
-                $bodyRawParams = json_decode($request->getContent(), true);
-                $params = array_merge($requestParams, $bodyRawParams);
-
-                $siteId = $request->getHeader("X-Forter-SiteID");
-                $key = $request->getHeader("X-Forter-Token");
-                $hash = $request->getHeader("X-Forter-Signature");
-                $postData = "";
-                $paramAmount =  sizeof($params);
-                $counter = 1;
-                foreach ($params as $param => $value) {
-                    if ($paramAmount == $counter) {
-                        $postData .= $param . "=" . $value;
-                    } else {
-                        $postData .= $param . "=" . $value . "&";
-                    }
-                    $counter++;
-                }
-
-                if ($hash != $this->calculateHash($siteId, $key, $postData)) {
-//                throw new \Exception("Forter: Invalid call");
-                }
-
-                if ($siteId != $this->getSiteId()) {
-//                throw new \Exception("Forter: Invalid call");
-                }
-                $jsonRequest = $params;
-
-                if (is_null($jsonRequest)) {
-//                throw new \Exception("Forter: Invalid call");
-                }
-
-                $orderId = $request->getParam('order_id');
-                $order = $this->getOrder($orderId);
-                $order->setForterResponse($jsonRequest['status']);
-                $order->setForterStatus($jsonRequest['action']);
-
-                if (!$order->getId()) {
-//                throw new \Exception("Forter: Unknown order_id {$orderId}");
-                }
-
-                if (!$order->getForterSent()) {
-//                throw new \Exception("Forter: Order was never sent to Forter [id={$orderId}]");
-                }
-
-                if (!$order->getForterStatus()) {
-//                throw new \Exception("Forter: Order status does not allow action.[id={$orderId}, status={$order->getForterStatus()}");
-                }
-
-                $this->handlePostDecisionCallback($jsonRequest['action'], $order);
-            } catch (Exception $e) {
-                $this->logger->critical('Error message', ['exception' => $e]);
-
-                $success = false;
-                $reason = $e->getMessage();
-            }
-
-            $response = array_filter(["action" => ($success ? "success" : "failure"), 'reason' => $reason]);
-
-            $result = $this->jsonResultFactory->create();
-            $result->setData($response);
-            return $result;
-        } else {
+        if (!$method == "POST") {
             $norouteUrl = $this->url->getUrl('noroute');
             $this->getResponse()->setRedirect($norouteUrl);
         }
+
+        try {
+            $siteId = $request->getHeader("X-Forter-SiteID");
+            $key = $request->getHeader("X-Forter-Token");
+            $hash = $request->getHeader("X-Forter-Signature");
+            $request = $this->getRequest();
+
+            if ($hash != $this->calculateHash($siteId, $key, $request)) {
+                throw new \Exception("Forter: Incorrect Hashing");
+            }
+
+            if ($siteId != $this->forterConfig->getSiteId()) {
+                throw new \Exception("Forter: Site Id Validation Faild");
+            }
+
+            if (is_null($jsonRequest)) {
+                throw new \Exception("Forter: Call body is empty");
+            }
+
+            $orderId = $request->getParam('order_id');
+
+            $order = $this->getOrder($orderId);
+
+            if (!$order) {
+                throw new \Exception("Forter: Unknown order");
+            }
+
+            $jsonRequest = $request->getParams();
+            $order->setForterResponse($jsonRequest['status']);
+            $order->setForterStatus($jsonRequest['action']);
+
+            $this->handlePostDecisionCallback($jsonRequest['action'], $order);
+        } catch (Exception $e) {
+            $this->abstractApi->reportToForterOnCatch($e);
+        }
+
+        return;
     }
 
     /**
@@ -217,32 +194,26 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
      * @param $body
      * @return string
      */
-    public function calculateHash($siteId, $token, $body)
+    public function calculateHash($siteId, $token, $request)
     {
-        $secert = $this->getSecretKey();
+        $requestParams = $request->getParams();
+        $bodyRawParams = json_decode($request->getContent(), true);
+        $params = array_merge($requestParams, $bodyRawParams);
+
+        $body = "";
+        $paramAmount =  sizeof($params);
+        $counter = 1;
+        foreach ($params as $param => $value) {
+            if ($paramAmount == $counter) {
+                $body .= $param . "=" . $value;
+            } else {
+                $body .= $param . "=" . $value . "&";
+            }
+            $counter++;
+        }
+
+        $secert = $this->forterConfig->getSecretKey();
         return hash('sha256', $secert . $token . $siteId . $body);
-    }
-
-    /**
-     * @param null $storeId
-     * @return mixed
-     */
-    public function getSecretKey($storeId = null)
-    {
-        $secretKey = $this->scopeConfig->getValue(self::XML_FORTER_SECRET_KEY);
-
-        return $secretKey;
-    }
-
-    /**
-     * @param null $storeId
-     * @return mixed
-     */
-    public function getSiteId($storeId = null)
-    {
-        $siteId = $this->scopeConfig->getValue(self::XML_FORTER_SITE_ID);
-
-        return $siteId;
     }
 
     /**
@@ -252,15 +223,12 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
      */
     public function handlePostDecisionCallback($forterDecision, $order)
     {
-        $holdEnabled = $this->scopeConfig->getValue(self::XML_FORTER_HOLD_ORDER);
         if ($forterDecision == "decline") {
             $this->handleDecline($order);
         } elseif ($forterDecision == 'approve') {
             $this->handleApprove($order);
         } elseif ($forterDecision == "not reviewed") {
             $this->handleNotReviewed($order);
-        } elseif ($forterDecision == "pending" && $holdEnabled == 1) {
-            $order->hold()->save();
         } else {
             throw new \Exception("Forter: Unsupported action from Forter");
         }
