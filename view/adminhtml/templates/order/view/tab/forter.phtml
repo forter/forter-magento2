@@ -67,6 +67,19 @@ $forterResponse = json_decode($forterResponse);
 </section>
 <?php endif; ?>
 
+<?php if (isset($forterResponse->reason)): ?>
+<section class="admin__page-section">
+    <div class="admin__page-section-content">
+        <div class="admin__page-section-item-title invoice_item_title">
+            <span class="title"><?php echo __("Forter Reason Code"); ?></span>
+        </div>
+        <div class="admin__page-section-item-content invoice_item_content">
+            <div class=""><?php echo $forterResponse->reason;?></div>
+        </div>
+    </div>
+</section>
+<?php endif; ?>
+
 <?php if (isset($forterResponse->errors)): ?>
 <section class="admin__page-section">
     <div class="admin__page-section-content">

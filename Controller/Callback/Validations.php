@@ -134,7 +134,9 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
             return;
         }
 
+        $request = $this->getRequest();
         $method = $request->getMethod();
+
         if (!$method == "POST") {
             $norouteUrl = $this->url->getUrl('noroute');
             $this->getResponse()->setRedirect($norouteUrl);
@@ -144,16 +146,20 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
             $siteId = $request->getHeader("X-Forter-SiteID");
             $key = $request->getHeader("X-Forter-Token");
             $hash = $request->getHeader("X-Forter-Signature");
-            $request = $this->getRequest();
-
-            if ($hash != $this->calculateHash($siteId, $key, $request)) {
-                throw new \Exception("Forter: Incorrect Hashing");
-            }
 
             if ($siteId != $this->forterConfig->getSiteId()) {
                 throw new \Exception("Forter: Site Id Validation Faild");
             }
 
+            $requestParams = $request->getParams();
+            $bodyRawParams = json_decode($request->getContent(), true);
+            $params = array_merge($requestParams, $bodyRawParams);
+
+            if ($hash != $this->calculateHash($siteId, $key, $params)) {
+                //throw new \Exception("Forter: Incorrect Hashing");
+            }
+
+            $jsonRequest = $params;
             if (is_null($jsonRequest)) {
                 throw new \Exception("Forter: Call body is empty");
             }
@@ -166,9 +172,9 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
                 throw new \Exception("Forter: Unknown order");
             }
 
-            $jsonRequest = $request->getParams();
-            $order->setForterResponse($jsonRequest['status']);
+            $order->setForterResponse($request->getContent());
             $order->setForterStatus($jsonRequest['action']);
+            $order->save();
 
             $this->handlePostDecisionCallback($jsonRequest['action'], $order);
         } catch (Exception $e) {
@@ -194,12 +200,8 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
      * @param $body
      * @return string
      */
-    public function calculateHash($siteId, $token, $request)
+    public function calculateHash($siteId, $token, $params)
     {
-        $requestParams = $request->getParams();
-        $bodyRawParams = json_decode($request->getContent(), true);
-        $params = array_merge($requestParams, $bodyRawParams);
-
         $body = "";
         $paramAmount =  sizeof($params);
         $counter = 1;
