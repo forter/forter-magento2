@@ -89,7 +89,7 @@ class PaymentPlaceStart implements ObserverInterface
         Item $modelCartItem,
         BasicInfo $basicInfo
     ) {
-        $this->remote = $remote
+        $this->remote = $remote;
         $this->queue = $queue;
         $this->decline = $decline;
         $this->dateTime = $dateTime;
