@@ -35,6 +35,7 @@ class AccountPlugin
 
             return $html . $newBlockHtml;
         }
+        return $html;
     }
 
     /**
