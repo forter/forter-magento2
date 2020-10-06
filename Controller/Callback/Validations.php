@@ -143,6 +143,8 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
         }
 
         try {
+            $success = true;
+            $reason = null;
             $siteId = $request->getHeader("X-Forter-SiteID");
             $key = $request->getHeader("X-Forter-Token");
             $hash = $request->getHeader("X-Forter-Signature");
@@ -174,9 +176,15 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
             $this->handlePostDecisionCallback($bodyRawParams['action'], $order);
         } catch (Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
+            $success = false;
+            $reason = $e->getMessage();
         }
 
-        return;
+        $response = array_filter(["action" => ($success ? "success" : "failure"), 'reason' => $reason]);
+        $result = $this->jsonResultFactory->create();
+        $result->setData($response);
+
+        return $result;
     }
 
     /**
