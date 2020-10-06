@@ -117,8 +117,8 @@ class PaymentPlaceStart implements ObserverInterface
 
             $ipAddress = $order->getRemoteIp();
             if ($this->config->getIsCron()) {
-                if(!$ipAddress){
-                  $ipAddress = $remote->getRemoteAddress();
+                if (!$ipAddress) {
+                    $ipAddress = $remote->getRemoteAddress();
                 }
                 $connectionInformation = $this->basicInfo->getConnectionInformation($ipAddress, getallheaders());
                 $order->setForterClientDetails(json_encode($connectionInformation));
