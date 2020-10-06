@@ -32,7 +32,7 @@ class BasicInfo
     public function getConnectionInformation($remoteIp, $headers)
     {
         return [
-            "customerIP" => $this->getIpFromOrder($remoteIp, $headers),
+            "customerIP" => $remoteIp ? $remoteIp : $this->getIpFromOrder($remoteIp, $headers),
             "userAgent" => (is_array($headers) && array_key_exists("User-Agent", $headers)) ? substr($headers['User-Agent'], 0, 4000) : "",
             "forterTokenCookie" => $this->cookieManager->getCookie("forterToken") . "",
             "merchantDeviceIdentifier" => null,

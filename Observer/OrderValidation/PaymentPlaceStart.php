@@ -10,6 +10,7 @@ use Forter\Forter\Model\RequestBuilder\BasicInfo;
 use Forter\Forter\Model\RequestBuilder\Order;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\Event\ObserverInterface;
+use Magento\Framework\HTTP\PhpEnvironment\RemoteAddress;
 use Magento\Framework\Message\ManagerInterface;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magento\Quote\Model\Quote\Item;
@@ -76,6 +77,7 @@ class PaymentPlaceStart implements ObserverInterface
      * @param Item $modelCartItem
      */
     public function __construct(
+        RemoteAddress $remote,
         Queue $queue,
         Decline $decline,
         ManagerInterface $messageManager,
@@ -87,6 +89,7 @@ class PaymentPlaceStart implements ObserverInterface
         Item $modelCartItem,
         BasicInfo $basicInfo
     ) {
+        $this->remote = $remote
         $this->queue = $queue;
         $this->decline = $decline;
         $this->dateTime = $dateTime;
@@ -112,8 +115,12 @@ class PaymentPlaceStart implements ObserverInterface
         try {
             $order = $observer->getEvent()->getPayment()->getOrder();
 
+            $ipAddress = $order->getRemoteIp();
             if ($this->config->getIsCron()) {
-                $connectionInformation = $this->basicInfo->getConnectionInformation($order->getRemoteIp(), getallheaders());
+                if(!$ipAddress){
+                  $ipAddress = $remote->getRemoteAddress();
+                }
+                $connectionInformation = $this->basicInfo->getConnectionInformation($ipAddress, getallheaders());
                 $order->setForterClientDetails(json_encode($connectionInformation));
                 $currentTime = $this->dateTime->gmtDate();
 
