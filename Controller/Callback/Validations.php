@@ -146,26 +146,21 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
             $siteId = $request->getHeader("X-Forter-SiteID");
             $key = $request->getHeader("X-Forter-Token");
             $hash = $request->getHeader("X-Forter-Signature");
+            $bodyRawParams = json_decode($request->getContent(), true);
 
             if ($siteId != $this->forterConfig->getSiteId()) {
                 throw new \Exception("Forter: Site Id Validation Faild");
             }
 
-            $requestParams = $request->getParams();
-            $bodyRawParams = json_decode($request->getContent(), true);
-            $params = array_merge($requestParams, $bodyRawParams);
-
-            if ($hash != $this->calculateHash($siteId, $key, $params)) {
-                //throw new \Exception("Forter: Incorrect Hashing");
+            if ($hash != $this->calculateHash($siteId, $key, $bodyRawParams)) {
+                throw new \Exception("Forter: Incorrect Hashing");
             }
 
-            $jsonRequest = $params;
-            if (is_null($jsonRequest)) {
+            if (is_null($bodyRawParams)) {
                 throw new \Exception("Forter: Call body is empty");
             }
 
             $orderId = $request->getParam('order_id');
-
             $order = $this->getOrder($orderId);
 
             if (!$order) {
@@ -173,10 +168,10 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
             }
 
             $order->setForterResponse($request->getContent());
-            $order->setForterStatus($jsonRequest['action']);
+            $order->setForterStatus($bodyRawParams['action']);
             $order->save();
 
-            $this->handlePostDecisionCallback($jsonRequest['action'], $order);
+            $this->handlePostDecisionCallback($bodyRawParams['action'], $order);
         } catch (Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }
@@ -197,25 +192,15 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
     /**
      * @param $siteId
      * @param $token
-     * @param $body
+     * @param $bodyRawParams
      * @return string
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function calculateHash($siteId, $token, $params)
+    public function calculateHash($siteId, $token, $bodyRawParams)
     {
-        $body = "";
-        $paramAmount =  sizeof($params);
-        $counter = 1;
-        foreach ($params as $param => $value) {
-            if ($paramAmount == $counter) {
-                $body .= $param . "=" . $value;
-            } else {
-                $body .= $param . "=" . $value . "&";
-            }
-            $counter++;
-        }
-
-        $secert = $this->forterConfig->getSecretKey();
-        return hash('sha256', $secert . $token . $siteId . $body);
+        $body = json_encode($bodyRawParams);
+        $secret = $this->forterConfig->getSecretKey();
+        return hash('sha256', $secret . $token . $siteId . $body);
     }
 
     /**
