@@ -9,12 +9,12 @@ use Forter\Forter\Model\Config;
 use Forter\Forter\Model\QueueFactory as ForterQueueFactory;
 use Forter\Forter\Model\RequestBuilder\Order;
 use Magento\Customer\Model\Session as CustomerSession;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Message\ManagerInterface;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magento\Sales\Api\OrderManagementInterface;
 use Magento\Store\Model\StoreManagerInterface;
-use \Magento\Framework\App\Config\ScopeConfigInterface;
 
 /**
  * Class PaymentPlaceEnd
@@ -22,7 +22,6 @@ use \Magento\Framework\App\Config\ScopeConfigInterface;
  */
 class PaymentPlaceEnd implements ObserverInterface
 {
-    const XML_FORTER_HOLD_ORDER = "forter/advanced_settings/enabled_hold_order";
     const VALIDATION_API_ENDPOINT = 'https://api.forter-secure.com/v2/orders/';
 
     /**
@@ -150,14 +149,13 @@ class PaymentPlaceEnd implements ObserverInterface
 
     public function handleResponse($forterDecision, $order)
     {
-        $holdEnabled = $this->scopeConfig->getValue(self::XML_FORTER_HOLD_ORDER);
         if ($forterDecision == "decline") {
             $this->handleDecline($order);
         } elseif ($forterDecision == 'approve') {
             $this->handleApprove($order);
         } elseif ($forterDecision == "not reviewed") {
             $this->handleNotReviewed($order);
-        } elseif ($forterDecision == "pending" && $holdEnabled == 1) {
+        } elseif ($forterDecision == "pending" && !$this->forterConfig->isPendingOnHoldEnabled()) {
             $order->hold()->save();
         }
     }
