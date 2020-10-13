@@ -147,6 +147,7 @@ class SendQueue
     private function handleForterResponse($order, $response)
     {
         if ($response == 'pending' && $this->forterConfig->isPendingOnHoldEnabled()) {
+            $this->forterConfig->addCommentToOrder($order, "Order set to Hold");
             $order->hold()->save();
         }
 
