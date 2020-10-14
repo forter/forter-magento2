@@ -112,7 +112,10 @@ class Customer
     {
         $shippingAddress = $order->getShippingAddress();
         $billingAddress = $order->getBillingAddress();
-
+        $shippingMethod = $order->getShippingMethod();
+        if (strpos($shippingMethod, "instore") > 0) {
+            $billingAddress = $shippingAddress;
+        }
         $primaryRecipient = [];
         if ($shippingAddress) {
             $personalDetails = [
