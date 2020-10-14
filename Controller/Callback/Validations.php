@@ -12,7 +12,7 @@ use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magento\Framework\UrlInterface;
 use Magento\Framework\View\Result\PageFactory;
-use Magento\Sales\Api\OrderRepositoryInterface;
+use Magento\Sales\Model\Order as OrderRepository;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -100,7 +100,7 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
         LoggerInterface $logger,
         Context $context,
         PageFactory $pageFactory,
-        OrderRepositoryInterface $orderRepository,
+        OrderRepository $orderRepository,
         JsonFactory $jsonResultFactory
     ) {
         $this->url = $url;
@@ -153,8 +153,8 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
                 throw new \Exception("Forter: Call body is empty");
             }
 
-            $orderId = $request->getParam('order_id');
-            $order = $this->getOrder($orderId);
+            $orderIncrementId = $request->getParam('order_id');
+            $order = $this->getOrder($orderIncrementId);
 
             if (!$order) {
                 throw new \Exception("Forter: Unknown order");
@@ -183,9 +183,9 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
      * @param $id
      * @return \Magento\Sales\Api\Data\OrderInterface
      */
-    public function getOrder($id)
+    public function getOrder($orderIncrementId)
     {
-        return $this->orderRepository->get($id);
+        return $this->orderRepository->loadByIncrementId($orderIncrementId);
     }
 
     /**
