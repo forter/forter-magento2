@@ -5,7 +5,6 @@ use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\ActionsHandler\Decline;
 use Forter\Forter\Model\Config;
 use Forter\Forter\Model\QueueFactory;
-use Magento\Customer\Model\Session;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Action\HttpPostActionInterface as HttpPostActionInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
@@ -58,11 +57,6 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
     protected $queue;
 
     /**
-     * @var CustomerSession
-     */
-    protected $customerSession;
-
-    /**
      * @var Decline
      */
     protected $decline;
@@ -90,7 +84,6 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
      * @param \Forter\Forter\Model\QueueFactory $queue
      * @param \Magento\Framework\UrlInterface $url
      * @param \Psr\Log\LoggerInterface $logger
-     * @param \Magento\Customer\Model\Session $customerSession
      * @param \Magento\Framework\App\Action\Context $context
      * @param \Magento\Framework\View\Result\PageFactory $pageFactory
      * @param \Magento\Sales\Api\OrderRepositoryInterface $orderRepository
@@ -105,7 +98,6 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
         QueueFactory $queue,
         UrlInterface $url,
         LoggerInterface $logger,
-        Session $customerSession,
         Context $context,
         PageFactory $pageFactory,
         OrderRepositoryInterface $orderRepository,
@@ -119,7 +111,6 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
         $this->_pageFactory = $pageFactory;
         $this->forterConfig = $forterConfig;
         $this->orderRepository = $orderRepository;
-        $this->customerSession = $customerSession;
         $this->jsonResultFactory = $jsonResultFactory;
         $this->abstractApi = $abstractApi;
         return parent::__construct($context);
@@ -236,14 +227,8 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
     {
         $result = $this->forterConfig->getDeclinePost();
         if ($result == '1') {
-            $this->customerSession->setForterMessage($this->forterConfig->getPostThanksMsg());
-            if ($order->canHold()) {
-                $order->setCanSendNewEmailFlag(false);
-                $this->decline->holdOrder($order);
-                $this->setMessageToQueue($order, 'decline');
-            }
+            $this->setMessageToQueue($order, 'decline');
         } elseif ($result == '2') {
-            $order->setCanSendNewEmailFlag(false);
             $this->decline->markOrderPaymentReview($order);
         }
     }
