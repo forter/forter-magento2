@@ -147,12 +147,6 @@ class Order
         $forterWebId = $this->request->getPost('forter_web_id');
         $forterNumber = ($forterWebId != "") ? $forterWebId : "";
         $order->setForterWebId($forterNumber);
-        $shippingMethod = $order->getShippingMethod();
-        if (strpos($shippingMethod, "instore") > 0) {
-            $deliveryMethod = "store pickup";
-        } else {
-            $deliveryMethod = "";
-        }
 
         $primaryRecipient = $this->customerPrepere->getPrimaryRecipient($order);
         if ($giftCardRecipient = $this->giftCardPrepere->getGiftCardPrimaryRecipient($order)) {
@@ -173,8 +167,7 @@ class Order
         "accountOwner" => $this->customerPrepere->getAccountOwnerInfo($order),
         "customerAccountData" => $this->customerPrepere->getCustomerAccountData($order, null),
         "totalDiscount" => $this->cartPrepare->getTotalDiscount($order),
-        "payment" => $this->paymentPrepere->generatePaymentInfo($order),
-        "deliveryMethod" => $deliveryMethod
+        "payment" => $this->paymentPrepere->generatePaymentInfo($order)
       ];
 
         if ($this->forterConfig->isSandboxMode()) {
