@@ -146,6 +146,11 @@ class SendQueue
 
     private function handleForterResponse($order, $response)
     {
+
+        if ($order->canUnhold()) {
+          $order->unhold()->save();
+        }
+
         if ($this->forterConfig->getIsCron()) {
             if ($response == 'approve') {
                 if ($this->forterConfig->getApproveCron() == '1') {
@@ -171,9 +176,6 @@ class SendQueue
             if ($response == 'approve') {
                 $this->approve->handleApproveImmediatly($order);
             } elseif ($response == 'decline') {
-                if ($order->canUnhold()) {
-                    $order->unhold()->save();
-                }
                 $this->decline->handlePostTransactionDescision($order);
             }
         }
