@@ -94,9 +94,16 @@ class Customer
      */
     public function getPrimaryDeliveryDetails($order)
     {
+        $shippingMethod = $order->getShippingMethod();
+        if (strpos($shippingMethod, "instore") > 0) {
+            $deliveryMethod = "store pickup";
+        } else {
+            $deliveryMethod = substr(str_replace($this::SHIPPING_METHOD_PREFIX, "", $order->getShippingDescription()), 0, 45);
+        }
+
         return [
             "deliveryType" => $order->getShippingMethod() ? "PHYSICAL" : "DIGITAL",
-            "deliveryMethod" => substr(str_replace($this::SHIPPING_METHOD_PREFIX, "", $order->getShippingDescription()), 0, 45),
+            "deliveryMethod" => $deliveryMethod,
             "deliveryPrice" => [
                 "amountLocalCurrency" => strval($order->getShippingAmount()),
                 "currency" => $order->getOrderCurrency()->getCurrencyCode() . ""
@@ -111,10 +118,11 @@ class Customer
     public function getPrimaryRecipient($order)
     {
         $shippingAddress = $order->getShippingAddress();
-        $billingAddress = $order->getBillingAddress();
         $shippingMethod = $order->getShippingMethod();
         if (strpos($shippingMethod, "instore") > 0) {
             $billingAddress = $shippingAddress;
+        } else {
+            $billingAddress = $order->getBillingAddress();
         }
         $primaryRecipient = [];
         if ($shippingAddress) {
