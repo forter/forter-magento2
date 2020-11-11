@@ -6,7 +6,6 @@ use Exception;
 use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\Config as ForterConfig;
 use Magento\Framework\DB\TransactionFactory;
-use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Api\InvoiceRepositoryInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order\Invoice;
@@ -96,7 +95,7 @@ class Approve
                 if ((int)$invoices->count() !== 0) {
                     $invoices = $invoices->getFirstItem();
                     $invoice = $this->_invoiceRepository->get($invoices->getId());
-                    $order->addStatusHistoryComment(__('Forter: Invoice Already Created for This Order'), false);
+                    $this->forterConfig->addCommentToOrder($order, 'Forter: Invoice Already Created for This Order');
                     return $invoice;
                 }
 
@@ -119,7 +118,7 @@ class Approve
                 return $invoice;
             }
         } catch (Exception $e) {
-            $order->addStatusHistoryComment(__('Forter: Magento Failed to Create Invoice. Internal Error'), false);
+            $this->forterConfig->addCommentToOrder($order, 'Forter: Magento Failed to Create Invoice. Internal Error');
             $this->abstractApi->reportToForterOnCatch($e);
         }
     }

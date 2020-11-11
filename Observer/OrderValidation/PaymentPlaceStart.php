@@ -108,20 +108,21 @@ class PaymentPlaceStart implements ObserverInterface
      */
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
+        $order = $observer->getEvent()->getPayment()->getOrder();
+        $ipAddress = $order->getRemoteIp();
+        if (!$ipAddress) {
+            $ipAddress = $remote->getRemoteAddress();
+        }
+
+        $connectionInformation = $this->basicInfo->getConnectionInformation($ipAddress, getallheaders());
+        $order->setForterClientDetails(json_encode($connectionInformation));
+
         if (!$this->config->isEnabled() || $this->config->getIsPost()) {
             return;
         }
 
         try {
-            $order = $observer->getEvent()->getPayment()->getOrder();
-
-            $ipAddress = $order->getRemoteIp();
             if ($this->config->getIsCron()) {
-                if (!$ipAddress) {
-                    $ipAddress = $remote->getRemoteAddress();
-                }
-                $connectionInformation = $this->basicInfo->getConnectionInformation($ipAddress, getallheaders());
-                $order->setForterClientDetails(json_encode($connectionInformation));
                 $currentTime = $this->dateTime->gmtDate();
 
                 $this->queue->setEntityType('pre_sync_order');

@@ -136,12 +136,7 @@ class Order
      */
     public function buildTransaction($order, $orderStage)
     {
-        $headers = getallheaders();
-        if ($headers) {
-            $connectionInformation = $this->basicInfoPrepare->getConnectionInformation($order->getRemoteIp(), $headers);
-        } else {
-            $connectionInformation = json_decode($order->getForterClientDetails());
-        }
+        $connectionInformation = json_decode($order->getForterClientDetails());
 
         //get forter client number
         $forterWebId = $this->request->getPost('forter_web_id');
