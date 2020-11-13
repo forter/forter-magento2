@@ -156,9 +156,8 @@ class PaymentPlaceEnd implements ObserverInterface
         } elseif ($forterDecision == "not reviewed") {
             $this->handleNotReviewed($order);
         } elseif ($forterDecision == "pending" && $this->forterConfig->isPendingOnHoldEnabled()) {
-            if ($order->canHold()) {
-                $this->decline->holdOrder($order);
-            }
+            $this->forterConfig->addCommentToOrder($order, "Order set to Hold");
+            $order->hold()->save();
         }
     }
 

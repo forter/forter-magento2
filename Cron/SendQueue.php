@@ -146,8 +146,9 @@ class SendQueue
 
     private function handleForterResponse($order, $response)
     {
+
         if ($order->canUnhold()) {
-            $order->unhold()->save();
+          $order->unhold()->save();
         }
 
         if ($this->forterConfig->getIsCron()) {
