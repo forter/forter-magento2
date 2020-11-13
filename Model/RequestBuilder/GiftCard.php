@@ -15,7 +15,8 @@ namespace Forter\Forter\Model\RequestBuilder;
  *
  * @package Forter\Forter\Model\RequestBuilder
  */
-class GiftCard {
+class GiftCard
+{
     /**
      * @param \Magento\Sales\Model\Order\Item $item
      *
@@ -27,7 +28,7 @@ class GiftCard {
             return null;
         }
 
-        $data          = $this->formatData($item);
+        $data = $this->formatData($item);
         $beneficiaries = [
             "personalDetails" => [
                 "firstName" => $data["firstName"],

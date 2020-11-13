@@ -112,6 +112,10 @@ class Cart
                 "beneficiaries" => $this->giftCardPrepere->getGiftCardBeneficiaries($item) ? $this->giftCardPrepere->getGiftCardBeneficiaries($item) : [$beneficiaries]
             ];
 
+            if ($this->giftCardPrepere->getGiftCardBeneficiaries($item)) {
+                $singleCartItem['beneficiaries'] = $this->giftCardPrepere->getGiftCardBeneficiaries($item);
+            }
+
             $cartItems[] = $singleCartItem;
         }
         return $cartItems;

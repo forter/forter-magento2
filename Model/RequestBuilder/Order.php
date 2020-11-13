@@ -75,6 +75,10 @@ class Order
      * @var Config
      */
     private $forterConfig;
+    /**
+     * @var GiftCardPrepere
+     */
+    protected $giftCardPrepere;
 
     /**
      * @var \Magento\Framework\App\RequestInterface
@@ -155,6 +159,11 @@ class Order
         $forterWebId = $this->request->getPost('forter_web_id');
         $forterNumber = ($forterWebId != "") ? $forterWebId : "";
         $order->setForterWebId($forterNumber);
+
+        $primaryRecipient = $this->customerPrepere->getPrimaryRecipient($order);
+        if ($giftCardRecipient = $this->giftCardPrepere->getGiftCardPrimaryRecipient($order)) {
+            $primaryRecipient["personalDetails"] = $giftCardRecipient;
+        }
 
         $data = [
         "orderId" => strval($order->getIncrementId()),
