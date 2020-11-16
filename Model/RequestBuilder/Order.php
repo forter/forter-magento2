@@ -22,6 +22,7 @@ use Magento\Newsletter\Model\Subscriber;
 use Magento\Review\Model\Review;
 use Magento\Sales\Model\OrderFactory;
 use Magento\Wishlist\Controller\WishlistProviderInterface;
+use Magento\Framework\App\ObjectManager;
 
 /**
  * Class Order
@@ -85,6 +86,11 @@ class Order
     protected $request;
 
     /**
+     * @var GiftCardPrepere
+     */
+    protected $giftCardPrepere;
+
+    /**
      * Order constructor.
      * @param BasicInfoPrepare $basicInfoPrepare
      * @param CartPrepare  $cartPrepare
@@ -112,7 +118,7 @@ class Order
         WishlistProviderInterface $wishlistProvider,
         Subscriber $subscriber,
         ForterConfig $forterConfig,
-        GiftCardPrepere $giftCardPrepere
+        GiftCardPrepere $giftCardPrepere = null
     ) {
         $this->basicInfoPrepare = $basicInfoPrepare;
         $this->cartPrepare = $cartPrepare;
@@ -126,7 +132,7 @@ class Order
         $this->subscriber = $subscriber;
         $this->forterConfig = $forterConfig;
         $this->request = $request;
-        $this->giftCardPrepere = $giftCardPrepere;
+        $this->giftCardPrepere = $giftCardPrepere ? $giftCardPrepere : ObjectManager::getInstance()->get(GiftCardPrepere::class);
     }
 
     /**
@@ -137,10 +143,16 @@ class Order
     public function buildTransaction($order, $orderStage)
     {
         $headers = getallheaders();
+        $primaryRecipient = $this->customerPrepere->getPrimaryRecipient($order);
+
         if ($headers) {
             $connectionInformation = $this->basicInfoPrepare->getConnectionInformation($order->getRemoteIp(), $headers);
         } else {
             $connectionInformation = json_decode($order->getForterClientDetails());
+        }
+
+        if ($giftCardRecipient = $this->giftCardPrepere->getGiftCardPrimaryRecipient($order)) {
+            $primaryRecipient["personalDetails"] = $giftCardRecipient;
         }
 
         //get forter client number
