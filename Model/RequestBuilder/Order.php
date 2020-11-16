@@ -142,15 +142,8 @@ class Order
      */
     public function buildTransaction($order, $orderStage)
     {
-        $headers = getallheaders();
+        $connectionInformation = json_decode($order->getForterClientDetails());
         $primaryRecipient = $this->customerPrepere->getPrimaryRecipient($order);
-
-        if ($headers) {
-            $connectionInformation = $this->basicInfoPrepare->getConnectionInformation($order->getRemoteIp(), $headers);
-        } else {
-            $connectionInformation = json_decode($order->getForterClientDetails());
-        }
-
         if ($giftCardRecipient = $this->giftCardPrepere->getGiftCardPrimaryRecipient($order)) {
             $primaryRecipient["personalDetails"] = $giftCardRecipient;
         }
