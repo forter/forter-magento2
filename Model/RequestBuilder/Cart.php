@@ -10,10 +10,8 @@
 
 namespace Forter\Forter\Model\RequestBuilder;
 
-use Magento\Catalog\Model\CategoryFactory;
 use Forter\Forter\Model\RequestBuilder\GiftCard as GiftCardPrepere;
-use Forter\Forter\Model\RequestBuilder\Customer as CustomerPrepere;
-use Magento\Framework\App\ObjectManager;
+use Magento\Catalog\Model\CategoryFactory;
 
 /**
  * Class Cart
@@ -31,25 +29,18 @@ class Cart
      */
     private $giftCardPrepere;
 
-    /**
-     * @var CustomerPrepere
-     */
-    private $customerPrepere;
 
     /**
      * Cart constructor.
      * @param CategoryFactory $categoryFactory
      * @param GiftCardPrepere $giftCardPrepere
-     * @param CustomerPrepere $customerPrepere
      */
     public function __construct(
         CategoryFactory $categoryFactory,
-        GiftCardPrepere $giftCardPrepere = null,
-        CustomerPrepere $customerPrepere = null
+        GiftCardPrepere $giftCardPrepere
     ) {
         $this->categoryFactory = $categoryFactory;
-        $this->giftCardPrepere = $giftCardPrepere ? $giftCardPrepere : ObjectManager::getInstance()->get(GiftCardPrepere::class);
-        $this->customerPrepere = $customerPrepere ? $customerPrepere : ObjectManager::getInstance()->get(CustomerPrepere::class);
+        $this->giftCardPrepere = $giftCardPrepere;
     }
 
     /**
@@ -73,7 +64,6 @@ class Cart
     {
         $totalDiscount = 0;
         $cartItems = [];
-        $beneficiaries = $this->customerPrepere->getPrimaryRecipient($order);
 
         foreach ($order->getAllItems() as $item) {
 
@@ -108,8 +98,7 @@ class Cart
                     "physicalGoods" => [
                         "wrapAsGift" => $item->getData("gift_message_available") ? true : false
                     ]
-                ],
-                "beneficiaries" => $this->giftCardPrepere->getGiftCardBeneficiaries($item) ? $this->giftCardPrepere->getGiftCardBeneficiaries($item) : [$beneficiaries]
+                ]
             ];
 
             if ($this->giftCardPrepere->getGiftCardBeneficiaries($item)) {
