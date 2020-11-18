@@ -138,8 +138,8 @@ class Order
     {
         $connectionInformation = json_decode($order->getForterClientDetails());
         $primaryRecipient = $this->customerPrepere->getPrimaryRecipient($order);
-        if ($giftCardRecipient = $this->giftCardPrepere->getGiftCardPrimaryRecipient($order)) {
-            $primaryRecipient["personalDetails"] = $giftCardRecipient;
+        if ($this->giftCardPrepere) {
+            $primaryRecipient["personalDetails"] = $this->giftCardPrepere->getGiftCardPrimaryRecipient($order);
         }
 
         //get forter client number
