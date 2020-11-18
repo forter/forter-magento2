@@ -22,7 +22,6 @@ use Magento\Newsletter\Model\Subscriber;
 use Magento\Review\Model\Review;
 use Magento\Sales\Model\OrderFactory;
 use Magento\Wishlist\Controller\WishlistProviderInterface;
-use Magento\Framework\App\ObjectManager;
 
 /**
  * Class Order
@@ -86,11 +85,6 @@ class Order
     protected $request;
 
     /**
-     * @var GiftCardPrepere
-     */
-    protected $giftCardPrepere;
-
-    /**
      * Order constructor.
      * @param BasicInfoPrepare $basicInfoPrepare
      * @param CartPrepare  $cartPrepare
@@ -118,7 +112,7 @@ class Order
         WishlistProviderInterface $wishlistProvider,
         Subscriber $subscriber,
         ForterConfig $forterConfig,
-        GiftCardPrepere $giftCardPrepere = null
+        GiftCardPrepere $giftCardPrepere
     ) {
         $this->basicInfoPrepare = $basicInfoPrepare;
         $this->cartPrepare = $cartPrepare;
@@ -132,7 +126,7 @@ class Order
         $this->subscriber = $subscriber;
         $this->forterConfig = $forterConfig;
         $this->request = $request;
-        $this->giftCardPrepere = $giftCardPrepere ? $giftCardPrepere : ObjectManager::getInstance()->get(GiftCardPrepere::class);
+        $this->giftCardPrepere;
     }
 
     /**
@@ -152,11 +146,6 @@ class Order
         $forterWebId = $this->request->getPost('forter_web_id');
         $forterNumber = ($forterWebId != "") ? $forterWebId : "";
         $order->setForterWebId($forterNumber);
-
-        $primaryRecipient = $this->customerPrepere->getPrimaryRecipient($order);
-        if ($giftCardRecipient = $this->giftCardPrepere->getGiftCardPrimaryRecipient($order)) {
-            $primaryRecipient["personalDetails"] = $giftCardRecipient;
-        }
 
         $data = [
         "orderId" => strval($order->getIncrementId()),
