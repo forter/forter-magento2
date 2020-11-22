@@ -141,8 +141,19 @@ class PaymentMethods
 
         $avsFullResult = $payment->getAdditionalInformation('adyen_avs_result');
         if ($avsFullResult) {
-            $detailsArray['avsFullResult'] = $avsFullResult;
+            $detailsArray['avsFullResult'] = (int) $avsFullResult;
         }
+
+        $cvcFullResult = $payment->getAdditionalInformation('adyen_cvc_result');
+        if ($cvcFullResult) {
+            $detailsArray['cvvResult'] = (int) $cvcFullResult;
+        }
+
+        $processorResponseText = $payment->getAdditionalInformation('adyen_refusal_reason_raw');
+        if ($processorResponseText) {
+            $detailsArray['adyen_refusal_reason_raw'] = $processorResponseText;
+        }
+
 
         return $this->preferCcDetails($payment, $detailsArray);
     }
