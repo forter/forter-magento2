@@ -151,7 +151,7 @@ class PaymentMethods
 
         $processorResponseText = $payment->getAdditionalInformation('adyen_refusal_reason_raw');
         if ($processorResponseText) {
-            $detailsArray['adyen_refusal_reason_raw'] = (int) $processorResponseText;
+            $detailsArray['adyen_refusal_reason_raw'] = $processorResponseText;
         }
 
 
