@@ -160,6 +160,41 @@ class PaymentMethods
         return $this->preferCcDetails($payment, $detailsArray);
     }
 
+
+    public function getPayflowproDetails($payment)
+    {
+        $detailsArray =[];
+
+        $ccType = $payment->getAdditionalInformation('cc_type');
+        if ($ccType) {
+            $detailsArray['cardBrand'] = $ccType;
+        }
+
+        $authResult = "authorized"
+
+        $processorResponseText = "Approved";
+
+        $processorResponseCode = "00"
+
+        if ($cvvResponseCode) {
+            $detailsArray['cvvResult'] = $cvvResponseCode;
+        }
+
+        $avsZipResult = $payment->getAdditionalInformation('avszip');
+        if ($avsZipResult) {
+            $detailsArray['avsZipResult'] = $avsZipResult;
+        }
+
+        $avsStreetResult = $payment->getAdditionalInformation('avsaddr');
+        if ($avsStreetResult) {
+            $detailsArray['avsStreetResult'] = $avsStreetResult;
+        }
+
+        $gatewayTransactionId = $payment->transaction_id() ? $payment->transaction_id() : ""
+
+        return $this->preferCcDetails($payment, $detailsArray);
+    }
+    
     public function preferCcDetails($payment, $detailsArray=[])
     {
         $cardDetails =  [
