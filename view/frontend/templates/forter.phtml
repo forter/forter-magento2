@@ -1,13 +1,9 @@
 <?php $siteId = $block->getSiteId(); ?>
 <script type="text/javascript" id="<?php echo $siteId; ?>">
 document.addEventListener('ftr:tokenReady', function(evt) {
-  require(["jquery"], function ($) {
-    $.ajax({
-      url: '/forter/index/sessions/',
-      type: "POST",
-      data: {forter_token:evt.detail}
-    });
-  });
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", '/forter/index/sessions', true);
+  xhr.send("forter_token="+evt.detail);
 });
 
 
