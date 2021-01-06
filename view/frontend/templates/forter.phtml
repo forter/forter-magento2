@@ -3,7 +3,7 @@
 document.addEventListener('ftr:tokenReady', function(evt) {
   var xhr = new XMLHttpRequest();
   xhr.open("POST", '/forter/index/sessions', true);
-  xhr.send("forter_token="+evt.detail);
+  xhr.send("token="+evt.detail);
 });
 
 
