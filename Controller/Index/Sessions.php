@@ -32,6 +32,6 @@ class Sessions extends \Magento\Framework\App\Action\Action
     public function execute()
     {
         $post = $this->getRequest()->getPostValue();
-        $this->customerSession->setForterToken($post['forter_token']);
+        $this->customerSession->setForterToken($post['token']);
     }
 }
