@@ -10,12 +10,20 @@
 
 namespace Forter\Forter\Model\RequestBuilder\Payment;
 
+use Magento\Customer\Model\Session;
+
 /**
  * Class Payment
  * @package Forter\Forter\Model\RequestBuilder
  */
 class PaymentMethods
 {
+    public function __construct(
+        Session $customerSession,
+    ) {
+        $this->customerSession = $customerSession;
+    }
+
     public function getPaypalDetails($payment)
     {
         return [
@@ -156,16 +164,17 @@ class PaymentMethods
             $detailsArray['processorResponseText'] = $processorResponseText;
         }
 
-
         return $this->preferCcDetails($payment, $detailsArray);
     }
 
     public function preferCcDetails($payment, $detailsArray=[])
     {
+        $binNumber = $this->customerSession->getForterBin() ? $this->customerSession->getForterBin() : $payment->getAdditionalInformation('bin');
+        $last4cc = $this->customerSession->getForterLast4cc() ? $this->customerSession->getForterLast4cc() : $payment->getCcLast4();
         $cardDetails =  [
             "nameOnCard" => array_key_exists("nameOnCard", $detailsArray) ? $detailsArray['nameOnCard'] : $payment->getCcOwner() . "",
             "cardBrand" => array_key_exists("cardBrand", $detailsArray) ? $detailsArray['cardBrand'] : $payment->getCcType() . "",
-            "bin" => array_key_exists('bin', $detailsArray) ? $detailsArray['bin'] : $payment->getAdditionalInformation('bin'),
+            "bin" => $binNumber ? $binNumber : $detailsArray['bin'],
             "countryOfIssuance" => array_key_exists('countryOfIssuance', $detailsArray) ? $detailsArray['countryOfIssuance'] : $payment->getAdditionalInformation('country_of_issuance'),
             "cardBank" => array_key_exists("cardBank", $detailsArray) ? $detailsArray['cardBank'] : $payment->getEcheckBankName(),
             "verificationResults" => [
@@ -192,8 +201,8 @@ class PaymentMethods
             $cardDetails["expirationYear"] = array_key_exists("expirationMonth", $detailsArray) ? $detailsArray['expirationYear'] : str_pad($payment->getCcExpYear(), 2, "0", STR_PAD_LEFT);
         }
 
-        if (array_key_exists("lastFourDigits", $detailsArray) || $payment->getCcLast4()) {
-            $cardDetails["lastFourDigits"] = array_key_exists("lastFourDigits", $detailsArray) ? $detailsArray['lastFourDigits'] : $payment->getCcLast4();
+        if (array_key_exists("lastFourDigits", $detailsArray) || $payment->getCcLast4() || $last4cc) {
+            $cardDetails["lastFourDigits"] = $last4cc ? $last4cc : $detailsArray['lastFourDigits'];
         }
 
         return $cardDetails;
