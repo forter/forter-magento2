@@ -45,18 +45,17 @@ require(["jquery"], function ($) {
         xhr.open("POST", '/forter/index/sessions', true);
 
         <?php if ($allowLast4CCListener): ?>
-          last4cc = "last4cc="+value.substr(0,6);
+          last4cc = "last4cc="+value.substr(value.length - 4);
           xhr.send(last4cc);
         <?php endif;?>
 
         <?php if ($allowBinListener): ?>
-          bin = "bin="+value.substr(value.length - 4);
+          bin = "bin="+value.substr(0,6);
           xhr.send(bin);
         <?php endif;?>
-
-
       }
     });
+
     <?php endif;?>
 
   });
