@@ -19,7 +19,7 @@ use Magento\Customer\Model\Session;
 class PaymentMethods
 {
     public function __construct(
-        Session $customerSession,
+        Session $customerSession
     ) {
         $this->customerSession = $customerSession;
     }
