@@ -26,6 +26,17 @@ require(["jquery"], function ($) {
       console.log('Forter: Invalid Web Id');
     }
     });
+
+    $(document).on('change', '#authorizenet_acceptjs_cc_number', function() {
+      value = $(this).val();
+      if(value.length === 16){
+        var xhr = new XMLHttpRequest();
+        params = "bin="+value.substr(0,6)"&last4cc="+value.substr(value.length - 4);
+        xhr.open("POST", '/forter/index/sessions', true);
+        xhr.send(params);
+      }
+    });
+
   });
 });
 
