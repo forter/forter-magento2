@@ -1,5 +1,13 @@
 <?php $siteId = $block->getSiteId(); ?>
+<?php $preAuthIsActive = $block->getPreAuthIsActive(); ?>
+<?php $allowLast4CCListener = $block->getAllowLast4CCListener(); ?>
+<?php $allowBinListener = $block->getAllowBinListener(); ?>
+<?php $elementToObserve = $block->getElementToObserve(); ?>
+
 <script type="text/javascript" id="<?php echo $siteId; ?>">
+
+
+
 document.addEventListener('ftr:tokenReady', function(evt) {
   var xhr = new XMLHttpRequest();
   xhr.open("POST", '/forter/index/sessions/', true);
@@ -27,15 +35,29 @@ require(["jquery"], function ($) {
     }
     });
 
-    $(document).on('change', '#authorizenet_acceptjs_cc_number', function() {
+    <?php if ($preAuthIsActive && strlen($elementToObserve) > 1): ?>
+    $(document).on('change', '<?php echo $elementToObserve; ?>', function() {
       value = $(this).val();
       if(value.length === 16){
+        var bin = '';
+        var last4cc = '';
         var xhr = new XMLHttpRequest();
-        params = "bin="+value.substr(0,6)"&last4cc="+value.substr(value.length - 4);
         xhr.open("POST", '/forter/index/sessions', true);
-        xhr.send(params);
+
+        <?php if ($allowLast4CCListener): ?>
+          last4cc = "last4cc="+value.substr(0,6);
+          xhr.send(last4cc);
+        <?php endif;?>
+
+        <?php if ($allowBinListener): ?>
+          bin = "bin="+value.substr(value.length - 4);
+          xhr.send(bin);
+        <?php endif;?>
+
+
       }
     });
+    <?php endif;?>
 
   });
 });
