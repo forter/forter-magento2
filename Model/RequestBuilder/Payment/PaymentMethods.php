@@ -169,12 +169,22 @@ class PaymentMethods
 
     public function preferCcDetails($payment, $detailsArray=[])
     {
-        $binNumber = $this->customerSession->getForterBin() ? $this->customerSession->getForterBin() : $payment->getAdditionalInformation('bin');
-        $last4cc = $this->customerSession->getForterLast4cc() ? $this->customerSession->getForterLast4cc() : $payment->getCcLast4();
+        if (array_key_exists("bin", $detailsArray)) {
+            $binNumber = $detailsArray['bin'];
+        } else {
+            $binNumber = $this->customerSession->getForterBin() ? $this->customerSession->getForterBin() : $payment->getAdditionalInformation('bin');
+        }
+
+        if (array_key_exists("lastFourDigits", $detailsArray)) {
+            $last4cc = $detailsArray['lastFourDigits'];
+        } else {
+            $last4cc = $this->customerSession->getForterLast4cc() ? $this->customerSession->getForterLast4cc() : $payment->getCcLast4();
+        }
+
         $cardDetails =  [
             "nameOnCard" => array_key_exists("nameOnCard", $detailsArray) ? $detailsArray['nameOnCard'] : $payment->getCcOwner() . "",
             "cardBrand" => array_key_exists("cardBrand", $detailsArray) ? $detailsArray['cardBrand'] : $payment->getCcType() . "",
-            "bin" => $binNumber ? $binNumber : $detailsArray['bin'],
+            "bin" => $binNumber,
             "countryOfIssuance" => array_key_exists('countryOfIssuance', $detailsArray) ? $detailsArray['countryOfIssuance'] : $payment->getAdditionalInformation('country_of_issuance'),
             "cardBank" => array_key_exists("cardBank", $detailsArray) ? $detailsArray['cardBank'] : $payment->getEcheckBankName(),
             "verificationResults" => [
@@ -202,7 +212,7 @@ class PaymentMethods
         }
 
         if (array_key_exists("lastFourDigits", $detailsArray) || $payment->getCcLast4() || $last4cc) {
-            $cardDetails["lastFourDigits"] = $last4cc ? $last4cc : $detailsArray['lastFourDigits'];
+            $cardDetails["lastFourDigits"] = $last4cc;
         }
 
         return $cardDetails;
