@@ -41,15 +41,17 @@ require(["jquery"], function ($) {
       if(value.length === 16){
         var bin = '';
         var last4cc = '';
-        var xhr = new XMLHttpRequest();
-        xhr.open("POST", '/forter/index/sessions', true);
 
         <?php if ($allowLast4CCListener): ?>
+          var xhr = new XMLHttpRequest();
+          xhr.open("POST", '/forter/index/sessions', true);
           last4cc = "last4cc="+value.substr(value.length - 4);
           xhr.send(last4cc);
         <?php endif;?>
 
         <?php if ($allowBinListener): ?>
+          var xhr = new XMLHttpRequest();
+          xhr.open("POST", '/forter/index/sessions', true);
           bin = "bin="+value.substr(0,6);
           xhr.send(bin);
         <?php endif;?>
