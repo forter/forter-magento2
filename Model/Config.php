@@ -404,7 +404,7 @@ class Config
     }
 
     /**
-     * Return if to yes/no regarding observe Last4CC
+     * Return boolean regarding active/disable pre-auth card observing
      *
      * @return boolean
      */
@@ -414,7 +414,7 @@ class Config
     }
 
     /**
-     * Return if to yes/no regarding observe Last4CC
+     * Return boolean regarding observe Last4CC
      *
      * @return boolean
      */
@@ -424,7 +424,7 @@ class Config
     }
 
     /**
-     * Return if to yes/no regarding observe Bin
+     * Return boolean regarding observe Bin
      *
      * @return boolean
      */

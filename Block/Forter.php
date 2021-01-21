@@ -43,8 +43,7 @@ class Forter extends \Magento\Framework\View\Element\Template
     }
 
     /**
-     * Return if to yes/no regarding observe Last4CC
-     *
+     * Return boolean regarding active/disable pre-auth card observing
      * @return boolean
      */
     public function getPreAuthIsActive()
@@ -53,7 +52,7 @@ class Forter extends \Magento\Framework\View\Element\Template
     }
 
     /**
-     * Return if to yes/no regarding observe Last4CC
+     * Return boolean regarding observe Last4CC
      *
      * @return boolean
      */
@@ -63,7 +62,7 @@ class Forter extends \Magento\Framework\View\Element\Template
     }
 
     /**
-     * Return if to yes/no regarding observe Bin
+     * Return boolean regarding observe Bin
      *
      * @return boolean
      */
