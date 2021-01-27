@@ -46,9 +46,9 @@ class Forter extends \Magento\Framework\View\Element\Template
      * Return boolean regarding active/disable pre-auth card observing
      * @return boolean
      */
-    public function getPreAuthIsActive()
+    public function isCcListenerActive()
     {
-        return $this->forterConfig->getPreAuthIsActive();
+        return $this->forterConfig->isCcListenerActive();
     }
 
     /**
