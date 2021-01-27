@@ -1,5 +1,5 @@
 <?php $siteId = $block->getSiteId(); ?>
-<?php $preAuthIsActive = $block->getPreAuthIsActive(); ?>
+<?php $ccListenerActive = $block->isCcListenerActive(); ?>
 <?php $allowLast4CCListener = $block->getAllowLast4CCListener(); ?>
 <?php $allowBinListener = $block->getAllowBinListener(); ?>
 <?php $elementToObserve = $block->getElementToObserve(); ?>
@@ -35,15 +35,15 @@ require(["jquery"], function ($) {
     }
     });
 
-    <?php if ($preAuthIsActive && strlen($elementToObserve) > 1): ?>
+    <?php if ($ccListenerActive && strlen($elementToObserve) > 1): ?>
     $(document).on('change', '<?php echo $elementToObserve; ?>', function() {
-      value = $(this).val();
-      if(value.length === 16){
+      value = $(this).val() || '';
+      if(value.length > 12 && value.length < 20){
         var bin = '';
         var last4cc = '';
 
         var xhr = new XMLHttpRequest();
-        xhr.open("POST", '/forter/index/sessions', true);
+        xhr.open("POST", '/magento/index/sessions', true);
         xhr.setRequestHeader("Content-type", "application/json");
         xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
 

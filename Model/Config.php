@@ -408,9 +408,9 @@ class Config
      *
      * @return boolean
      */
-    public function getPreAuthIsActive()
+    public function isCcListenerActive()
     {
-        return $this->scopeConfig->getValue('forter/advanced_settings_pre_auth/enabled_cc_listener');
+        return $this->scopeConfig->getValue('forter/advanced_settings_cc_listener/enabled_cc_listener');
     }
 
     /**
@@ -420,7 +420,7 @@ class Config
      */
     public function getAllowLast4CCListener()
     {
-        return $this->scopeConfig->getValue('forter/advanced_settings_pre_auth/enabled_cc_listener_last4cc');
+        return $this->scopeConfig->getValue('forter/advanced_settings_cc_listener/enabled_cc_listener_last4cc');
     }
 
     /**
@@ -430,7 +430,7 @@ class Config
      */
     public function getAllowBinListener()
     {
-        return $this->scopeConfig->getValue('forter/advanced_settings_pre_auth/enabled_cc_listener_bin');
+        return $this->scopeConfig->getValue('forter/advanced_settings_cc_listener/enabled_cc_listener_bin');
     }
 
     /**
@@ -440,7 +440,7 @@ class Config
      */
     public function getElementToObserve()
     {
-        return $this->scopeConfig->getValue('forter/advanced_settings_pre_auth/class_id_identifier');
+        return $this->scopeConfig->getValue('forter/advanced_settings_cc_listener/class_id_identifier');
     }
 
     /**

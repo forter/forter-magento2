@@ -194,7 +194,7 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
               </group>
-              <group id="advanced_settings_pre_auth" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+              <group id="advanced_settings_cc_listener" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Advanced Settings Pre Auth</label>
                     <field id="enabled_cc_listener" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Enable CreditCard Listener</label>
