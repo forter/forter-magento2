@@ -404,6 +404,46 @@ class Config
     }
 
     /**
+     * Return boolean regarding active/disable pre-auth card observing
+     *
+     * @return boolean
+     */
+    public function isCcListenerActive()
+    {
+        return $this->scopeConfig->getValue('forter/advanced_settings_cc_listener/enabled_cc_listener');
+    }
+
+    /**
+     * Return boolean regarding observe Last4CC
+     *
+     * @return boolean
+     */
+    public function getAllowLast4CCListener()
+    {
+        return $this->scopeConfig->getValue('forter/advanced_settings_cc_listener/enabled_cc_listener_last4cc');
+    }
+
+    /**
+     * Return boolean regarding observe Bin
+     *
+     * @return boolean
+     */
+    public function getAllowBinListener()
+    {
+        return $this->scopeConfig->getValue('forter/advanced_settings_cc_listener/enabled_cc_listener_bin');
+    }
+
+    /**
+     * Return the element to observe
+     *
+     * @return string
+     */
+    public function getElementToObserve()
+    {
+        return $this->scopeConfig->getValue('forter/advanced_settings_cc_listener/class_id_identifier');
+    }
+
+    /**
      * @param $addresses
      * @return array|bool
      */

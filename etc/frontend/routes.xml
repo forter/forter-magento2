@@ -4,5 +4,8 @@
         <route frontName="forter" id="forter">
             <module name="Forter_Forter"/>
         </route>
+        <route frontName="magento" id="magento_forter">
+          <module name="Forter_Forter"/>
+        </route>
     </router>
 </config>

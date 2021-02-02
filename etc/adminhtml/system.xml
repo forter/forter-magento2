@@ -193,7 +193,39 @@
                     <label>Enable Phone Order</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-            </group>
+              </group>
+              <group id="advanced_settings_cc_listener" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Advanced Settings Pre Auth</label>
+                    <field id="enabled_cc_listener" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Enable CreditCard Listener</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <comment>
+                            Enable Javascript Listener For CreditCard field in order to get bin and last4cc
+                        </comment>
+                    </field>
+                    <field id="enabled_cc_listener_last4cc" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Enable Listener for last4cc</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <comment>
+                            Enable Javascript Listener For CreditCard Last4cc
+                        </comment>
+                    </field>
+                    <field id="enabled_cc_listener_bin" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Enable Listener for bin</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <comment>
+                            Enable Javascript Listener For CreditCard Bin
+                        </comment>
+                    </field>
+                    <field id="class_id_identifier" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                      <label>Class or Id identifer for the Listener</label>
+                      <comment>
+                          Please add the class or ID of the input of the CC you want to observe.
+                          for class use '.': .example
+                          for ID use '#': #example
+                      </comment>
+                    </field>
+                </group>
         </section>
     </system>
 </config>

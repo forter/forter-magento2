@@ -27,8 +27,7 @@ class Forter extends \Magento\Framework\View\Element\Template
         Context $context,
         ForterConfig $forterConfig,
         array $data = []
-    )
-    {
+    ) {
         parent::__construct($context, $data);
         $this->forterConfig = $forterConfig;
     }
@@ -37,10 +36,48 @@ class Forter extends \Magento\Framework\View\Element\Template
      * Return Merchant Site Id
      *
      * @return string
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function getSiteId()
     {
         return $this->forterConfig->getSiteId();
+    }
+
+    /**
+     * Return boolean regarding active/disable pre-auth card observing
+     * @return boolean
+     */
+    public function isCcListenerActive()
+    {
+        return $this->forterConfig->isCcListenerActive();
+    }
+
+    /**
+     * Return boolean regarding observe Last4CC
+     *
+     * @return boolean
+     */
+    public function getAllowLast4CCListener()
+    {
+        return $this->forterConfig->getAllowLast4CCListener();
+    }
+
+    /**
+     * Return boolean regarding observe Bin
+     *
+     * @return boolean
+     */
+    public function getAllowBinListener()
+    {
+        return $this->forterConfig->getAllowBinListener();
+    }
+
+    /**
+     * Return the element to observe
+     *
+     * @return string
+     */
+    public function getElementToObserve()
+    {
+        return $this->forterConfig->getElementToObserve();
     }
 }
