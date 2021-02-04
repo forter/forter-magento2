@@ -218,11 +218,13 @@
                         </comment>
                     </field>
                     <field id="class_id_identifier" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
-                      <label>Class or Id identifer for the Listener</label>
+                      <label>Class or Id identifier for the Listener</label>
                       <comment>
-                          Please add the class or ID of the input of the CC you want to observe.
-                          for class use '.': .example
-                          for ID use '#': #example
+                          <![CDATA[
+                              Please add the CSS selector of the CC input you want to observe.<br>
+                              Example selector: <i>.cc-number-field-wrapper input</i><br>
+                              How to use: <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector">https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector</a>.
+                          ]]>
                       </comment>
                     </field>
                 </group>
