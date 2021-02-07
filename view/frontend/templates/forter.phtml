@@ -38,9 +38,9 @@ require(["jquery"], function ($) {
         });
 
         <?php if ($ccListenerActive && strlen($elementToObserve) > 1): ?>
-        $(document).on('change', document.querySelector('<?php echo $elementToObserve; ?>'), function() {
+        $(document).on('change', document.querySelector('<?php echo $elementToObserve; ?>'), function(event) {
             try {
-                var value = $(this).val() || '';
+                var value = event.target.value || '';
                 value = value.replace(/\s|-/g, '');
                 if (value.length > 12 && value.length < 20) {
                     var xhr = new XMLHttpRequest();
