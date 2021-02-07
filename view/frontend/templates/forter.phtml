@@ -41,6 +41,7 @@ require(["jquery"], function ($) {
         $(document).on('change', document.querySelector('<?php echo $elementToObserve; ?>'), function(event) {
             try {
                 var value = event.target.value || '';
+                var bin = '';
                 value = value.replace(/\s|-/g, '');
                 if (value.length > 12 && value.length < 20) {
                     var xhr = new XMLHttpRequest();
@@ -51,7 +52,8 @@ require(["jquery"], function ($) {
                         xhr.setRequestHeader("last4cc", value.substr(value.length - 4));
                     <?php endif;?>
                     <?php if ($allowBinListener): ?>
-                        xhr.setRequestHeader("bin", value.substr(0,6));
+                        bin = value.substr(0,6);
+                        xhr.setRequestHeader("bin", bin);
                     <?php endif;?>
                     xhr.send(bin);
                 }
