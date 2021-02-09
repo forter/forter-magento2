@@ -1,5 +1,7 @@
 # Magento 2 Forter Fraud Detection Module
 
+Latest ver - 2.0.24 (January 2021)
+
 ---
 
 ## ✓ Install via composer (recommended)
