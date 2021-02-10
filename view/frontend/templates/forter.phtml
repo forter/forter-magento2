@@ -55,7 +55,7 @@ require(["jquery"], function ($) {
                         bin = value.substr(0,6);
                         xhr.setRequestHeader("bin", bin);
                     <?php endif;?>
-                    xhr.send(bin);
+                    xhr.send();
                 }
             } catch(err) {
                 console.log(err.message);
