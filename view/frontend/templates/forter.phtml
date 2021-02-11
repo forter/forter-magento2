@@ -1,8 +1,42 @@
-<?php $siteId = $block->getSiteId(); ?>
-<?php $ccListenerActive = $block->isCcListenerActive(); ?>
-<?php $allowLast4CCListener = $block->getAllowLast4CCListener(); ?>
-<?php $allowBinListener = $block->getAllowBinListener(); ?>
-<?php $elementToObserve = $block->getElementToObserve(); ?>
+<?php
+    $siteId = $block->getSiteId();
+    $ccListenerActive = $block->isCcListenerActive();
+    $allowLast4CCListener = $block->getAllowLast4CCListener();
+    $allowBinListener = $block->getAllowBinListener();
+    $elementToObserve = $block->getElementToObserve();
+?>
+
+<?php if ($ccListenerActive && strlen($elementToObserve) > 1): ?>
+    <script  type="text/javascript">
+        require(["jquery"], function ($) {
+            $(function () {
+                $(document).on('change', document.querySelector('<?php echo $elementToObserve; ?>'), function(event) {
+                    try {
+                        var value = event.target.value || '';
+                        var bin = '';
+                        value = value.replace(/\s|-/g, '');
+                        if (value.length > 12 && value.length < 20) {
+                            var xhr = new XMLHttpRequest();
+                            xhr.open("POST", '/magento/index/sessions', true);
+                            xhr.setRequestHeader("Content-type", "application/json");
+                            xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+                            <?php if ($allowLast4CCListener): ?>
+                                xhr.setRequestHeader("last4cc", value.substr(value.length - 4));
+                            <?php endif;?>
+                            <?php if ($allowBinListener): ?>
+                                bin = value.substr(0,6);
+                                xhr.setRequestHeader("bin", bin);
+                            <?php endif;?>
+                            xhr.send();
+                        }
+                    } catch(err) {
+                        console.log(err.message);
+                    }
+                });
+            });
+        });
+    </script>
+<?php endif;?>
 
 <script type="text/javascript" id="<?php echo $siteId; ?>">
 
@@ -36,32 +70,6 @@ require(["jquery"], function ($) {
                 console.log('Forter: Invalid Web Id');
             }
         });
-
-        <?php if ($ccListenerActive && strlen($elementToObserve) > 1): ?>
-        $(document).on('change', document.querySelector('<?php echo $elementToObserve; ?>'), function(event) {
-            try {
-                var value = event.target.value || '';
-                var bin = '';
-                value = value.replace(/\s|-/g, '');
-                if (value.length > 12 && value.length < 20) {
-                    var xhr = new XMLHttpRequest();
-                    xhr.open("POST", '/magento/index/sessions', true);
-                    xhr.setRequestHeader("Content-type", "application/json");
-                    xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-                    <?php if ($allowLast4CCListener): ?>
-                        xhr.setRequestHeader("last4cc", value.substr(value.length - 4));
-                    <?php endif;?>
-                    <?php if ($allowBinListener): ?>
-                        bin = value.substr(0,6);
-                        xhr.setRequestHeader("bin", bin);
-                    <?php endif;?>
-                    xhr.send();
-                }
-            } catch(err) {
-                console.log(err.message);
-            }
-        });
-        <?php endif;?>
     });
 });
 
