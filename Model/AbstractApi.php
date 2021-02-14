@@ -2,6 +2,8 @@
 
 namespace Forter\Forter\Model;
 
+use Forter\Forter\Logger\Logger\ErrorLogger;
+use Forter\Forter\Logger\Logger\ResponseLogger;
 use Forter\Forter\Model\Config as ForterConfig;
 use Magento\Checkout\Model\Session;
 use Magento\Framework\HTTP\Client\Curl as ClientInterface;
@@ -28,6 +30,14 @@ class AbstractApi
      * @var Config
      */
     private $forterConfig;
+    /**
+     * @var forterResponseLogger
+     */
+    private $forterResponseLogger;
+    /**
+     * @var forterErrorLogger
+     */
+    private $forterErrorLogger;
 
     /**
      * AbstractApi constructor.
@@ -37,11 +47,15 @@ class AbstractApi
     public function __construct(
         Session $checkoutSession,
         ClientInterface $clientInterface,
-        ForterConfig $forterConfig
+        ForterConfig $forterConfig,
+        ResponseLogger $forterResponseLogger,
+        ErrorLogger $forterErrorLogger
     ) {
         $this->checkoutSession = $checkoutSession;
         $this->clientInterface = $clientInterface;
         $this->forterConfig = $forterConfig;
+        $this->forterResponseLogger = $forterResponseLogger;
+        $this->forterErrorLogger = $forterErrorLogger;
     }
 
     /**
@@ -58,9 +72,9 @@ class AbstractApi
                 $tries++;
                 $timeOutStatus = $this->calcTimeOut($tries);
                 $this->setCurlOptions(strlen($data), $tries);
-                $this->forterConfig->log('Request attempt number:' . $tries);
-                $this->forterConfig->log('Request Url:' . $url);
-                $this->forterConfig->log('Request Body:' . $data);
+                $this->forterResponseLogger->debug('[Forter Request attempt number]:' . $tries);
+                $this->forterResponseLogger->debug('[Forter Request Url]:' . $url);
+                $this->forterResponseLogger->debug('[Forter Request Body]:' . $data);
 
                 try {
                     if ($type == 'post') {
@@ -69,8 +83,8 @@ class AbstractApi
                         $this->clientInterface->get($url);
                     }
                     $response = $this->clientInterface->getBody();
-                    $this->forterConfig->log('Response Body:' . $response, 'debug');
-                    $this->forterConfig->log('Response Header:' . json_encode($this->clientInterface->getHeaders()));
+                    $this->forterResponseLogger->info('[Forter Response Body]:' . $response);
+                    $this->forterResponseLogger->info('[Forter Response Header]:' . json_encode($this->clientInterface->getHeaders()));
 
                     $response = json_decode($response);
 
@@ -169,6 +183,7 @@ class AbstractApi
        ]
      ];
 
+        $this->forterErrorLogger->info($json);
         $this->sendApiRequest($url, json_encode($json));
     }
 }

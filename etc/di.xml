@@ -1,29 +1,55 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-  <type name="Magento\Customer\Model\AccountManagement">
-    <plugin name="forter_customer_plugin" type="Forter\Forter\Plugin\Customer\Model\AccountManagement" />
-  </type>
-  <type name="Magento\Customer\Model\ResourceModel\CustomerRepository">
-    <plugin name="forter_customer_after_save" type="Forter\Forter\Plugin\Customer\Model\ResourceModel\CustomerRepository" sortOrder="10" disabled="false"/>
-  </type>
-  <type name="Magento\Sales\Model\Order\Payment">
-    <plugin name="forter_payment_around_place" type="Forter\Forter\Plugin\Order\Payment" sortOrder="10" disabled="false"/>
- </type>
- <type name="Magento\Sales\Block\Adminhtml\Order\Create\Form\Account">
+    <type name="Magento\Customer\Model\AccountManagement">
+      <plugin name="forter_customer_plugin" type="Forter\Forter\Plugin\Customer\Model\AccountManagement" />
+    </type>
+    <type name="Magento\Customer\Model\ResourceModel\CustomerRepository">
+      <plugin name="forter_customer_after_save" type="Forter\Forter\Plugin\Customer\Model\ResourceModel\CustomerRepository" sortOrder="10" disabled="false"/>
+    </type>
+    <type name="Magento\Sales\Model\Order\Payment">
+      <plugin name="forter_payment_around_place" type="Forter\Forter\Plugin\Order\Payment" sortOrder="10" disabled="false"/>
+    </type>
+    <type name="Magento\Sales\Block\Adminhtml\Order\Create\Form\Account">
      <plugin name="after_order_create_form_account" type="Forter\Forter\Plugin\Sales\Block\Adminhtml\Order\Create\Form\AccountPlugin" sortOrder="2"/>
- </type>
- <virtualType name="Magento\Sales\Model\ResourceModel\Order\Grid" type="Magento\Sales\Model\ResourceModel\Grid">
-    <arguments>
+    </type>
+    <virtualType name="Magento\Sales\Model\ResourceModel\Order\Grid" type="Magento\Sales\Model\ResourceModel\Grid">
+      <arguments>
         <argument name="columns" xsi:type="array">
             <item name="forter_status" xsi:type="string">sales_order.forter_status</item>
         </argument>
-    </arguments>
-</virtualType>
-<virtualType name="Magento\Sales\Model\ResourceModel\Order\Grid" type="Magento\Sales\Model\ResourceModel\Grid">
-    <arguments>
+      </arguments>
+    </virtualType>
+    <virtualType name="Magento\Sales\Model\ResourceModel\Order\Grid" type="Magento\Sales\Model\ResourceModel\Grid">
+      <arguments>
         <argument name="columns" xsi:type="array">
             <item name="forter_web_id" xsi:type="string">sales_order.forter_web_id</item>
         </argument>
-    </arguments>
-</virtualType>
+      </arguments>
+    </virtualType>
+   <type name="Forter\Forter\Logger\Handler\ErrorHandler">
+     <arguments>
+         <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
+     </arguments>
+   </type>
+   <type name="Forter\Forter\Logger\Logger\ErrorLogger">
+     <arguments>
+         <argument name="name" xsi:type="string">forterErrorLogger</argument>
+         <argument name="handlers"  xsi:type="array">
+             <item name="system" xsi:type="object">Forter\Forter\Logger\Handler\ErrorHandler</item>
+         </argument>
+     </arguments>
+   </type>
+   <type name="Forter\Forter\Logger\Handler\ResponseHandler">
+     <arguments>
+         <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
+     </arguments>
+   </type>
+   <type name="Forter\Forter\Logger\Logger\ResponseLogger">
+     <arguments>
+         <argument name="name" xsi:type="string">forterResponseLogger</argument>
+         <argument name="handlers"  xsi:type="array">
+             <item name="system" xsi:type="object">Forter\Forter\Logger\Handler\ResponseHandler</item>
+         </argument>
+     </arguments>
+   </type>
 </config>
