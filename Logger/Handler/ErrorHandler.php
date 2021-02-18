@@ -18,7 +18,7 @@ class ErrorHandler extends BaseHandler
      *
      * @var int
      */
-    protected $loggerType = MonologLogger::ERROR;
+    protected $loggerType = MonologLogger::DEBUG;
 
     /**
      * File name

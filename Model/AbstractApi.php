@@ -182,8 +182,8 @@ class AbstractApi
          "debugInfo" => ""
        ]
      ];
-
+        $json = json_encode($json);
         $this->forterErrorLogger->info($json);
-        $this->sendApiRequest($url, json_encode($json));
+        $this->sendApiRequest($url, $json);
     }
 }

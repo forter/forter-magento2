@@ -108,20 +108,20 @@ class PaymentPlaceStart implements ObserverInterface
      */
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
-        $order = $observer->getEvent()->getPayment()->getOrder();
-        $ipAddress = $order->getRemoteIp();
-        if (!$ipAddress) {
-            $ipAddress = $this->remote->getRemoteAddress();
-        }
-
-        $connectionInformation = $this->basicInfo->getConnectionInformation($ipAddress, getallheaders());
-        $order->setForterClientDetails(json_encode($connectionInformation));
-
-        if (!$this->config->isEnabled() || $this->config->getIsPost()) {
-            return;
-        }
-
         try {
+            $order = $observer->getEvent()->getPayment()->getOrder();
+            $ipAddress = $order->getRemoteIp();
+            if (!$ipAddress) {
+                $ipAddress = $this->remote->getRemoteAddress();
+            }
+
+            $connectionInformation = $this->basicInfo->getConnectionInformation($ipAddress, getallheaders());
+            $order->setForterClientDetails(json_encode($connectionInformation));
+
+            if (!$this->config->isEnabled() || $this->config->getIsPost()) {
+                return;
+            }
+
             if ($this->config->getIsCron()) {
                 $currentTime = $this->dateTime->gmtDate();
 
