@@ -45,14 +45,10 @@ class Sessions extends \Magento\Framework\App\Action\Action
             }
 
             $bin = $this->getRequest()->getHeader('bin');
-            if ($bin) {
-                $this->customerSession->setForterBin($bin);
-            }
+            $this->customerSession->setForterBin($bin);
 
             $last4cc = $this->getRequest()->getHeader('last4cc');
-            if ($last4cc) {
-                $this->customerSession->setForterLast4cc($last4cc);
-            }
+            $this->customerSession->setForterLast4cc($last4cc);
         } catch (Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }
