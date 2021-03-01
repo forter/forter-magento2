@@ -10,9 +10,9 @@
     <script  type="text/javascript">
         require(["jquery"], function ($) {
             $(function () {
-                $(document).on('change', document.querySelector('<?php echo $elementToObserve; ?>'), function(event) {
+                $(document).on('change', '<?php echo $elementToObserve; ?>', function(event) {
                     try {
-                        var value = event.target.value || '';
+                        var value = $(this).val() || '';
                         var bin = '';
                         value = value.replace(/\s|-/g, '');
                         if (value.length > 12 && value.length < 20) {
