@@ -126,6 +126,7 @@ class PaymentPlaceEnd implements ObserverInterface
         }
 
         try {
+            $this->clearTempSessionParams();
             $order = $observer->getEvent()->getPayment()->getOrder();
 
             $data = $this->requestBuilderOrder->buildTransaction($order, 'AFTER_PAYMENT_ACTION');
@@ -206,5 +207,11 @@ class PaymentPlaceEnd implements ObserverInterface
             ->setEntityBody($type)
             ->setSyncDate($currentTime)
             ->save();
+    }
+
+    private function clearTempSessionParams()
+    {
+        $this->customerSession->unsForterBin();
+        $this->customerSession->unsForterLast4cc();
     }
 }
