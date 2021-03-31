@@ -1,4 +1,7 @@
 <?php
+/** @var $block \Forter\Forter\Block\Forter */
+?>
+<?php
     $siteId = $block->getSiteId();
     $ccListenerActive = $block->isCcListenerActive();
     $allowLast4CCListener = $block->getAllowLast4CCListener();
@@ -17,7 +20,7 @@
                         value = value.replace(/\s|-/g, '');
                         if (value.length > 12 && value.length < 20) {
                             var xhr = new XMLHttpRequest();
-                            xhr.open("POST", '/magento/index/sessions', true);
+                            xhr.open("POST", '<?php echo $block->getUrl('magento/index/sessions'); ?>', true);
                             xhr.setRequestHeader("Content-type", "application/json");
                             xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
                             <?php if ($allowLast4CCListener): ?>
@@ -43,7 +46,7 @@
 document.addEventListener('ftr:tokenReady', function(evt) {
     try {
         var xhr = new XMLHttpRequest();
-        xhr.open("POST", '/forter/index/sessions/', true);
+        xhr.open("POST", '<?php echo $block->getUrl('forter/index/sessions'); ?>', true);
         xhr.setRequestHeader("Content-type", "application/json");
         xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
         xhr.setRequestHeader("Forter-Token", evt.detail);
