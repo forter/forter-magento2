@@ -121,7 +121,7 @@ class PaymentPlaceEnd implements ObserverInterface
      */
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
-        if (!$this->forterConfig->isEnabled() || !$this->forterConfig->getIsPost()) {
+        if (!$this->forterConfig->isEnabled() || (!$this->forterConfig->getIsPost() && !$this->config->getIsPreAndPost())) {
             return;
         }
 

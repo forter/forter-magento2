@@ -388,10 +388,28 @@ class Config
     /**
      * @return bool
      */
+    public function getIsPre()
+    {
+        $prePostSelect = $this->scopeConfig->getValue('forter/immediate_post_pre_decision/pre_post_select');
+        return ($prePostSelect == '1' ? true : false);
+    }
+
+    /**
+     * @return bool
+     */
     public function getIsPost()
     {
         $prePostSelect = $this->scopeConfig->getValue('forter/immediate_post_pre_decision/pre_post_select');
         return ($prePostSelect == '2' ? true : false);
+    }
+
+    /**
+     * @return bool
+     */
+    public function getIsPreAndPost()
+    {
+        $prePostSelect = $this->scopeConfig->getValue('forter/immediate_post_pre_decision/pre_post_select');
+        return ($prePostSelect == '4' ? true : false);
     }
 
     /**
@@ -441,6 +459,16 @@ class Config
     public function getElementToObserve()
     {
         return $this->scopeConfig->getValue('forter/advanced_settings_cc_listener/class_id_identifier');
+    }
+
+    /**
+     * @return string
+     */
+    public function getVerificationResultsMapping($key)
+    {
+        if ($key) {
+            return $this->scopeConfig->getValue('forter/verification_results_mapping/' . (string) $key);
+        }
     }
 
     /**

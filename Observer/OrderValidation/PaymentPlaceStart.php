@@ -118,7 +118,7 @@ class PaymentPlaceStart implements ObserverInterface
             $connectionInformation = $this->basicInfo->getConnectionInformation($ipAddress, getallheaders());
             $order->setForterClientDetails(json_encode($connectionInformation));
 
-            if (!$this->config->isEnabled() || $this->config->getIsPost()) {
+            if (!$this->config->isEnabled() || ($this->config->getIsPost() && !$this->config->getIsPreAndPost())) {
                 return;
             }
 
