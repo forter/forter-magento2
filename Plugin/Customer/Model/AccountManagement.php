@@ -106,13 +106,12 @@ class AccountManagement
 
         try {
             $customer = $this->localMatchCustomerByRpToken($resetToken);
-
-            $headers = getallheaders();
-            if ($customer) {
+            $connectionInformation = $this->getConnectionInformation();
+            if ($customer && $connectionInformation) {
                 $json = [
                   "accountId" => $customer->getId(),
                   "eventTime" => time(),
-                  "connectionInformation" => $this->basicInfo->getConnectionInformation($this->remoteAddress->getRemoteAddress(), $headers),
+                  "connectionInformation" => $connectionInformation,
                   "passwordUpdateTrigger" => 'USER_FORGOT_PASSWORD'
                 ];
 
@@ -143,14 +142,14 @@ class AccountManagement
         }
 
         try {
-            $headers = getallheaders();
             $websiteID = $this->storemanager->getStore()->getWebsiteId();
             $customer = $this->customer->create()->setWebsiteId($websiteID)->loadByEmail($email);
-            if ($customer) {
+            $connectionInformation = $this->getConnectionInformation();
+            if ($customer && $connectionInformation) {
                 $json = [
                   "accountId" => $customer->getId(),
                   "eventTime" => time(),
-                  "connectionInformation" => $this->basicInfo->getConnectionInformation($this->remoteAddress->getRemoteAddress(), $headers),
+                  "connectionInformation" => $connectionInformation,
                   "passwordUpdateTrigger" => 'LOGGED_IN_USER'
                 ];
 
@@ -197,27 +196,27 @@ class AccountManagement
     private function sendLoginAttempt($loginStatus, $customer)
     {
         try {
-            $headers = getallheaders();
             $customerAccountData = $this->customerPrepere->getCustomerAccountData(null, $customer);
             $areaCode = ($this->state->getAreaCode() == 'frontend' ? 'END_USER' : 'MERCHANT_ADMIN');
             $type = ($this->state->getAreaCode() == 'frontend' ? 'PRIVATE' : 'MERCHANT_EMPLOYEE');
-
-            $json = [
-                "accountId" => $customer->getId(),
-                "eventTime" => time(),
-                "connectionInformation" => $this->basicInfo->getConnectionInformation($this->remoteAddress->getRemoteAddress(), $headers),
-                "accountData" => [
-                  "type" => $type,
-                  "statusChangeBy" => $areaCode,
-                  "addressesInAccount" => $this->forterConfig->getAddressInAccount($customer->getAddresses()),
-                  "customerEngagement" => $customerAccountData['customerEngagement'],
-                  "status" => $customerAccountData['status']
-                ],
-                "loginStatus" => $loginStatus,
-                "loginMethodType" => "PASSWORD"
-            ];
+            $connectionInformation = $this->getConnectionInformation();
 
             if ($customer) {
+                $json = [
+                    "accountId" => $customer->getId(),
+                    "eventTime" => time(),
+                    "connectionInformation" => $connectionInformation,
+                    "accountData" => [
+                      "type" => $type,
+                      "statusChangeBy" => $areaCode,
+                      "addressesInAccount" => $this->forterConfig->getAddressInAccount($customer->getAddresses()),
+                      "customerEngagement" => $customerAccountData['customerEngagement'],
+                      "status" => $customerAccountData['status']
+                    ],
+                    "loginStatus" => $loginStatus,
+                    "loginMethodType" => "PASSWORD"
+                ];
+
                 $url = 'https://api.forter-secure.com/v2/accounts/login/' . $customer->getId();
                 $this->abstractApi->sendApiRequest($url, json_encode($json));
             }
@@ -261,5 +260,14 @@ class AccountManagement
         }
         //Unique customer found.
         return $found->getItems()[0];
+    }
+
+    /**
+     * @method getConnectionInformation
+     * @return array
+     */
+    private function getConnectionInformation()
+    {
+        return $this->basicInfo->getConnectionInformation($this->remoteAddress->getRemoteAddress());
     }
 }
