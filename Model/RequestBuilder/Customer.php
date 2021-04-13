@@ -95,7 +95,7 @@ class Customer
     public function getPrimaryDeliveryDetails($order)
     {
         $shippingMethod = $order->getShippingMethod();
-        if ($shippingMethod = 'instore_pickup') {
+        if ($shippingMethod == 'instore_pickup') {
             $deliveryMethod = "store pickup";
         } else {
             $deliveryMethod = substr(str_replace($this::SHIPPING_METHOD_PREFIX, "", $order->getShippingDescription()), 0, 45);
@@ -119,7 +119,7 @@ class Customer
     {
         $shippingAddress = $order->getShippingAddress();
         $shippingMethod = $order->getShippingMethod();
-        if ($shippingMethod = 'instore_pickup') {
+        if ($shippingMethod == 'instore_pickup') {
             $billingAddress = $shippingAddress;
         } else {
             $billingAddress = $order->getBillingAddress();
