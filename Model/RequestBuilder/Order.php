@@ -136,7 +136,7 @@ class Order
      */
     public function buildTransaction($order, $orderStage)
     {
-        $connectionInformation = json_decode($order->getForterClientDetails());
+        $connectionInformation = $order->getPayment()->getAdditionalInformation('forter_client_details');
         $primaryRecipient = $this->customerPrepere->getPrimaryRecipient($order);
         if ($this->giftCardPrepere) {
             $primaryRecipient["personalDetails"] = $this->giftCardPrepere->getGiftCardPrimaryRecipient($order);
@@ -144,25 +144,23 @@ class Order
 
         //get forter client number
         $forterWebId = $this->request->getPost('forter_web_id');
-        $forterNumber = ($forterWebId != "") ? $forterWebId : "";
-        $order->setForterWebId($forterNumber);
 
         $data = [
-        "orderId" => strval($order->getIncrementId()),
-        "orderType" => $this->getOrderType($order),
-        "timeSentToForter" => time()*1000,
-        "checkoutTime" => time(),
-        "additionalIdentifiers" => $this->basicInfoPrepare->getAdditionalIdentifiers($order, $orderStage),
-        "connectionInformation" => $connectionInformation,
-        "totalAmount" => $this->cartPrepare->getTotalAmount($order),
-        "cartItems" => $this->cartPrepare->generateCartItems($order),
-        "primaryDeliveryDetails" => $this->customerPrepere->getPrimaryDeliveryDetails($order),
-        "primaryRecipient" => $primaryRecipient,
-        "accountOwner" => $this->customerPrepere->getAccountOwnerInfo($order),
-        "customerAccountData" => $this->customerPrepere->getCustomerAccountData($order, null),
-        "totalDiscount" => $this->cartPrepare->getTotalDiscount($order),
-        "payment" => $this->paymentPrepere->generatePaymentInfo($order)
-      ];
+            "orderId" => strval($order->getIncrementId()),
+            "orderType" => $forterWebId ? "PHONE" : "WEB",
+            "timeSentToForter" => time()*1000,
+            "checkoutTime" => time(),
+            "additionalIdentifiers" => $this->basicInfoPrepare->getAdditionalIdentifiers($order, $orderStage),
+            "connectionInformation" => $connectionInformation,
+            "totalAmount" => $this->cartPrepare->getTotalAmount($order),
+            "cartItems" => $this->cartPrepare->generateCartItems($order),
+            "primaryDeliveryDetails" => $this->customerPrepere->getPrimaryDeliveryDetails($order),
+            "primaryRecipient" => $primaryRecipient,
+            "accountOwner" => $this->customerPrepere->getAccountOwnerInfo($order),
+            "customerAccountData" => $this->customerPrepere->getCustomerAccountData($order, null),
+            "totalDiscount" => $this->cartPrepare->getTotalDiscount($order),
+            "payment" => $this->paymentPrepere->generatePaymentInfo($order)
+        ];
 
         if ($this->forterConfig->isSandboxMode()) {
             $data['additionalInformation'] = [
@@ -170,28 +168,11 @@ class Order
           ];
         }
 
-        $phoneWebId = $order->getForterWebId(); // field to be created by the merchant as instructed in documentation
-        if ($phoneWebId != '') {
+        if ($forterWebId) {
             $data['phoneOrderInformation'] = [
-                "customerWebId" => $phoneWebId
+                "customerWebId" => $forterWebId
             ];
         }
         return $data;
-    }
-
-    /**
-     * Returns order type according to 'forter_web_id' attribute.
-     * @param $order
-     * @return string
-     */
-    private function getOrderType($order)
-    {
-        if ($order->getForterWebId() && $order->getForterWebId() != "") {
-            $orderType = "PHONE";
-        } else {
-            $orderType = "WEB";
-        }
-
-        return $orderType;
     }
 }

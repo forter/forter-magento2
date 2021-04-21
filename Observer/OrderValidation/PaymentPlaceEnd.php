@@ -12,6 +12,7 @@ use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Message\ManagerInterface;
+use Magento\Framework\Registry;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magento\Sales\Api\OrderManagementInterface;
 use Magento\Store\Model\StoreManagerInterface;
@@ -25,68 +26,85 @@ class PaymentPlaceEnd implements ObserverInterface
     const VALIDATION_API_ENDPOINT = 'https://api.forter-secure.com/v2/orders/';
 
     /**
-     * @var ManagerInterface
-     */
-    private $messageManager;
-    /**
-     * @var Decline
-     */
-    private $decline;
-    /**
-     * @var ForterQueueFactory
-     */
-    private $queue;
-    /**
-     * @var Approve
-     */
-    private $approve;
-    /**
-     * @var AbstractApi
-     */
-    private $abstractApi;
-    /**
-     * @var Config
-     */
-    private $forterConfig;
-    /**
-     * @var Order
-     */
-    private $requestBuilderOrder;
-    /**
-     * @var OrderManagementInterface
-     */
-    private $orderManagement;
-    /**
-     * @var StoreManagerInterface
-     */
-    private $storeManager;
-    /**
-     * @var DateTime
-     */
-    private $dateTime;
-    /**
-     * @var CustomerSession
-     */
-    private $customerSession;
-    /**
-     * @var
+     * @var ScopeConfigInterface
      */
     private $scopeConfig;
 
     /**
-     * PaymentPlaceEnd constructor.
-     * @param ScopeConfigInterface $scopeConfig
-     * @param CustomerSession $customerSession
-     * @param ManagerInterface $messageManager
-     * @param ForterQueueFactory $queue
-     * @param Decline $decline
-     * @param Approve $approve
-     * @param DateTime $dateTime
-     * @param AbstractApi $abstractApi
-     * @param Config $forterConfig
-     * @param Order $requestBuilderOrder
-     * @param OrderManagementInterface $orderManagement
-     * @param StoreManagerInterface $storeManager
+     * @var ManagerInterface
+     */
+    private $messageManager;
+
+    /**
+     * @var Decline
+     */
+    private $decline;
+
+    /**
+     * @var ForterQueueFactory
+     */
+    private $queue;
+
+    /**
+     * @var Approve
+     */
+    private $approve;
+
+    /**
+     * @var AbstractApi
+     */
+    private $abstractApi;
+
+    /**
+     * @var Config
+     */
+    private $forterConfig;
+
+    /**
+     * @var Order
+     */
+    private $requestBuilderOrder;
+
+    /**
+     * @var OrderManagementInterface
+     */
+    private $orderManagement;
+
+    /**
+     * @var StoreManagerInterface
+     */
+    private $storeManager;
+
+    /**
+     * @var DateTime
+     */
+    private $dateTime;
+
+    /**
+     * @var CustomerSession
+     */
+    private $customerSession;
+
+    /**
+     * @var Registry
+     */
+    private $registry;
+
+    /**
+     * @method __construct
+     * @param  ScopeConfigInterface     $scopeConfig
+     * @param  CustomerSession          $customerSession
+     * @param  ManagerInterface         $messageManager
+     * @param  ForterQueueFactory       $queue
+     * @param  Decline                  $decline
+     * @param  Approve                  $approve
+     * @param  DateTime                 $dateTime
+     * @param  AbstractApi              $abstractApi
+     * @param  Config                   $forterConfig
+     * @param  Order                    $requestBuilderOrder
+     * @param  OrderManagementInterface $orderManagement
+     * @param  StoreManagerInterface    $storeManager
+     * @param  Registry                 $registry
      */
     public function __construct(
         ScopeConfigInterface $scopeConfig,
@@ -100,7 +118,8 @@ class PaymentPlaceEnd implements ObserverInterface
         Config $forterConfig,
         Order $requestBuilderOrder,
         OrderManagementInterface $orderManagement,
-        StoreManagerInterface $storeManager
+        StoreManagerInterface $storeManager,
+        Registry $registry
     ) {
         $this->customerSession = $customerSession;
         $this->messageManager = $messageManager;
@@ -114,6 +133,7 @@ class PaymentPlaceEnd implements ObserverInterface
         $this->requestBuilderOrder = $requestBuilderOrder;
         $this->orderManagement = $orderManagement;
         $this->queue = $queue;
+        $this->registry = $registry;
     }
 
     /**
@@ -121,11 +141,16 @@ class PaymentPlaceEnd implements ObserverInterface
      */
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
-        if (!$this->forterConfig->isEnabled() || (!$this->forterConfig->getIsPost() && !$this->forterConfig->getIsPreAndPost())) {
-            return;
-        }
-
         try {
+            if (!$this->forterConfig->isEnabled() || (!$this->forterConfig->getIsPost() && !$this->forterConfig->getIsPreAndPost())) {
+                if ($this->registry->registry('forter_pre_decision')) {
+                    $order = $observer->getEvent()->getPayment()->getOrder();
+                    $order->addStatusHistoryComment(__('Forter (pre) Decision: %1', $this->registry->registry('forter_pre_decision')));
+                    $order->save();
+                }
+                return;
+            }
+
             $this->clearTempSessionParams();
             $order = $observer->getEvent()->getPayment()->getOrder();
 
@@ -138,10 +163,13 @@ class PaymentPlaceEnd implements ObserverInterface
 
             if ($forterResponse->status != 'success' || !isset($forterResponse->action)) {
                 $order->setForterStatus('error');
+                $order->addStatusHistoryComment(__('Forter (post) Decision: %1', 'error'));
+                $order->save();
                 return;
             }
 
             $order->setForterStatus($forterResponse->action);
+            $order->addStatusHistoryComment(__('Forter (post) Decision: %1', $forterResponse->action));
             $this->handleResponse($forterResponse->action, $order);
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);

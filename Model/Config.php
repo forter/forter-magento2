@@ -11,6 +11,8 @@
 
 namespace Forter\Forter\Model;
 
+use Forter\Forter\Logger\Logger\DebugLogger;
+use Forter\Forter\Logger\Logger\ErrorLogger;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\Module\ModuleListInterface;
@@ -51,23 +53,37 @@ class Config
      * @var EncryptorInterface
      */
     private $encryptor;
+
     /**
      * @var LoggerInterface
      */
     private $logger;
+
     /**
      * @var UrlInterface
      */
     private $urlBuilder;
 
     /**
+     * @var DebugLogger
+     */
+    private $forterDebugLogger;
+
+    /**
+     * @var ErrorLogger
+     */
+    private $forterErrorLogger;
+
+    /**
      * @method __construct
-     * @param ScopeConfigInterface $scopeConfig
-     * @param StoreManagerInterface $storeManager
-     * @param EncryptorInterface $encryptor
-     * @param LoggerInterface $logger
-     * @param UrlInterface $urlBuilder
-     * @param ModuleListInterface $moduleList
+     * @param  ScopeConfigInterface  $scopeConfig
+     * @param  StoreManagerInterface $storeManager
+     * @param  EncryptorInterface    $encryptor
+     * @param  LoggerInterface       $logger
+     * @param  ModuleListInterface   $moduleList
+     * @param  UrlInterface          $urlBuilder
+     * @param  DebugLogger           $forterDebugLogger
+     * @param  ErrorLogger           $forterErrorLogger
      */
     public function __construct(
         ScopeConfigInterface $scopeConfig,
@@ -75,7 +91,9 @@ class Config
         EncryptorInterface $encryptor,
         LoggerInterface $logger,
         ModuleListInterface $moduleList,
-        UrlInterface $urlBuilder
+        UrlInterface $urlBuilder,
+        DebugLogger $forterDebugLogger,
+        ErrorLogger $forterErrorLogger
     ) {
         $this->scopeConfig = $scopeConfig;
         $this->storeManager = $storeManager;
@@ -83,6 +101,8 @@ class Config
         $this->logger = $logger;
         $this->moduleList = $moduleList;
         $this->urlBuilder = $urlBuilder;
+        $this->forterDebugLogger = $forterDebugLogger;
+        $this->forterErrorLogger = $forterErrorLogger;
     }
 
     /**
@@ -264,26 +284,15 @@ class Config
      */
     public function log($message, $type = "debug", $data = [], $prefix = '[Forter] ')
     {
-        if (!$this->isDebugEnabled()) {
-            return false;
-        }
-
-        $this->logger->debug($prefix . json_encode($message), $data); //REMOVE LATER
-        if ($type !== 'debug' || $this->isDebugEnabled()) {
+        if ($type === 'error' || $this->isDebugEnabled()) {
+            $message = $prefix . json_encode($message);
             if (!isset($data['store_id'])) {
                 $data['store_id'] = $this->getStoreId();
             }
-            switch ($type) {
-                case 'error':
-                    $this->logger->error($prefix . json_encode($message), $data);
-                    break;
-                case 'info':
-                    $this->logger->info($prefix . json_encode($message), $data);
-                    break;
-                case 'debug':
-                default:
-                    $this->logger->debug($prefix . json_encode($message), $data);
-                    break;
+            $this->forterDebugLogger->debug($message, $data);
+            if ($type === 'error') {
+                $this->forterErrorLogger->debug($message, $data);
+                $this->logger->error($message, $data);
             }
         }
         return $this;

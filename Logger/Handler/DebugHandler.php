@@ -9,9 +9,9 @@ use Magento\Framework\Logger\Handler\Base as BaseHandler;
 use Monolog\Logger as MonologLogger;
 
 /**
- * Class ErrorHandler
+ * Class DebugHandler
  */
-class ResponseHandler extends BaseHandler
+class DebugHandler extends BaseHandler
 {
     /**
      * Logging level
@@ -25,5 +25,5 @@ class ResponseHandler extends BaseHandler
      *
      * @var string
      */
-    protected $fileName = '/var/log/Forter/response.log';
+    protected $fileName = '/var/log/Forter/debug.log';
 }
