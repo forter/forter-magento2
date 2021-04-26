@@ -547,23 +547,23 @@ class Config
                 }
                 return $result;
             case 'approve_post':
-              if ($result == '1') {
-                  $result = 'Create Invoice and Capture Payments (CRON)';
-              } elseif ($result == '2') {
-                  $result = 'Create Invoice and Capture Payments (IMMEDIATELY)';
-              } elseif ($result == '3') {
-                  $result = 'Do Nothing';
-              }
-              return $result;
+                if ($result == '1') {
+                    $result = 'Create Invoice and Capture Payments (CRON)';
+                } elseif ($result == '2') {
+                    $result = 'Create Invoice and Capture Payments (IMMEDIATELY)';
+                } elseif ($result == '3') {
+                    $result = 'Do Nothing';
+                }
+                return $result;
             case 'not_review_post':
-              if ($result == '1') {
-                  $result = 'Create Invoice and Capture Payments (CRON)';
-              } elseif ($result == '2') {
-                  $result = 'Create Invoice and Capture Payments (IMMEDIATELY)';
-              } elseif ($result == '3') {
-                  $result = 'Do Nothing';
-              }
-              return $result;
+                if ($result == '1') {
+                    $result = 'Create Invoice and Capture Payments (CRON)';
+                } elseif ($result == '2') {
+                    $result = 'Create Invoice and Capture Payments (IMMEDIATELY)';
+                } elseif ($result == '3') {
+                    $result = 'Do Nothing';
+                }
+                return $result;
             default:
                 return $result;
         }

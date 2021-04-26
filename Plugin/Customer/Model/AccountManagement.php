@@ -137,7 +137,7 @@ class AccountManagement
         $currentPassword,
         $newPassword
     ) {
-        if (!$this->forterConfig->isEnabled()  || !$this->forterConfig->isAccountTouchpointEnabled()) {
+        if (!$this->forterConfig->isEnabled() || !$this->forterConfig->isAccountTouchpointEnabled()) {
             return false;
         }
 
@@ -171,7 +171,7 @@ class AccountManagement
      */
     public function aroundAuthenticate(AccountManagementOriginal $subject, callable $proceed, $username, $password)
     {
-        if (!$this->forterConfig->isEnabled()  || !$this->forterConfig->isAccountTouchpointEnabled()) {
+        if (!$this->forterConfig->isEnabled() || !$this->forterConfig->isAccountTouchpointEnabled()) {
             $result = $proceed($username, $password);
             return $result;
         }

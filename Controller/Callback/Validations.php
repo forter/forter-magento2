@@ -23,8 +23,8 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
 {
 
     /**
-      * @var AbstractApi
-      */
+     * @var AbstractApi
+     */
     protected $abstractApi;
     /**
      * @var Config

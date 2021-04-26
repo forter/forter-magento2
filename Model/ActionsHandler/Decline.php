@@ -19,8 +19,8 @@ use Magento\Sales\Model\Service\CreditmemoService;
 class Decline
 {
     /**
-      * @var AbstractApi
-      */
+     * @var AbstractApi
+     */
     private $abstractApi;
     /**
      * @var CheckoutSession

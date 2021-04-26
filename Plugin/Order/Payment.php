@@ -65,7 +65,7 @@ class Payment
     public function notifyForterOfPaymentFailure($e, $subject)
     {
         try {
-            if(!$this->forterConfig->isEnabled()) {
+            if (!$this->forterConfig->isEnabled()) {
                 return;
             }
             if ($e->getMessage() == $this->forterConfig->getPreThanksMsg()) {
@@ -75,7 +75,7 @@ class Payment
             $data = $this->requestBuilderOrder->buildTransaction($order, 'PAYMENT_ACTION_FAILURE');
             $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
             $this->abstractApi->sendApiRequest($url, json_encode($data));
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }
     }

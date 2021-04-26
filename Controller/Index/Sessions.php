@@ -13,8 +13,8 @@ use Magento\Framework\View\Result\PageFactory;
 class Sessions extends \Magento\Framework\App\Action\Action
 {
     /**
-      * @var AbstractApi
-      */
+     * @var AbstractApi
+     */
     protected $abstractApi;
 
     /**

@@ -53,7 +53,7 @@ class AbstractApi
      * @param $data
      * @return string
      */
-    public function sendApiRequest($url, $data, $type='post')
+    public function sendApiRequest($url, $data, $type = 'post')
     {
         try {
             $tries = 1;
@@ -160,8 +160,8 @@ class AbstractApi
         $orderId = $this->checkoutSession->getQuote()->getReservedOrderId();
 
         $json = [
-       "orderID" => $orderId,
-       "exception" => [
+        "orderID" => $orderId,
+        "exception" => [
          "message" => [
            "message" => $e->getMessage(),
            "fileName" => $e->getFile(),
@@ -170,8 +170,8 @@ class AbstractApi
            "stack" => $e->getTrace()
          ],
          "debugInfo" => ""
-       ]
-     ];
+        ]
+        ];
         $json = json_encode($json);
         $this->forterErrorLogger->info($json);
         $this->sendApiRequest($url, $json);

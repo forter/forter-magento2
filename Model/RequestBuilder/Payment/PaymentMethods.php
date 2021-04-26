@@ -59,7 +59,7 @@ class PaymentMethods
               "gatewayTransactionId" => $payment->getTransactionId(),
           ],
           "fullPaypalResponsePayload" => $payment->getAdditionalInformation()
-      ];
+        ];
     }
 
     public function getAuthorizeNetDetails($payment)
@@ -194,7 +194,7 @@ class PaymentMethods
         return $this->forterConfig->getVerificationResultsMapping($key);
     }
 
-    public function preferCcDetails($payment, $detailsArray=[])
+    public function preferCcDetails($payment, $detailsArray = [])
     {
         if (array_key_exists("bin", $detailsArray)) {
             $binNumber = $detailsArray['bin'];

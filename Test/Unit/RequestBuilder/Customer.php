@@ -114,7 +114,7 @@ class Customer extends TestCase
         "created" => strtotime(ConstList::CUSTOMER_CREATION_DATE),
         "pastOrdersCount" => 0,
         "pastOrdersSum" => 0
-      ]);
+        ]);
     }
 
     public function testGetPrimaryDeliveryDetails()

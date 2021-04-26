@@ -1,12 +1,12 @@
 <?php
 /**
-* Forter Payments For Magento 2
-* https://www.Forter.com/
-*
-* @category Forter
-* @package  Forter_Forter
-* @author   Girit-Interactive (https://www.girit-tech.com/)
-*/
+ * Forter Payments For Magento 2
+ * https://www.Forter.com/
+ *
+ * @category Forter
+ * @package  Forter_Forter
+ * @author   Girit-Interactive (https://www.girit-tech.com/)
+ */
 namespace Forter\Forter\Model\RequestBuilder;
 
 use Forter\Forter\Model\Config as ForterConfig;
@@ -170,7 +170,7 @@ class Order
         if ($this->forterConfig->isSandboxMode()) {
             $data['additionalInformation'] = [
               'debug' => $order->debug()
-          ];
+            ];
         }
 
         return $data;
