@@ -142,7 +142,10 @@ class PaymentPlaceStart implements ObserverInterface
 
             $order = $observer->getEvent()->getPayment()->getOrder();
 
-            if (!($connectionInformation = $this->basicInfo->getConnectionInformation($order->getRemoteIp() ?: $this->remote->getRemoteAddress()))) {
+            $connectionInformation = $this->basicInfo->getConnectionInformation(
+                $order->getRemoteIp() ?: $this->remote->getRemoteAddress()
+            );
+            if (!$connectionInformation) {
                 return;
             }
 
