@@ -136,31 +136,36 @@ class Order
      */
     public function buildTransaction($order, $orderStage)
     {
-        $connectionInformation = $order->getPayment()->getAdditionalInformation('forter_client_details');
-        $primaryRecipient = $this->customerPrepere->getPrimaryRecipient($order);
-        if ($this->giftCardPrepere) {
-            $primaryRecipient["personalDetails"] = $this->giftCardPrepere->getGiftCardPrimaryRecipient($order);
-        }
-
-        //get forter client number
-        $forterWebId = $this->request->getPost('forter_web_id');
-
         $data = [
             "orderId" => strval($order->getIncrementId()),
-            "orderType" => $forterWebId ? "PHONE" : "WEB",
+            "orderType" => "WEB",
             "timeSentToForter" => time()*1000,
             "checkoutTime" => time(),
             "additionalIdentifiers" => $this->basicInfoPrepare->getAdditionalIdentifiers($order, $orderStage),
-            "connectionInformation" => $connectionInformation,
             "totalAmount" => $this->cartPrepare->getTotalAmount($order),
             "cartItems" => $this->cartPrepare->generateCartItems($order),
             "primaryDeliveryDetails" => $this->customerPrepere->getPrimaryDeliveryDetails($order),
-            "primaryRecipient" => $primaryRecipient,
+            "primaryRecipient" => $this->customerPrepere->getPrimaryRecipient($order),
             "accountOwner" => $this->customerPrepere->getAccountOwnerInfo($order),
             "customerAccountData" => $this->customerPrepere->getCustomerAccountData($order, null),
             "totalDiscount" => $this->cartPrepare->getTotalDiscount($order),
             "payment" => $this->paymentPrepere->generatePaymentInfo($order)
         ];
+
+        if ($this->giftCardPrepere) {
+            $data['primaryRecipient']["personalDetails"] = $this->giftCardPrepere->getGiftCardPrimaryRecipient($order);
+        }
+
+        //If phone order - get forter client number (forter_web_id)
+        if (($forterWebId = $this->request->getPost('forter_web_id'))) {
+            $data['connectionInformation'] = "PHONE";
+            $data['phoneOrderInformation'] = [
+                "customerWebId" => $forterWebId
+            ];
+        } else {
+            //If not a phone order - add the connectionInformation:
+            $data['connectionInformation'] = $order->getPayment()->getAdditionalInformation('forter_client_details');
+        }
 
         if ($this->forterConfig->isSandboxMode()) {
             $data['additionalInformation'] = [
@@ -168,11 +173,6 @@ class Order
           ];
         }
 
-        if ($forterWebId) {
-            $data['phoneOrderInformation'] = [
-                "customerWebId" => $forterWebId
-            ];
-        }
         return $data;
     }
 }
