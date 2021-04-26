@@ -158,7 +158,7 @@ class Order
 
         //If phone order - get forter client number (forter_web_id)
         if (($forterWebId = $this->request->getPost('forter_web_id'))) {
-            $data['connectionInformation'] = "PHONE";
+            $data['orderType'] = "PHONE";
             $data['phoneOrderInformation'] = [
                 "customerWebId" => $forterWebId
             ];
