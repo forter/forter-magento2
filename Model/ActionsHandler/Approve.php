@@ -23,8 +23,8 @@ class Approve
      */
     private $forterConfig;
     /**
-      * @var AbstractApi
-      */
+     * @var AbstractApi
+     */
     private $abstractApi;
     /**
      * @var CollectionFactory

@@ -39,8 +39,7 @@ class ForterStatus extends Column
         SearchCriteriaBuilder $criteria,
         array $components = [],
         array $data = []
-    )
-    {
+    ) {
         $this->_orderRepository = $orderRepository;
         $this->_searchCriteria = $criteria;
         parent::__construct($context, $uiComponentFactory, $components, $data);

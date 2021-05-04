@@ -29,20 +29,25 @@ class BasicInfo
 
     /**
      * @param $remoteIp
-     * @param $headers
      * @return array
      */
-    public function getConnectionInformation($remoteIp, $headers)
+    public function getConnectionInformation($remoteIp)
     {
-        $forterToken = $this->customerSession->getForterToken() ? $this->customerSession->getForterToken() : $this->cookieManager->getCookie("forterToken");
+        $headers = getallheaders();
+        $userAgent = (is_array($headers) && array_key_exists("User-Agent", $headers)) ? substr($headers['User-Agent'], 0, 4000) : "";
 
-        return [
-            "customerIP" => $remoteIp ? $remoteIp : $this->getIpFromOrder($remoteIp, $headers),
-            "userAgent" => (is_array($headers) && array_key_exists("User-Agent", $headers)) ? substr($headers['User-Agent'], 0, 4000) : "",
-            "forterTokenCookie" => $forterToken . "",
-            "merchantDeviceIdentifier" => null,
-            "fullHeaders" => substr(json_encode($headers) . "", 0, 4000)
-        ];
+        if (\strpos($userAgent, 'CyberSource') === false) {
+            $forterToken = $this->customerSession->getForterToken() ? $this->customerSession->getForterToken() : $this->cookieManager->getCookie("forterToken");
+            return [
+                "customerIP" => $remoteIp ? $remoteIp : $this->getIpFromOrder($remoteIp, $headers),
+                "userAgent" => (string) $userAgent,
+                "forterTokenCookie" => (string) $forterToken,
+                "merchantDeviceIdentifier" => null,
+                "fullHeaders" => substr(json_encode($headers) . "", 0, 4000)
+            ];
+        }
+
+        return [];
     }
 
     /**

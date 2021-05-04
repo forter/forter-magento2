@@ -350,7 +350,7 @@ class Customer
                   [
                       "phone" => $billingAddress->getTelephone() . ""
                   ]
-              ];
+                ];
             }
         }
 

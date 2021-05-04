@@ -52,7 +52,8 @@ class Html extends Template implements BlockInterface
         }
 
         $element->setData(
-            'after_element_html', $this->_getAfterElementHtml() . $editor->getElementHtml()
+            'after_element_html',
+            $this->_getAfterElementHtml() . $editor->getElementHtml()
         );
 
         return $element;
@@ -73,5 +74,4 @@ HTML;
 
         return $html;
     }
-
 }

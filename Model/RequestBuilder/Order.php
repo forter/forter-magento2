@@ -1,12 +1,12 @@
 <?php
 /**
-* Forter Payments For Magento 2
-* https://www.Forter.com/
-*
-* @category Forter
-* @package  Forter_Forter
-* @author   Girit-Interactive (https://www.girit-tech.com/)
-*/
+ * Forter Payments For Magento 2
+ * https://www.Forter.com/
+ *
+ * @category Forter
+ * @package  Forter_Forter
+ * @author   Girit-Interactive (https://www.girit-tech.com/)
+ */
 namespace Forter\Forter\Model\RequestBuilder;
 
 use Forter\Forter\Model\Config as ForterConfig;
@@ -136,62 +136,43 @@ class Order
      */
     public function buildTransaction($order, $orderStage)
     {
-        $connectionInformation = json_decode($order->getForterClientDetails());
-        $primaryRecipient = $this->customerPrepere->getPrimaryRecipient($order);
+        $data = [
+            "orderId" => strval($order->getIncrementId()),
+            "orderType" => "WEB",
+            "timeSentToForter" => time()*1000,
+            "checkoutTime" => time(),
+            "additionalIdentifiers" => $this->basicInfoPrepare->getAdditionalIdentifiers($order, $orderStage),
+            "totalAmount" => $this->cartPrepare->getTotalAmount($order),
+            "cartItems" => $this->cartPrepare->generateCartItems($order),
+            "primaryDeliveryDetails" => $this->customerPrepere->getPrimaryDeliveryDetails($order),
+            "primaryRecipient" => $this->customerPrepere->getPrimaryRecipient($order),
+            "accountOwner" => $this->customerPrepere->getAccountOwnerInfo($order),
+            "customerAccountData" => $this->customerPrepere->getCustomerAccountData($order, null),
+            "totalDiscount" => $this->cartPrepare->getTotalDiscount($order),
+            "payment" => $this->paymentPrepere->generatePaymentInfo($order)
+        ];
+
         if ($this->giftCardPrepere) {
-            $primaryRecipient["personalDetails"] = $this->giftCardPrepere->getGiftCardPrimaryRecipient($order);
+            $data['primaryRecipient']["personalDetails"] = $this->giftCardPrepere->getGiftCardPrimaryRecipient($order);
         }
 
-        //get forter client number
-        $forterWebId = $this->request->getPost('forter_web_id');
-        $forterNumber = ($forterWebId != "") ? $forterWebId : "";
-        $order->setForterWebId($forterNumber);
-
-        $data = [
-        "orderId" => strval($order->getIncrementId()),
-        "orderType" => $this->getOrderType($order),
-        "timeSentToForter" => time()*1000,
-        "checkoutTime" => time(),
-        "additionalIdentifiers" => $this->basicInfoPrepare->getAdditionalIdentifiers($order, $orderStage),
-        "connectionInformation" => $connectionInformation,
-        "totalAmount" => $this->cartPrepare->getTotalAmount($order),
-        "cartItems" => $this->cartPrepare->generateCartItems($order),
-        "primaryDeliveryDetails" => $this->customerPrepere->getPrimaryDeliveryDetails($order),
-        "primaryRecipient" => $primaryRecipient,
-        "accountOwner" => $this->customerPrepere->getAccountOwnerInfo($order),
-        "customerAccountData" => $this->customerPrepere->getCustomerAccountData($order, null),
-        "totalDiscount" => $this->cartPrepare->getTotalDiscount($order),
-        "payment" => $this->paymentPrepere->generatePaymentInfo($order)
-      ];
+        //If phone order - get forter client number (forter_web_id)
+        if (($forterWebId = $this->request->getPost('forter_web_id'))) {
+            $data['orderType'] = "PHONE";
+            $data['phoneOrderInformation'] = [
+                "customerWebId" => $forterWebId
+            ];
+        } else {
+            //If not a phone order - add the connectionInformation:
+            $data['connectionInformation'] = $order->getPayment()->getAdditionalInformation('forter_client_details');
+        }
 
         if ($this->forterConfig->isSandboxMode()) {
             $data['additionalInformation'] = [
               'debug' => $order->debug()
-          ];
-        }
-
-        $phoneWebId = $order->getForterWebId(); // field to be created by the merchant as instructed in documentation
-        if ($phoneWebId != '') {
-            $data['phoneOrderInformation'] = [
-                "customerWebId" => $phoneWebId
             ];
         }
+
         return $data;
-    }
-
-    /**
-     * Returns order type according to 'forter_web_id' attribute.
-     * @param $order
-     * @return string
-     */
-    private function getOrderType($order)
-    {
-        if ($order->getForterWebId() && $order->getForterWebId() != "") {
-            $orderType = "PHONE";
-        } else {
-            $orderType = "WEB";
-        }
-
-        return $orderType;
     }
 }

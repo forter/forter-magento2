@@ -11,6 +11,8 @@
 
 namespace Forter\Forter\Model;
 
+use Forter\Forter\Logger\Logger\DebugLogger;
+use Forter\Forter\Logger\Logger\ErrorLogger;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\Module\ModuleListInterface;
@@ -51,23 +53,37 @@ class Config
      * @var EncryptorInterface
      */
     private $encryptor;
+
     /**
      * @var LoggerInterface
      */
     private $logger;
+
     /**
      * @var UrlInterface
      */
     private $urlBuilder;
 
     /**
+     * @var DebugLogger
+     */
+    private $forterDebugLogger;
+
+    /**
+     * @var ErrorLogger
+     */
+    private $forterErrorLogger;
+
+    /**
      * @method __construct
-     * @param ScopeConfigInterface $scopeConfig
-     * @param StoreManagerInterface $storeManager
-     * @param EncryptorInterface $encryptor
-     * @param LoggerInterface $logger
-     * @param UrlInterface $urlBuilder
-     * @param ModuleListInterface $moduleList
+     * @param  ScopeConfigInterface  $scopeConfig
+     * @param  StoreManagerInterface $storeManager
+     * @param  EncryptorInterface    $encryptor
+     * @param  LoggerInterface       $logger
+     * @param  ModuleListInterface   $moduleList
+     * @param  UrlInterface          $urlBuilder
+     * @param  DebugLogger           $forterDebugLogger
+     * @param  ErrorLogger           $forterErrorLogger
      */
     public function __construct(
         ScopeConfigInterface $scopeConfig,
@@ -75,7 +91,9 @@ class Config
         EncryptorInterface $encryptor,
         LoggerInterface $logger,
         ModuleListInterface $moduleList,
-        UrlInterface $urlBuilder
+        UrlInterface $urlBuilder,
+        DebugLogger $forterDebugLogger,
+        ErrorLogger $forterErrorLogger
     ) {
         $this->scopeConfig = $scopeConfig;
         $this->storeManager = $storeManager;
@@ -83,6 +101,8 @@ class Config
         $this->logger = $logger;
         $this->moduleList = $moduleList;
         $this->urlBuilder = $urlBuilder;
+        $this->forterDebugLogger = $forterDebugLogger;
+        $this->forterErrorLogger = $forterErrorLogger;
     }
 
     /**
@@ -264,26 +284,15 @@ class Config
      */
     public function log($message, $type = "debug", $data = [], $prefix = '[Forter] ')
     {
-        if (!$this->isDebugEnabled()) {
-            return false;
-        }
-
-        $this->logger->debug($prefix . json_encode($message), $data); //REMOVE LATER
-        if ($type !== 'debug' || $this->isDebugEnabled()) {
+        if ($type === 'error' || $this->isDebugEnabled()) {
+            $message = $prefix . json_encode($message);
             if (!isset($data['store_id'])) {
                 $data['store_id'] = $this->getStoreId();
             }
-            switch ($type) {
-                case 'error':
-                    $this->logger->error($prefix . json_encode($message), $data);
-                    break;
-                case 'info':
-                    $this->logger->info($prefix . json_encode($message), $data);
-                    break;
-                case 'debug':
-                default:
-                    $this->logger->debug($prefix . json_encode($message), $data);
-                    break;
+            $this->forterDebugLogger->debug($message, $data);
+            if ($type === 'error') {
+                $this->forterErrorLogger->debug($message, $data);
+                $this->logger->error($message, $data);
             }
         }
         return $this;
@@ -388,10 +397,28 @@ class Config
     /**
      * @return bool
      */
+    public function getIsPre()
+    {
+        $prePostSelect = $this->scopeConfig->getValue('forter/immediate_post_pre_decision/pre_post_select');
+        return ($prePostSelect == '1' ? true : false);
+    }
+
+    /**
+     * @return bool
+     */
     public function getIsPost()
     {
         $prePostSelect = $this->scopeConfig->getValue('forter/immediate_post_pre_decision/pre_post_select');
         return ($prePostSelect == '2' ? true : false);
+    }
+
+    /**
+     * @return bool
+     */
+    public function getIsPreAndPost()
+    {
+        $prePostSelect = $this->scopeConfig->getValue('forter/immediate_post_pre_decision/pre_post_select');
+        return ($prePostSelect == '4' ? true : false);
     }
 
     /**
@@ -441,6 +468,16 @@ class Config
     public function getElementToObserve()
     {
         return $this->scopeConfig->getValue('forter/advanced_settings_cc_listener/class_id_identifier');
+    }
+
+    /**
+     * @return string
+     */
+    public function getVerificationResultsMapping($key)
+    {
+        if ($key) {
+            return $this->scopeConfig->getValue('forter/verification_results_mapping/' . (string) $key);
+        }
     }
 
     /**
@@ -510,23 +547,23 @@ class Config
                 }
                 return $result;
             case 'approve_post':
-              if ($result == '1') {
-                  $result = 'Create Invoice and Capture Payments (CRON)';
-              } elseif ($result == '2') {
-                  $result = 'Create Invoice and Capture Payments (IMMEDIATELY)';
-              } elseif ($result == '3') {
-                  $result = 'Do Nothing';
-              }
-              return $result;
+                if ($result == '1') {
+                    $result = 'Create Invoice and Capture Payments (CRON)';
+                } elseif ($result == '2') {
+                    $result = 'Create Invoice and Capture Payments (IMMEDIATELY)';
+                } elseif ($result == '3') {
+                    $result = 'Do Nothing';
+                }
+                return $result;
             case 'not_review_post':
-              if ($result == '1') {
-                  $result = 'Create Invoice and Capture Payments (CRON)';
-              } elseif ($result == '2') {
-                  $result = 'Create Invoice and Capture Payments (IMMEDIATELY)';
-              } elseif ($result == '3') {
-                  $result = 'Do Nothing';
-              }
-              return $result;
+                if ($result == '1') {
+                    $result = 'Create Invoice and Capture Payments (CRON)';
+                } elseif ($result == '2') {
+                    $result = 'Create Invoice and Capture Payments (IMMEDIATELY)';
+                } elseif ($result == '3') {
+                    $result = 'Do Nothing';
+                }
+                return $result;
             default:
                 return $result;
         }

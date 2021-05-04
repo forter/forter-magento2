@@ -161,13 +161,13 @@ class SendQueue
                 }
             } elseif ($response == 'decline') {
                 switch ($this->forterConfig->getDeclineCron()) {
-                case 1:
-                    $this->decline->handlePostTransactionDescision($order);
-                    return;
-                case 2:
-                    $this->decline->markOrderPaymentReview();
-                    return;
-              }
+                    case 1:
+                        $this->decline->handlePostTransactionDescision($order);
+                        return;
+                    case 2:
+                        $this->decline->markOrderPaymentReview();
+                        return;
+                }
             }
 
             return;

@@ -12,6 +12,7 @@ use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\HTTP\PhpEnvironment\RemoteAddress;
 use Magento\Framework\Message\ManagerInterface;
+use Magento\Framework\Registry;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magento\Quote\Model\Quote\Item;
 
@@ -25,56 +26,76 @@ class PaymentPlaceStart implements ObserverInterface
      *
      */
     const VALIDATION_API_ENDPOINT = 'https://api.forter-secure.com/v2/orders/';
+
     /**
      * @var Decline
      */
     private $decline;
+
     /**
      * @var CheckoutSession
      */
     private $checkoutSession;
+
     /**
      * @var Item
      */
     private $modelCartItem;
+
     /**
      * @var AbstractApi
      */
     private $abstractApi;
+
     /**
      * @var ManagerInterface
      */
     private $messageManager;
+
     /**
      * @var Queue
      */
     private $queue;
+
     /**
      * @var Config
      */
     private $config;
+
     /**
      * @var Order
      */
     private $requestBuilderOrder;
+
     /**
      * @var DateTime
      */
     private $dateTime;
+
     /**
      * @var BasicInfo
      */
     private $basicInfo;
 
     /**
-     * PaymentPlaceStart constructor.
-     * @param Decline $decline
-     * @param ManagerInterface $messageManager
-     * @param CheckoutSession $checkoutSession
-     * @param AbstractApi $abstractApi
-     * @param Config $config
-     * @param Order $requestBuilderOrder
-     * @param Item $modelCartItem
+     * @var Registry
+     */
+    private $registry;
+
+    /**
+     * @method __construct
+     * @param  RemoteAddress    $remote
+     * @param  Queue            $queue
+     * @param  Decline          $decline
+     * @param  ManagerInterface $messageManager
+     * @param  CheckoutSession  $checkoutSession
+     * @param  AbstractApi      $abstractApi
+     * @param  DateTime         $dateTime
+     * @param  Config           $config
+     * @param  Order            $requestBuilderOrder
+     * @param  Item             $modelCartItem
+     * @param  BasicInfo        $basicInfo
+     * @param  Registry         $registry
      */
     public function __construct(
         RemoteAddress $remote,
@@ -87,7 +108,8 @@ class PaymentPlaceStart implements ObserverInterface
         Config $config,
         Order $requestBuilderOrder,
         Item $modelCartItem,
-        BasicInfo $basicInfo
+        BasicInfo $basicInfo,
+        Registry $registry
     ) {
         $this->remote = $remote;
         $this->queue = $queue;
@@ -100,6 +122,7 @@ class PaymentPlaceStart implements ObserverInterface
         $this->config = $config;
         $this->requestBuilderOrder = $requestBuilderOrder;
         $this->basicInfo = $basicInfo;
+        $this->registry = $registry;
     }
 
     /**
@@ -109,16 +132,26 @@ class PaymentPlaceStart implements ObserverInterface
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
         try {
-            $order = $observer->getEvent()->getPayment()->getOrder();
-            $ipAddress = $order->getRemoteIp();
-            if (!$ipAddress) {
-                $ipAddress = $this->remote->getRemoteAddress();
+            if (!$this->config->isEnabled()) {
+                return;
             }
 
-            $connectionInformation = $this->basicInfo->getConnectionInformation($ipAddress, getallheaders());
-            $order->setForterClientDetails(json_encode($connectionInformation));
+            if ($this->registry->registry('forter_pre_decision')) {
+                $this->registry->unregister('forter_pre_decision');
+            }
 
-            if (!$this->config->isEnabled() || $this->config->getIsPost()) {
+            $order = $observer->getEvent()->getPayment()->getOrder();
+
+            $connectionInformation = $this->basicInfo->getConnectionInformation(
+                $order->getRemoteIp() ?: $this->remote->getRemoteAddress()
+            );
+            if (!$connectionInformation) {
+                return;
+            }
+
+            $order->getPayment()->setAdditionalInformation('forter_client_details', $connectionInformation);
+
+            if ($this->config->getIsPost() && !$this->config->getIsPreAndPost()) {
                 return;
             }
 
@@ -144,10 +177,12 @@ class PaymentPlaceStart implements ObserverInterface
             $response = json_decode($response);
 
             if ($response->status != 'success' || !isset($response->action)) {
+                $this->registry->register('forter_pre_decision', 'error');
                 $order->setForterStatus('error');
                 return;
             }
 
+            $this->registry->register('forter_pre_decision', $response->action);
             $order->setForterStatus($response->action);
 
             if ($response->action != 'decline') {

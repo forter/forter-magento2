@@ -38,7 +38,7 @@ class Order extends TestCase
               "orderFactory" => $orderFactoryMock,
               "review" => $reviewMock,
               "subscriber" => $subscriberMock
-          ]
+            ]
         );
 
         $this->paymentPrepere = $objectManager->getObject(
@@ -47,7 +47,7 @@ class Order extends TestCase
             "customerPreper" => $this->customerPrepere,
             "paymentMethods" => $this->paymentMethods
 
-          ]
+            ]
         );
 
         $this->basicInfoPrepare = $objectManager->getObject(

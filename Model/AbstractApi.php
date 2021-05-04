@@ -2,8 +2,6 @@
 
 namespace Forter\Forter\Model;
 
-use Forter\Forter\Logger\Logger\ErrorLogger;
-use Forter\Forter\Logger\Logger\ResponseLogger;
 use Forter\Forter\Model\Config as ForterConfig;
 use Magento\Checkout\Model\Session;
 use Magento\Framework\HTTP\Client\Curl as ClientInterface;
@@ -18,44 +16,36 @@ class AbstractApi
      *
      */
     const ERROR_ENDPOINT = 'https://api.forter-secure.com/errors/';
+
     /**
      * @var ClientInterface
      */
     private $checkoutSession;
+
     /**
      * @var ClientInterface
      */
     private $clientInterface;
+
     /**
      * @var Config
      */
     private $forterConfig;
-    /**
-     * @var forterResponseLogger
-     */
-    private $forterResponseLogger;
-    /**
-     * @var forterErrorLogger
-     */
-    private $forterErrorLogger;
 
     /**
-     * AbstractApi constructor.
-     * @param ClientInterface $clientInterface
-     * @param Config $forterConfig
+     * @method __construct
+     * @param  Session         $checkoutSession
+     * @param  ClientInterface $clientInterface
+     * @param  ForterConfig    $forterConfig
      */
     public function __construct(
         Session $checkoutSession,
         ClientInterface $clientInterface,
-        ForterConfig $forterConfig,
-        ResponseLogger $forterResponseLogger,
-        ErrorLogger $forterErrorLogger
+        ForterConfig $forterConfig
     ) {
         $this->checkoutSession = $checkoutSession;
         $this->clientInterface = $clientInterface;
         $this->forterConfig = $forterConfig;
-        $this->forterResponseLogger = $forterResponseLogger;
-        $this->forterErrorLogger = $forterErrorLogger;
     }
 
     /**
@@ -63,7 +53,7 @@ class AbstractApi
      * @param $data
      * @return string
      */
-    public function sendApiRequest($url, $data, $type='post')
+    public function sendApiRequest($url, $data, $type = 'post')
     {
         try {
             $tries = 1;
@@ -72,9 +62,9 @@ class AbstractApi
                 $tries++;
                 $timeOutStatus = $this->calcTimeOut($tries);
                 $this->setCurlOptions(strlen($data), $tries);
-                $this->forterResponseLogger->debug('[Forter Request attempt number]:' . $tries);
-                $this->forterResponseLogger->debug('[Forter Request Url]:' . $url);
-                $this->forterResponseLogger->debug('[Forter Request Body]:' . $data);
+                $this->forterConfig->log('[Forter Request attempt number] ' . $tries, "debug");
+                $this->forterConfig->log('[Forter Request Url] ' . $url, "debug");
+                $this->forterConfig->log('[Forter Request Body] ' . $data, "debug");
 
                 try {
                     if ($type == 'post') {
@@ -83,8 +73,8 @@ class AbstractApi
                         $this->clientInterface->get($url);
                     }
                     $response = $this->clientInterface->getBody();
-                    $this->forterResponseLogger->info('[Forter Response Body]:' . $response);
-                    $this->forterResponseLogger->info('[Forter Response Header]:' . json_encode($this->clientInterface->getHeaders()));
+                    $this->forterConfig->log('[Forter Response Body] ' . $response, "debug");
+                    $this->forterConfig->log('[Forter Response Header] ', "debug", [$this->clientInterface->getHeaders()]);
 
                     $response = json_decode($response);
 
@@ -92,7 +82,7 @@ class AbstractApi
                         return json_encode($response);
                     }
                 } catch (\Exception $e) {
-                    $this->forterConfig->log('Error:' . $e->getMessage());
+                    $this->forterConfig->log('[Exception] ' . $e->getMessage() . "\n" . $e->getTraceAsString(), "error");
                 }
             } while ($timeOutStatus);
 
@@ -170,8 +160,8 @@ class AbstractApi
         $orderId = $this->checkoutSession->getQuote()->getReservedOrderId();
 
         $json = [
-       "orderID" => $orderId,
-       "exception" => [
+        "orderID" => $orderId,
+        "exception" => [
          "message" => [
            "message" => $e->getMessage(),
            "fileName" => $e->getFile(),
@@ -180,8 +170,8 @@ class AbstractApi
            "stack" => $e->getTrace()
          ],
          "debugInfo" => ""
-       ]
-     ];
+        ]
+        ];
         $json = json_encode($json);
         $this->forterErrorLogger->info($json);
         $this->sendApiRequest($url, $json);

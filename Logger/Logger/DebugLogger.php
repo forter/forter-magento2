@@ -1,6 +1,6 @@
 <?php
 namespace Forter\Forter\Logger\Logger;
 
-class ResponseLogger extends \Monolog\Logger
+class DebugLogger extends \Monolog\Logger
 {
 }

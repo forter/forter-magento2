@@ -33,7 +33,7 @@ class General extends TestCase
           "User-Agent" => ConstList::USER_AGENT,
         ];
 
-        $connectionInformation = $this->basicinfo->getConnectionInformation($this->orderMock->getRemoteIp(), $headers);
+        $connectionInformation = $this->basicinfo->getConnectionInformation($this->orderMock->getRemoteIp());
 
         $this->assertEquals($connectionInformation, [
           "customerIP" => ConstList::ORDER_REMOTE_IP,

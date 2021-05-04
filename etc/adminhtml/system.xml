@@ -67,13 +67,13 @@
                         On "Approve" or "Not Reviewed" we the action will be the payment gateway default
                     </comment>
                     <depends>
-                        <field id="pre_post_select">1</field>
+                        <field id="pre_post_select" separator=",">1,4</field>
                     </depends>
                 </field>
                 <field id="pre_thanks_msg" translate="label" type="textarea" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Custom Error Message (pre-authorization)</label>
                     <depends>
-                        <field id="pre_post_select">1</field>
+                        <field id="pre_post_select" separator=",">1,4</field>
                     </depends>
                 </field>
                 <field id="decline_post" translate="Module" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -84,21 +84,21 @@
                     </comment>
                     <source_model>Forter\Forter\Model\Config\Source\PostAuthDeclineOptions</source_model>
                     <depends>
-                        <field id="pre_post_select">2</field>
+                        <field id="pre_post_select" separator=",">2,4</field>
                     </depends>
                 </field>
                 <field id="approve_post" translate="Module" type="select" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Action On Approve (post-authorization)</label>
                     <source_model>Forter\Forter\Model\Config\Source\PostAuthApproveOptions</source_model>
                     <depends>
-                        <field id="pre_post_select">2</field>
+                        <field id="pre_post_select" separator=",">2,4</field>
                     </depends>
                 </field>
                 <field id="not_review_post" translate="Module" type="select" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Action On Not Reviewed (post-authorization)</label>
                     <source_model>Forter\Forter\Model\Config\Source\PostAuthApproveOptions</source_model>
                     <depends>
-                        <field id="pre_post_select">2</field>
+                        <field id="pre_post_select" separator=",">2,4</field>
                     </depends>
                 </field>
                 <field id="post_thanks_msg" translate="label" type="textarea" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -108,7 +108,7 @@
                         To prevent showing an error message, leave this field blank.
                     </comment>
                     <depends>
-                        <field id="pre_post_select">2</field>
+                        <field id="pre_post_select" separator=",">2,4</field>
                     </depends>
                 </field>
                 <field id="approve_cron" translate="Module" type="select" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -168,7 +168,31 @@
                     </comment>
                 </field>
             </group>
-            <group id="advanced_settings" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+            <group id="verification_results_mapping" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Verification Results Mapping</label>
+                <field id="cvv_result" translate="label comment" sortOrder="10" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>cvvResult</label>
+                </field>
+                <field id="authorization_code" translate="label comment" sortOrder="20" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>authorizationCode</label>
+                </field>
+                <field id="processor_response_code" translate="label comment" sortOrder="30" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>processorResponseCode</label>
+                </field>
+                <field id="processor_response_text" translate="label comment" sortOrder="40" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>processorResponseText</label>
+                </field>
+                <field id="avs_street_result" translate="label comment" sortOrder="50" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>avsStreetResult</label>
+                </field>
+                <field id="avs_zip_result" translate="label comment" sortOrder="60" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>avsZipResult</label>
+                </field>
+                <field id="avs_full_result" translate="label comment" sortOrder="70" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>avsFullResult</label>
+                </field>
+            </group>
+            <group id="advanced_settings" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Advanced Settings</label>
                 <field id="enabled_account_touchpoint" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Enable Account Touchpoint</label>
@@ -194,7 +218,7 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
               </group>
-              <group id="advanced_settings_cc_listener" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+              <group id="advanced_settings_cc_listener" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Advanced Settings Pre Auth</label>
                     <field id="enabled_cc_listener" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Enable CreditCard Listener</label>

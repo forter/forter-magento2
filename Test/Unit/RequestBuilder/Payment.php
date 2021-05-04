@@ -32,7 +32,7 @@ class Payment extends TestCase
               "orderFactory" => $orderFactoryMock,
               "review" => $reviewMock,
               "subscriber" => $subscriberMock
-          ]
+            ]
         );
 
         $this->paymentPrepere = $objectManager->getObject(
@@ -41,7 +41,7 @@ class Payment extends TestCase
             "customerPreper" => $this->customerPrepere,
             "paymentMethods" => $this->paymentMethods
 
-          ]
+            ]
         );
     }
 
@@ -51,7 +51,7 @@ class Payment extends TestCase
         $this->assertEquals(
             $paymentInfo[0],
             [
-          "creditCard" => [
+            "creditCard" => [
             "nameOnCard" => ConstList::PAYMENT_CCOWNER,
             "cardBrand" => ConstList::PAYMENT_CCTYPE,
             "bin" => null,
@@ -80,8 +80,8 @@ class Payment extends TestCase
                 "avsStreetAddressResponseCode" => ConstList::PAYMENT_AVS_STREET_ADDRESS_RESPONSE_CODE,
                 "avsPostalCodeResponseCode" => ConstList::PAYMENT_AVS_POSTAL_CODE_RESPONSE_CODE
             ]
-          ],
-          "billingDetails" => [
+            ],
+            "billingDetails" => [
             "personalDetails" => [
               "firstName" => ConstList::CUSTOMER_FIRST_NAME,
               "lastName" => ConstList::CUSTOMER_LAST_NAME,
@@ -111,7 +111,7 @@ class Payment extends TestCase
               "amountLocalCurrency" => ConstList::ORDER_GRAND_TOTAL,
               "currency" => ConstList::CURRENCYCODE
             ]
-          ]
+            ]
         );
     }
 }
