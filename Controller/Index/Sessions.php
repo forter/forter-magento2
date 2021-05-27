@@ -4,13 +4,14 @@ namespace Forter\Forter\Controller\Index;
 use Forter\Forter\Model\AbstractApi;
 use Magento\Customer\Model\Session;
 use Magento\Framework\App\Action\Context;
+use Magento\Framework\App\Action\HttpPostActionInterface as HttpPostActionInterface;
 use Magento\Framework\View\Result\PageFactory;
 
 /**
  * Class Validations
  * @package Forter\Forter\Controller\Api
  */
-class Sessions extends \Magento\Framework\App\Action\Action
+class Sessions extends \Magento\Framework\App\Action\Action implements HttpPostActionInterface
 {
     /**
      * @var AbstractApi

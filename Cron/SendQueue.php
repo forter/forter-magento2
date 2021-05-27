@@ -70,49 +70,53 @@ class SendQueue
      */
     public function execute()
     {
-        $items = $this->forterQueue
-        ->create()
-        ->getCollection()
-        ->addFieldToFilter('sync_flag', '0')
-        ->addFieldToFilter(
-            'sync_date',
-            [
-              'from' => date('Y-m-d H:i:s', strtotime('-7 days')),
-              'to' => date('Y-m-d H:i:s', strtotime($this->dateTime->gmtDate()))
-            ]
-        );
+        try {
+            $items = $this->forterQueue
+                ->create()
+                ->getCollection()
+                ->addFieldToFilter('sync_flag', '0')
+                ->addFieldToFilter(
+                    'sync_date',
+                    [
+                      'from' => date('Y-m-d H:i:s', strtotime('-7 days')),
+                      'to' => date('Y-m-d H:i:s', strtotime($this->dateTime->gmtDate()))
+                    ]
+                );
 
-        $items->setPageSize(10000)->setCurPage(1);
+            $items->setPageSize(10000)->setCurPage(1);
 
-        foreach ($items as $item) {
-            $searchCriteria = $this->searchCriteriaBuilder
-                ->addFilter('increment_id', $item->getData('increment_id'), 'eq')
-                ->create();
+            foreach ($items as $item) {
+                $searchCriteria = $this->searchCriteriaBuilder
+                    ->addFilter('increment_id', $item->getData('increment_id'), 'eq')
+                    ->create();
 
-            $orderList = $this->orderRepository->getList($searchCriteria)->getItems();
-            $order = reset($orderList);
+                $orderList = $this->orderRepository->getList($searchCriteria)->getItems();
+                $order = reset($orderList);
 
-            if (!$order) {
-                // order does not exist, remove from queue
-                $item->setSyncFlag('1');
-                continue;
-            }
-
-            $method = $order->getPayment()->getMethod();
-
-            if ($item->getEntityType() == 'pre_sync_order') {
-                if (strpos($method, 'adyen') !== false && !$order->getPayment()->getAdyenPspReference()) {
+                if (!$order) {
+                    // order does not exist, remove from queue
+                    $item->setSyncFlag('1');
                     continue;
                 }
 
-                $this->handlePreSyncMethod($order, $item);
-                $item->setSyncFlag('1');
-            } elseif ($item->getEntityType() == 'order') {
-                $this->handleForterResponse($order, $item->getData('entity_body'));
-                $item->setSyncFlag('1');
-            }
+                $method = $order->getPayment()->getMethod();
 
-            $item->save();
+                if ($item->getEntityType() == 'pre_sync_order') {
+                    if (strpos($method, 'adyen') !== false && !$order->getPayment()->getAdyenPspReference()) {
+                        continue;
+                    }
+
+                    $this->handlePreSyncMethod($order, $item);
+                    $item->setSyncFlag('1');
+                } elseif ($item->getEntityType() == 'order') {
+                    $this->handleForterResponse($order, $item->getData('entity_body'));
+                    $item->setSyncFlag('1');
+                }
+
+                $item->save();
+            }
+        } catch (\Exception $e) {
+            $this->abstractApi->reportToForterOnCatch($e);
         }
     }
 

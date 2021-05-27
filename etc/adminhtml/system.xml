@@ -170,17 +170,17 @@
             </group>
             <group id="verification_results_mapping" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Verification Results Mapping</label>
-                <field id="cvv_result" translate="label comment" sortOrder="10" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>cvvResult</label>
-                </field>
-                <field id="authorization_code" translate="label comment" sortOrder="20" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="authorization_code" translate="label comment" sortOrder="10" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>authorizationCode</label>
                 </field>
-                <field id="processor_response_code" translate="label comment" sortOrder="30" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>processorResponseCode</label>
+                <field id="authorization_policy" translate="label comment" sortOrder="20" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>authorizationPolicy</label>
                 </field>
-                <field id="processor_response_text" translate="label comment" sortOrder="40" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>processorResponseText</label>
+                <field id="avs_full_result" translate="label comment" sortOrder="30" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>avsFullResult</label>
+                </field>
+                <field id="avs_name_result" translate="label comment" sortOrder="40" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>avsNameResult</label>
                 </field>
                 <field id="avs_street_result" translate="label comment" sortOrder="50" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>avsStreetResult</label>
@@ -188,8 +188,20 @@
                 <field id="avs_zip_result" translate="label comment" sortOrder="60" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>avsZipResult</label>
                 </field>
-                <field id="avs_full_result" translate="label comment" sortOrder="70" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>avsFullResult</label>
+                <field id="cvv_result" translate="label comment" sortOrder="70" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>cvvResult</label>
+                </field>
+                <field id="cavv_result" translate="label comment" sortOrder="80" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>cavvResult</label>
+                </field>
+                <field id="eci_value" translate="label comment" sortOrder="90" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>eciValue</label>
+                </field>
+                <field id="processor_response_code" translate="label comment" sortOrder="100" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>processorResponseCode</label>
+                </field>
+                <field id="processor_response_text" translate="label comment" sortOrder="110" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>processorResponseText</label>
                 </field>
             </group>
             <group id="advanced_settings" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
