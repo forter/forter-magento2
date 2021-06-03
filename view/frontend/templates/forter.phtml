@@ -17,9 +17,8 @@
                     value = value.replace(/\s|-/g, '');
                     if (value.length > 12 && value.length < 20) {
                         var xhr = new XMLHttpRequest();
-                        xhr.open("POST", '/magento/index/sessions', true);
+                        xhr.open("POST", "<?php echo $block->getUrl('magento/index/sessions') ?>", true);
                         xhr.setRequestHeader("Content-type", "application/json");
-                        xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
                         <?php if ($allowLast4CCListener): ?>
                             xhr.setRequestHeader("last4cc", value.substr(value.length - 4));
                         <?php endif;?>
@@ -43,9 +42,8 @@
 document.addEventListener('ftr:tokenReady', function(event) {
     try {
         var xhr = new XMLHttpRequest();
-        xhr.open("POST", '/forter/index/sessions/', true);
+        xhr.open("POST", "<?php echo $block->getUrl('forter/index/sessions') ?>", true);
         xhr.setRequestHeader("Content-type", "application/json");
-        xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
         xhr.setRequestHeader("Forter-Token", event.detail);
         xhr.send();
     } catch (err) {
