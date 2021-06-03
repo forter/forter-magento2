@@ -8,6 +8,9 @@ use Forter\Forter\Model\QueueFactory;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Action\HttpPostActionInterface as HttpPostActionInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\App\CsrfAwareActionInterface;
+use Magento\Framework\App\Request\InvalidRequestException;
+use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magento\Framework\UrlInterface;
@@ -19,7 +22,7 @@ use Psr\Log\LoggerInterface;
  * Class Validations
  * @package Forter\Forter\Controller\Api
  */
-class Validations extends \Magento\Framework\App\Action\Action implements HttpPostActionInterface
+class Validations extends \Magento\Framework\App\Action\Action implements HttpPostActionInterface, CsrfAwareActionInterface
 {
 
     /**
@@ -78,16 +81,19 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
 
     /**
      * Validations constructor.
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
-     * @param \Magento\Framework\Stdlib\DateTime\DateTime $dateTime
-     * @param \Forter\Forter\Model\Config $forterConfig
-     * @param \Forter\Forter\Model\QueueFactory $queue
-     * @param \Magento\Framework\UrlInterface $url
-     * @param \Psr\Log\LoggerInterface $logger
-     * @param \Magento\Framework\App\Action\Context $context
-     * @param \Magento\Framework\View\Result\PageFactory $pageFactory
-     * @param \Magento\Sales\Api\OrderRepositoryInterface $orderRepository
-     * @param \Magento\Framework\Controller\Result\JsonFactory $jsonResultFactory
+     * @method __construct
+     * @param  AbstractApi          $abstractApi
+     * @param  ScopeConfigInterface $scopeConfig
+     * @param  Decline              $decline
+     * @param  DateTime             $dateTime
+     * @param  Config               $forterConfig
+     * @param  QueueFactory         $queue
+     * @param  UrlInterface         $url
+     * @param  LoggerInterface      $logger
+     * @param  Context              $context
+     * @param  PageFactory          $pageFactory
+     * @param  OrderRepository      $orderRepository
+     * @param  JsonFactory          $jsonResultFactory
      */
     public function __construct(
         AbstractApi $abstractApi,
@@ -272,5 +278,15 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
             ->setEntityBody($type)
             ->setSyncDate($currentTime)
             ->save();
+    }
+
+    public function createCsrfValidationException(RequestInterface $request): ? InvalidRequestException
+    {
+        return null;
+    }
+
+    public function validateForCsrf(RequestInterface $request): ?bool
+    {
+        return true;
     }
 }

@@ -3,15 +3,18 @@ namespace Forter\Forter\Controller\Index;
 
 use Forter\Forter\Model\AbstractApi;
 use Magento\Customer\Model\Session;
+use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Action\HttpPostActionInterface as HttpPostActionInterface;
-use Magento\Framework\View\Result\PageFactory;
+use Magento\Framework\App\CsrfAwareActionInterface;
+use Magento\Framework\App\Request\InvalidRequestException;
+use Magento\Framework\App\RequestInterface;
 
 /**
  * Class Validations
  * @package Forter\Forter\Controller\Api
  */
-class Sessions extends \Magento\Framework\App\Action\Action implements HttpPostActionInterface
+class Sessions extends Action implements HttpPostActionInterface, CsrfAwareActionInterface
 {
     /**
      * @var AbstractApi
@@ -19,19 +22,19 @@ class Sessions extends \Magento\Framework\App\Action\Action implements HttpPostA
     protected $abstractApi;
 
     /**
-     * @param \Magento\Framework\App\Action\Context
-     * @param \Magento\Framework\View\Result\PageFactory
+     * @method __construct
+     * @param  Context     $context
+     * @param  AbstractApi $abstractApi
+     * @param  Session     $customerSession
      */
     public function __construct(
-        AbstractApi $abstractApi,
         Context $context,
-        Session $customerSession,
-        PageFactory $pageFactory
+        AbstractApi $abstractApi,
+        Session $customerSession
     ) {
-        $this->_pageFactory = $pageFactory;
-        $this->customerSession = $customerSession;
+        parent::__construct($context);
         $this->abstractApi = $abstractApi;
-        return parent::__construct($context);
+        $this->customerSession = $customerSession;
     }
 
     /**
@@ -53,5 +56,15 @@ class Sessions extends \Magento\Framework\App\Action\Action implements HttpPostA
         } catch (Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }
+    }
+
+    public function createCsrfValidationException(RequestInterface $request): ? InvalidRequestException
+    {
+        return null;
+    }
+
+    public function validateForCsrf(RequestInterface $request): ?bool
+    {
+        return true;
     }
 }
