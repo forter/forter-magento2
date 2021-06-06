@@ -173,7 +173,7 @@ class AbstractApi
         ]
         ];
         $json = json_encode($json);
-        $this->forterErrorLogger->info($json);
+        $this->forterConfig->log($json, "error");
         $this->sendApiRequest($url, $json);
     }
 }
