@@ -95,7 +95,8 @@ class SendQueue
 
                 if (!$order) {
                     // order does not exist, remove from queue
-                    $item->setSyncFlag('1');
+                    $item->setSyncFlag('1')
+                        ->save();
                     continue;
                 }
 
