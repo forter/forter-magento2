@@ -113,7 +113,6 @@ class AbstractApi
         $this->clientInterface->addHeader('x-forter-client', 'magento2');
         $this->clientInterface->addHeader('Content-Type', 'application/json');
         $this->clientInterface->addHeader('Content-Length', $bodyLen);
-
         /* Curl Options */
         $this->clientInterface->setOption(CURLOPT_USERNAME, $this->forterConfig->getSecretKey());
         $this->clientInterface->setOption(CURLOPT_RETURNTRANSFER, true);
