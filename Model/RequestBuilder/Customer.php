@@ -182,15 +182,15 @@ class Customer
         //Retrieve all orders with this email address
         $totalOrders = $this->orderFactory->create()
             ->getCollection()
+            ->addFieldToSelect('grand_total')
             ->addFieldToFilter('customer_email', $customer->getEmail());
 
         $ordersSum = 0;
-
+        $ordersCount = 0;
         foreach ($totalOrders as $oldOrder) {
             $ordersSum += $oldOrder->getGrandTotal();
+            $ordersCount++;
         }
-
-        $ordersCount = $totalOrders->getTotalCount();
 
         return [
             "firstName" => $customer->getFirstname() . "",
