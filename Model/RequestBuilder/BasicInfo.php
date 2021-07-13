@@ -35,7 +35,9 @@ class BasicInfo
     {
         $headers = getallheaders();
         $userAgent = (is_array($headers) && array_key_exists("User-Agent", $headers)) ? substr($headers['User-Agent'], 0, 4000) : "";
-
+        if (!$userAgent) {
+            $userAgent = (is_array($headers) && array_key_exists("user-agent", $headers)) ? substr($headers['user-agent'], 0, 4000) : "";
+        }
         if (\strpos($userAgent, 'CyberSource') === false) {
             $forterToken = $this->customerSession->getForterToken() ? $this->customerSession->getForterToken() : $this->cookieManager->getCookie("forterToken");
             return [

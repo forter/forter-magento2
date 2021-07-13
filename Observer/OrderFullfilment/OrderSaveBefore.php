@@ -4,6 +4,7 @@ namespace Forter\Forter\Observer\OrderFullfilment;
 
 use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\Config;
+use Forter\Forter\Model\RequestBuilder\Payment as PaymentPrepere;
 use Magento\Framework\Event\ObserverInterface;
 
 /**
@@ -27,10 +28,12 @@ class OrderSaveBefore implements ObserverInterface
      */
     public function __construct(
         AbstractApi $abstractApi,
-        Config $config
+        Config $config,
+        PaymentPrepere $paymentPrepere
     ) {
         $this->abstractApi = $abstractApi;
         $this->config = $config;
+        $this->paymentPrepere = $paymentPrepere;
     }
 
     /**
@@ -63,6 +66,7 @@ class OrderSaveBefore implements ObserverInterface
             "orderId" => $order->getIncrementId(),
             "eventTime" => time(),
             "updatedStatus" => $orderState,
+            "payment" => $this->paymentPrepere->generatePaymentInfo($order)
             ];
             $url = self::ORDER_FULFILLMENT_STATUS_ENDPOINT . $order->getIncrementId();
             $this->abstractApi->sendApiRequest($url, json_encode($json));
