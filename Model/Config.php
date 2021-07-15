@@ -349,6 +349,14 @@ class Config
     /**
      * @return mixed
      */
+    public function isHoldingOrdersEnabled()
+    {
+        return $this->scopeConfig->getValue('forter/advanced_settings/enabled_order_holding');
+    }
+
+    /**
+     * @return mixed
+     */
     public function isOrderFulfillmentEnable()
     {
         return $this->scopeConfig->getValue('forter/advanced_settings/enabled_order_fulfillment');
