@@ -210,6 +210,10 @@
                     <label>Enable Account Touchpoint</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
+                <field id="enabled_order_holding" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Order Holding</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
                 <field id="enabled_decision_controller" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Enable Decision Change Controller</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
