@@ -160,7 +160,10 @@ class Decline
      */
     public function holdOrder($order)
     {
-        $order->hold()->save();
+        if ($this->forterConfig->isHoldingOrdersEnabled()) {
+            $order->hold()->save();
+        }
+
         $this->forterConfig->addCommentToOrder($order, "Order Has been holded");
     }
 
