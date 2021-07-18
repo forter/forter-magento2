@@ -31,6 +31,20 @@ class Config
      */
     const MODULE_NAME = 'Forter_Forter';
 
+    const VERIFICATION_RESULTS_DEFAULT_FIELDS = [
+        "authorizationCode",
+        "authorizationPolicy",
+        "avsFullResult",
+        "avsNameResult",
+        "avsStreetResult",
+        "avsZipResult",
+        "cvvResult",
+        "cavvResult",
+        "eciValue",
+        "processorResponseCode",
+        "processorResponseText"
+    ];
+
     /**
      * Scope config object.
      *
@@ -73,6 +87,11 @@ class Config
      * @var ErrorLogger
      */
     private $forterErrorLogger;
+
+    /**
+     * @var array|null
+     */
+    private $verificationResultMap;
 
     /**
      * @method __construct
@@ -479,12 +498,52 @@ class Config
     }
 
     /**
+     * @method getVerificationResultsMap
+     * @return array
+     */
+    public function getVerificationResultsMap()
+    {
+        if ($this->verificationResultMap === null) {
+            $this->verificationResultMap = (array) json_decode($this->scopeConfig->getValue('forter/advanced_settings/verification_results_map'), true);
+        }
+        return $this->verificationResultMap;
+    }
+
+    /**
+     * @method getVerificationResultsMethodFields
+     * @param  string                             $method
+     * @return array
+     */
+    public function getVerificationResultsMethodFields($method)
+    {
+        $fields = self::VERIFICATION_RESULTS_DEFAULT_FIELDS;
+        if ($method) {
+            $map = $this->getVerificationResultsMap();
+            if (isset($map[$method])) {
+                foreach ((array)$map[$method] as $key => $value) {
+                    if (!in_array($key, $fields)) {
+                        $fields[] = $key;
+                    }
+                }
+            }
+        }
+        return $fields;
+    }
+
+    /**
+     * @method getVerificationResultsMapping
+     * @param  string                        $method
+     * @param  string                        $key
      * @return string
      */
-    public function getVerificationResultsMapping($key)
+    public function getVerificationResultsMapping($method, $key)
     {
-        if ($key) {
-            return $this->scopeConfig->getValue('forter/verification_results_mapping/' . (string) $key);
+        if ($method && $key) {
+            $map = $this->getVerificationResultsMap();
+            if (isset($map[$method]) && !empty($map[$method][$key])) {
+                return (string)$map[$method][$key];
+            }
+            return $key;
         }
     }
 
