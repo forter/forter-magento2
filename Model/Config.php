@@ -116,7 +116,6 @@ class Config
         DebugLogger $forterDebugLogger,
         ErrorLogger $forterErrorLogger
     ) {
-        $this->paymentPrepere = $paymentPrepere;
         $this->scopeConfig = $scopeConfig;
         $this->storeManager = $storeManager;
         $this->encryptor = $encryptor;
