@@ -130,7 +130,7 @@ class SendQueue
             $response = $this->abstractApi->sendApiRequest($url, json_encode($data));
             $responseArray = json_decode($response);
 
-            if ($orderState == 'processing') {
+            if ($order->getState() == 'processing') {
                 $this->abstractApi->sendOrderStatus($order);
             }
 
