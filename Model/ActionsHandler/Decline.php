@@ -4,6 +4,7 @@ namespace Forter\Forter\Model\ActionsHandler;
 
 use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\Config as ForterConfig;
+use Forter\Forter\Model\Sendmail;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\Exception\PaymentException;
 use Magento\Sales\Api\OrderManagementInterface;
@@ -22,6 +23,10 @@ class Decline
      * @var AbstractApi
      */
     private $abstractApi;
+    /**
+     * @var Sendmail
+     */
+    private $sendmail;
     /**
      * @var CheckoutSession
      */
@@ -58,6 +63,7 @@ class Decline
      */
     public function __construct(
         AbstractApi $abstractApi,
+        Sendmail $sendMail,
         Order $order,
         CreditmemoFactory $creditmemoFactory,
         ForterConfig $forterConfig,
@@ -67,6 +73,7 @@ class Decline
         OrderManagementInterface $orderManagement
     ) {
         $this->abstractApi = $abstractApi;
+        $this->sendMail = $sendMail;
         $this->orderManagement = $orderManagement;
         $this->checkoutSession = $checkoutSession;
         $this->order = $order;
@@ -81,6 +88,7 @@ class Decline
      */
     public function handlePreTransactionDescision()
     {
+        $this->sendMail->sendMail();
         $forterDecision = $this->forterConfig->getDeclinePre();
         if ($forterDecision == '1') {
             throw new PaymentException(__($this->forterConfig->getPreThanksMsg()));
