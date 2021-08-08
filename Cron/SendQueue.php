@@ -139,7 +139,7 @@ class SendQueue
             }
 
             $this->handleForterResponse($order, $responseArray->action);
-            $order->addStatusHistoryComment(__('Forter (cron) Decision: %1', $forterResponse->action));
+            $order->addStatusHistoryComment(__('Forter (cron) Decision: %1', $responseArray->action));
             $order->setForterStatus($responseArray->action);
             $order->save();
 
