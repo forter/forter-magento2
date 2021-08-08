@@ -47,20 +47,6 @@ class Config
     ];
 
     /**
-     * Abstract Api
-     *
-     * @var AbstractApi
-     */
-    private $abstractApi;
-
-    /**
-     * Payment Prefer
-     *
-     * @var PaymentPrepere
-     */
-    private $paymentPrepere;
-
-    /**
      * Scope config object.
      *
      * @var ScopeConfigInterface
@@ -121,8 +107,6 @@ class Config
      * @param  ErrorLogger           $forterErrorLogger
      */
     public function __construct(
-        AbstractApi $abstractApi,
-        PaymentPrepere $paymentPrepere,
         ScopeConfigInterface $scopeConfig,
         StoreManagerInterface $storeManager,
         EncryptorInterface $encryptor,
@@ -132,7 +116,6 @@ class Config
         DebugLogger $forterDebugLogger,
         ErrorLogger $forterErrorLogger
     ) {
-        $this->abstractApi = $abstractApi;
         $this->paymentPrepere = $paymentPrepere;
         $this->scopeConfig = $scopeConfig;
         $this->storeManager = $storeManager;
@@ -654,17 +637,5 @@ class Config
             default:
                 return $result;
         }
-    }
-
-    public function sendOrderStatus($order)
-    {
-        $json = [
-        "orderId" => $order->getIncrementId(),
-        "eventTime" => time(),
-        "updatedStatus" => $order->getState(),
-        "payment" => $this->paymentPrepere->generatePaymentInfo($order)
-      ];
-        $url = "https://api.forter-secure.com/v2/status/" . $order->getIncrementId();
-        $this->abstractApi->sendApiRequest($url, json_encode($json));
     }
 }

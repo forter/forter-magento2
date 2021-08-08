@@ -65,7 +65,7 @@ class OrderSaveBefore implements ObserverInterface
                 return false;
             }
 
-            $this->forterConfig->sendOrderStatus($order);
+            $this->abstractApi->sendOrderStatus($order);
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }

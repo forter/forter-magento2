@@ -131,7 +131,7 @@ class SendQueue
             $responseArray = json_decode($response);
 
             if ($orderState == 'processing') {
-                $this->forterConfig->sendOrderStatus($order);
+                $this->abstractApi->sendOrderStatus($order);
             }
 
             $order->setForterResponse($response);

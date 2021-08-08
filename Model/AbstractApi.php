@@ -3,6 +3,7 @@
 namespace Forter\Forter\Model;
 
 use Forter\Forter\Model\Config as ForterConfig;
+use Forter\Forter\Model\RequestBuilder\Payment as PaymentPrepere;
 use Magento\Checkout\Model\Session;
 use Magento\Framework\HTTP\Client\Curl as ClientInterface;
 
@@ -16,6 +17,13 @@ class AbstractApi
      *
      */
     const ERROR_ENDPOINT = 'https://api.forter-secure.com/errors/';
+
+    /**
+     * Payment Prefer
+     *
+     * @var PaymentPrepere
+     */
+    private $paymentPrepere;
 
     /**
      * @var ClientInterface
@@ -39,10 +47,12 @@ class AbstractApi
      * @param  ForterConfig    $forterConfig
      */
     public function __construct(
+        PaymentPrepere $paymentPrepere,
         Session $checkoutSession,
         ClientInterface $clientInterface,
         ForterConfig $forterConfig
     ) {
+        $this->paymentPrepere = $paymentPrepere;
         $this->checkoutSession = $checkoutSession;
         $this->clientInterface = $clientInterface;
         $this->forterConfig = $forterConfig;
@@ -174,5 +184,17 @@ class AbstractApi
         $json = json_encode($json);
         $this->forterConfig->log($json, "error");
         $this->sendApiRequest($url, $json);
+    }
+
+    public function sendOrderStatus($order)
+    {
+        $json = [
+        "orderId" => $order->getIncrementId(),
+        "eventTime" => time(),
+        "updatedStatus" => $order->getState(),
+        "payment" => $this->paymentPrepere->generatePaymentInfo($order)
+      ];
+        $url = "https://api.forter-secure.com/v2/status/" . $order->getIncrementId();
+        $this->abstractApi->sendApiRequest($url, json_encode($json));
     }
 }

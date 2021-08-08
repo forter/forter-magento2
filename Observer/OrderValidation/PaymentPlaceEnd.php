@@ -159,7 +159,7 @@ class PaymentPlaceEnd implements ObserverInterface
             $forterResponse = $this->abstractApi->sendApiRequest($url, json_encode($data));
 
             if ($orderState == 'processing') {
-                $this->forterConfig->sendOrderStatus($order);
+                $this->abstractApi->sendOrderStatus($order);
             }
 
             $order->setForterResponse($forterResponse);

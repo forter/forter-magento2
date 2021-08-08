@@ -173,7 +173,7 @@ class PaymentPlaceStart implements ObserverInterface
             $response = $this->abstractApi->sendApiRequest($url, json_encode($data));
 
             if ($orderState == 'processing') {
-                $this->config->sendOrderStatus($order);
+                $this->abstractApi->sendOrderStatus($order);
             }
 
             $order->setForterResponse($response);
