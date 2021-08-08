@@ -130,6 +130,10 @@ class SendQueue
             $response = $this->abstractApi->sendApiRequest($url, json_encode($data));
             $responseArray = json_decode($response);
 
+            if ($orderState == 'processing') {
+                $this->forterConfig->sendOrderStatus($order);
+            }
+
             $order->setForterResponse($response);
 
             if ($responseArray->status != 'success' || !isset($responseArray->action)) {

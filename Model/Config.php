@@ -11,6 +11,8 @@
 
 namespace Forter\Forter\Model;
 
+use Forter\Forter\Model\AbstractApi;
+use Forter\Forter\Model\RequestBuilder\Payment as PaymentPrepere;
 use Forter\Forter\Logger\Logger\DebugLogger;
 use Forter\Forter\Logger\Logger\ErrorLogger;
 use Magento\Framework\App\Config\ScopeConfigInterface;
@@ -44,6 +46,20 @@ class Config
         "processorResponseCode",
         "processorResponseText"
     ];
+
+    /**
+     * Abstract Api
+     *
+     * @var AbstractApi
+     */
+    private $abstractApi;
+
+    /**
+     * Payment Prefer
+     *
+     * @var PaymentPrepere
+     */
+    private $paymentPrepere;
 
     /**
      * Scope config object.
@@ -95,6 +111,7 @@ class Config
 
     /**
      * @method __construct
+     * @param  PaymentPrepere  $paymentPrepere
      * @param  ScopeConfigInterface  $scopeConfig
      * @param  StoreManagerInterface $storeManager
      * @param  EncryptorInterface    $encryptor
@@ -105,6 +122,8 @@ class Config
      * @param  ErrorLogger           $forterErrorLogger
      */
     public function __construct(
+        AbstractApi $abstractApi,
+        PaymentPrepere $paymentPrepere,
         ScopeConfigInterface $scopeConfig,
         StoreManagerInterface $storeManager,
         EncryptorInterface $encryptor,
@@ -114,6 +133,8 @@ class Config
         DebugLogger $forterDebugLogger,
         ErrorLogger $forterErrorLogger
     ) {
+        $this->abstractApi = $abstractApi;
+        $this->paymentPrepere = $paymentPrepere;
         $this->scopeConfig = $scopeConfig;
         $this->storeManager = $storeManager;
         $this->encryptor = $encryptor;
@@ -634,5 +655,16 @@ class Config
             default:
                 return $result;
         }
+    }
+
+    public function sendOrderStatus($order){
+      $json = [
+        "orderId" => $order->getIncrementId(),
+        "eventTime" => time(),
+        "updatedStatus" => $order->getState();,
+        "payment" => $this->paymentPrepere->generatePaymentInfo($order)
+      ];
+      $url = "https://api.forter-secure.com/v2/status/" . $order->getIncrementId();
+      $this->abstractApi->sendApiRequest($url, json_encode($json));
     }
 }
