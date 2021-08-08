@@ -11,10 +11,9 @@
 
 namespace Forter\Forter\Model;
 
-use Forter\Forter\Model\AbstractApi;
-use Forter\Forter\Model\RequestBuilder\Payment as PaymentPrepere;
 use Forter\Forter\Logger\Logger\DebugLogger;
 use Forter\Forter\Logger\Logger\ErrorLogger;
+use Forter\Forter\Model\RequestBuilder\Payment as PaymentPrepere;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\Module\ModuleListInterface;
@@ -657,14 +656,15 @@ class Config
         }
     }
 
-    public function sendOrderStatus($order){
-      $json = [
+    public function sendOrderStatus($order)
+    {
+        $json = [
         "orderId" => $order->getIncrementId(),
         "eventTime" => time(),
-        "updatedStatus" => $order->getState();,
+        "updatedStatus" => $order->getState(),
         "payment" => $this->paymentPrepere->generatePaymentInfo($order)
       ];
-      $url = "https://api.forter-secure.com/v2/status/" . $order->getIncrementId();
-      $this->abstractApi->sendApiRequest($url, json_encode($json));
+        $url = "https://api.forter-secure.com/v2/status/" . $order->getIncrementId();
+        $this->abstractApi->sendApiRequest($url, json_encode($json));
     }
 }
