@@ -195,6 +195,6 @@ class AbstractApi
         "payment" => $this->paymentPrepere->generatePaymentInfo($order)
       ];
         $url = "https://api.forter-secure.com/v2/status/" . $order->getIncrementId();
-        $this->abstractApi->sendApiRequest($url, json_encode($json));
+        $this->sendApiRequest($url, json_encode($json));
     }
 }
