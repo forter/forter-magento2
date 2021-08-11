@@ -200,7 +200,21 @@
                 <field id="verification_results_map" translate="label comment" type="textarea" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0" canRestore="1">
                     <label>Verification Results Mapping</label>
                     <comment>
-                        Map Forter fields to your local payment fields. Example: {"payment_method_code": {"forter_field": "magento_field", ...}, ...}
+<![CDATA[
+<p>Map Forter fields to your local payment fields.<br>Example:
+<pre>{
+    "payment_method_code_1":{
+        "forter_field1":"magento_field1",
+        "forter_field2":"magento_field2",
+        ...
+    },
+    "payment_method_code_2":{
+        "forter_field1":"magento_field1",
+        "forter_field2":"magento_field2",
+        ...
+    },
+    ...
+}</pre><p>]]>
                     </comment>
                 </field>
               </group>
