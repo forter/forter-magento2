@@ -83,7 +83,7 @@ class PaymentMethods
 
         $authCode = $payment->getAdditionalInformation('authCode');
         if ($authCode) {
-            $detailsArray['authCode'] = $authCode;
+            $detailsArray['authorizationCode'] = $authCode;
         }
 
         return $this->preferCcDetails($payment, $detailsArray);
@@ -100,7 +100,7 @@ class PaymentMethods
 
         $authResult = $payment->getAdditionalInformation('processorAuthorizationCode');
         if ($ccType) {
-            $detailsArray['authCode'] = $authResult;
+            $detailsArray['authorizationCode'] = $authResult;
         }
 
         $cvvResponseCode = $payment->getAdditionalInformation('cvvResponseCode');
@@ -162,7 +162,7 @@ class PaymentMethods
 
         $authCode = $payment->getAdditionalInformation('adyen_auth_code');
         if ($authCode) {
-            $detailsArray['authCode'] = $authCode;
+            $detailsArray['authorizationCode'] = $authCode;
         }
 
         $avsFullResult = $payment->getAdditionalInformation('adyen_avs_result');
@@ -186,12 +186,33 @@ class PaymentMethods
     }
 
     /**
-     * Alias for ForterConfig::getVerificationResultsMapping()
-     * @return string|null
+     * Get mapped forter field
+     * @return mixed
      */
-    private function getVerResMap($key)
+
+    /**
+     * Get mapped forter field
+     * @method getVerificationResultsField
+     * @param  Payment  $payment
+     * @param  string   $key
+     * @param  array    $detailsArray
+     * @param  string   $default
+     * @return mixed
+     */
+    private function getVerificationResultsField($payment, $key, $detailsArray = [], $default = "")
     {
-        return $this->forterConfig->getVerificationResultsMapping($key);
+        if (($vrmKey = $this->forterConfig->getVerificationResultsMapping($payment->getMethod(), $key))) {
+            if (($val = $payment->getData($vrmKey))) {
+                return $val;
+            } elseif (($val = $payment->getAdditionalInformation($vrmKey))) {
+                return $val;
+            } elseif (!empty($detailsArray[$vrmKey])) {
+                return $detailsArray[$vrmKey];
+            } elseif (!empty($detailsArray[$key])) {
+                return $detailsArray[$key];
+            }
+        }
+        return $default;
     }
 
     public function preferCcDetails($payment, $detailsArray = [])
@@ -208,31 +229,27 @@ class PaymentMethods
             $last4cc = $this->customerSession->getForterLast4cc() ? $this->customerSession->getForterLast4cc() : $payment->getCcLast4();
         }
 
+        $detailsArray["avsFullResult"] = !empty($detailsArray["avsFullResult"]) ? $detailsArray["avsFullResult"] : $payment->getCcAvsStatus();
+        $detailsArray["cvvResult"] = !empty($detailsArray["cvvResult"]) ? $detailsArray["cvvResult"] : $payment->getCcCidStatus();
+        $detailsArray["cavvResult"] = !empty($detailsArray["cavvResult"]) ? $detailsArray["cavvResult"] : $payment->getCcCidStatus();
+
         $cardDetails =  [
             "nameOnCard" => array_key_exists("nameOnCard", $detailsArray) ? $detailsArray['nameOnCard'] : $payment->getCcOwner() . "",
             "cardBrand" => array_key_exists("cardBrand", $detailsArray) ? $detailsArray['cardBrand'] : $payment->getCcType() . "",
             "bin" => $binNumber,
             "countryOfIssuance" => array_key_exists('countryOfIssuance', $detailsArray) ? $detailsArray['countryOfIssuance'] : $payment->getAdditionalInformation('country_of_issuance'),
             "cardBank" => array_key_exists("cardBank", $detailsArray) ? $detailsArray['cardBank'] : $payment->getEcheckBankName(),
-            "verificationResults" => [
-                "authorizationCode" => ($_vrmKey = $this->getVerResMap('authorization_code')) ? $payment->getAdditionalInformation($_vrmKey) : (array_key_exists("authCode", $detailsArray) ? $detailsArray['authCode'] : ""),
-                "authorizationPolicy" => ($_vrmKey = $this->getVerResMap('authorization_policy')) ? $payment->getAdditionalInformation($_vrmKey) : (array_key_exists("authorizationPolicy", $detailsArray) ? $detailsArray['authorizationPolicy'] : ""),
-                "avsFullResult" => ($_vrmKey = $this->getVerResMap('avs_full_result')) ? $payment->getAdditionalInformation($_vrmKey) : (array_key_exists("avsFullResult", $detailsArray) ? $detailsArray['avsFullResult'] : $payment->getCcAvsStatus() . ""),
-                "avsNameResult" => ($_vrmKey = $this->getVerResMap('avs_name_result')) ? $payment->getAdditionalInformation($_vrmKey) : (array_key_exists("avsNameResult", $detailsArray) ? $detailsArray['avsNameResult'] : ""),
-                "avsStreetResult" => ($_vrmKey = $this->getVerResMap('avs_street_result')) ? $payment->getAdditionalInformation($_vrmKey) : (array_key_exists("avsStreetResult", $detailsArray) ? $detailsArray['avsStreetResult'] : ""),
-                "avsZipResult" => ($_vrmKey = $this->getVerResMap('avs_zip_result')) ? $payment->getAdditionalInformation($_vrmKey) : (array_key_exists("avsZipResult", $detailsArray) ? $detailsArray['avsZipResult'] : ""),
-                "cvvResult" => ($_vrmKey = $this->getVerResMap('cvv_result')) ? $payment->getAdditionalInformation($_vrmKey) : (array_key_exists("cvvResult", $detailsArray) ? $detailsArray['cvvResult'] : $payment->getCcCidStatus() . ""),
-                "cavvResult" => ($_vrmKey = $this->getVerResMap('cavv_result')) ? $payment->getAdditionalInformation($_vrmKey) : (array_key_exists("cavvResult", $detailsArray) ? $detailsArray['cavvResult'] : $payment->getCcCidStatus() . ""),
-                "eciValue" => ($_vrmKey = $this->getVerResMap('eci_value')) ? $payment->getAdditionalInformation($_vrmKey) : (array_key_exists("eciValue", $detailsArray) ? $detailsArray['eciValue'] : ""),
-                "processorResponseCode" => ($_vrmKey = $this->getVerResMap('processor_response_code')) ? $payment->getAdditionalInformation($_vrmKey) : (array_key_exists('processorResponseCode', $detailsArray) ? $detailsArray['processorResponseCode'] : $payment->getAdditionalInformation("processorResponseCode")),
-                "processorResponseText" => ($_vrmKey = $this->getVerResMap('processor_response_text')) ? $payment->getAdditionalInformation($_vrmKey) : (array_key_exists('processorResponseText', $detailsArray) ? $detailsArray['processorResponseText'] : $payment->getAdditionalInformation("processorResponseText")),
-            ],
+            "verificationResults" => [],
             "paymentGatewayData" => [
                 "gatewayName" => $payment->getMethod() ? $payment->getMethod() : "",
                 "gatewayTransactionId" => $payment->getCcTransId() ? $payment->getCcTransId() : "",
             ],
             "fullResponsePayload" => $payment->getAdditionalInformation() ? $payment->getAdditionalInformation() : ""
         ];
+
+        foreach ($this->forterConfig->getVerificationResultsMethodFields($payment->getMethod()) as $field) {
+            $cardDetails["verificationResults"][$field] = $this->getVerificationResultsField($payment, $field, $detailsArray);
+        }
 
         if (array_key_exists("expirationMonth", $detailsArray) || $payment->getCcExpMonth()) {
             $cardDetails["expirationMonth"] = array_key_exists("expirationMonth", $detailsArray) ? $detailsArray['expirationMonth'] : str_pad($payment->getCcExpMonth(), 2, "0", STR_PAD_LEFT);

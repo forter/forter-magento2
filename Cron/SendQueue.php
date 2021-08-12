@@ -130,6 +130,8 @@ class SendQueue
             $response = $this->abstractApi->sendApiRequest($url, json_encode($data));
             $responseArray = json_decode($response);
 
+            $this->abstractApi->sendOrderStatus($order);
+
             $order->setForterResponse($response);
 
             if ($responseArray->status != 'success' || !isset($responseArray->action)) {
@@ -139,7 +141,7 @@ class SendQueue
             }
 
             $this->handleForterResponse($order, $responseArray->action);
-            $order->addStatusHistoryComment(__('Forter (cron) Decision: %1', $forterResponse->action));
+            $order->addStatusHistoryComment(__('Forter (cron) Decision: %1', $responseArray->action));
             $order->setForterStatus($responseArray->action);
             $order->save();
 

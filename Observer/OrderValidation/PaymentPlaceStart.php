@@ -172,6 +172,8 @@ class PaymentPlaceStart implements ObserverInterface
             $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
             $response = $this->abstractApi->sendApiRequest($url, json_encode($data));
 
+            $this->abstractApi->sendOrderStatus($order);
+
             $order->setForterResponse($response);
 
             $response = json_decode($response);
