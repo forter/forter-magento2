@@ -7,17 +7,15 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\MailException;
 use Magento\Framework\Mail\Template\TransportBuilder;
 use Magento\Framework\Translate\Inline\StateInterface;
-use Magento\Sales\Model\Order;
 use Magento\Store\Model\StoreManagerInterface;
 use Psr\Log\LoggerInterface;
 
 class Sendmail
 {
     const EMAIL_TEMPLATE = 'forter/sendmail_on_decline/email_template';
-
     const EMAIL_SERVICE_ENABLE = 'forter/sendmail_on_decline/enabled';
-
-    const SENDER_EMAIL = 'forter/sendmail_on_decline/sender';
+    const EMAIL_SENDER = 'forter/sendmail_on_decline/sender';
+    const EMAIL_RECEIVER = 'forter/sendmail_on_decline/receiver';
 
     /**
      * @var StateInterface
@@ -68,15 +66,14 @@ class Sendmail
 
     /**
      * Send Mail
-     * @param  Order $order
      * @return $this
      *
      * @throws LocalizedException
      * @throws MailException
      */
-    public function sendMail(Order $order)
+    public function sendMail()
     {
-        $storeId = $order->getStoreId();
+        $storeId = $this->storeManager->getStore()->getId();
 
         if (!$this->getConfigValue(self::EMAIL_SERVICE_ENABLE, $storeId)) {
             return;
@@ -92,12 +89,12 @@ class Sendmail
         ])->setTemplateVars([
             'message_1' => 'CUSTOM MESSAGE STR 1',
             'message_2' => 'custom message str 2',
-            'store' => $storeId
+            'store' => $this->storeManager->getStore()
         ])->setFromByScope(
-            $this->getConfigValue(self::SENDER_EMAIL, $storeId),
+            $this->getConfigValue(self::EMAIL_SENDER, $storeId),
             $storeId
         )->addTo(
-            $order->getCustomerEmail()
+            $this->getConfigValue(self::EMAIL_RECEIVER, $storeId)
         )->getTransport();
 
         try {

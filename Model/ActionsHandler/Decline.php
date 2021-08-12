@@ -84,12 +84,11 @@ class Decline
     }
 
     /**
-     * @param  Order $order
      * @return $this
      */
-    public function handlePreTransactionDescision(Order $order)
+    public function handlePreTransactionDescision()
     {
-        $this->sendMail->sendMail($order);
+        $this->sendMail->sendMail();
         $forterDecision = $this->forterConfig->getDeclinePre();
         if ($forterDecision == '1') {
             throw new PaymentException(__($this->forterConfig->getPreThanksMsg()));
