@@ -7,7 +7,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\MailException;
 use Magento\Framework\Mail\Template\TransportBuilder;
 use Magento\Framework\Translate\Inline\StateInterface;
-use Magento\Store\Model\ScopeInterface;
+use Magento\Sales\Model\Order;
 use Magento\Store\Model\StoreManagerInterface;
 use Psr\Log\LoggerInterface;
 
@@ -40,6 +40,13 @@ class Sendmail
     private $logger;
 
     /**
+     * Core store config
+     *
+     * @var ScopeConfigInterface
+     */
+    protected $scopeConfig;
+
+    /**
      * @param StoreManagerInterface $storeManager
      * @param TransportBuilder $transportBuilder
      * @param StateInterface $inlineTranslation
@@ -52,63 +59,45 @@ class Sendmail
         LoggerInterface $logger,
         ScopeConfigInterface $scopeConfig
     ) {
-        $this->scopeConfig = $scopeConfig;
         $this->storeManager = $storeManager;
         $this->transportBuilder = $transportBuilder;
         $this->inlineTranslation = $inlineTranslation;
         $this->logger = $logger;
+        $this->scopeConfig = $scopeConfig;
     }
 
     /**
      * Send Mail
-     *
+     * @param  Order $order
      * @return $this
      *
      * @throws LocalizedException
      * @throws MailException
      */
-    public function sendMail()
+    public function sendMail(Order $order)
     {
-        $email = 'zach@girit.biz'; //set receiver mail
+        $storeId = $order->getStoreId();
+
+        if (!$this->getConfigValue(self::EMAIL_SERVICE_ENABLE, $storeId)) {
+            return;
+        }
 
         $this->inlineTranslation->suspend();
-        $storeId = $this->getStoreId();
-
-        /* email template */
-        $template = $this->scopeConfig->getValue(
-            self::EMAIL_TEMPLATE,
-            ScopeInterface::SCOPE_STORE,
-            $storeId
-        );
-
-        $vars = [
-            'message_1' => 'CUSTOM MESSAGE STR 1',
-            'message_2' => 'custom message str 2',
-            'store' => $this->getStore()
-        ];
-
-        /*  $sender ['email'] = $this->scopeConfig->getValue(
-              self::SENDER_EMAIL,
-              ScopeInterface::SCOPE_STORE,
-              $storeId
-          );*/
-
-        $sender ['email'] = 'test@girit.biz';
-        $sender['name'] = 'admin';
 
         $transport = $this->transportBuilder->setTemplateIdentifier(
-            $template
-        )->setTemplateOptions(
-            [
-                'area' => Area::AREA_FRONTEND,
-                'store' => $this->getStoreId()
-            ]
-        )->setTemplateVars(
-            $vars
-        )->setFromByScope(
-            $sender
+            $this->getConfigValue(self::EMAIL_TEMPLATE, $storeId)
+        )->setTemplateOptions([
+            'area' => Area::AREA_FRONTEND,
+            'store' => $storeId
+        ])->setTemplateVars([
+            'message_1' => 'CUSTOM MESSAGE STR 1',
+            'message_2' => 'custom message str 2',
+            'store' => $storeId
+        ])->setFromByScope(
+            $this->getConfigValue(self::SENDER_EMAIL, $storeId),
+            $storeId
         )->addTo(
-            $email
+            $order->getCustomerEmail()
         )->getTransport();
 
         try {
@@ -116,24 +105,25 @@ class Sendmail
         } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());
         }
+
         $this->inlineTranslation->resume();
 
         return $this;
     }
 
-    /*
-     * get Current store id
+    /**
+     * Return store configuration value
+     *
+     * @param string $path
+     * @param int $storeId
+     * @return mixed
      */
-    public function getStoreId()
+    protected function getConfigValue($path, $storeId)
     {
-        return $this->storeManager->getStore()->getId();
-    }
-
-    /*
-     * get Current store Info
-     */
-    public function getStore()
-    {
-        return $this->storeManager->getStore();
+        return $this->scopeConfig->getValue(
+            $path,
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
     }
 }
