@@ -33,7 +33,6 @@
               <sendmail>
                 <enabled>1</enabled>
                 <sender>general</sender>
-                <receiver>sales</receiver>
                 <email_template>forter_sendmail_on_decline_email_template</email_template>
               </sendmail>
             </sendmail_on_decline>

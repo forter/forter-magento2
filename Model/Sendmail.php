@@ -1,21 +1,19 @@
 <?php
+
 namespace Forter\Forter\Model;
 
 use Magento\Framework\App\Area;
-use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\MailException;
 use Magento\Framework\Mail\Template\TransportBuilder;
 use Magento\Framework\Translate\Inline\StateInterface;
-use Magento\Store\Model\StoreManagerInterface;
-use Psr\Log\LoggerInterface;
 
 class Sendmail
 {
-    const EMAIL_TEMPLATE = 'forter/sendmail_on_decline/email_template';
-    const EMAIL_SERVICE_ENABLE = 'forter/sendmail_on_decline/enabled';
-    const EMAIL_SENDER = 'forter/sendmail_on_decline/sender';
-    const EMAIL_RECEIVER = 'forter/sendmail_on_decline/receiver';
+    const EMAIL_TEMPLATE = 'sendmail_on_decline/email_template';
+    const EMAIL_SERVICE_ENABLE = 'sendmail_on_decline/enabled';
+    const EMAIL_SENDER = 'sendmail_on_decline/sender';
+    const EMAIL_RECEIVER = 'sendmail_on_decline/receiver';
 
     /**
      * @var StateInterface
@@ -28,40 +26,24 @@ class Sendmail
     private $transportBuilder;
 
     /**
-     * @var StoreManagerInterface
+     * @var Config
      */
-    private $storeManager;
+    protected $forterConfig;
 
     /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
-     * Core store config
-     *
-     * @var ScopeConfigInterface
-     */
-    protected $scopeConfig;
-
-    /**
-     * @param StoreManagerInterface $storeManager
-     * @param TransportBuilder $transportBuilder
-     * @param StateInterface $inlineTranslation
-     * @param LoggerInterface $logger
+     * @method __construct
+     * @param  TransportBuilder $transportBuilder
+     * @param  StateInterface   $inlineTranslation
+     * @param  Config           $forterConfig
      */
     public function __construct(
-        StoreManagerInterface $storeManager,
         TransportBuilder $transportBuilder,
         StateInterface $inlineTranslation,
-        LoggerInterface $logger,
-        ScopeConfigInterface $scopeConfig
+        Config $forterConfig
     ) {
-        $this->storeManager = $storeManager;
         $this->transportBuilder = $transportBuilder;
         $this->inlineTranslation = $inlineTranslation;
-        $this->logger = $logger;
-        $this->scopeConfig = $scopeConfig;
+        $this->forterConfig = $forterConfig;
     }
 
     /**
@@ -73,54 +55,36 @@ class Sendmail
      */
     public function sendMail()
     {
-        $storeId = $this->storeManager->getStore()->getId();
-
-        if (!$this->getConfigValue(self::EMAIL_SERVICE_ENABLE, $storeId)) {
+        if (!$this->forterConfig->isEnabled() || !$this->forterConfig->getConfigValue(self::EMAIL_SERVICE_ENABLE)) {
             return;
         }
 
         $this->inlineTranslation->suspend();
 
-        $transport = $this->transportBuilder->setTemplateIdentifier(
-            $this->getConfigValue(self::EMAIL_TEMPLATE, $storeId)
-        )->setTemplateOptions([
-            'area' => Area::AREA_FRONTEND,
-            'store' => $storeId
-        ])->setTemplateVars([
-            'message_1' => 'CUSTOM MESSAGE STR 1',
-            'message_2' => 'custom message str 2',
-            'store' => $this->storeManager->getStore()
-        ])->setFromByScope(
-            $this->getConfigValue(self::EMAIL_SENDER, $storeId),
-            $storeId
-        )->addTo(
-            $this->getConfigValue(self::EMAIL_RECEIVER, $storeId)
-        )->getTransport();
-
         try {
+            $transport = $this->transportBuilder->setTemplateIdentifier(
+                $this->forterConfig->getConfigValue(self::EMAIL_TEMPLATE)
+            )->setTemplateOptions([
+                'area' => Area::AREA_FRONTEND,
+                'store' => $this->forterConfig->getStoreId()
+            ])->setTemplateVars([
+                'message_1' => 'CUSTOM MESSAGE STR 1',
+                'message_2' => 'custom message str 2',
+                'store' => $this->forterConfig->getCurrentStore()
+            ])->setFromByScope(
+                $this->forterConfig->getConfigValue(self::EMAIL_SENDER),
+                $this->forterConfig->getStoreId()
+            )->addTo(
+                $this->forterConfig->getConfigValue(self::EMAIL_RECEIVER)
+            )->getTransport();
+
             $transport->sendMessage();
-        } catch (\Exception $exception) {
-            $this->logger->critical($exception->getMessage());
+        } catch (\Exception $e) {
+            $this->forterConfig->log($e->getMessage(), "error");
         }
 
         $this->inlineTranslation->resume();
 
         return $this;
-    }
-
-    /**
-     * Return store configuration value
-     *
-     * @param string $path
-     * @param int $storeId
-     * @return mixed
-     */
-    protected function getConfigValue($path, $storeId)
-    {
-        return $this->scopeConfig->getValue(
-            $path,
-            \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
-            $storeId
-        );
     }
 }
