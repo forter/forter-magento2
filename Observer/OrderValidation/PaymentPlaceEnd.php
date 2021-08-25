@@ -205,6 +205,7 @@ class PaymentPlaceEnd implements ObserverInterface
             $order->setCanSendNewEmailFlag(false);
             $this->decline->markOrderPaymentReview($order);
         }
+        $this->decline->sendDeclineMail($order);
     }
 
     public function handleApprove($order)

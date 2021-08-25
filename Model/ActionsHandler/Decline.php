@@ -87,14 +87,24 @@ class Decline
      * @param  Order $order
      * @return $this
      */
-    public function handlePreTransactionDescision(Order $order)
+    public function handlePreTransactionDescision($order)
     {
-        $this->sendMail->sendMail($order);
+        $this->sendDeclineMail($order);
         $forterDecision = $this->forterConfig->getDeclinePre();
         if ($forterDecision == '1') {
             throw new PaymentException(__($this->forterConfig->getPreThanksMsg()));
         }
 
+        return $this;
+    }
+
+    /**
+     * @param  Order $order
+     * @return $this
+     */
+    public function sendDeclineMail($order)
+    {
+        $this->sendMail->sendMail($order);
         return $this;
     }
 
@@ -115,6 +125,7 @@ class Decline
             if ($order->canHold()) {
                 $this->holdOrder($order);
             }
+            $this->sendDeclineMail($order);
         } catch (Exception $e) {
             $this->addCommentToOrder($order, 'Order Cancellation attempt failed. Internal Error');
             $this->abstractApi->reportToForterOnCatch($e);
