@@ -7,6 +7,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\MailException;
 use Magento\Framework\Mail\Template\TransportBuilder;
 use Magento\Framework\Translate\Inline\StateInterface;
+use Magento\Sales\Model\Order;
 
 class Sendmail
 {
@@ -48,12 +49,13 @@ class Sendmail
 
     /**
      * Send Mail
+     * @param  Order $order
      * @return $this
      *
      * @throws LocalizedException
      * @throws MailException
      */
-    public function sendMail()
+    public function sendMail(Order $order)
     {
         if (!$this->forterConfig->isEnabled() || !$this->forterConfig->getConfigValue(self::EMAIL_SERVICE_ENABLE)) {
             return;
@@ -68,8 +70,7 @@ class Sendmail
                 'area' => Area::AREA_FRONTEND,
                 'store' => $this->forterConfig->getStoreId()
             ])->setTemplateVars([
-                'message_1' => 'CUSTOM MESSAGE STR 1',
-                'message_2' => 'custom message str 2',
+                'order' => $order,
                 'store' => $this->forterConfig->getCurrentStore()
             ])->setFromByScope(
                 $this->forterConfig->getConfigValue(self::EMAIL_SENDER),
