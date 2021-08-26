@@ -195,6 +195,7 @@ class PaymentPlaceEnd implements ObserverInterface
 
     public function handleDecline($order)
     {
+        $this->decline->sendDeclineMail($order);
         $result = $this->forterConfig->getDeclinePost();
         if ($result == '1') {
             $this->customerSession->setForterMessage($this->forterConfig->getPostThanksMsg());

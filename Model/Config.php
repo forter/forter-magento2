@@ -15,6 +15,7 @@ use Forter\Forter\Logger\Logger\DebugLogger;
 use Forter\Forter\Logger\Logger\ErrorLogger;
 use Forter\Forter\Model\RequestBuilder\Payment as PaymentPrepere;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\Module\ModuleListInterface;
 use Magento\Framework\UrlInterface;
@@ -95,16 +96,21 @@ class Config
     private $verificationResultMap;
 
     /**
+     * @var ProductMetadataInterface
+     */
+    private $productMetadata;
+
+    /**
      * @method __construct
-     * @param  PaymentPrepere  $paymentPrepere
-     * @param  ScopeConfigInterface  $scopeConfig
-     * @param  StoreManagerInterface $storeManager
-     * @param  EncryptorInterface    $encryptor
-     * @param  LoggerInterface       $logger
-     * @param  ModuleListInterface   $moduleList
-     * @param  UrlInterface          $urlBuilder
-     * @param  DebugLogger           $forterDebugLogger
-     * @param  ErrorLogger           $forterErrorLogger
+     * @param  ScopeConfigInterface     $scopeConfig
+     * @param  StoreManagerInterface    $storeManager
+     * @param  EncryptorInterface       $encryptor
+     * @param  LoggerInterface          $logger
+     * @param  ModuleListInterface      $moduleList
+     * @param  UrlInterface             $urlBuilder
+     * @param  DebugLogger              $forterDebugLogger
+     * @param  ErrorLogger              $forterErrorLogger
+     * @param  ProductMetadataInterface $productMetadata
      */
     public function __construct(
         ScopeConfigInterface $scopeConfig,
@@ -114,7 +120,8 @@ class Config
         ModuleListInterface $moduleList,
         UrlInterface $urlBuilder,
         DebugLogger $forterDebugLogger,
-        ErrorLogger $forterErrorLogger
+        ErrorLogger $forterErrorLogger,
+        ProductMetadataInterface $productMetadata
     ) {
         $this->scopeConfig = $scopeConfig;
         $this->storeManager = $storeManager;
@@ -124,6 +131,7 @@ class Config
         $this->urlBuilder = $urlBuilder;
         $this->forterDebugLogger = $forterDebugLogger;
         $this->forterErrorLogger = $forterErrorLogger;
+        $this->productMetadata = $productMetadata;
     }
 
     /**
@@ -214,7 +222,7 @@ class Config
      * @return mixed
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    private function getConfigValue($fieldKey)
+    public function getConfigValue($fieldKey)
     {
         return $this->scopeConfig->getValue(
             $this->getConfigPath() . $fieldKey,
@@ -325,6 +333,11 @@ class Config
     public function getModuleVersion()
     {
         return $this->moduleList->getOne(self::MODULE_NAME)['setup_version'];
+    }
+
+    public function getMagentoFullVersion()
+    {
+        return "{$this->productMetadata->getName()} {$this->productMetadata->getEdition()} {$this->productMetadata->getVersion()}";
     }
 
     /**

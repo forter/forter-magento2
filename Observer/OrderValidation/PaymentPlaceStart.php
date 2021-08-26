@@ -194,6 +194,6 @@ class PaymentPlaceStart implements ObserverInterface
             $this->abstractApi->reportToForterOnCatch($e);
         }
 
-        $this->decline->handlePreTransactionDescision();
+        $this->decline->handlePreTransactionDescision($order);
     }
 }

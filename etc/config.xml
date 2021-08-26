@@ -29,6 +29,13 @@
                 <enabled_order_fulfillment>1</enabled_order_fulfillment>
                 <phone_order_enabled>0</phone_order_enabled>
             </advanced_settings>
+            <sendmail_on_decline>
+              <sendmail>
+                <enabled>1</enabled>
+                <sender>general</sender>
+                <email_template>forter_sendmail_on_decline_email_template</email_template>
+              </sendmail>
+            </sendmail_on_decline>
         </forter>
     </default>
 </config>

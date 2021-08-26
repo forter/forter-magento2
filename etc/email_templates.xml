@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Email:etc/email_templates.xsd">
+    <template id="forter_sendmail_on_decline_email_template" label="Forter Decline Template Magento 2" file="forter_sendmail_on_decline_email_template.html" type="html" module="Forter_Forter" area="frontend"/>
+</config>

@@ -120,7 +120,7 @@ class AbstractApi
         $this->clientInterface->addHeader('x-forter-siteid', $this->forterConfig->getSiteId());
         $this->clientInterface->addHeader('api-version', $this->forterConfig->getApiVersion());
         $this->clientInterface->addHeader('x-forter-extver', $this->forterConfig->getModuleVersion());
-        $this->clientInterface->addHeader('x-forter-client', 'magento2');
+        $this->clientInterface->addHeader('x-forter-client', $this->forterConfig->getMagentoFullVersion());
         $this->clientInterface->addHeader('Content-Type', 'application/json');
         $this->clientInterface->addHeader('Content-Length', $bodyLen);
         /* Curl Options */
