@@ -13,6 +13,7 @@ namespace Forter\Forter\Model;
 
 use Forter\Forter\Logger\Logger\DebugLogger;
 use Forter\Forter\Logger\Logger\ErrorLogger;
+use Forter\Forter\Model\RequestBuilder\Payment as PaymentPrepere;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\Encryption\EncryptorInterface;

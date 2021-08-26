@@ -65,14 +65,7 @@ class OrderSaveBefore implements ObserverInterface
                 return false;
             }
 
-            $json = [
-            "orderId" => $order->getIncrementId(),
-            "eventTime" => time(),
-            "updatedStatus" => $orderState,
-            "payment" => $this->paymentPrepere->generatePaymentInfo($order)
-            ];
-            $url = self::ORDER_FULFILLMENT_STATUS_ENDPOINT . $order->getIncrementId();
-            $this->abstractApi->sendApiRequest($url, json_encode($json));
+            $this->abstractApi->sendOrderStatus($order);
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }
