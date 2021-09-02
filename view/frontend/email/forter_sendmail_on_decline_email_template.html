@@ -1,16 +1,25 @@
+<!--@subject {{trans "Forter declined order #%increment_id" increment_id=$order.getIncrementId()}} @-->
+
 {{template config_path="design/email/header_template"}}
 
 <table>
     <tr class="email-info">
         <td>
             <p>
-                {{trans "Hello"}}<br>
-                {{trans "Order #%increment_id was declined by Forter" increment_id=$order.getIncrementId()}}
+                {{trans "Hi"}},<br>
+                {{trans "Forter declined order #%increment_id" increment_id=$order.getIncrementId()}}
             </p>
-            <p>{{trans "Forder Decision: %forter_decision" forter_decision=$order.getForterStatus()}}</p>
             <p>
-                {{trans "Please contact the client in order to end the purchase process"}}<br>
-                {{trans Thank you"}}
+                {{trans "The order details are"}}:<br>
+                <ul>
+                    <li>{{trans "Date: %order_date" order_date=$order.getCreatedAt()}}</li>
+                    <li>{{trans "Total amount: %grand_total %currency"  grand_total=$order.getGrandTotal() currency=$order.getCurrencyCode()}}</li>
+                </ul>
+                {{trans "The client details are"}}:<br>
+                <ul>
+                    <li>{{trans "Name: %customer_name" customer_name=$order.getCustomerName()}}</li>
+                    <li>{{trans "Email: %customer_email"  customer_email=$order.getCustomerEmail()}}</li>
+                </ul>
             </p>
         </td>
     </tr>
