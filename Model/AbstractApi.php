@@ -186,12 +186,25 @@ class AbstractApi
         $this->sendApiRequest($url, $json);
     }
 
+    public function getUpdatedStatusEnum($order)
+    {
+        $orderState = $order->getState();
+        if ($orderState == 'complete') {
+            $orderState = 'COMPLETED';
+        } elseif ($orderState == 'processing') {
+            $orderState = 'PROCESSING';
+        } elseif ($orderState == 'canceled') {
+            $orderState = 'CANCELED_BY_MERCHANT';
+        }
+        return $orderState;
+    }
+
     public function sendOrderStatus($order)
     {
         $json = [
         "orderId" => $order->getIncrementId(),
         "eventTime" => time(),
-        "updatedStatus" => $order->getState(),
+        "updatedStatus" => $this->getUpdatedStatusEnum($order),
         "payment" => $this->paymentPrepere->generatePaymentInfo($order)
       ];
         $url = "https://api.forter-secure.com/v2/status/" . $order->getIncrementId();
