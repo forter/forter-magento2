@@ -186,7 +186,7 @@ class AbstractApi
         $this->sendApiRequest($url, $json);
     }
 
-    public function getOrderStatusEnum($order)
+    public function getUpdatedStatusEnum($order)
     {
         $orderState = $order->getState();
         if ($orderState == 'complete') {
@@ -204,7 +204,7 @@ class AbstractApi
         $json = [
         "orderId" => $order->getIncrementId(),
         "eventTime" => time(),
-        "updatedStatus" => $this->getOrderStatusEnum($order),
+        "updatedStatus" => $this->getUpdatedStatusEnum($order),
         "payment" => $this->paymentPrepere->generatePaymentInfo($order)
       ];
         $url = "https://api.forter-secure.com/v2/status/" . $order->getIncrementId();
