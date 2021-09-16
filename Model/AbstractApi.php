@@ -189,14 +189,14 @@ class AbstractApi
     public function getUpdatedStatusEnum($order)
     {
         $orderState = $order->getState();
-        if ($orderState == 'complete') {
-            $orderState = 'COMPLETED';
-        } elseif ($orderState == 'processing') {
-            $orderState = 'PROCESSING';
-        } elseif ($orderState == 'canceled') {
-            $orderState = 'CANCELED_BY_MERCHANT';
+        if ($orderState == "complete") {
+            $orderState = "COMPLETED";
+        } elseif ($orderState == "processing") {
+            $orderState = "PROCESSING";
+        } elseif ($orderState == "canceled") {
+            $orderState = "CANCELED_BY_MERCHANT";
         }
-        return $orderState;
+        return "PROCESSING";
     }
 
     public function sendOrderStatus($order)
