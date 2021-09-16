@@ -195,8 +195,10 @@ class AbstractApi
             $orderState = "PROCESSING";
         } elseif ($orderState == "canceled") {
             $orderState = "CANCELED_BY_MERCHANT";
+        } else {
+            $orderState = "PROCESSING";
         }
-        return "PROCESSING";
+        return $orderState;
     }
 
     public function sendOrderStatus($order)
