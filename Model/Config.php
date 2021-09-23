@@ -596,9 +596,8 @@ class Config
     {
         $order->addStatusHistoryComment('Forter: ' . $message)
           ->setIsCustomerNotified(false)
-          ->setEntityName('order');
-
-        $order->save();
+          ->setEntityName('order')
+          ->save();
     }
 
     /**
