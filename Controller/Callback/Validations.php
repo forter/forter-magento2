@@ -159,8 +159,7 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
                 throw new \Exception("Forter: Call body is empty");
             }
 
-            $orderIncrementId = $request->getParam('order_id');
-            $order = $this->getOrder($orderIncrementId);
+            $order = $this->getOrder($bodyRawParams['orderId']);
 
             if (!$order) {
                 throw new \Exception("Forter: Unknown order");
