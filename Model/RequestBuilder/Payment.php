@@ -50,9 +50,9 @@ class Payment
         // If paypal:
         if (strpos($payment_method, 'paypal') !== false) {
             $paymentData["paypal"] = $this->paymentMethods->getPaypalDetails($payment);
-        } elseif (strpos($payment_method, 'paybright')) {
+        } elseif (strpos($payment_method, 'paybright') !== false) {
             $paymentData["installmentService"] = $this->paymentMethods->getPaybrightDetails($order, $payment);
-        } elseif (strpos($payment->getData('cc_type'), 'klarna_account')) {
+        } elseif (strpos($payment->getData('cc_type'), 'klarna_account') !== false) {
             $paymentData["installmentService"] = $this->paymentMethods->getAdyenKlarnaDetails($order, $payment);
         } else {
             if (strpos($payment_method, 'adyen') !== false) {
