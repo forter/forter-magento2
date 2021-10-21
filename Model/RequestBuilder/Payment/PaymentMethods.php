@@ -69,7 +69,7 @@ class PaymentMethods
           "firstName" => $order->getShippingAddress()->getFirstname(),
           "lastName" => $order->getShippingAddress()->getLastname(),
           "serviceResponseCode" => "200",
-          "paymentId" => $payment->last_trans_id(),
+          "paymentId" => $payment->getData('last_trans_id'),
           "fullResponsePayload" => $payment->getAdditionalInformation()
         ];
     }
@@ -77,11 +77,11 @@ class PaymentMethods
     public function getAdyenKlarnaDetails($order, $payment)
     {
         return [
-        "serviceName" => $payment->cc_type(),
+        "serviceName" => $payment->getData('cc_type'),
         "firstName" => $order->getShippingAddress()->getFirstname(),
         "lastName" => $order->getShippingAddress()->getLastname(),
         "serviceResponseCode" => "200",
-        "paymentId" => $payment->cc_trans_id(),
+        "paymentId" => $payment->getData('cc_trans_id'),
         "fullResponsePayload" => $payment->getAdditionalInformation()
       ];
     }

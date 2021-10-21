@@ -52,7 +52,7 @@ class Payment
             $paymentData["paypal"] = $this->paymentMethods->getPaypalDetails($payment);
         } elseif (strpos($payment_method, 'paybright')) {
             $paymentData["installmentService"] = $this->paymentMethods->getPaybrightDetails($order, $payment);
-        } elseif (strpos($payment->cc_type(), 'klarna_account')) {
+        } elseif (strpos($payment->getData('cc_type'), 'klarna_account')) {
             $paymentData["installmentService"] = $this->paymentMethods->getAdyenKlarnaDetails($order, $payment);
         } else {
             if (strpos($payment_method, 'adyen') !== false) {
