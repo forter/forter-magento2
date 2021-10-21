@@ -62,6 +62,30 @@ class PaymentMethods
         ];
     }
 
+    public function getPaybrightDetails($order, $payment)
+    {
+        return [
+          "serviceName": $payment->getMethod(),
+          "firstName": $order->getShippingAddress()->getFirstname(),
+          "lastName": $order->getShippingAddress()->getLastname(),
+          "serviceResponseCode": "200",
+          "paymentId": $payment->last_trans_id(),
+          "fullResponsePayload": $payment->getAdditionalInformation()
+        ];
+    }
+
+    public function getAdyenKlarnaDetails($order, $payment)
+    {
+      return [
+        "serviceName": $payment->cc_type(),
+        "firstName": $order->getShippingAddress()->getFirstname(),
+        "lastName": $order->getShippingAddress()->getLastname(),
+        "serviceResponseCode": "200",
+        "paymentId": $payment->cc_trans_id(),
+        "fullResponsePayload": $payment->getAdditionalInformation()
+      ];
+    }
+
     public function getAuthorizeNetDetails($payment)
     {
         $detailsArray = [];
