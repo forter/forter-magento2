@@ -13,7 +13,6 @@ namespace Forter\Forter\Model;
 
 use Forter\Forter\Logger\Logger\DebugLogger;
 use Forter\Forter\Logger\Logger\ErrorLogger;
-use Forter\Forter\Model\RequestBuilder\Payment as PaymentPrepere;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
@@ -370,14 +369,6 @@ class Config
     public function getPostThanksMsg()
     {
         return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/post_thanks_msg');
-    }
-
-    /**
-     * @return mixed
-     */
-    public function isAccountTouchpointEnabled()
-    {
-        return $this->scopeConfig->getValue('forter/advanced_settings/enabled_account_touchpoint');
     }
 
     /**
