@@ -116,7 +116,6 @@ class Decline
         try {
             if ($order->canCancel()) {
                 $this->cancelOrder($order);
-
             }
 
             if ($order->canCreditmemo()) {
