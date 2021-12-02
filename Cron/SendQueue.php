@@ -78,8 +78,7 @@ class SendQueue
                 ->addFieldToFilter(
                     'sync_date',
                     [
-                      'from' => date('Y-m-d H:i:s', strtotime('-7 days')),
-                      'to' => date('Y-m-d H:i:s', strtotime($this->dateTime->gmtDate()))
+                      'from' => date('Y-m-d H:i:s', strtotime('-7 days'))
                     ]
                 );
 
@@ -103,7 +102,7 @@ class SendQueue
                 $method = $order->getPayment()->getMethod();
 
                 if ($item->getEntityType() == 'pre_sync_order') {
-                    if (strpos($method, 'adyen') !== false && !$order->getPayment()->getAdyenPspReference()) {
+                    if (strpos($method, 'adyen') !== false && !$order->getPayment()->getAdyenNotificationEventCode()) {
                         continue;
                     }
 
