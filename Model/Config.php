@@ -207,6 +207,20 @@ class Config
     }
 
     /**
+     * @return array
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function getEmailSettingsOnDecline()
+    {
+        return [
+          "enable" => $this->getConfigValue('sendmail_on_decline/sendmail_on_decline_enabled'),
+          "email_sender" => $this->getConfigValue('sendmail_on_decline/sender'),
+          "email_receiver" => $this->getConfigValue('sendmail_on_decline/receiver'),
+          "custom_email_template" => $this->getConfigValue('sendmail_on_decline/email_template')
+        ];
+    }
+
+    /**
      * @return string
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
@@ -385,6 +399,14 @@ class Config
     public function isOrderFulfillmentEnable()
     {
         return $this->scopeConfig->getValue('forter/advanced_settings/enabled_order_fulfillment');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function isPhoneOrderEnabled()
+    {
+        return $this->scopeConfig->getValue('forter/advanced_settings/phone_order_enabled');
     }
 
     /**
@@ -636,6 +658,29 @@ class Config
                     $result = 'Create Invoice and Capture Payments (IMMEDIATELY)';
                 } elseif ($result == '3') {
                     $result = 'Do Nothing';
+                }
+                return $result;
+            case 'approve_cron':
+                if ($result == '1') {
+                    $result = 'Create Invoice and Capture Payments (CRON)';
+                } elseif ($result == '2') {
+                    $result = 'Do Nothing';
+                }
+                return $result;
+            case 'decline_cron':
+                if ($result == '1') {
+                    $result = 'Cancel Order, Void or Refund Payment (CRON)';
+                } elseif ($result == '2') {
+                    $result = 'Set Order to Payment Review State';
+                } elseif ($result == '3') {
+                    $result = 'Do nothing';
+                }
+                return $result;
+              case 'not_review_cron':
+                if ($result == '1') {
+                    $result = 'Create Invoice and Capture Payments';
+                } elseif ($result == '2') {
+                    $result = 'Do nothing';
                 }
                 return $result;
             default:
