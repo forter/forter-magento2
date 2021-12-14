@@ -102,12 +102,12 @@ class SendQueue
                 $method = $order->getPayment()->getMethod();
 
                 if ($item->getEntityType() == 'pre_sync_order') {
-                    if (strpos($method, 'adyen') !== false && !$order->getPayment()->getAdyenNotificationEventCode()) {
+                    $result = $this->handlePreSyncMethod($order, $item);
+                    if (!$result) {
                         continue;
+                    } else {
+                        $item->setSyncFlag('1');
                     }
-
-                    $this->handlePreSyncMethod($order, $item);
-                    $item->setSyncFlag('1');
                 } elseif ($item->getEntityType() == 'order') {
                     $this->handleForterResponse($order, $item->getData('entity_body'));
                     $item->setSyncFlag('1');
@@ -124,6 +124,26 @@ class SendQueue
     {
         try {
             $data = $this->requestBuilderOrder->buildTransaction($order, 'AFTER_PAYMENT_ACTION');
+            $paymentMethod = $data['payment'][0]['paymentMethodNickname'];
+
+            if ($paymentMethod == 'adyen_cc') {
+                if (!isset($data['payment'][0]['creditCard'])) {
+                    return false;
+                }
+                $creditCard = $data['payment'][0]['creditCard'];
+                if (!array_key_exists('expirationMonth', $creditCard) && !array_key_exists('expirationYear', $creditCard) && !array_key_exists('lastFourDigits', $creditCard)) {
+                    return false;
+                }
+            } elseif ($paymentMethod == 'adyen_hpp') {
+                if (!isset($data['payment'][0]['paypal'])) {
+                    return false;
+                }
+                $paypal = $data['payment'][0]['paypal'];
+                if (!array_key_exists('payerId', $paypal) || !array_key_exists('payerEmail', $paypal) || !array_key_exists('paymentMethod', $paypal) || !array_key_exists('paymentStatus', $paypal)) {
+                    return false;
+                }
+            }
+
             $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
 
             $response = $this->abstractApi->sendApiRequest($url, json_encode($data));
