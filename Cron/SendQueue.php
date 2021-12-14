@@ -131,7 +131,7 @@ class SendQueue
                     return false;
                 }
                 $creditCard = $data['payment'][0]['creditCard'];
-                if (!array_key_exists('expirationMonth', $creditCard) && !array_key_exists('expirationYear', $creditCard) && !array_key_exists('lastFourDigits', $creditCard)) {
+                if (!array_key_exists('expirationMonth', $creditCard) || !array_key_exists('expirationYear', $creditCard) || !array_key_exists('lastFourDigits', $creditCard)) {
                     return false;
                 }
             } elseif ($paymentMethod == 'adyen_hpp') {
