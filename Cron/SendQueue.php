@@ -156,7 +156,7 @@ class SendQueue
             if ($responseArray->status != 'success' || !isset($responseArray->action)) {
                 $order->setForterStatus('error');
                 $order->save();
-                return false;
+                return true;
             }
 
             $this->handleForterResponse($order, $responseArray->action);
