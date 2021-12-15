@@ -168,33 +168,33 @@ class PaymentMethods
         $additonal_data = $payment->getAdditionalInformation('additionalData');
         $detailsArray = [];
         if ($additonal_data) {
-            if ($additonal_data['expiryDate']) {
+            if (isset($additonal_data['expiryDate'])) {
                 $cardDate = explode("/", $additonal_data['expiryDate']);
                 $detailsArray['expirationMonth'] = strlen($cardDate[0]) > 1 ? $cardDate[0] : '0' . $cardDate[0];
                 $detailsArray['expirationYear'] = $cardDate[1];
             }
-            if ($additonal_data['authCode']) {
+            if (isset($additonal_data['authCode'])) {
                 $detailsArray['authorizationCode'] = $additonal_data['authCode'];
             }
-            if ($additonal_data['cardHolderName']) {
+            if (isset($additonal_data['cardHolderName'])) {
                 $detailsArray['nameOnCard'] = $additonal_data['cardHolderName'];
             }
-            if ($additonal_data['paymentMethod']) {
+            if (isset($additonal_data['paymentMethod'])) {
                 $detailsArray['cardBrand'] = $additonal_data['paymentMethod'];
             }
-            if ($additonal_data['cardBin']) {
+            if (isset($additonal_data['cardBin'])) {
                 $detailsArray['bin'] = $additonal_data['cardBin'];
             }
-            if ($additonal_data['cardSummary']) {
+            if (isset($additonal_data['cardSummary'])) {
                 $detailsArray['lastFourDigits'] = $additonal_data['cardSummary'];
             }
-            if ($additonal_data['avsResultRaw']) {
+            if (isset($additonal_data['avsResultRaw'])) {
                 $detailsArray['avsFullResult'] = $additonal_data['avsResultRaw'];
             }
-            if ($additonal_data['cvcResultRaw']) {
+            if (isset($additonal_data['cvcResultRaw'])) {
                 $detailsArray['cvvResult'] = $additonal_data['cvcResultRaw'];
             }
-            if ($additonal_data['refusalReasonRaw']) {
+            if (isset($additonal_data['refusalReasonRaw'])) {
                 $detailsArray['processorResponseText'] = $additonal_data['refusalReasonRaw'];
             }
             $detailsArray['fullResponsePayload'] = $additonal_data;

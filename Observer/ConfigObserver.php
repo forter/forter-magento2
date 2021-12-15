@@ -51,29 +51,60 @@ class ConfigObserver implements \Magento\Framework\Event\ObserverInterface
             $this->validateCredentials();
 
             $json = [
-              "general" => [
+              "basic_settings" => [
                 "active" => $this->forterConfig->isEnabled(),
                 "site_id" => $this->forterConfig->getSiteId(),
                 "secret_key" => $this->forterConfig->getSecretKey(),
                 "module_version" => $this->forterConfig->getModuleVersion(),
-                "api_version" => $this->forterConfig->getApiVersion(),
+                "forter_api_version" => $this->forterConfig->getApiVersion(),
                 "debug_mode" => $this->forterConfig->isDebugEnabled(),
-                "enhanced_data_mode" => $this->forterConfig->isSandboxMode(),
-                "sandbox_mode" => $this->forterConfig->isSandboxMode()
+                "enhanced_data_mode" => $this->forterConfig->isSandboxMode()
               ],
-              "pre_post_decision" => [
-                "pre_post_select" => $this->forterConfig->getPrePostDecisionMsg('pre_post_select'),
-                "pre_decline" => $this->forterConfig->getPrePostDecisionMsg('decline_pre'),
-                "pre_thanks_msg" => $this->forterConfig->getPreThanksMsg(),
-                "post_decline" => $this->forterConfig->getPrePostDecisionMsg('decline_post'),
-                "post_approve" => $this->forterConfig->getPrePostDecisionMsg('approve_post'),
-                "post_not_review" => $this->forterConfig->getPrePostDecisionMsg('not_review_post'),
-                "post_thanks_msg" => $this->forterConfig->getPostThanksMsg()
+              "order_validation_settings" => [
+                "order_validation_location" => $this->forterConfig->getPrePostDecisionMsg('pre_post_select'),
+                "pre" => [
+                  "action_on_decline" => $this->forterConfig->getPrePostDecisionMsg('decline_pre'),
+                  "success_page_message" => $this->forterConfig->getPreThanksMsg()
+                ],
+                "post" => [
+                  "action_on_decline" => $this->forterConfig->getPrePostDecisionMsg('decline_post'),
+                  "action_on_approve" => $this->forterConfig->getPrePostDecisionMsg('approve_post'),
+                  "action_on_not_review" => $this->forterConfig->getPrePostDecisionMsg('not_review_post'),
+                  "success_page_message" => $this->forterConfig->getPostThanksMsg()
+                ],
+                "pre_and_post" => [
+                  "pre_action_on_decline" => $this->forterConfig->getPrePostDecisionMsg('decline_pre'),
+                  "pre_success_page_message" => $this->forterConfig->getPreThanksMsg(),
+                  "post_action_on_decline" => $this->forterConfig->getPrePostDecisionMsg('decline_post'),
+                  "post_action_on_approve" => $this->forterConfig->getPrePostDecisionMsg('approve_post'),
+                  "post_action_on_not_review" => $this->forterConfig->getPrePostDecisionMsg('not_review_post'),
+                  "post_success_page_message" => $this->forterConfig->getPostThanksMsg()
+                ],
+                "cron" => [
+                  "action_on_approve" => $this->forterConfig->getPrePostDecisionMsg('approve_cron'),
+                  "action_on_decline" => $this->forterConfig->getPrePostDecisionMsg('decline_cron'),
+                  "action_on_not_review" => $this->forterConfig->getPrePostDecisionMsg('not_review_cron')
+                ]
               ],
               "store" => [
                 "storeId" => $this->forterConfig->getStoreId()
               ],
               "connection_information" => $this->forterConfig->getTimeOutSettings(),
+              "email_setting_on_decline" => $this->forterConfig->getEmailSettingsOnDecline(),
+              "advanced_settings" => [
+                "enable_order_holding" => $this->forterConfig->isHoldingOrdersEnabled(),
+                "enable_decision_change_controller" => $this->forterConfig->isDecisionControllerEnabled(),
+                "hold_order_on_pending_decision" => $this->forterConfig->isPendingOnHoldEnabled(),
+                "enable_order_fulfillment" => $this->forterConfig->isOrderFulfillmentEnable(),
+                "enable_phone_order" => $this->forterConfig->isPhoneOrderEnabled(),
+                "verification_results_mapping" => $this->forterConfig->getVerificationResultsMap(),
+              ],
+              "advanced_settings_pre_auth" => [
+                "enable_creditcard_listener" => $this->forterConfig->isCcListenerActive(),
+                "enable_listener_for_last4cc" => $this->forterConfig->getAllowLast4CCListener(),
+                "enable_listener_for_bin" => $this->forterConfig->getAllowBinListener(),
+                "class_or_id_identifier_for_the_listener" => $this->forterConfig->getElementToObserve()
+              ],
               "eventTime" => time()
             ];
 
