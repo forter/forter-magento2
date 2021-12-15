@@ -102,6 +102,9 @@ class SendQueue
                 $method = $order->getPayment()->getMethod();
 
                 if ($item->getEntityType() == 'pre_sync_order') {
+                    if ($order->getForterStatus()) {
+                        continue;
+                    }
                     $result = $this->handlePreSyncMethod($order, $item);
                     if (!$result) {
                         continue;
