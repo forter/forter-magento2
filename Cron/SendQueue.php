@@ -102,6 +102,9 @@ class SendQueue
                 $method = $order->getPayment()->getMethod();
 
                 if ($item->getEntityType() == 'pre_sync_order') {
+                    if (strpos($method, 'adyen') !== false && !$order->getPayment()->getAdyenPspReference()) {
+                        continue;
+                    }
                     if ($order->getForterStatus()) {
                         continue;
                     }
@@ -135,14 +138,6 @@ class SendQueue
                 }
                 $creditCard = $data['payment'][0]['creditCard'];
                 if (!array_key_exists('expirationMonth', $creditCard) || !array_key_exists('expirationYear', $creditCard) || !array_key_exists('lastFourDigits', $creditCard)) {
-                    return false;
-                }
-            } elseif ($paymentMethod == 'adyen_hpp') {
-                if (!isset($data['payment'][0]['paypal'])) {
-                    return false;
-                }
-                $paypal = $data['payment'][0]['paypal'];
-                if (!array_key_exists('payerId', $paypal) || !array_key_exists('payerEmail', $paypal) || !array_key_exists('paymentMethod', $paypal) || !array_key_exists('paymentStatus', $paypal)) {
                     return false;
                 }
             }
