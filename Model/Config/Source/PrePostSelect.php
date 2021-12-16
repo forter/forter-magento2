@@ -17,7 +17,7 @@ class PrePostSelect implements \Magento\Framework\Option\ArrayInterface
             ['value' => '1', 'label' => __('Before Payment Action (pre-authorization)')],
             ['value' => '2', 'label' => __('After Payment Action (post-authorization)')],
             ['value' => '4', 'label' => __('Before & After Payment Action (pre/post-authorization)')],
-            ['value' => '3', 'label' => __('by Cron (for Adyen)')]
+            ['value' => '3', 'label' => __('by Cron')]
         ];
     }
 }
