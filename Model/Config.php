@@ -358,7 +358,7 @@ class Config
      */
     public function getDeclinePre()
     {
-        return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/decline_pre');
+        return $this->getConfigValue('immediate_post_pre_decision/decline_pre');
     }
 
     /**
@@ -366,7 +366,7 @@ class Config
      */
     public function getDeclinePost()
     {
-        return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/decline_post');
+        return $this->getConfigValue('immediate_post_pre_decision/decline_post');
     }
 
     /**
@@ -374,7 +374,7 @@ class Config
      */
     public function getPreThanksMsg()
     {
-        return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/pre_thanks_msg');
+        return $this->getConfigValue('immediate_post_pre_decision/pre_thanks_msg');
     }
 
     /**
@@ -382,7 +382,7 @@ class Config
      */
     public function getPostThanksMsg()
     {
-        return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/post_thanks_msg');
+        return $this->getConfigValue('immediate_post_pre_decision/post_thanks_msg');
     }
 
     /**
@@ -390,7 +390,7 @@ class Config
      */
     public function isHoldingOrdersEnabled()
     {
-        return $this->scopeConfig->getValue('forter/advanced_settings/enabled_order_holding');
+        return $this->getConfigValue('advanced_settings/enabled_order_holding');
     }
 
     /**
@@ -398,7 +398,7 @@ class Config
      */
     public function isOrderFulfillmentEnable()
     {
-        return $this->scopeConfig->getValue('forter/advanced_settings/enabled_order_fulfillment');
+        return $this->getConfigValue('advanced_settings/enabled_order_fulfillment');
     }
 
     /**
@@ -406,7 +406,7 @@ class Config
      */
     public function isPhoneOrderEnabled()
     {
-        return $this->scopeConfig->getValue('forter/advanced_settings/phone_order_enabled');
+        return $this->getConfigValue('advanced_settings/phone_order_enabled');
     }
 
     /**
@@ -414,7 +414,7 @@ class Config
      */
     public function getApprovePost()
     {
-        return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/approve_post');
+        return $this->getConfigValue('immediate_post_pre_decision/approve_post');
     }
 
     /**
@@ -422,7 +422,7 @@ class Config
      */
     public function getApproveCron()
     {
-        return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/approve_cron');
+        return $this->getConfigValue('immediate_post_pre_decision/approve_cron');
     }
 
     /**
@@ -430,7 +430,7 @@ class Config
      */
     public function getDeclineCron()
     {
-        return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/decline_cron');
+        return $this->getConfigValue('immediate_post_pre_decision/decline_cron');
     }
 
     /**
@@ -438,7 +438,7 @@ class Config
      */
     public function getNotReviewCron()
     {
-        return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/not_review_cron');
+        return $this->getConfigValue('immediate_post_pre_decision/not_review_cron');
     }
 
     /**
@@ -446,7 +446,7 @@ class Config
      */
     public function getNotReviewPost()
     {
-        return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/not_review_post');
+        return $this->getConfigValue('immediate_post_pre_decision/not_review_post');
     }
 
     /**
@@ -454,7 +454,7 @@ class Config
      */
     public function getIsPre()
     {
-        $prePostSelect = $this->scopeConfig->getValue('forter/immediate_post_pre_decision/pre_post_select');
+        $prePostSelect = $this->getConfigValue('immediate_post_pre_decision/pre_post_select');
         return ($prePostSelect == '1' ? true : false);
     }
 
@@ -463,7 +463,7 @@ class Config
      */
     public function getIsPost()
     {
-        $prePostSelect = $this->scopeConfig->getValue('forter/immediate_post_pre_decision/pre_post_select');
+        $prePostSelect = $this->getConfigValue('immediate_post_pre_decision/pre_post_select');
         return ($prePostSelect == '2' ? true : false);
     }
 
@@ -472,7 +472,7 @@ class Config
      */
     public function getIsPreAndPost()
     {
-        $prePostSelect = $this->scopeConfig->getValue('forter/immediate_post_pre_decision/pre_post_select');
+        $prePostSelect = $this->getConfigValue('immediate_post_pre_decision/pre_post_select');
         return ($prePostSelect == '4' ? true : false);
     }
 
@@ -481,7 +481,7 @@ class Config
      */
     public function getIsCron()
     {
-        $prePostSelect = $this->scopeConfig->getValue('forter/immediate_post_pre_decision/pre_post_select');
+        $prePostSelect = $this->getConfigValue('immediate_post_pre_decision/pre_post_select');
         return ($prePostSelect == '3' ? true : false);
     }
 
@@ -492,7 +492,7 @@ class Config
      */
     public function isCcListenerActive()
     {
-        return $this->scopeConfig->getValue('forter/advanced_settings_cc_listener/enabled_cc_listener');
+        return $this->getConfigValue('advanced_settings_cc_listener/enabled_cc_listener');
     }
 
     /**
@@ -502,7 +502,7 @@ class Config
      */
     public function getAllowLast4CCListener()
     {
-        return $this->scopeConfig->getValue('forter/advanced_settings_cc_listener/enabled_cc_listener_last4cc');
+        return $this->getConfigValue('advanced_settings_cc_listener/enabled_cc_listener_last4cc');
     }
 
     /**
@@ -512,7 +512,7 @@ class Config
      */
     public function getAllowBinListener()
     {
-        return $this->scopeConfig->getValue('forter/advanced_settings_cc_listener/enabled_cc_listener_bin');
+        return $this->getConfigValue('advanced_settings_cc_listener/enabled_cc_listener_bin');
     }
 
     /**
@@ -522,7 +522,7 @@ class Config
      */
     public function getElementToObserve()
     {
-        return $this->scopeConfig->getValue('forter/advanced_settings_cc_listener/class_id_identifier');
+        return $this->getConfigValue('advanced_settings_cc_listener/class_id_identifier');
     }
 
     /**
@@ -532,7 +532,7 @@ class Config
     public function getVerificationResultsMap()
     {
         if ($this->verificationResultMap === null) {
-            $this->verificationResultMap = (array) json_decode($this->scopeConfig->getValue('forter/advanced_settings/verification_results_map'), true);
+            $this->verificationResultMap = (array) json_decode($this->getConfigValue('advanced_settings/verification_results_map'), true);
         }
         return $this->verificationResultMap;
     }
@@ -620,10 +620,22 @@ class Config
      */
     public function getPrePostDecisionMsg($type)
     {
-        $result = $this->scopeConfig->getValue('forter/immediate_post_pre_decision/' . $type);
+        $result = $this->getConfigValue('immediate_post_pre_decision/' . $type);
         switch ($type) {
             case 'pre_post_select':
-                return ($result == '1' ? 'Before Payment Action (pre-authorization)' : 'After Payment Action (post-authorization)');
+                if ($result == '1') {
+                    return 'Before Payment Action (pre-authorization)';
+                } elseif ($result == '2') {
+                    return 'After Payment Action (post-authorization)';
+                } elseif ($result == '3') {
+                    return 'by Cron';
+                } elseif ($result == '4') {
+                    return 'Before & After Payment Action (pre/post-authorization)';
+                } else {
+                    return $result;
+                }
+
+                // no break
             case 'decline_pre':
                 if ($result == '0') {
                     $result = 'Do nothing';
