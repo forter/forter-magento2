@@ -61,6 +61,8 @@ class Payment
                 $cardDetails = $this->paymentMethods->getAuthorizeNetDetails($payment);
             } elseif (strpos($payment_method, 'braintree') !== false) {
                 $cardDetails = $this->paymentMethods->getBraintreeDetails($payment);
+            } elseif (strpos($payment_method, 'mercadopago') !== false) {
+                $cardDetails = $this->paymentMethods->getMercadopagoDetails($payment);
             } else {
                 $cardDetails = $this->paymentMethods->preferCcDetails($payment);
             }
