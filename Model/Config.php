@@ -18,7 +18,6 @@ use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\Module\ModuleListInterface;
 use Magento\Framework\UrlInterface;
-use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Psr\Log\LoggerInterface;
 
@@ -167,27 +166,28 @@ class Config
      * @return int
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function getStoreId()
+    public function getStoreId($scopeId = null)
     {
-        return $this->storeManager->getStore()->getId();
+        $scopeId = ($scopeId === null) ? $this->storeManager->getStore()->getId() : $scopeId;
+        return $scopeId;
     }
 
     /**
      * @return bool
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function getSiteId()
+    public function getSiteId($scope = null, $scopeId = null)
     {
-        return $this->getConfigValue('settings/site_id');
+        return $this->getConfigValue('settings/site_id', $scope, $scopeId);
     }
 
     /**
      * @return bool
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function getSecretKey()
+    public function getSecretKey($scope = null, $scopeId = null)
     {
-        $secretKey = $this->getConfigValue('settings/secret_key');
+        $secretKey = $this->getConfigValue('settings/secret_key', $scope, $scopeId);
         $decryptSecretKey = $this->encryptor->decrypt($secretKey);
         return $decryptSecretKey;
     }
@@ -196,13 +196,13 @@ class Config
      * @return array
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function getTimeOutSettings()
+    public function getTimeOutSettings($scope = null, $scopeId = null)
     {
         return $timeOutArray = [
-            "base_connection_timeout" => $this->getConfigValue('connection_information/base_connection_timeout'),
-            "base_request_timeout" => $this->getConfigValue('connection_information/base_request_timeout'),
-            "max_connection_timeout" => $this->getConfigValue('connection_information/max_connection_timeout'),
-            "max_request_timeout" => $this->getConfigValue('connection_information/max_request_timeout')
+            "base_connection_timeout" => $this->getConfigValue('connection_information/base_connection_timeout', $scope, $scopeId),
+            "base_request_timeout" => $this->getConfigValue('connection_information/base_request_timeout', $scope, $scopeId),
+            "max_connection_timeout" => $this->getConfigValue('connection_information/max_connection_timeout', $scope, $scopeId),
+            "max_request_timeout" => $this->getConfigValue('connection_information/max_request_timeout', $scope, $scopeId)
         ];
     }
 
@@ -210,13 +210,13 @@ class Config
      * @return array
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function getEmailSettingsOnDecline()
+    public function getEmailSettingsOnDecline($scope = null, $scopeId = null)
     {
         return [
-          "enable" => $this->getConfigValue('sendmail_on_decline/sendmail_on_decline_enabled'),
-          "email_sender" => $this->getConfigValue('sendmail_on_decline/sender'),
-          "email_receiver" => $this->getConfigValue('sendmail_on_decline/receiver'),
-          "custom_email_template" => $this->getConfigValue('sendmail_on_decline/email_template')
+          "enable" => $this->getConfigValue('sendmail_on_decline/sendmail_on_decline_enabled', $scope, $scopeId),
+          "email_sender" => $this->getConfigValue('sendmail_on_decline/sender', $scope, $scopeId),
+          "email_receiver" => $this->getConfigValue('sendmail_on_decline/receiver', $scope, $scopeId),
+          "custom_email_template" => $this->getConfigValue('sendmail_on_decline/email_template', $scope, $scopeId)
         ];
     }
 
@@ -224,9 +224,9 @@ class Config
      * @return string
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function getApiVersion()
+    public function getApiVersion($scope = null, $scopeId = null)
     {
-        return $this->getConfigValue('settings/api_version');
+        return $this->getConfigValue('settings/api_version', $scope, $scopeId);
     }
 
     /**
@@ -235,12 +235,20 @@ class Config
      * @return mixed
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function getConfigValue($fieldKey)
+    public function getConfigValue($fieldKey, $scope = null, $scopeId = null)
     {
+        $scope = ($scope === null) ? \Magento\Store\Model\ScopeInterface::SCOPE_STORE : $scope;
+        if ($scope === \Magento\Store\Model\ScopeInterface::SCOPE_STORE) {
+            $scope = \Magento\Store\Model\ScopeInterface::SCOPE_STORES;
+        } elseif ($scope === \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE) {
+            $scope = \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITES;
+        }
+        $scopeId = ($scopeId === null) ? $this->getStoreId() : $scopeId;
+
         return $this->scopeConfig->getValue(
             $this->getConfigPath() . $fieldKey,
-            ScopeInterface::SCOPE_STORE,
-            $this->getStoreId()
+            $scope,
+            $scopeId
         );
     }
 
@@ -251,12 +259,12 @@ class Config
      * @return bool
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function isEnabled()
+    public function isEnabled($scope = null, $scopeId = null)
     {
         if (!$this->getSecretKey() || !$this->getSiteId()) {
             return false;
         }
-        return (bool)$this->getConfigValue('settings/enabled');
+        return (bool)$this->getConfigValue('settings/enabled', $scope, $scopeId);
     }
 
     /**
@@ -266,9 +274,9 @@ class Config
      * @return bool
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function isDebugEnabled()
+    public function isDebugEnabled($scope = null, $scopeId = null)
     {
-        return (bool)$this->getConfigValue('settings/debug_mode');
+        return (bool)$this->getConfigValue('settings/debug_mode', $scope, $scopeId);
     }
 
     /**
@@ -278,9 +286,9 @@ class Config
      * @return bool
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function isDecisionControllerEnabled()
+    public function isDecisionControllerEnabled($scope = null, $scopeId = null)
     {
-        return (bool)$this->getConfigValue('advanced_settings/enabled_decision_controller');
+        return (bool)$this->getConfigValue('advanced_settings/enabled_decision_controller', $scope, $scopeId);
     }
 
     /**
@@ -290,9 +298,9 @@ class Config
      * @return bool
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function isPendingOnHoldEnabled()
+    public function isPendingOnHoldEnabled($scope = null, $scopeId = null)
     {
-        return (bool)$this->getConfigValue('advanced_settings/enabled_hold_order');
+        return (bool)$this->getConfigValue('advanced_settings/enabled_hold_order', $scope, $scopeId);
     }
 
     /**
@@ -302,9 +310,9 @@ class Config
      * @return bool
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function isSandboxMode()
+    public function isSandboxMode($scope = null, $scopeId = null)
     {
-        return (bool)$this->getConfigValue('settings/enhanced_data_mode');
+        return (bool)$this->getConfigValue('settings/enhanced_data_mode', $scope, $scopeId);
     }
 
     /**
@@ -372,41 +380,41 @@ class Config
     /**
      * @return mixed
      */
-    public function getPreThanksMsg()
+    public function getPreThanksMsg($scope = null, $scopeId = null)
     {
-        return $this->getConfigValue('immediate_post_pre_decision/pre_thanks_msg');
+        return $this->getConfigValue('immediate_post_pre_decision/pre_thanks_msg', $scope, $scopeId);
     }
 
     /**
      * @return mixed
      */
-    public function getPostThanksMsg()
+    public function getPostThanksMsg($scope = null, $scopeId = null)
     {
-        return $this->getConfigValue('immediate_post_pre_decision/post_thanks_msg');
+        return $this->getConfigValue('immediate_post_pre_decision/post_thanks_msg', $scope, $scopeId);
     }
 
     /**
      * @return mixed
      */
-    public function isHoldingOrdersEnabled()
+    public function isHoldingOrdersEnabled($scope = null, $scopeId = null)
     {
-        return $this->getConfigValue('advanced_settings/enabled_order_holding');
+        return $this->getConfigValue('advanced_settings/enabled_order_holding', $scope, $scopeId);
     }
 
     /**
      * @return mixed
      */
-    public function isOrderFulfillmentEnable()
+    public function isOrderFulfillmentEnable($scope = null, $scopeId = null)
     {
-        return $this->getConfigValue('advanced_settings/enabled_order_fulfillment');
+        return $this->getConfigValue('advanced_settings/enabled_order_fulfillment', $scope, $scopeId);
     }
 
     /**
      * @return mixed
      */
-    public function isPhoneOrderEnabled()
+    public function isPhoneOrderEnabled($scope = null, $scopeId = null)
     {
-        return $this->getConfigValue('advanced_settings/phone_order_enabled');
+        return $this->getConfigValue('advanced_settings/phone_order_enabled', $scope, $scopeId);
     }
 
     /**
@@ -490,9 +498,9 @@ class Config
      *
      * @return boolean
      */
-    public function isCcListenerActive()
+    public function isCcListenerActive($scope = null, $scopeId = null)
     {
-        return $this->getConfigValue('advanced_settings_cc_listener/enabled_cc_listener');
+        return $this->getConfigValue('advanced_settings_cc_listener/enabled_cc_listener', $scope, $scopeId);
     }
 
     /**
@@ -500,9 +508,9 @@ class Config
      *
      * @return boolean
      */
-    public function getAllowLast4CCListener()
+    public function getAllowLast4CCListener($scope = null, $scopeId = null)
     {
-        return $this->getConfigValue('advanced_settings_cc_listener/enabled_cc_listener_last4cc');
+        return $this->getConfigValue('advanced_settings_cc_listener/enabled_cc_listener_last4cc', $scope, $scopeId);
     }
 
     /**
@@ -510,9 +518,9 @@ class Config
      *
      * @return boolean
      */
-    public function getAllowBinListener()
+    public function getAllowBinListener($scope = null, $scopeId = null)
     {
-        return $this->getConfigValue('advanced_settings_cc_listener/enabled_cc_listener_bin');
+        return $this->getConfigValue('advanced_settings_cc_listener/enabled_cc_listener_bin', $scope, $scopeId);
     }
 
     /**
@@ -520,19 +528,19 @@ class Config
      *
      * @return string
      */
-    public function getElementToObserve()
+    public function getElementToObserve($scope = null, $scopeId = null)
     {
-        return $this->getConfigValue('advanced_settings_cc_listener/class_id_identifier');
+        return $this->getConfigValue('advanced_settings_cc_listener/class_id_identifier', $scope, $scopeId);
     }
 
     /**
      * @method getVerificationResultsMap
      * @return array
      */
-    public function getVerificationResultsMap()
+    public function getVerificationResultsMap($scope = null, $scopeId = null)
     {
         if ($this->verificationResultMap === null) {
-            $this->verificationResultMap = (array) json_decode($this->getConfigValue('advanced_settings/verification_results_map'), true);
+            $this->verificationResultMap = (array) json_decode($this->getConfigValue('advanced_settings/verification_results_map', $scope, $scopeId), true);
         }
         return $this->verificationResultMap;
     }
@@ -618,9 +626,9 @@ class Config
      * @param $type
      * @return mixed|string
      */
-    public function getPrePostDecisionMsg($type)
+    public function getPrePostDecisionMsg($type, $scope = null, $scopeId = null)
     {
-        $result = $this->getConfigValue('immediate_post_pre_decision/' . $type);
+        $result = $this->getConfigValue('immediate_post_pre_decision/' . $type, $scope, $scopeId);
         switch ($type) {
             case 'pre_post_select':
                 if ($result == '1') {
