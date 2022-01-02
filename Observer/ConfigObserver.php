@@ -56,6 +56,8 @@ class ConfigObserver implements \Magento\Framework\Event\ObserverInterface
         try {
             $website = $observer->getWebsite();
             $store   = $observer->getStore();
+            $scopeData['scope'] = null;
+            $scopeData['scope_id'] = null;
 
             if ($website) {
                 $scopeData['scope']    = \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITES;
