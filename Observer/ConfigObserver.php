@@ -122,7 +122,7 @@ class ConfigObserver implements \Magento\Framework\Event\ObserverInterface
                 "enable_creditcard_listener" => $this->forterConfig->isCcListenerActive($scopeData['scope'], $scopeData['scope_id']),
                 "enable_listener_for_last4cc" => $this->forterConfig->getAllowLast4CCListener($scopeData['scope'], $scopeData['scope_id']),
                 "enable_listener_for_bin" => $this->forterConfig->getAllowBinListener($scopeData['scope'], $scopeData['scope_id']),
-                "class_or_id_identifier_for_the_listener" => $this->forterConfig->getElementToObserve()
+                "class_or_id_identifier_for_the_listener" => $this->forterConfig->getElementToObserve($scopeData['scope'], $scopeData['scope_id'])
               ],
               "eventTime" => time()
             ];

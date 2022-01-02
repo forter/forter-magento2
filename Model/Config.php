@@ -639,44 +639,39 @@ class Config
                     return 'by Cron';
                 } elseif ($result == '4') {
                     return 'Before & After Payment Action (pre/post-authorization)';
-                } else {
-                    return $result;
                 }
+                return $result;
 
-                // no break
             case 'decline_pre':
                 if ($result == '0') {
                     $result = 'Do nothing';
                 } elseif ($result == '1') {
-                    $result = 'Payment exception (stay in checkout page with error message)';
-                } elseif ($result == '2') {
-                    $result = 'Deletes the order session and redirects the customet back to cart page with error message';
+                    $result = 'Show Payment Error to User (stay in checkout page with error message)';
                 }
                 return $result;
+
             case 'decline_post':
                 if ($result == '3') {
                     $result = 'Do nothing';
                 } elseif ($result == '1') {
-                    $result = 'Cancel Order, Void or Refund Payment';
+                    $result = 'Cancel Order, Stop Confirmation Email, Void or Refund Payment (CRON)';
                 } elseif ($result == '2') {
-                    $result = 'Set to Payment Review State';
+                    $result = 'Set Order to Payment Review State and Stop Confirmation Email';
                 }
                 return $result;
+
             case 'approve_post':
                 if ($result == '1') {
                     $result = 'Create Invoice and Capture Payments (CRON)';
                 } elseif ($result == '2') {
-                    $result = 'Create Invoice and Capture Payments (IMMEDIATELY)';
-                } elseif ($result == '3') {
                     $result = 'Do Nothing';
                 }
                 return $result;
+
             case 'not_review_post':
                 if ($result == '1') {
                     $result = 'Create Invoice and Capture Payments (CRON)';
                 } elseif ($result == '2') {
-                    $result = 'Create Invoice and Capture Payments (IMMEDIATELY)';
-                } elseif ($result == '3') {
                     $result = 'Do Nothing';
                 }
                 return $result;
