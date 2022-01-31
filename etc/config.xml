@@ -25,6 +25,7 @@
                 <max_request_timeout>7000</max_request_timeout>
             </connection_information>
             <advanced_settings>
+                <enabled_order_holding>1</enabled_order_holding>
                 <enabled_order_fulfillment>1</enabled_order_fulfillment>
                 <phone_order_enabled>0</phone_order_enabled>
             </advanced_settings>
