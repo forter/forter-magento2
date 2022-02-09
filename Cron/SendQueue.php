@@ -105,9 +105,6 @@ class SendQueue
                     if (strpos($method, 'adyen') !== false && !$order->getPayment()->getAdyenPspReference()) {
                         continue;
                     }
-                    if ($order->getForterStatus()) {
-                        continue;
-                    }
                     $result = $this->handlePreSyncMethod($order, $item);
                     if (!$result) {
                         continue;
