@@ -33,7 +33,7 @@ jobs:
           host: 67.207.78.240
           port: 22
           username: root
-          password: ${{secrets.CD_SERVER_PASSWORD}}}       # Private ssh key registered on the remote server - Required: true
+          password: ${{secrets.CD_SERVER_PASSWORD}}       # Private ssh key registered on the remote server - Required: true
           script: |
             cd /var/www/html 
             composer require forter/magento2-module-forter
