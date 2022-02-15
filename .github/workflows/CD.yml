@@ -27,7 +27,7 @@ jobs:
       - name: Server Oprations
         uses: D3rHase/ssh-command-action@v0.2
         with:
-          HOST: ${{secrets.CD_SERVER_IP}}                             # Remote server address / ip - Required: true
+          HOST: '67.207.78.240'
           USER: root
           PRIVATE_SSH_KEY: ${{secrets.CD_SERVER_KEY}}       # Private ssh key registered on the remote server - Required: true
           COMMAND: |
