@@ -67,7 +67,7 @@ jobs:
           script: |
             cd /var/www/html 
             chown www-data:www-data -R ./vendor/forter
-            composer dump-autoload
+            composer install
             php bin/magento maintenance:enable
             php bin/magento setup:upgrade
             php bin/magento setup:di:compile
