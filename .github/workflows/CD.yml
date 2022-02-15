@@ -25,6 +25,24 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
+      - name: Install SSH Key
+          uses: shimataro/ssh-key-action@v2
+          with:
+            key: ${{ secrets.CD_SERVER_KEY }}
+            known_hosts: ${{ secrets.CD_SERVER_IP }} 
       # Runs a single command using the runners shell
       - name: Run a one-line script
-        run: echo Hello, world!
+        uses: D3rHase/ssh-command-action@{version}
+        with:
+          HOST: ${{secrets.CD_SERVER_IP}}                             # Remote server address / ip - Required: true
+          USER: root
+          PRIVATE_SSH_KEY: ${{secrets.PRIVATE_SSH_KEY}}       # Private ssh key registered on the remote server - Required: true
+          COMMAND: |
+            cd /var/www/html 
+            composer require forter/magento2-module-forter
+            php bin/magento maintenance:enable
+            php bin/magento setup:upgrade
+            php bin/magento setup:di:compile
+            php bin/magento setup:static-content:deploy
+            php bin/magento maintenance:disable
+            php bin/magento cache:flush 
