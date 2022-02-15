@@ -23,13 +23,6 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-
-      - name: Install SSH Key
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.CD_SERVER_KEY }}
-          # known_hosts: ${{ secrets.CD_SERVER_IP }} 
-          if_key_exists: replace 
       # Runs a single command using the runners shell
       - name: Server Oprations
         uses: D3rHase/ssh-command-action@v0.2
