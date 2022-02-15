@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI
+name: CI-CD
 
 # Controls when the workflow will run
 on:
@@ -9,6 +9,9 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+  workflow_run:
+    workflows: ["build"]
+    types: [requested]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
