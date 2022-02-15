@@ -46,7 +46,8 @@ jobs:
             mkdir -p forter
             chown www-data:www-data -R ./forter
       - name: Deploy with Plugin
-        run: rsync --timeout=0  -avzPr ./ root@$67.207.78.240:/var/www/html/vendor/forter
+        timeout-minutes: 30
+        run: rsync -e 'ssh -v' --timeout=0  -avzPr ./ root@$67.207.78.240:/var/www/html/vendor/forter
       # Runs a single command using the runners shell
       - name: Server Oprations
         uses: appleboy/ssh-action@master
