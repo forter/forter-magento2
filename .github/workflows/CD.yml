@@ -30,8 +30,8 @@ jobs:
           key: ${{ secrets.CD_SERVER_KEY }}
           known_hosts: ${{ secrets.CD_SERVER_IP }} 
       # Runs a single command using the runners shell
-      - name: Run a one-line script
-        uses: D3rHase/ssh-command-action@0.2
+      - name: Server Oprations
+        uses: D3rHase/ssh-command-action@v0.2
         with:
           HOST: ${{secrets.CD_SERVER_IP}}                             # Remote server address / ip - Required: true
           USER: root
