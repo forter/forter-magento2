@@ -30,7 +30,8 @@ jobs:
       - name: Server Oprations
         uses: appleboy/ssh-action@master
         with:
-          host: '67.207.78.240'
+          host: 67.207.78.240
+          port: 22
           user: root
           password: ${{secrets.CD_SERVER_PASSWORD}}}       # Private ssh key registered on the remote server - Required: true
           script: |
