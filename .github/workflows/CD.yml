@@ -33,6 +33,8 @@ jobs:
           key: ${{ secrets.CD_SERVER_KEY }}
           known_hosts: 67.207.78.240
       
+      - name: Adding Known Hosts
+        run: ssh-keyscan -H 67.207.78.240 >> ~/.ssh/known_hosts
       - name: Server Oprations
         uses: appleboy/ssh-action@master
         with:
