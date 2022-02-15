@@ -28,6 +28,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: running Config
         run: echo ${{ secrets.CD_SERVER_KEY }}
+        
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
         with:
