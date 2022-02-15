@@ -31,6 +31,7 @@ jobs:
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.CD_SERVER_KEY }}
+          known_hosts: 67.207.78.240
       # Runs a single command using the runners shell
       - name: Server Oprations
         uses: appleboy/ssh-action@master
