@@ -1,0 +1,31 @@
+{
+  "name": "forter-magento2",
+  "version": "1.0.0",
+  "description": "Latest ver - 2.0.52 (December 2021)",
+  "main": "jest.config.js",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watchAll"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sivanwol/forter-magento2.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Sivanwol/forter-magento2/issues"
+  },
+  "homepage": "https://github.com/Sivanwol/forter-magento2#readme",
+  "devDependencies": {
+    "@types/faker": "^6.6.9",
+    "@types/jest": "^27.4.0",
+    "faker": "^6.6.6",
+    "jest": "^27.5.1",
+    "jest-playwright-preset": "^1.7.0",
+    "lodash": "^4.17.21",
+    "playwright": "^1.19.1",
+    "ts-jest": "^27.1.3",
+    "typescript": "^4.5.5"
+  }
+}

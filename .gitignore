@@ -29,7 +29,6 @@ atlassian*
 /node_modules
 /.grunt
 /Gruntfile.js
-/package.json
 /.php_cs
 /.php_cs.cache
 /grunt-config.json
@@ -73,3 +72,5 @@ atlassian*
 auth.json
 *.todo
 /tasks/*
+/e2e/screenshots/*
+!/e2e/screenshots/.gitkeep
