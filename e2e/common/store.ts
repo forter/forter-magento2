@@ -1,7 +1,7 @@
 import { Page } from 'playwright';
 import { getScreenShotPath, scrollOnElement } from './general';
 export const declineEmail = 'decline@forter.com'
-export const acceptEmail = 'decline@forter.com'
+export const acceptEmail = 'approve@forter.com'
 export class CheckoutFormData {
     public email: string;
     public firstName: string;
@@ -11,10 +11,9 @@ export class CheckoutFormData {
     public city: string;
     public zipcode: string;
     public phone: string;
-    public readonly creditCardNumber = 4111111111111111;
-    public readonly credisExpireMM = '03';
-    public readonly credisExpireYY = '30';
-    public readonly verifyCVC = 737;
+    public readonly creditCardNumber = '4111111111111111';
+    public readonly creditCardExpire = '03/2030';
+    public readonly creditCardCVV = '737';
     constructor(email: string,
         firstName: string,
         lastName: string,
@@ -36,7 +35,7 @@ export class CheckoutFormData {
 }
 export const buyStoreProduct = async (page: Page) => {
     const productItem = page.locator('li.product-item')
-    const product = productItem.nth(5);
+    const product = productItem.nth(4);
     await product.hover();
     const addToCart = product.locator("button[type=submit]");
     await page.screenshot({ fullPage: true, path: getScreenShotPath('pre-add-to-cart') });
@@ -44,11 +43,18 @@ export const buyStoreProduct = async (page: Page) => {
     await page.waitForTimeout(2000);
     await scrollOnElement(page, '.showcart');
     await page.screenshot({ fullPage: true, path: getScreenShotPath('add-to-cart') });
+    console.log("finshed checkout page");
 }
 
 export const fillCheckoutForm = async (page: Page, formData: CheckoutFormData) => {
-    await page.screenshot({ fullPage: true, path: getScreenShotPath('pre-form-fill-step1') });
-    const form = page.locator('.checkout-shipping-address')
+    await fillCheckoutFirstPage(page, formData);
+    await page.waitForTimeout(15000);
+    await fillCheckoutLastPage(page, formData);
+}
+
+const fillCheckoutFirstPage = async (page: Page, formData: CheckoutFormData) => {
+    const form = page.locator('.opc-wrapper')
+    await form.screenshot({ path: getScreenShotPath('pre-form-shipping-address') });
     await form.locator('input[name="username"]').fill(formData.email);
     await form.locator('input[name="firstname"]').fill(formData.firstName);
     await form.locator('input[name="lastname"]').fill(formData.lastName);
@@ -57,9 +63,20 @@ export const fillCheckoutForm = async (page: Page, formData: CheckoutFormData) =
     await form.locator('input[name="city"]').fill(formData.city);
     await form.locator('input[name="postcode"]').fill(formData.zipcode)
     await form.locator('input[name="telephone"]').fill(formData.phone);
-    await form.locator('input[name="telephone"]').fill(formData.phone);
-    const radio = form.locator('input[type="radio"]')
-    await radio.nth(0).click();
-    await page.screenshot({ fullPage: true, path: getScreenShotPath('post-form-fill-step1') });
-
+    await form.locator('input[type="radio"]').nth(0).click();
+    await form.screenshot({ path: getScreenShotPath('post-form-shipping-address') });
+    await form.locator('button[data-role="opc-continue"]').click();
+    console.log("finshed shipping address");
+}
+const fillCheckoutLastPage = async (page: Page, formData: CheckoutFormData) => {
+    const form = page.locator('#checkout-step-payment')
+    await form.screenshot({ path: getScreenShotPath('pre-form-place-order') });
+    await form.locator('input#braintree').click();
+    await page.waitForTimeout(10000);
+    await form.locator('input#credit-card-number').fill(formData.creditCardNumber);
+    await form.locator('input#expiration').fill(formData.creditCardExpire)
+    await form.locator('input#cvv').fill(formData.creditCardCVV);
+    await form.screenshot({ path: getScreenShotPath('post-form-place-order') });
+    await form.locator('button[title="Place Order"]').click();
+    console.log("finshed place order");
 }
