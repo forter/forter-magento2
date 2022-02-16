@@ -18,9 +18,8 @@
   },
   "homepage": "https://github.com/Sivanwol/forter-magento2#readme",
   "devDependencies": {
-    "@types/faker": "^6.6.9",
+    "@faker-js/faker": "^6.0.0-alpha.6",
     "@types/jest": "^27.4.0",
-    "faker": "^6.6.6",
     "jest": "^27.5.1",
     "jest-playwright-preset": "^1.7.0",
     "lodash": "^4.17.21",

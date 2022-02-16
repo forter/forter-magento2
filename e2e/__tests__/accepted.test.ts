@@ -1,7 +1,8 @@
 import { Browser, Page } from 'playwright';
 import { getBrowser, closeBrowser, getStorePage } from '../common/general';
-import { buyStoreProduct } from '../common/store';
-const serverAddress = "http://165.232.69.178/"
+import { buyStoreProduct, CheckoutFormData, acceptEmail, fillCheckoutForm } from '../common/store';
+import faker from '@faker-js/faker';
+const serverAddress = "http://165.232.69.178"
 jest.setTimeout(5000000)
 describe('Testing Accepted Deals', () => {
     let browser: Browser;
@@ -16,5 +17,16 @@ describe('Testing Accepted Deals', () => {
     it('Test Accept Deal', async () => {
         page = await getStorePage(serverAddress);
         await buyStoreProduct(page)
+        page.goto(`${serverAddress}/checkout`)
+        await page.waitForTimeout(15000);
+        const formData: CheckoutFormData = new CheckoutFormData(acceptEmail,
+            faker.name.firstName(),
+            faker.name.lastName(),
+            faker.address.streetAddress(),
+            faker.address.country(),
+            faker.address.city(),
+            faker.address.zipCode(),
+            faker.phone.phoneNumber())
+        await fillCheckoutForm(page, formData)
     })
 })

@@ -9,7 +9,7 @@ export class CheckoutFormData {
     public streetAddress: string;
     public country: string;
     public city: string;
-    public zipcode: number;
+    public zipcode: string;
     public phone: string;
     public readonly creditCardNumber = 4111111111111111;
     public readonly credisExpireMM = '03';
@@ -21,7 +21,7 @@ export class CheckoutFormData {
         streetAddress: string,
         country: string,
         city: string,
-        zipcode: number,
+        zipcode: string,
         phone: string) {
         this.email = email;
         this.firstName = firstName;
@@ -36,19 +36,30 @@ export class CheckoutFormData {
 }
 export const buyStoreProduct = async (page: Page) => {
     const productItem = page.locator('li.product-item')
-    const product = productItem.nth(0);
+    const product = productItem.nth(5);
     await product.hover();
-    const productSizes = product.locator('.swatch-option')
-    await productSizes.nth(0).click();
-    const addToCart = product.locator("button.tocart");
+    const addToCart = product.locator("button[type=submit]");
     await page.screenshot({ fullPage: true, path: getScreenShotPath('pre-add-to-cart') });
     await addToCart.dblclick();
-    await page.screenshot({ fullPage: true, path: getScreenShotPath('post-add-to-cart') });
     await page.waitForTimeout(2000);
     await scrollOnElement(page, '.showcart');
     await page.screenshot({ fullPage: true, path: getScreenShotPath('add-to-cart') });
 }
 
 export const fillCheckoutForm = async (page: Page, formData: CheckoutFormData) => {
+    await page.screenshot({ fullPage: true, path: getScreenShotPath('pre-form-fill-step1') });
+    const form = page.locator('.checkout-shipping-address')
+    await form.locator('input[name="username"]').fill(formData.email);
+    await form.locator('input[name="firstname"]').fill(formData.firstName);
+    await form.locator('input[name="lastname"]').fill(formData.lastName);
+    await form.locator('input[name="street[0]"]').fill(formData.streetAddress);
+    await form.locator('select[name="region_id"]').selectOption({ label: 'Alabama' });
+    await form.locator('input[name="city"]').fill(formData.city);
+    await form.locator('input[name="postcode"]').fill(formData.zipcode)
+    await form.locator('input[name="telephone"]').fill(formData.phone);
+    await form.locator('input[name="telephone"]').fill(formData.phone);
+    const radio = form.locator('input[type="radio"]')
+    await radio.nth(0).click();
+    await page.screenshot({ fullPage: true, path: getScreenShotPath('post-form-fill-step1') });
 
 }
