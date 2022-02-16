@@ -43,7 +43,7 @@ export const buyStoreProduct = async (page: Page) => {
     await page.waitForTimeout(2000);
     await scrollOnElement(page, '.showcart');
     await page.screenshot({ fullPage: true, path: getScreenShotPath('add-to-cart') });
-    console.log("finshed checkout page");
+    console.log("finshed shopping page and did checkout");
 }
 
 export const fillCheckoutForm = async (page: Page, formData: CheckoutFormData) => {
@@ -69,14 +69,13 @@ const fillCheckoutFirstPage = async (page: Page, formData: CheckoutFormData) => 
     console.log("finshed shipping address");
 }
 const fillCheckoutLastPage = async (page: Page, formData: CheckoutFormData) => {
-    const form = page.locator('#checkout-step-payment')
-    await form.screenshot({ path: getScreenShotPath('pre-form-place-order') });
-    await form.locator('input#braintree').click();
+    await page.screenshot({ path: getScreenShotPath('pre-form-place-order') });
+    await page.locator('input[value="braintree"]').click();
     await page.waitForTimeout(10000);
-    await form.locator('input#credit-card-number').fill(formData.creditCardNumber);
-    await form.locator('input#expiration').fill(formData.creditCardExpire)
-    await form.locator('input#cvv').fill(formData.creditCardCVV);
-    await form.screenshot({ path: getScreenShotPath('post-form-place-order') });
-    await form.locator('button[title="Place Order"]').click();
+    await page.locator('#credit-card-number').fill(formData.creditCardNumber);
+    await page.locator('#expiration').fill(formData.creditCardExpire)
+    await page.locator('#cvv').fill(formData.creditCardCVV);
+    await page.screenshot({ path: getScreenShotPath('post-form-place-order') });
+    await page.locator('button[title="Place Order"]').click();
     console.log("finshed place order");
 }
