@@ -32,6 +32,5 @@ describe('Testing Accepted Deals', () => {
         await page.screenshot({ path: getScreenShotPath('Accept-deal-final-result') });
         const title = page.locator('span[data-ui-id="page-title-wrapper"]').innerText()
         expect(title).toEqual("Thank you for your purchase!");
-
     })
 })

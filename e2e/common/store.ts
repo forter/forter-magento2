@@ -73,9 +73,10 @@ const fillCheckoutLastPage = async (page: Page, formData: CheckoutFormData) => {
     await page.locator('input[value="braintree"]').click();
     await page.waitForTimeout(10000);
     await page.screenshot({ path: getScreenShotPath('cardform-form-place-order') });
-    await page.fill('input[name="credit-card-number"]', formData.creditCardNumber);
-    await page.fill('input[name="expiration"]', formData.creditCardExpire)
-    await page.fill('input[name="cvv"]', formData.creditCardCVV);
+    console.log(page.locator('#credit-card-number'))
+    await page.locator('input[name="credit-card-number"]-card-number').fill(formData.creditCardNumber);
+    await page.locator('input[name="expiration"]').fill(formData.creditCardExpire)
+    await page.locator('input[name="cvv"]').fill(formData.creditCardCVV);
     await page.screenshot({ path: getScreenShotPath('post-form-place-order') });
     await page.locator('button[title="Place Order"]').click();
     console.log("finshed place order");
