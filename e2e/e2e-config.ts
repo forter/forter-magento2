@@ -1,0 +1,1 @@
+export const serverAddress = "http://165.232.69.178"
