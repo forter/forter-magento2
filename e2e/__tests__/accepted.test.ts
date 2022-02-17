@@ -30,7 +30,7 @@ describe('Testing Accepted Deals', () => {
         await fillCheckoutForm(page, formData);
         await page.waitForTimeout(15000);
         await page.screenshot({ path: getScreenShotPath('Accept-deal-final-result') });
-        const title = page.locator('span[data-ui-id="page-title-wrapper"]').innerText()
+        const title = await page.locator('span[data-ui-id="page-title-wrapper"]').innerText()
         expect(title).toEqual("Thank you for your purchase!");
     })
 })

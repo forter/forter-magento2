@@ -73,11 +73,17 @@ const fillCheckoutLastPage = async (page: Page, formData: CheckoutFormData) => {
     await page.locator('input[value="braintree"]').click();
     await page.waitForTimeout(10000);
     await page.screenshot({ path: getScreenShotPath('cardform-form-place-order') });
-    console.log(page.locator('#credit-card-number'))
-    await page.locator('input[name="credit-card-number"]-card-number').fill(formData.creditCardNumber);
-    await page.locator('input[name="expiration"]').fill(formData.creditCardExpire)
-    await page.locator('input[name="cvv"]').fill(formData.creditCardCVV);
+    let iframe_element = await page.waitForSelector("#braintree-hosted-field-number")
+    let iframe = await iframe_element.contentFrame()
+    await iframe?.fill('input[name="credit-card-number"]', formData.creditCardNumber);
+    iframe_element = await page.waitForSelector("#braintree-hosted-field-expirationDate")
+    iframe = await iframe_element.contentFrame()
+    await iframe?.fill('input[name="expiration"]', formData.creditCardExpire)
+    iframe_element = await page.waitForSelector("#braintree-hosted-field-cvv")
+    iframe = await iframe_element.contentFrame()
+    await iframe?.fill('input[name="cvv"]', formData.creditCardCVV);
     await page.screenshot({ path: getScreenShotPath('post-form-place-order') });
-    await page.locator('button[title="Place Order"]').click();
+    const button = page.locator('button[title="Place Order"]').nth(0);
+    await button.click();
     console.log("finshed place order");
 }
