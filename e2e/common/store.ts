@@ -48,7 +48,7 @@ export const buyStoreProduct = async (page: Page) => {
 
 export const fillCheckoutForm = async (page: Page, formData: CheckoutFormData) => {
     await fillCheckoutFirstPage(page, formData);
-    await page.waitForTimeout(15000);
+    await page.waitForTimeout(5000);
     await fillCheckoutLastPage(page, formData);
 }
 

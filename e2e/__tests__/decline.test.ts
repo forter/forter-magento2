@@ -28,9 +28,9 @@ describe('Testing Decline Deals', () => {
             faker.address.zipCode(),
             faker.phone.phoneNumber())
         await fillCheckoutForm(page, formData);
-        await page.waitForTimeout(1500);
-        await page.screenshot({ path: getScreenShotPath('decline-deal-final-result') });
-        const errorMsg = page.locator('.checkout-messages');
+        await page.waitForTimeout(2000);
+        await page.screenshot({ fullPage: true, path: getScreenShotPath('decline-deal-final-result') });
+        const errorMsg = page.locator('div[data-role="checkout-messages"]:visible');
         const errorMsgVisible = await errorMsg.isVisible();
         expect(errorMsgVisible).toBeTruthy();
         const title = await errorMsg.innerText()
