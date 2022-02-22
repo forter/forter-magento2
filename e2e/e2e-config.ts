@@ -1,1 +1,1 @@
-export const serverAddress = "http://165.232.69.178change the server ip to one that "
+export const serverAddress = "http://165.232.69.178"
