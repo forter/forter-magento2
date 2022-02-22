@@ -8,10 +8,9 @@ describe('Testing Decline Deals', () => {
     let browser: Browser;
     let page: Page;
     beforeEach(async () => {
-        browser = await getBrowser(true)
+        browser = await getBrowser()
     });
     afterEach(async () => {
-        await page.close();
         await closeBrowser()
     });
     it('Test General Decline Deal', async () => {
@@ -29,7 +28,7 @@ describe('Testing Decline Deals', () => {
             faker.address.zipCode(),
             faker.phone.phoneNumber())
         await fillCheckoutForm(page, formData);
-        await page.waitForTimeout(2000);
+        await page.waitForTimeout(4000);
         await page.screenshot({ fullPage: true, path: getScreenShotPath('decline-deal-final-result') });
         const errorMsg = page.locator('div[data-role="checkout-messages"]:visible');
         const errorMsgVisible = await errorMsg.isVisible();
@@ -37,7 +36,6 @@ describe('Testing Decline Deals', () => {
         const title = await errorMsg.innerText()
         expect(title).toEqual("We are sorry, but we could not process your order at this time.");
     })
-
     it('Test With No Auth Card Decline Deal', async () => {
         setTestPrefix('braintree-noauth-decline')
         page = await getStorePage(serverAddress);
@@ -54,7 +52,7 @@ describe('Testing Decline Deals', () => {
             faker.phone.phoneNumber(),
             '5105105105105100')
         await fillCheckoutForm(page, formData);
-        await page.waitForTimeout(2000);
+        await page.waitForTimeout(4000);
         await page.screenshot({ fullPage: true, path: getScreenShotPath('decline-deal-final-result') });
         const errorMsg = page.locator('div[data-role="checkout-messages"]:visible');
         const errorMsgVisible = await errorMsg.isVisible();
@@ -63,4 +61,3 @@ describe('Testing Decline Deals', () => {
         expect(title).toEqual("We are sorry, but we could not process your order at this time.");
     })
 })
-///5105105105105100

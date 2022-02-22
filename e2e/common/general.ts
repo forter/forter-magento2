@@ -1,15 +1,14 @@
 import { chromium, Browser, Page } from "playwright";
-let browser: Browser;
+let browser: Browser | undefined;
 let prefixTestName = 'none';
-export const getBrowser = async (doLanuch: boolean) => {
-    if (!browser || !doLanuch)
-        browser = await chromium.launch();
+export const getBrowser = async () => {
+    browser = await chromium.launch();
     return browser;
 }
-export const closeBrowser = async () => browser.close();
+export const closeBrowser = async () => browser?.close();
 
 export const getStorePage = async (storeAddress: string) => {
-    let page: Page = await browser.newPage();
+    const page: Page = await browser?.newPage() as Page;
 
     // page.route('**', (route, request) => {
     //     console.log(request.url());

@@ -75,7 +75,7 @@ const fillCheckoutFirstPage = async (page: Page, formData: CheckoutFormData) => 
 const fillCheckoutLastPage = async (page: Page, formData: CheckoutFormData) => {
     await page.screenshot({ path: getScreenShotPath('pre-form-place-order') });
     await page.locator('input[value=braintree]').click();
-    await page.waitForTimeout(10000);
+    await page.waitForTimeout(5000);
     await page.screenshot({ path: getScreenShotPath('cardform-form-place-order') });
     let iframe_element = await page.waitForSelector("#braintree-hosted-field-number")
     let iframe = await iframe_element.contentFrame()

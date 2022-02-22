@@ -8,7 +8,7 @@ describe('Testing Accepted Deals', () => {
     let browser: Browser;
     let page: Page;
     beforeEach(async () => {
-        browser = await getBrowser(true)
+        browser = await getBrowser()
     });
     afterEach(async () => {
         await page.close();
