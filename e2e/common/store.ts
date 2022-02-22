@@ -11,7 +11,7 @@ export class CheckoutFormData {
     public city: string;
     public zipcode: string;
     public phone: string;
-    public readonly creditCardNumber = '4111111111111111';
+    public creditCardNumber = '4111111111111111';
     public readonly creditCardExpire = '03/2030';
     public readonly creditCardCVV = '737';
     constructor(email: string,
@@ -21,7 +21,8 @@ export class CheckoutFormData {
         country: string,
         city: string,
         zipcode: string,
-        phone: string) {
+        phone: string,
+        creditCard?: string) {
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -30,6 +31,9 @@ export class CheckoutFormData {
         this.city = city;
         this.zipcode = zipcode;
         this.phone = phone
+        if (creditCard) {
+            this.creditCardNumber = creditCard;
+        }
     }
 
 }
@@ -70,7 +74,7 @@ const fillCheckoutFirstPage = async (page: Page, formData: CheckoutFormData) => 
 }
 const fillCheckoutLastPage = async (page: Page, formData: CheckoutFormData) => {
     await page.screenshot({ path: getScreenShotPath('pre-form-place-order') });
-    await page.locator('input[value="braintree"]').click();
+    await page.locator('input[value=braintree]').click();
     await page.waitForTimeout(10000);
     await page.screenshot({ path: getScreenShotPath('cardform-form-place-order') });
     let iframe_element = await page.waitForSelector("#braintree-hosted-field-number")

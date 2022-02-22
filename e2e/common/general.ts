@@ -1,5 +1,6 @@
 import { chromium, Browser, Page } from "playwright";
 let browser: Browser;
+let prefixTestName = 'none';
 export const getBrowser = async (doLanuch: boolean) => {
     if (!browser || !doLanuch)
         browser = await chromium.launch();
@@ -18,7 +19,8 @@ export const getStorePage = async (storeAddress: string) => {
     return page;
 }
 
-export const getScreenShotPath = (fileName: string) => (`./e2e/screenshots/${fileName}.png`)
+export const setTestPrefix = (name: string) => prefixTestName = name;
+export const getScreenShotPath = (fileName: string) => (`./e2e/screenshots/${prefixTestName}-${fileName}.png`)
 
 export async function scrollOnElement(page: Page, selector: string) {
     await page.$eval(selector, (element) => {

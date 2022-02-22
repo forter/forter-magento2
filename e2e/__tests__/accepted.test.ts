@@ -1,5 +1,5 @@
 import { Browser, Page } from 'playwright';
-import { getBrowser, closeBrowser, getStorePage, getScreenShotPath } from '../common/general';
+import { getBrowser, closeBrowser, getStorePage, getScreenShotPath, setTestPrefix } from '../common/general';
 import { buyStoreProduct, CheckoutFormData, acceptEmail, fillCheckoutForm } from '../common/store';
 import faker from '@faker-js/faker';
 import { serverAddress } from '../e2e-config';
@@ -14,7 +14,8 @@ describe('Testing Accepted Deals', () => {
         await page.close();
         await closeBrowser()
     });
-    it('Test Accept Deal', async () => {
+    it('Test Approved Deal', async () => {
+        setTestPrefix('braintree-geneal-approved')
         page = await getStorePage(serverAddress);
         await buyStoreProduct(page)
         page.goto(`${serverAddress}/checkout`)
