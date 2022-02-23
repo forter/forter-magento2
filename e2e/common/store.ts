@@ -1,93 +1,62 @@
 import { Page } from 'playwright';
+import { CheckoutFormDto } from './dto/checkoutForm.dto';
+import { CheckoutFormDataDto } from './dto/checkoutFormData.dto';
+import { StoreDto } from './dto/store.dto';
 import { getScreenShotPath, scrollOnElement } from './general';
-export const declineEmail = 'decline@forter.com'
-export const acceptEmail = 'approve@forter.com'
-export class CheckoutFormData {
-    public email: string;
-    public firstName: string;
-    public lastName: string;
-    public streetAddress: string;
-    public country: string;
-    public city: string;
-    public zipcode: string;
-    public phone: string;
-    public creditCardNumber = '4111111111111111';
-    public readonly creditCardExpire = '03/2030';
-    public readonly creditCardCVV = '737';
-    constructor(email: string,
-        firstName: string,
-        lastName: string,
-        streetAddress: string,
-        country: string,
-        city: string,
-        zipcode: string,
-        phone: string,
-        creditCard?: string) {
-        this.email = email;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.country = country;
-        this.streetAddress = streetAddress;
-        this.city = city;
-        this.zipcode = zipcode;
-        this.phone = phone
-        if (creditCard) {
-            this.creditCardNumber = creditCard;
-        }
-    }
-
-}
 export const buyStoreProduct = async (page: Page) => {
-    const productItem = page.locator('li.product-item')
+    const productItem = page.locator(StoreDto.Instance.SelectProductItemElmName)
     const product = productItem.nth(4);
     await product.hover();
-    const addToCart = product.locator("button[type=submit]");
+    const addToCart = product.locator(StoreDto.Instance.AddToCartBtnElmName);
     await page.screenshot({ fullPage: true, path: getScreenShotPath('pre-add-to-cart') });
     await addToCart.dblclick();
     await page.waitForTimeout(2000);
-    await scrollOnElement(page, '.showcart');
+    await scrollOnElement(page, StoreDto.Instance.ShowCartElmName);
     await page.screenshot({ fullPage: true, path: getScreenShotPath('add-to-cart') });
     console.log("finshed shopping page and did checkout");
 }
 
-export const fillCheckoutForm = async (page: Page, formData: CheckoutFormData) => {
+export const fillCheckoutForm = async (page: Page, formData: CheckoutFormDataDto) => {
     await fillCheckoutFirstPage(page, formData);
     await page.waitForTimeout(5000);
     await fillCheckoutLastPage(page, formData);
 }
 
-const fillCheckoutFirstPage = async (page: Page, formData: CheckoutFormData) => {
-    const form = page.locator('.opc-wrapper')
+const fillCheckoutFirstPage = async (page: Page, formData: CheckoutFormDataDto) => {
+    let checkoutForm: CheckoutFormDto = new CheckoutFormDto(formData.payment);
+    const form = page.locator(checkoutForm.FormElmName)
     await form.screenshot({ path: getScreenShotPath('pre-form-shipping-address') });
-    await form.locator('input[name="username"]').fill(formData.email);
-    await form.locator('input[name="firstname"]').fill(formData.firstName);
-    await form.locator('input[name="lastname"]').fill(formData.lastName);
-    await form.locator('input[name="street[0]"]').fill(formData.streetAddress);
-    await form.locator('select[name="region_id"]').selectOption({ label: 'Alabama' });
-    await form.locator('input[name="city"]').fill(formData.city);
-    await form.locator('input[name="postcode"]').fill(formData.zipcode)
-    await form.locator('input[name="telephone"]').fill(formData.phone);
-    await form.locator('input[type="radio"]').nth(0).click();
+    await form.locator(checkoutForm.InputEmailElmName).fill(formData.email);
+    await form.locator(checkoutForm.InputFirstNameElmName).fill(formData.firstName);
+    await form.locator(checkoutForm.InputLastNameElmName).fill(formData.lastName);
+    await form.locator(checkoutForm.InputStreetElmName).fill(formData.streetAddress);
+    await form.locator(checkoutForm.InputStateElmName).selectOption({ label: 'Alabama' });
+    await form.locator(checkoutForm.InputCityElmName).fill(formData.city);
+    await form.locator(checkoutForm.InputZipCodeElmName).fill(formData.zipcode)
+    await form.locator(checkoutForm.InputPhoneElmName).fill(formData.phone);
+    await form.locator(checkoutForm.InputShippingTypeElmName).nth(0).click();
     await form.screenshot({ path: getScreenShotPath('post-form-shipping-address') });
-    await form.locator('button[data-role="opc-continue"]').click();
+    await form.locator(checkoutForm.PlaceOrderElmName).click();
     console.log("finshed shipping address");
 }
-const fillCheckoutLastPage = async (page: Page, formData: CheckoutFormData) => {
+const fillCheckoutLastPage = async (page: Page, formData: CheckoutFormDataDto) => {
+    const checkoutForm: CheckoutFormDto = new CheckoutFormDto(formData.payment);
+    const paymentForm= checkoutForm.PaymentForm;
     await page.screenshot({ path: getScreenShotPath('pre-form-place-order') });
-    await page.locator('input[value=braintree]').click();
+    await page.locator(paymentForm.getSelectPaymentType()).click();
     await page.waitForTimeout(5000);
     await page.screenshot({ path: getScreenShotPath('cardform-form-place-order') });
-    let iframe_element = await page.waitForSelector("#braintree-hosted-field-number")
+    let iframe_element = await page.waitForSelector(paymentForm.getPaymentIFrameCreditNum())
     let iframe = await iframe_element.contentFrame()
-    await iframe?.fill('input[name="credit-card-number"]', formData.creditCardNumber);
-    iframe_element = await page.waitForSelector("#braintree-hosted-field-expirationDate")
+    await iframe?.fill(paymentForm.getCreditCardNum(), formData.creditCardNumber);
+    iframe_element = await page.waitForSelector(paymentForm.getPaymentIFrameCreditExp())
     iframe = await iframe_element.contentFrame()
-    await iframe?.fill('input[name="expiration"]', formData.creditCardExpire)
-    iframe_element = await page.waitForSelector("#braintree-hosted-field-cvv")
+    await iframe?.fill(paymentForm.getCreditCardExp(), formData.creditCardExpire)
+    iframe_element = await page.waitForSelector(paymentForm.getPaymentIFrameCreditCVV())
     iframe = await iframe_element.contentFrame()
-    await iframe?.fill('input[name="cvv"]', formData.creditCardCVV);
+    await iframe?.fill(paymentForm.getCreditCardCVV(), formData.creditCardCVV);
     await page.screenshot({ path: getScreenShotPath('post-form-place-order') });
-    const button = page.locator('button[title="Place Order"]').nth(0);
+    const button = page.locator(checkoutForm.PlaceOrderElmName).nth(0);
     await button.click();
     console.log("finshed place order");
 }
