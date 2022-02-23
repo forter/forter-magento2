@@ -74,3 +74,5 @@ auth.json
 /tasks/*
 /e2e/screenshots/*
 !/e2e/screenshots/.gitkeep
+.env
+!.env.template

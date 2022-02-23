@@ -1,8 +1,10 @@
 import { chromium, Browser, Page } from "playwright";
+import { serverAddress } from '../e2e-config';
 let browser: Browser | undefined;
 let prefixTestName = 'none';
 export const getBrowser = async () => {
     browser = await chromium.launch();
+    console.log(`Running on server address ${serverAddress}`)
     return browser;
 }
 export const closeBrowser = async () => browser?.close();

@@ -20,6 +20,7 @@
   "devDependencies": {
     "@faker-js/faker": "^6.0.0-alpha.6",
     "@types/jest": "^27.4.0",
+    "dotenv": "^16.0.0",
     "jest": "^27.5.1",
     "jest-playwright-preset": "^1.7.0",
     "lodash": "^4.17.21",

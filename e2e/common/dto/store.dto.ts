@@ -24,5 +24,8 @@ export class StoreDto {
         return 'span[data-ui-id="page-title-wrapper"]';
     }
     
+    public get FetchSuccessOrderIdElmName() {
+        return 'div.checkout-success >>  p:first-child >> span'
+    }
 
 }

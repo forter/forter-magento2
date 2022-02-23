@@ -10,7 +10,7 @@ export const buyStoreProduct = async (page: Page) => {
     const addToCart = product.locator(StoreDto.Instance.AddToCartBtnElmName);
     await page.screenshot({ fullPage: true, path: getScreenShotPath('pre-add-to-cart') });
     await addToCart.dblclick();
-    await page.waitForTimeout(2000);
+    await page.waitForLoadState('networkidle')
     await scrollOnElement(page, StoreDto.Instance.ShowCartElmName);
     await page.screenshot({ fullPage: true, path: getScreenShotPath('add-to-cart') });
     console.log("finshed shopping page and did checkout");
@@ -18,8 +18,17 @@ export const buyStoreProduct = async (page: Page) => {
 
 export const fillCheckoutForm = async (page: Page, formData: CheckoutFormDataDto) => {
     await fillCheckoutFirstPage(page, formData);
-    await page.waitForTimeout(5000);
+    await page.waitForLoadState('networkidle')
     await fillCheckoutLastPage(page, formData);
+}
+
+export const fetchOrderIdFromPage = async (page: Page) => {
+    const orderTextElm = page.locator(StoreDto.Instance.FetchSuccessOrderIdElmName);
+    const orderText = await orderTextElm.textContent();
+    const matches = orderText?.match(/\d/g);
+    expect(matches).toBeDefined();
+    const orderId = matches?.join('')
+    return orderId || '';
 }
 
 const fillCheckoutFirstPage = async (page: Page, formData: CheckoutFormDataDto) => {
@@ -44,7 +53,7 @@ const fillCheckoutLastPage = async (page: Page, formData: CheckoutFormDataDto) =
     const paymentForm= checkoutForm.PaymentForm;
     await page.screenshot({ path: getScreenShotPath('pre-form-place-order') });
     await page.locator(paymentForm.getSelectPaymentType()).click();
-    await page.waitForTimeout(5000);
+    await page.waitForLoadState('networkidle');
     await page.screenshot({ path: getScreenShotPath('cardform-form-place-order') });
     let iframe_element = await page.waitForSelector(paymentForm.getPaymentIFrameCreditNum())
     let iframe = await iframe_element.contentFrame()
