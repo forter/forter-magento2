@@ -6,7 +6,7 @@ import { serverAddress } from '../../e2e-config';
 import { acceptEmail, PaymentType, TextOrderSuccessMsg } from '../../common/constants';
 import { CheckoutFormDataDto } from '../../common/dto/checkoutFormData.dto';
 import { StoreDto } from '../../common/dto/store.dto';
-import { doStoreAdminLogin } from '../../common/store-admin';
+import { checkStatusOfOrderOnOrderList, doStoreAdminLogin } from '../../common/store-admin';
 jest.setTimeout(5000000)
 describe('Testing Accepted Deals', () => {
     let browser: Browser;
@@ -22,7 +22,7 @@ describe('Testing Accepted Deals', () => {
         page = await getStorePage(serverAddress);
         await buyStoreProduct(page)
         page.goto(`${serverAddress}/checkout`)
-        await page.waitForLoadState('networkidle')
+        await page.waitForNavigation();
         const formData: CheckoutFormDataDto = new CheckoutFormDataDto(acceptEmail,
             faker.name.firstName(),
             faker.name.lastName(),
@@ -45,5 +45,6 @@ describe('Testing Accepted Deals', () => {
         page = await getStorePage(`${serverAddress}/admin`);
         page = await doStoreAdminLogin(page);
         await page.screenshot({ path: getScreenShotPath('accept-deal-final-result') });
+        await checkStatusOfOrderOnOrderList(page,'000000026', false)
     })
 })
