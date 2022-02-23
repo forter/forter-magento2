@@ -36,7 +36,7 @@ const fillCheckoutFirstPage = async (page: Page, formData: CheckoutFormDataDto) 
     await form.locator(checkoutForm.InputPhoneElmName).fill(formData.phone);
     await form.locator(checkoutForm.InputShippingTypeElmName).nth(0).click();
     await form.screenshot({ path: getScreenShotPath('post-form-shipping-address') });
-    await form.locator(checkoutForm.PlaceOrderElmName).click();
+    await form.locator(checkoutForm.SubmitShippingFormElmName).click();
     console.log("finshed shipping address");
 }
 const fillCheckoutLastPage = async (page: Page, formData: CheckoutFormDataDto) => {

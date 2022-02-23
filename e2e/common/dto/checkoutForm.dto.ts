@@ -34,7 +34,7 @@ export class CheckoutFormDto {
         return 'input[name="city"]';
     }
     public get InputStateElmName() {
-        return 'input[name="region_id"]';
+        return 'select[name="region_id"]';
     }
     public get InputZipCodeElmName() {
         return 'input[name="postcode"]';
