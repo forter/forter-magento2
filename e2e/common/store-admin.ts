@@ -2,7 +2,7 @@ import { Locator, Page } from "playwright";
 import { adminStoreUser, adminStoreUserPassword, serverAddress } from "../e2e-config";
 import { ForterFlowMode } from "./constants";
 import { StoreAdminDto } from "./dto/admin/admin.dto";
-import { getScreenShotPath } from "./general";
+import { getScreenShotPath, getStorePage } from "./general";
 
 export const doStoreAdminLogin = async (page: Page) => {
     console.log(`U:${adminStoreUser} , P: ${adminStoreUserPassword}`)
@@ -70,6 +70,7 @@ const goToOrderList = async (page: Page, orderId: string) => {
     expect(totalItems).toBe(1)
     return page;
 }
+
 export const updateStoreForterMode = async (page: Page, mode: ForterFlowMode) => {
     await page.goto(`${serverAddress}/admin/admin/system_config/edit/section/forter#forter_immediate_post_pre_decision-link`)
     await page.waitForLoadState('networkidle')
@@ -86,8 +87,10 @@ export const updateStoreForterMode = async (page: Page, mode: ForterFlowMode) =>
     await page.locator(StoreAdminDto.Instance.Settings.RevalidateCacheStore).click();
     await page.waitForLoadState('networkidle')
     await page.screenshot({ path: getScreenShotPath('orderPostCacheForter') });
-
-
 }
-//admin/admin/system_config/edit/section/forter
-//admin/admin/cache/index
+export const changeForterMode = async (page: Page, mode: ForterFlowMode) => {
+    page = await getStorePage(`${serverAddress}/admin`);
+    page = await doStoreAdminLogin(page);
+    await updateStoreForterMode(page, mode);
+    return page;
+}

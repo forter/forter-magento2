@@ -32,7 +32,7 @@ describe('Testing Decline Deals', () => {
             faker.phone.phoneNumber(),
             PaymentType.BrainTree)
         await fillCheckoutForm(page, formData);
-        await page.waitForTimeout(4000);
+        await page.waitForTimeout(2000);
         await page.screenshot({ fullPage: true, path: getScreenShotPath('decline-deal-final-result') });
         const errorMsg = page.locator(StoreDto.Instance.OrderErrorMsgElmName);
         const errorMsgVisible = await errorMsg.isVisible();
@@ -57,7 +57,7 @@ describe('Testing Decline Deals', () => {
             PaymentType.BrainTree,
             '5105105105105100')
         await fillCheckoutForm(page, formData);
-        await page.waitForTimeout(4000);
+        await page.waitForTimeout(2000);
         await page.screenshot({ fullPage: true, path: getScreenShotPath('decline-deal-final-result') });
         const errorMsg = page.locator(StoreDto.Instance.OrderErrorMsgElmName);
         const errorMsgVisible = await errorMsg.isVisible();
