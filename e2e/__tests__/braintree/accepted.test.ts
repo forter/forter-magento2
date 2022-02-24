@@ -3,10 +3,10 @@ import { getBrowser, closeBrowser, getStorePage, getScreenShotPath, setTestPrefi
 import { buyStoreProduct, fillCheckoutForm, fetchOrderIdFromPage } from '../../common/store';
 import faker from '@faker-js/faker';
 import { serverAddress } from '../../e2e-config';
-import { acceptEmail, PaymentType, TextOrderSuccessMsg } from '../../common/constants';
+import { acceptEmail, ForterFlowMode, PaymentType, TextOrderSuccessMsg } from '../../common/constants';
 import { CheckoutFormDataDto } from '../../common/dto/checkoutFormData.dto';
 import { StoreDto } from '../../common/dto/store.dto';
-import { checkOrderPage, checkStatusOfOrderOnOrderList, doStoreAdminLogin } from '../../common/store-admin';
+import { checkOrderPage, checkStatusOfOrderOnOrderList, doStoreAdminLogin, updateStoreForterMode } from '../../common/store-admin';
 jest.setTimeout(5000000)
 describe('Testing Accepted Deals', () => {
     let browser: Browser;
@@ -48,7 +48,7 @@ describe('Testing Accepted Deals', () => {
     it('Test admin user actions' , async () => {
         page = await getStorePage(`${serverAddress}/admin`);
         page = await doStoreAdminLogin(page);
-        await page.screenshot({ path: getScreenShotPath('accept-deal-final-result') });
-        await checkOrderPage(page,'000000026', false)
+        await page.screenshot({ path: getScreenShotPath('dashboard') });
+        await updateStoreForterMode(page, ForterFlowMode.After);
     })
 })

@@ -1,5 +1,6 @@
 import { Locator, Page } from "playwright";
 import { adminStoreUser, adminStoreUserPassword, serverAddress } from "../e2e-config";
+import { ForterFlowMode } from "./constants";
 import { StoreAdminDto } from "./dto/admin/admin.dto";
 import { getScreenShotPath } from "./general";
 
@@ -17,7 +18,7 @@ export const doStoreAdminLogin = async (page: Page) => {
 }
 
 export const checkStatusOfOrderOnOrderList = async (page: Page, orderId: string, checkApproved: boolean) => {
-    page = await goToOrderList(page,orderId);
+    page = await goToOrderList(page, orderId);
     const forterItem = page.locator(`${StoreAdminDto.Instance.OrderList.ListDataItemsElmName} >> nth=0 >> td >> nth=11`)
     await page.screenshot({ path: getScreenShotPath('orderlist') });
     if (checkApproved) {
@@ -30,34 +31,34 @@ export const checkStatusOfOrderOnOrderList = async (page: Page, orderId: string,
     }
 }
 export const checkOrderPage = async (page: Page, orderId: string, checkApproved: boolean) => {
-    page = await goToOrderList(page,orderId);
+    page = await goToOrderList(page, orderId);
     await page.locator(`${StoreAdminDto.Instance.OrderList.ListDataItemsElmName} >> nth=0 >> td >> nth=1`).click();
     await page.waitForLoadState('networkidle')
     await page.screenshot({ path: getScreenShotPath('orderPage') });
     const pageOrderId = await page.locator(StoreAdminDto.Instance.OrderPage.OrderTitle).textContent()
     expect(orderId).toEqual(pageOrderId?.replace('#', ''));
-    const commentOrderHistoryItems= page.locator(StoreAdminDto.Instance.OrderPage.OrderHistoryItems)
+    const commentOrderHistoryItems = page.locator(StoreAdminDto.Instance.OrderPage.OrderHistoryItems)
     // we check the order history
     const count = await commentOrderHistoryItems.count()
     for (let i = 0; i < count; ++i) {
         const text = await commentOrderHistoryItems.nth(i).textContent();
-        let regex = new RegExp(`Forter`,'gi')
+        let regex = new RegExp(`Forter`, 'gi')
         let match = regex.test(text || '');
         if (match) {
-           regex = new RegExp(`${(checkApproved)?'approve':'decline'}`, 'gi')
-           match = regex.test(text || '');
-           expect(match).toBeTruthy();
-           break;
+            regex = new RegExp(`${(checkApproved) ? 'approve' : 'decline'}`, 'gi')
+            match = regex.test(text || '');
+            expect(match).toBeTruthy();
+            break;
         }
     }
     await page.locator(StoreAdminDto.Instance.OrderPage.ForterTabMenu).click()
     await page.screenshot({ path: getScreenShotPath('orderPageForter') });
     const text = await page.locator(StoreAdminDto.Instance.OrderPage.ForterTabDecision).textContent()
-    expect(text).toEqual((checkApproved)?'approve':'decline');
+    expect(text).toEqual((checkApproved) ? 'approve' : 'decline');
 }
 
-const goToOrderList= async (page: Page, orderId: string) => {
-    page.goto(`${serverAddress}/admin/sales/order/`)
+const goToOrderList = async (page: Page, orderId: string) => {
+    await page.goto(`${serverAddress}/admin/sales/order/`)
     await page.waitForLoadState('networkidle')
     await page.fill(StoreAdminDto.Instance.OrderList.SearchOrderElmName, orderId);
     await page.keyboard.press('Enter');
@@ -69,3 +70,17 @@ const goToOrderList= async (page: Page, orderId: string) => {
     expect(totalItems).toBe(1)
     return page;
 }
+export const updateStoreForterMode = async (page: Page, mode: ForterFlowMode) => {
+    const url = await page.url()
+    const key = url.replace(`${serverAddress}/admin/admin/dashboard/index/key/`, '').replace('/','')
+    console.log(`broswer local key ${key}`)
+    await page.goto(`${serverAddress}/admin/admin/system_config/edit/section/forter`)
+    await page.waitForLoadState('networkidle')
+    await page.screenshot({ path: getScreenShotPath('orderPreChangeFlowForter') });
+    await page.locator(StoreAdminDto.Instance.Settings.SelectForterFlow).selectOption({ value: `${mode}` });
+    await page.locator(StoreAdminDto.Instance.Settings.SaveForterConfig).click();
+    await page.waitForTimeout(1500);
+    await page.screenshot({ path: getScreenShotPath('orderChangeFlowForter') });
+}
+//admin/admin/system_config/edit/section/forter
+//admin/admin/cache/index

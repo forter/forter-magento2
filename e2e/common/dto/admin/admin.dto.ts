@@ -53,6 +53,22 @@ class StoreAdminOrderPageDto {
     public get ForterTabDecision() { return '.invoice_item_content >> nth=1 >> div'}
     public get ForterTabReasonCode() { return '.invoice_item_content >> nth=3 >> div'}
 }
+class StoreAdminSettingsDto {
+
+    private static instance: StoreAdminSettingsDto;
+    public static get Instance() {
+        if (!this.instance) {
+            this.instance = new StoreAdminSettingsDto;
+        }
+        return this.instance;
+    }
+    public get ConfigurationStoreMenuItem() { return 'li#menu-magento-config-system-config >> a'}
+    public get ForterConfigurationForterMenuItems() { return 'div.config-nav-block admin__page-nav >> .admin__page-nav-title >> strong'}
+    public get CacheManagementStoreMenuItem() { return 'li#menu-magento-backend-system-cache >> a'}
+    public get SelectForterFlow() { return 'select#forter_immediate_post_pre_decision_pre_post_select' }
+    public get SaveForterConfig() { return 'button[title="Save Config"]' }
+    public get RevalidateCacheStore() { return 'button[title="Flush Magento Cache"]' }
+}
 
 export class StoreAdminDto {
     private static instance: StoreAdminDto;
@@ -66,6 +82,5 @@ export class StoreAdminDto {
     public get MainAdmin() { return StoreAdminMainDto.Instance; }
     public get OrderList() { return StoreAdminOrderListPageDto.Instance; }
     public get OrderPage() { return StoreAdminOrderPageDto.Instance; }
-
-
+    public get Settings() { return StoreAdminSettingsDto.Instance; }
 }

@@ -8,3 +8,9 @@ export enum PaymentType {
     Paypal,
     Adyen
 }
+export enum ForterFlowMode {
+    Before=1,
+    After=2,
+    BeforeAndAfter=4,
+    Cron=3
+}

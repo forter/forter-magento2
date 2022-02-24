@@ -12,6 +12,7 @@ export const closeBrowser = async () => browser?.close();
 export const getStorePage = async (storeAddress: string) => {
     const page: Page = await browser?.newPage() as Page;
 
+    // page.on('request', request => console.log('>>', request.method(), request.url()));
     // page.route('**', (route, request) => {
     //     console.log(request.url());
     //     route.continue();
