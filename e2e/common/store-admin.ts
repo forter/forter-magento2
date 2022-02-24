@@ -35,7 +35,7 @@ export const checkOrderPage = async (page: Page, orderId: string, checkApproved:
     await page.waitForLoadState('networkidle')
     await page.screenshot({ path: getScreenShotPath('orderPage') });
     const pageOrderId = await page.locator(StoreAdminDto.Instance.OrderPage.OrderTitle).textContent()
-    expect(orderId).toEqual(pageOrderId);
+    expect(orderId).toEqual(pageOrderId?.replace('#', ''));
     const commentOrderHistoryItems= page.locator(StoreAdminDto.Instance.OrderPage.OrderHistoryItems)
     // we check the order history
     const count = await commentOrderHistoryItems.count()
@@ -47,9 +47,13 @@ export const checkOrderPage = async (page: Page, orderId: string, checkApproved:
            regex = new RegExp(`${(checkApproved)?'approve':'decline'}`, 'gi')
            match = regex.test(text || '');
            expect(match).toBeTruthy();
+           break;
         }
     }
-
+    await page.locator(StoreAdminDto.Instance.OrderPage.ForterTabMenu).click()
+    await page.screenshot({ path: getScreenShotPath('orderPageForter') });
+    const text = await page.locator(StoreAdminDto.Instance.OrderPage.ForterTabDecision).textContent()
+    expect(text).toEqual((checkApproved)?'approve':'decline');
 }
 
 const goToOrderList= async (page: Page, orderId: string) => {

@@ -46,12 +46,12 @@ class StoreAdminOrderPageDto {
         }
         return this.instance;
     }
-    public get OrderTitle() { return '.page-actions-inner'; }
+    public get OrderTitle() { return '.page-title'; }
     public get OrderHistoryItems() { return 'ul.note-list >> .note-list-item >> .note-list-comment'}
     public get ForterTabMenu() { return 'a.tab-item-link[name="order_forter"]'}
-    public get ForterTabApiStatus() { return '.admin__page-section >>  nth=1 >>.admin__page-section-content >> .invoice_item_content >> div'}
-    public get ForterTabDecision() { return '.admin__page-section >>  nth=2 >>.admin__page-section-content >> .invoice_item_content >> div'}
-    public get ForterTabReasonCode() { return '.admin__page-section >>  nth=4 >>.admin__page-section-content >> .invoice_item_content >> div'}
+    public get ForterTabApiStatus() { return '.invoice_item_content >> nth=0 >> div'}
+    public get ForterTabDecision() { return '.invoice_item_content >> nth=1 >> div'}
+    public get ForterTabReasonCode() { return '.invoice_item_content >> nth=3 >> div'}
 }
 
 export class StoreAdminDto {
