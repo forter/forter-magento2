@@ -1,6 +1,5 @@
 import { Locator, Page } from "playwright";
 import { adminStoreUser, adminStoreUserPassword, serverAddress } from "../e2e-config";
-import { TextNoDataOnTable } from "./constants";
 import { StoreAdminDto } from "./dto/admin/admin.dto";
 import { getScreenShotPath } from "./general";
 
@@ -33,8 +32,26 @@ export const checkStatusOfOrderOnOrderList = async (page: Page, orderId: string,
 export const checkOrderPage = async (page: Page, orderId: string, checkApproved: boolean) => {
     page = await goToOrderList(page,orderId);
     await page.locator(`${StoreAdminDto.Instance.OrderList.ListDataItemsElmName} >> nth=0 >> td >> nth=1`).click();
-    
+    await page.waitForLoadState('networkidle')
+    await page.screenshot({ path: getScreenShotPath('orderPage') });
+    const pageOrderId = await page.locator(StoreAdminDto.Instance.OrderPage.OrderTitle).textContent()
+    expect(orderId).toEqual(pageOrderId);
+    const commentOrderHistoryItems= page.locator(StoreAdminDto.Instance.OrderPage.OrderHistoryItems)
+    // we check the order history
+    const count = await commentOrderHistoryItems.count()
+    for (let i = 0; i < count; ++i) {
+        const text = await commentOrderHistoryItems.nth(i).textContent();
+        let regex = new RegExp(`Forter`,'gi')
+        let match = regex.test(text || '');
+        if (match) {
+           regex = new RegExp(`${(checkApproved)?'approve':'decline'}`, 'gi')
+           match = regex.test(text || '');
+           expect(match).toBeTruthy();
+        }
+    }
+
 }
+
 const goToOrderList= async (page: Page, orderId: string) => {
     page.goto(`${serverAddress}/admin/sales/order/`)
     await page.waitForLoadState('networkidle')
