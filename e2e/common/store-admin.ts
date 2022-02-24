@@ -71,16 +71,23 @@ const goToOrderList = async (page: Page, orderId: string) => {
     return page;
 }
 export const updateStoreForterMode = async (page: Page, mode: ForterFlowMode) => {
-    const url = await page.url()
-    const key = url.replace(`${serverAddress}/admin/admin/dashboard/index/key/`, '').replace('/','')
-    console.log(`broswer local key ${key}`)
-    await page.goto(`${serverAddress}/admin/admin/system_config/edit/section/forter`)
+    await page.goto(`${serverAddress}/admin/admin/system_config/edit/section/forter#forter_immediate_post_pre_decision-link`)
     await page.waitForLoadState('networkidle')
     await page.screenshot({ path: getScreenShotPath('orderPreChangeFlowForter') });
     await page.locator(StoreAdminDto.Instance.Settings.SelectForterFlow).selectOption({ value: `${mode}` });
     await page.locator(StoreAdminDto.Instance.Settings.SaveForterConfig).click();
     await page.waitForTimeout(1500);
     await page.screenshot({ path: getScreenShotPath('orderChangeFlowForter') });
+    await page.locator(StoreAdminDto.Instance.Settings.SaveForterConfig).click();
+    await page.waitForTimeout(1500);
+    await page.goto(`${serverAddress}/admin/admin/cache/index`)
+    await page.waitForLoadState('networkidle')
+    await page.screenshot({ path: getScreenShotPath('orderPreCacheForter') });
+    await page.locator(StoreAdminDto.Instance.Settings.RevalidateCacheStore).click();
+    await page.waitForLoadState('networkidle')
+    await page.screenshot({ path: getScreenShotPath('orderPostCacheForter') });
+
+
 }
 //admin/admin/system_config/edit/section/forter
 //admin/admin/cache/index
