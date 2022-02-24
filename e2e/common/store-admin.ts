@@ -88,6 +88,38 @@ export const updateStoreForterMode = async (page: Page, mode: ForterFlowMode) =>
     await page.waitForLoadState('networkidle')
     await page.screenshot({ path: getScreenShotPath('orderPostCacheForter') });
 }
+
+export const checkForOrderByName = async (page: Page, name: string, checkApproved: boolean) => {
+    await page.goto(`${serverAddress}/admin/sales/order/`)
+    await page.waitForLoadState('networkidle')
+    await page.fill(StoreAdminDto.Instance.OrderList.SearchBillingElmName, name);
+    await page.locator(StoreAdminDto.Instance.OrderList.SubmitSearchElmName).click();
+    await page.waitForTimeout(1500);
+    const countNoDataItem = await page.locator(StoreAdminDto.Instance.OrderList.ListHasNoDataElmName).count();
+    expect(countNoDataItem).toBe(0)
+    const locatorItems = page.locator(StoreAdminDto.Instance.OrderList.ListDataItemsElmName);
+    const totalItems = await locatorItems.count();
+    expect(totalItems).toBe(1)
+    const remoteName = await locatorItems.nth(0).locator('td >> nth=4 >> div').textContent();
+    expect(name).toEqual(remoteName);
+
+    const orderId = await locatorItems.nth(0).locator('td >> nth=1 >> div').textContent();
+    expect(orderId).not.toBeNull();
+    const forterItem = page.locator(`${StoreAdminDto.Instance.OrderList.ListDataItemsElmName} >> nth=0 >> td >> nth=11`)
+    await page.screenshot({ path: getScreenShotPath('orderlist') });
+    if (checkApproved) {
+        const text = await forterItem.innerText()
+        expect(text).toEqual('approve');
+    }
+    else {
+        const text = await forterItem.innerText()
+        expect(text).toEqual('decline');
+    }
+    if (orderId) {
+        await checkOrderPage(page, orderId  , checkApproved)
+    }
+
+}
 export const changeForterMode = async (page: Page, mode: ForterFlowMode) => {
     page = await getStorePage(`${serverAddress}/admin`);
     page = await doStoreAdminLogin(page);

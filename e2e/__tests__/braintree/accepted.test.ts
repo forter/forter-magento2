@@ -8,7 +8,7 @@ import { CheckoutFormDataDto } from '../../common/dto/checkoutFormData.dto';
 import { StoreDto } from '../../common/dto/store.dto';
 import { changeForterMode, checkOrderPage, checkStatusOfOrderOnOrderList, doStoreAdminLogin, updateStoreForterMode } from '../../common/store-admin';
 jest.setTimeout(5000000)
-describe('Testing Accepted Deals', () => {
+describe('BrainTree Accepted Deals', () => {
     let browser: Browser;
     let page: Page;
     beforeEach(async () => {
@@ -18,7 +18,7 @@ describe('Testing Accepted Deals', () => {
         await closeBrowser()
     });
 
-    it('Test Approved Deal - Verify Mode: Before', async () => {
+    it('BrainTree Approved Deal - Verify Mode: Before', async () => {
         setTestPrefix('braintree-approved-before')
         page = await changeForterMode(page, ForterFlowMode.Before);
         page = await getStorePage(serverAddress);
@@ -48,7 +48,7 @@ describe('Testing Accepted Deals', () => {
         await checkOrderPage(page,orderID, true)
     })
 
-    it('Test Approved Deal - Verify Mode: After', async () => {
+    it('BrainTree Approved Deal - Verify Mode: After', async () => {
         setTestPrefix('braintree-approved-after')
         page = await changeForterMode(page, ForterFlowMode.After);
         page = await getStorePage(serverAddress);
@@ -77,7 +77,7 @@ describe('Testing Accepted Deals', () => {
         await checkStatusOfOrderOnOrderList(page,orderID, true)
         await checkOrderPage(page,orderID, true)
     })
-    it('Test Approved Deal - Verify Mode: Before & After', async () => {
+    it('BrainTree Approved Deal - Verify Mode: Before & After', async () => {
         setTestPrefix('braintree-approved-before-after')
         page = await changeForterMode(page, ForterFlowMode.BeforeAndAfter);
         page = await getStorePage(serverAddress);

@@ -35,6 +35,8 @@ class StoreAdminOrderListPageDto {
     public get SearchOrderElmName() { return 'input[placeholder="Search by keyword"]'; }
     public get ListHasNoDataElmName() { return 'tr.data-grid-tr-no-data >> td'}
     public get ListDataItemsElmName() { return 'tr.data-row' }
+    public get SearchBillingElmName() { return 'input[name="billing_name"]' }
+    public get SubmitSearchElmName() { return 'button[data-action="grid-filter-apply"]' }
 }
 
 class StoreAdminOrderPageDto {
