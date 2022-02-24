@@ -18,16 +18,7 @@ export const doStoreAdminLogin = async (page: Page) => {
 }
 
 export const checkStatusOfOrderOnOrderList = async (page: Page, orderId: string, checkApproved: boolean) => {
-    page.goto(`${serverAddress}/admin/sales/order/`)
-    await page.waitForLoadState('networkidle')
-    await page.fill(StoreAdminDto.Instance.OrderList.SearchOrderElmName, orderId);
-    await page.keyboard.press('Enter');
-    await page.waitForTimeout(1500);
-    const countNoDataItem = await page.locator(StoreAdminDto.Instance.OrderList.ListHasNoDataElmName).count();
-    expect(countNoDataItem).toBe(0)
-    const locatorItems = page.locator(StoreAdminDto.Instance.OrderList.ListDataItemsElmName);
-    const totalItems = await locatorItems.count();
-    expect(totalItems).toBe(1)
+    page = await goToOrderList(page,orderId);
     const forterItem = page.locator(`${StoreAdminDto.Instance.OrderList.ListDataItemsElmName} >> nth=0 >> td >> nth=11`)
     await page.screenshot({ path: getScreenShotPath('orderlist') });
     if (checkApproved) {
@@ -39,7 +30,21 @@ export const checkStatusOfOrderOnOrderList = async (page: Page, orderId: string,
         expect(text).toEqual('decline');
     }
 }
-const hasOrderListHasData = async (page: Page) => {
-    const text = await page.locator(StoreAdminDto.Instance.OrderList.ListHasNoDataElmName).textContent();
-    expect(text).toEqual(TextNoDataOnTable)
+export const checkOrderPage = async (page: Page, orderId: string, checkApproved: boolean) => {
+    page = await goToOrderList(page,orderId);
+    await page.locator(`${StoreAdminDto.Instance.OrderList.ListDataItemsElmName} >> nth=0 >> td >> nth=1`).click();
+    
+}
+const goToOrderList= async (page: Page, orderId: string) => {
+    page.goto(`${serverAddress}/admin/sales/order/`)
+    await page.waitForLoadState('networkidle')
+    await page.fill(StoreAdminDto.Instance.OrderList.SearchOrderElmName, orderId);
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(1500);
+    const countNoDataItem = await page.locator(StoreAdminDto.Instance.OrderList.ListHasNoDataElmName).count();
+    expect(countNoDataItem).toBe(0)
+    const locatorItems = page.locator(StoreAdminDto.Instance.OrderList.ListDataItemsElmName);
+    const totalItems = await locatorItems.count();
+    expect(totalItems).toBe(1)
+    return page;
 }
