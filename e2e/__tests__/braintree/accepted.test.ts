@@ -33,13 +33,17 @@ describe('Testing Accepted Deals', () => {
             faker.phone.phoneNumber(),
             PaymentType.BrainTree)
         await fillCheckoutForm(page, formData);
-        await page.waitForTimeout(5000);
+        await page.waitForTimeout(7000);
         await page.screenshot({ path: getScreenShotPath('accept-deal-final-result') });
         const title = await page.locator(StoreDto.Instance.OrderSuccessMsgElmName).innerText()
         expect(title).toEqual(TextOrderSuccessMsg);
         const orderID = await fetchOrderIdFromPage(page);
         expect(orderID).not.toHaveLength(0);
         console.log(`user buy under order id (${orderID})`)
+        page = await getStorePage(`${serverAddress}/admin`);
+        page = await doStoreAdminLogin(page);
+        await checkStatusOfOrderOnOrderList(page,orderID, true)
+        await checkOrderPage(page,orderID, true)
     })
     it('Test admin user actions' , async () => {
         page = await getStorePage(`${serverAddress}/admin`);
