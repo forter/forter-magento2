@@ -20,7 +20,7 @@ describe('BrainTree No Review Deals', () => {
     });
 
     it('BrainTree No Review Deal - Verify Mode: Before', async () => {
-        setTestPrefix('braintree-approved-before')
+        setTestPrefix('braintree-noreview-approved-before')
         page = await changeForterMode(page, ForterFlowMode.Before);
         page = await getStorePage(serverAddress);
         await buyStoreProduct(page)
@@ -50,7 +50,7 @@ describe('BrainTree No Review Deals', () => {
     })
 
     it('BrainTree No Review Deal - Verify Mode: After', async () => {
-        setTestPrefix('braintree-approved-after')
+        setTestPrefix('braintree-noreview-approved-after')
         page = await changeForterMode(page, ForterFlowMode.After);
         page = await getStorePage(serverAddress);
         await buyStoreProduct(page)
@@ -78,8 +78,8 @@ describe('BrainTree No Review Deals', () => {
         // await checkStatusOfOrderOnOrderList(page,orderID, true)
         // await checkOrderPage(page,orderID, true)
     })
-    it('BrainTree No Review Deal - Verify Mode: Before & After', async () => {
-        setTestPrefix('braintree-approved-before-after')
+    it('BrainTree No Review Deal - Verify Mode: Before&After', async () => {
+        setTestPrefix('braintree-noreview-approved-before-after')
         page = await changeForterMode(page, ForterFlowMode.BeforeAndAfter);
         page = await getStorePage(serverAddress);
         await buyStoreProduct(page)
