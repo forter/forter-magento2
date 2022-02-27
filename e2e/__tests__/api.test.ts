@@ -1,16 +1,17 @@
 import { Browser, Page } from 'playwright';
-import { getBrowser, closeBrowser, getStorePage, getScreenShotPath, setTestPrefix } from '../../common/general';
-import { buyStoreProduct, fillCheckoutForm, fetchOrderIdFromPage } from '../../common/store';
 import faker from '@faker-js/faker';
-import { serverAddress } from '../../e2e-config';
-import { acceptEmail, ForterFlowMode, PaymentType, TextOrderSuccessMsg } from '../../common/constants';
-import { CheckoutFormDataDto } from '../../common/dto/checkoutFormData.dto';
-import { StoreDto } from '../../common/dto/store.dto';
-import { changeForterMode, checkOrderPage, checkStatusOfOrderOnOrderList, doStoreAdminLogin, updateStoreForterMode } from '../../common/store-admin';
+import { ForterFlowMode, acceptEmail, PaymentType, TextOrderSuccessMsg } from '../common/constants';
+import { StoreAdminDto } from '../common/dto/admin/admin.dto';
+import { CheckoutFormDataDto } from '../common/dto/checkoutFormData.dto';
+import { StoreDto } from '../common/dto/store.dto';
+import { getBrowser, closeBrowser, setTestPrefix, getStorePage, getScreenShotPath } from '../common/general';
+import { buyStoreProduct, fillCheckoutForm, fetchOrderIdFromPage } from '../common/store';
+import { changeForterMode, doStoreAdminLogin } from '../common/store-admin';
+import { serverAddress } from '../e2e-config';
 jest.setTimeout(5000000)
 describe('API TESTING', () => {
     const APIV_BAD = 'FORTER85.1';
-    const APIV_GOOD = 2.14;
+    const APIV_GOOD = '2.14';
     let browser: Browser;
     let page: Page;
     beforeEach(async () => {
@@ -19,7 +20,7 @@ describe('API TESTING', () => {
     
     afterAll(async () => {
         browser = await getBrowser()
-        await changeApiVerion(APIV_GOOD)
+        await changeApiVersion(APIV_GOOD)
         await closeBrowser()
 
     })
@@ -29,9 +30,9 @@ describe('API TESTING', () => {
     });
 
 
-    it('API Change: Failed API Vertion Not prevernt Transctions', async () => {
+    it('API Change: Failed API Version Not prevent Transactions', async () => {
         setTestPrefix('api-checks')
-        await changeApiVerion(APIV_BAD)
+        await changeApiVersion(APIV_BAD)
         page = await changeForterMode(page, ForterFlowMode.Before);
         page = await getStorePage(serverAddress);
         await buyStoreProduct(page)
@@ -56,7 +57,7 @@ describe('API TESTING', () => {
         console.log(`user buy under order id (${orderID})`)
     })
 
-    const changeApiVerion = async (api: stirng) => {
+    const changeApiVersion = async (api: string) => {
         page = await getStorePage(`${serverAddress}/admin`);
         page = await doStoreAdminLogin(page);
         await page.goto(`${serverAddress}/admin/admin/system_config/edit/section/forter#forter_settings-link`)
