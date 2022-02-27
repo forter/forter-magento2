@@ -3,16 +3,17 @@ import { getBrowser, closeBrowser, getStorePage, getScreenShotPath, setTestPrefi
 import { buyStoreProduct, fillCheckoutForm, fetchOrderIdFromPage } from '../../common/store';
 import faker from '@faker-js/faker';
 import { serverAddress } from '../../e2e-config';
-import { acceptEmail, ForterFlowMode, PaymentType, TextOrderSuccessMsg } from '../../common/constants';
+import { acceptEmail, API_V_GOOD, ForterFlowMode, PaymentType, TextOrderSuccessMsg } from '../../common/constants';
 import { CheckoutFormDataDto } from '../../common/dto/checkoutFormData.dto';
 import { StoreDto } from '../../common/dto/store.dto';
-import { changeForterMode, checkOrderPage, checkStatusOfOrderOnOrderList, doStoreAdminLogin, updateStoreForterMode } from '../../common/store-admin';
+import { changeApiVersion, changeForterMode, checkOrderPage, checkStatusOfOrderOnOrderList, doStoreAdminLogin, updateStoreForterMode } from '../../common/store-admin';
 jest.setTimeout(5000000)
 describe('BrainTree Accepted Deals', () => {
     let browser: Browser;
     let page: Page;
     beforeEach(async () => {
         browser = await getBrowser()
+        await changeApiVersion(page, API_V_GOOD)
     });
     afterEach(async () => {
         await closeBrowser()

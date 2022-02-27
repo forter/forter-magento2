@@ -15,3 +15,6 @@ export enum ForterFlowMode {
     BeforeAndAfter=4,
     Cron=3
 }
+
+export const API_V_BAD = 'FORTER85.1';
+export const API_V_GOOD = '2.14';

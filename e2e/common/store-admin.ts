@@ -120,6 +120,26 @@ export const checkForOrderByName = async (page: Page, name: string, checkApprove
     }
 
 }
+export const changeApiVersion = async (page: Page,api: string) => {
+    page = await getStorePage(`${serverAddress}/admin`);
+    page = await doStoreAdminLogin(page);
+    await page.goto(`${serverAddress}/admin/admin/system_config/edit/section/forter#forter_settings-link`)
+    await page.waitForLoadState('networkidle')
+    await page.screenshot({ path: getScreenShotPath('orderPreChangeFlowForter') });
+    await page.fill(StoreAdminDto.Instance.Settings.ForterAPIVerion, APIV_BAD);
+    await page.locator(StoreAdminDto.Instance.Settings.SaveForterConfig).click();
+    await page.waitForTimeout(1500);
+    await page.screenshot({ path: getScreenShotPath('orderChangeFlowForter') });
+    await page.locator(StoreAdminDto.Instance.Settings.SaveForterConfig).click();
+    await page.waitForTimeout(1500);
+    await page.goto(`${serverAddress}/admin/admin/cache/index`)
+    await page.waitForLoadState('networkidle')
+    await page.screenshot({ path: getScreenShotPath('orderPreCacheForter') });
+    await page.locator(StoreAdminDto.Instance.Settings.RevalidateCacheStore).click();
+    await page.waitForLoadState('networkidle')
+    await page.screenshot({ path: getScreenShotPath('orderPostCacheForter') });
+}
+})
 export const changeForterMode = async (page: Page, mode: ForterFlowMode) => {
     page = await getStorePage(`${serverAddress}/admin`);
     page = await doStoreAdminLogin(page);

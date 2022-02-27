@@ -1,18 +1,19 @@
 import { Browser, Page } from 'playwright';
 import faker from '@faker-js/faker';
-import { declineEmail, TextOrderErrorMsg, PaymentType, ForterFlowMode, TextOrderSuccessMsg } from '../../common/constants';
+import { declineEmail, TextOrderErrorMsg, PaymentType, ForterFlowMode, TextOrderSuccessMsg, API_V_GOOD } from '../../common/constants';
 import { CheckoutFormDataDto } from '../../common/dto/checkoutFormData.dto';
 import { StoreDto } from '../../common/dto/store.dto';
 import { getBrowser, closeBrowser, setTestPrefix, getStorePage, getScreenShotPath } from '../../common/general';
 import { buyStoreProduct, fetchOrderIdFromPage, fillCheckoutForm } from '../../common/store';
 import { serverAddress } from '../../e2e-config';
-import { changeForterMode, checkForOrderByName, checkOrderPage, checkStatusOfOrderOnOrderList, doStoreAdminLogin } from '../../common/store-admin';
+import { changeApiVersion, changeForterMode, checkForOrderByName, checkOrderPage, checkStatusOfOrderOnOrderList, doStoreAdminLogin } from '../../common/store-admin';
 jest.setTimeout(5000000)
 describe('BrainTree Decline Deals', () => {
     let browser: Browser;
     let page: Page;
     beforeEach(async () => {
         browser = await getBrowser()
+        await changeApiVersion(page, API_V_GOOD)
     });
     afterEach(async () => {
         await closeBrowser()
