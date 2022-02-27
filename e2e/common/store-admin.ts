@@ -126,7 +126,7 @@ export const changeApiVersion = async (page: Page,api: string) => {
     await page.goto(`${serverAddress}/admin/admin/system_config/edit/section/forter#forter_settings-link`)
     await page.waitForLoadState('networkidle')
     await page.screenshot({ path: getScreenShotPath('orderPreChangeFlowForter') });
-    await page.fill(StoreAdminDto.Instance.Settings.ForterAPIVerion, APIV_BAD);
+    await page.fill(StoreAdminDto.Instance.Settings.ForterAPIVersion, api);
     await page.locator(StoreAdminDto.Instance.Settings.SaveForterConfig).click();
     await page.waitForTimeout(1500);
     await page.screenshot({ path: getScreenShotPath('orderChangeFlowForter') });
@@ -139,7 +139,7 @@ export const changeApiVersion = async (page: Page,api: string) => {
     await page.waitForLoadState('networkidle')
     await page.screenshot({ path: getScreenShotPath('orderPostCacheForter') });
 }
-})
+
 export const changeForterMode = async (page: Page, mode: ForterFlowMode) => {
     page = await getStorePage(`${serverAddress}/admin`);
     page = await doStoreAdminLogin(page);
