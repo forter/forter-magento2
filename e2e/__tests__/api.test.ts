@@ -8,7 +8,7 @@ import { CheckoutFormDataDto } from '../../common/dto/checkoutFormData.dto';
 import { StoreDto } from '../../common/dto/store.dto';
 import { changeForterMode, checkOrderPage, checkStatusOfOrderOnOrderList, doStoreAdminLogin, updateStoreForterMode } from '../../common/store-admin';
 jest.setTimeout(5000000)
-describe('BrainTree Accepted Deals', () => {
+describe('API TESTING', () => {
     const APIV_BAD = 'FORTER85.1';
     const APIV_GOOD = 2.14;
     let browser: Browser;
