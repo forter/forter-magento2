@@ -70,6 +70,7 @@ class StoreAdminSettingsDto {
     public get SelectForterFlow() { return 'select#forter_immediate_post_pre_decision_pre_post_select' }
     public get SaveForterConfig() { return 'button[title="Save Config"]' }
     public get RevalidateCacheStore() { return 'button[title="Flush Magento Cache"]' }
+    public get ForterAPIVerion() { return 'item#forter_settings_api_version'; }
 }
 
 export class StoreAdminDto {
