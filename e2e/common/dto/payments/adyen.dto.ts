@@ -1,3 +1,5 @@
+import { Page } from 'playwright';
+import { CheckoutFormDataDto } from '../checkoutFormData.dto';
 import { ICreditFormInput } from '../ICreditFormInput';
 export class PaymentBrainTree implements ICreditFormInput {
     public getSelectPaymentType= () => 'input[value=braintree]';
@@ -8,7 +10,7 @@ export class PaymentBrainTree implements ICreditFormInput {
     public getPaymentIFrameCreditCVV = () => '#braintree-hosted-field-cvv'
     public getCreditCardCVV = () => 'input[name="cvv"]'
 }
-export const adyenFillCreditInfo = (page: Page,paymentForm:ICreditFormInput,formData: CheckoutFormDataDto) => {
+export const adyenFillCreditInfo =  async (page: Page,paymentForm:ICreditFormInput,formData: CheckoutFormDataDto) => {
     let iframe_element = await page.waitForSelector(paymentForm.getPaymentIFrameCreditNum())
     let iframe = await iframe_element.contentFrame()
     await iframe?.fill(paymentForm.getCreditCardNum(), formData.creditCardNumber);

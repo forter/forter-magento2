@@ -1,3 +1,5 @@
+import { Page } from 'playwright';
+import { CheckoutFormDataDto } from '../checkoutFormData.dto';
 import { ICreditFormInput } from '../ICreditFormInput';
 export class PaymentBrainTree implements ICreditFormInput {
     public getSelectPaymentType= () => 'input[value=braintree]';
