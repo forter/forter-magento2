@@ -1,6 +1,8 @@
 import { Page } from 'playwright';
 import { CheckoutFormDto } from './dto/checkoutForm.dto';
 import { CheckoutFormDataDto } from './dto/checkoutFormData.dto';
+import { brainTreeFillCreditInfo } from './dto/payments/brainTree.dto';
+import { adyenFillCreditInfo } from './dto/payments/adyen.dto';
 import { StoreDto } from './dto/store.dto';
 import { getScreenShotPath, scrollOnElement } from './general';
 export const buyStoreProduct = async (page: Page) => {
@@ -55,15 +57,14 @@ const fillCheckoutLastPage = async (page: Page, formData: CheckoutFormDataDto) =
     await page.locator(paymentForm.getSelectPaymentType()).click();
     await page.waitForLoadState('networkidle');
     await page.screenshot({ path: getScreenShotPath('cardform-form-place-order') });
-    let iframe_element = await page.waitForSelector(paymentForm.getPaymentIFrameCreditNum())
-    let iframe = await iframe_element.contentFrame()
-    await iframe?.fill(paymentForm.getCreditCardNum(), formData.creditCardNumber);
-    iframe_element = await page.waitForSelector(paymentForm.getPaymentIFrameCreditExp())
-    iframe = await iframe_element.contentFrame()
-    await iframe?.fill(paymentForm.getCreditCardExp(), formData.creditCardExpire)
-    iframe_element = await page.waitForSelector(paymentForm.getPaymentIFrameCreditCVV())
-    iframe = await iframe_element.contentFrame()
-    await iframe?.fill(paymentForm.getCreditCardCVV(), formData.creditCardCVV);
+    switch (formData.payment) {
+        case PaymentType.BrainTree:
+            await brainTreeFillCreditInfo(page, paymentForm, formData);
+            break;
+        case PaymentType.Adyen:
+            await adyenFillCreditInfo(page, paymentForm, formData);
+            break;
+    }
     await page.screenshot({ path: getScreenShotPath('post-form-place-order') });
     const button = page.locator(checkoutForm.PlaceOrderElmName).nth(0);
     await button.click();

@@ -8,7 +8,7 @@ export class PaymentBrainTree implements ICreditFormInput {
     public getPaymentIFrameCreditCVV = () => '#braintree-hosted-field-cvv'
     public getCreditCardCVV = () => 'input[name="cvv"]'
 }
-export const brainTreeFillCreditInfo = (page: Page,paymentForm:ICreditFormInput,formData: CheckoutFormDataDto) => {
+export const brainTreeFillCreditInfo = async (page: Page,paymentForm:ICreditFormInput,formData: CheckoutFormDataDto) => {
     let iframe_element = await page.waitForSelector(paymentForm.getPaymentIFrameCreditNum())
     let iframe = await iframe_element.contentFrame()
     await iframe?.fill(paymentForm.getCreditCardNum(), formData.creditCardNumber);
