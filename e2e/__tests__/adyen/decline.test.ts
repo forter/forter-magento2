@@ -19,7 +19,7 @@ describe('Adyen Decline Deals', () => {
         await closeBrowser()
     });
     it('Adyen Decline Deal, Verify Mode: Cron', async () => {
-        setTestPrefix('adyen-decline-before')
+        setTestPrefix('adyen-decline-cron')
         page = await changeForterMode(page, ForterFlowMode.Before);
         page = await getStorePage(serverAddress);
         await buyStoreProduct(page)
@@ -35,12 +35,10 @@ describe('Adyen Decline Deals', () => {
             faker.phone.phoneNumber(),
             PaymentType.Adyen)
         await fillCheckoutForm(page, formData);
-        await page.waitForTimeout(1000);
+        await page.waitForTimeout(3000);
         await page.screenshot({ fullPage: true, path: getScreenShotPath('decline-deal-final-result') });
-        const errorMsg = page.locator('div.checkout-messages');
+        const errorMsg = page.locator('div[data-role="checkout-messages"]');
         const errorMsgVisible = await errorMsg.isVisible();
         expect(errorMsgVisible).toBeTruthy();
-        const title = await errorMsg.locator('div.checkout-cart-validationmessages-message-error').innerText()
-        expect(title).toEqual(TextOrderErrorMsg);
     })
 })
