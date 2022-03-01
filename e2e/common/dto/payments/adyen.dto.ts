@@ -9,7 +9,7 @@ export class PaymentAdyenTree implements ICreditFormInput {
     public getCreditCardExp = () => 'input[data-fieldtype="encryptedExpiryDate"]'
     public getPaymentIFrameCreditCVV = () => 'iframe[title="Iframe for secured card security code"]'
     public getCreditCardCVV = () => 'input[data-fieldtype="encryptedSecurityCode"]'
-    public getCreditCardHolderName = () => 'input.adyen-checkout__input adyen-checkout__input--text'
+    public getCreditCardHolderName = () => 'input[placeholder="J. Smith"]'
 }
 export const adyenFillCreditInfo =  async (page: Page,paymentForm:ICreditFormInput,formData: CheckoutFormDataDto) => {
     let iframe_element = await page.waitForSelector(paymentForm.getPaymentIFrameCreditNum())

@@ -56,13 +56,15 @@ const fillCheckoutLastPage = async (page: Page, formData: CheckoutFormDataDto) =
     const paymentForm= checkoutForm.PaymentForm;
     await page.screenshot({ path: getScreenShotPath('pre-form-place-order') });
     await page.locator(paymentForm.getSelectPaymentType()).click();
-    await page.waitForLoadState('networkidle');
     await page.screenshot({ path: getScreenShotPath('cardform-form-place-order') });
     switch (formData.payment) {
         case PaymentType.BrainTree:
+            await page.waitForLoadState('networkidle');
             await brainTreeFillCreditInfo(page, paymentForm, formData);
             break;
         case PaymentType.Adyen:
+            await page.waitForTimeout(20000);
+            await page.screenshot({ fullPage:true ,path: getScreenShotPath('cardform-adyen-form-place-order') });
             await adyenFillCreditInfo(page, paymentForm, formData);
             break;
     }
