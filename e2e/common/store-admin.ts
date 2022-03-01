@@ -60,6 +60,7 @@ export const checkOrderPage = async (page: Page, orderId: string, checkApproved:
 const goToOrderList = async (page: Page, orderId: string) => {
     await page.goto(`${serverAddress}/admin/sales/order/`)
     await page.waitForLoadState('networkidle')
+    await page.screenshot({ path: getScreenShotPath('orderListForter') });
     await page.fill(StoreAdminDto.Instance.OrderList.SearchOrderElmName, orderId);
     await page.keyboard.press('Enter');
     await page.waitForTimeout(1500);
@@ -90,7 +91,7 @@ export const updateStoreForterMode = async (page: Page, mode: ForterFlowMode) =>
 }
 
 export const checkForOrderByName = async (page: Page, name: string, checkApproved: boolean) => {
-    await page.goto(`${serverAddress}/admin/sales/order/`)
+    await page.goto(`${serverAddress}/admin/admin/sales/order/`)
     await page.waitForLoadState('networkidle')
     await page.fill(StoreAdminDto.Instance.OrderList.SearchBillingElmName, name);
     await page.locator(StoreAdminDto.Instance.OrderList.SubmitSearchElmName).click();

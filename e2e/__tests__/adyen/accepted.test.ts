@@ -43,9 +43,5 @@ describe('BrainTree Accepted Deals', () => {
         const orderID = await fetchOrderIdFromPage(page);
         expect(orderID).not.toHaveLength(0);
         console.log(`user buy under order id (${orderID})`)
-        page = await getStorePage(`${serverAddress}/admin`);
-        page = await doStoreAdminLogin(page);
-        await checkStatusOfOrderOnOrderList(page,orderID, true)
-        await checkOrderPage(page,orderID, true)
     })
 })
