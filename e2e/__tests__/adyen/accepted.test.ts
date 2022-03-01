@@ -19,8 +19,8 @@ describe('BrainTree Accepted Deals', () => {
         await closeBrowser()
     });
 
-    it('BrainTree Approved Deal - Verify Mode: Cron', async () => {
-        setTestPrefix('braintree-approved-before')
+    it('Adyen Approved Deal - Verify Mode: Cron', async () => {
+        setTestPrefix('adyen-approved-before')
         page = await changeForterMode(page, ForterFlowMode.Cron);
         page = await getStorePage(serverAddress);
         await buyStoreProduct(page)

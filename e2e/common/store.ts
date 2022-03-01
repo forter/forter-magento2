@@ -5,6 +5,7 @@ import { brainTreeFillCreditInfo } from './dto/payments/brainTree.dto';
 import { adyenFillCreditInfo } from './dto/payments/adyen.dto';
 import { StoreDto } from './dto/store.dto';
 import { getScreenShotPath, scrollOnElement } from './general';
+import { PaymentType } from './constants';
 export const buyStoreProduct = async (page: Page) => {
     const productItem = page.locator(StoreDto.Instance.SelectProductItemElmName)
     const product = productItem.nth(4);
