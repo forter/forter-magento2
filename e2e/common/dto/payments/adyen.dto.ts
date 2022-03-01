@@ -1,7 +1,7 @@
 import { Page } from 'playwright';
 import { CheckoutFormDataDto } from '../checkoutFormData.dto';
 import { ICreditFormInput } from '../ICreditFormInput';
-export class PaymentBrainTree implements ICreditFormInput {
+export class PaymentAdyenTree implements ICreditFormInput {
     public getSelectPaymentType= () => 'input[value=adyen_cc]';
     public getPaymentIFrameCreditNum = () => 'iframe[title="Iframe for secured card number"]'
     public getCreditCardNum = () => 'input[data-fieldtype="encryptedCardNumber"]'

@@ -1,5 +1,6 @@
 import { PaymentType } from '../constants';
 import { ICreditFormInput } from './ICreditFormInput';
+import { PaymentAdyenTree } from './payments/adyen.dto';
 import { PaymentBrainTree } from './payments/brainTree.dto';
 export class CheckoutFormDto {
     public readonly Payment:PaymentType;
@@ -9,6 +10,10 @@ export class CheckoutFormDto {
         switch(this.Payment) {
             case PaymentType.BrainTree:
                 this.paymentFormElem = new PaymentBrainTree()
+                break;
+            case PaymentType.Adyen:
+                this.paymentFormElem = new PaymentAdyenTree();
+                break;
         }
     }
     
