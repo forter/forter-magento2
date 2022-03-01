@@ -6,4 +6,5 @@ export interface ICreditFormInput {
     getCreditCardExp: () => string;
     getPaymentIFrameCreditCVV: () => string;
     getCreditCardCVV: () => string;
+    getCreditCardHolderName: () => string;
 }

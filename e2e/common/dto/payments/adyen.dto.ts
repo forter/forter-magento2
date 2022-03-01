@@ -2,13 +2,14 @@ import { Page } from 'playwright';
 import { CheckoutFormDataDto } from '../checkoutFormData.dto';
 import { ICreditFormInput } from '../ICreditFormInput';
 export class PaymentBrainTree implements ICreditFormInput {
-    public getSelectPaymentType= () => 'input[value=braintree]';
-    public getPaymentIFrameCreditNum = () => '#braintree-hosted-field-number'
-    public getCreditCardNum = () => 'input[name="credit-card-number"]'
-    public getPaymentIFrameCreditExp = () => '#braintree-hosted-field-expirationDate'
-    public getCreditCardExp = () => 'input[name="expiration"]'
-    public getPaymentIFrameCreditCVV = () => '#braintree-hosted-field-cvv'
-    public getCreditCardCVV = () => 'input[name="cvv"]'
+    public getSelectPaymentType= () => 'input[value=adyen_cc]';
+    public getPaymentIFrameCreditNum = () => 'iframe[title="Iframe for secured card number"]'
+    public getCreditCardNum = () => 'input[data-fieldtype="encryptedCardNumber"]'
+    public getPaymentIFrameCreditExp = () => 'iframe[title="Iframe for secured card expiry date"]'
+    public getCreditCardExp = () => 'input[data-fieldtype="encryptedExpiryDate"]'
+    public getPaymentIFrameCreditCVV = () => 'iframe[title="Iframe for secured card security code"]'
+    public getCreditCardCVV = () => 'input[data-fieldtype="encryptedSecurityCode"]'
+    public getCreditCardHolderName = () => 'input.adyen-checkout__input adyen-checkout__input--text'
 }
 export const adyenFillCreditInfo =  async (page: Page,paymentForm:ICreditFormInput,formData: CheckoutFormDataDto) => {
     let iframe_element = await page.waitForSelector(paymentForm.getPaymentIFrameCreditNum())
@@ -20,4 +21,5 @@ export const adyenFillCreditInfo =  async (page: Page,paymentForm:ICreditFormInp
     iframe_element = await page.waitForSelector(paymentForm.getPaymentIFrameCreditCVV())
     iframe = await iframe_element.contentFrame()
     await iframe?.fill(paymentForm.getCreditCardCVV(), formData.creditCardCVV);
+    await page.fill(paymentForm.getCreditCardHolderName(), `${formData.firstName} ${formData.lastName}`)
 }

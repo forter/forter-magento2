@@ -9,6 +9,7 @@ export class PaymentBrainTree implements ICreditFormInput {
     public getCreditCardExp = () => 'input[name="expiration"]'
     public getPaymentIFrameCreditCVV = () => '#braintree-hosted-field-cvv'
     public getCreditCardCVV = () => 'input[name="cvv"]'
+    public getCreditCardHolderName = () => ''
 }
 export const brainTreeFillCreditInfo = async (page: Page,paymentForm:ICreditFormInput,formData: CheckoutFormDataDto) => {
     let iframe_element = await page.waitForSelector(paymentForm.getPaymentIFrameCreditNum())
