@@ -68,7 +68,7 @@ const fillCheckoutLastPage = async (page: Page, formData: CheckoutFormDataDto) =
             await adyenFillCreditInfo(page, paymentForm, formData);
             break;
     }
-    await page.screenshot({ path: getScreenShotPath('post-form-place-order') });
+    await page.screenshot({fullPage:true , path: getScreenShotPath('post-form-place-order') });
     const button = page.locator(checkoutForm.PlaceOrderElmName).nth(0);
     await button.click();
     console.log("finshed place order");

@@ -12,6 +12,7 @@ export class CheckoutFormDataDto {
     public payment:PaymentType;
     public creditCardNumber = '4111111111111111';
     public readonly creditCardExpire = '03/2030';
+    public readonly creditCardShortExpire = '03/30';
     public readonly creditCardCVV = '737';
     constructor(email: string,
         firstName: string,
