@@ -19,7 +19,6 @@ export class StoreDto {
     public get OrderErrorMsgElmName() {
         return 'div[data-role="checkout-messages"]:visible'
     }
-
     public get OrderSuccessMsgElmName() {
         return 'span[data-ui-id="page-title-wrapper"]';
     }
