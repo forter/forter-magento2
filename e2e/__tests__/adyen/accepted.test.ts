@@ -6,7 +6,7 @@ import { serverAddress } from '../../e2e-config';
 import { acceptEmail, API_V_GOOD, ForterFlowMode, PaymentType, TextOrderSuccessMsg } from '../../common/constants';
 import { CheckoutFormDataDto } from '../../common/dto/checkoutFormData.dto';
 import { StoreDto } from '../../common/dto/store.dto';
-import { changeApiVersion, changeForterMode, checkOrderPage, checkStatusOfOrderOnOrderList, doStoreAdminLogin, updateStoreForterMode } from '../../common/store-admin';
+import { changeApiVersion, changeForterMode} from '../../common/store-admin';
 jest.setTimeout(5000000)
 describe('BrainTree Accepted Deals', () => {
     let browser: Browser;
