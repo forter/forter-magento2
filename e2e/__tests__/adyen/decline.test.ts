@@ -37,7 +37,7 @@ describe('Adyen Decline Deals', () => {
         await fillCheckoutForm(page, formData);
         await page.waitForTimeout(3000);
         await page.screenshot({ fullPage: true, path: getScreenShotPath('decline-deal-final-result') });
-        const errorMsg = page.locator('div[data-role="checkout-messages"]');
+        const errorMsg = page.locator('div[data-role="checkout-messages"]').nth(4);
         const errorMsgVisible = await errorMsg.isVisible();
         expect(errorMsgVisible).toBeTruthy();
     })
