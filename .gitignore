@@ -71,3 +71,4 @@ atlassian*
 !/generated/.htaccess
 .DS_Store
 auth.json
+/tasks

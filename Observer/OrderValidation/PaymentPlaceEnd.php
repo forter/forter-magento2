@@ -6,6 +6,8 @@ use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\ActionsHandler\Approve;
 use Forter\Forter\Model\ActionsHandler\Decline;
 use Forter\Forter\Model\Config;
+use Forter\Forter\Common\ForterLogger;
+use Forter\Forter\Common\ForterLoggerMessage;
 use Forter\Forter\Model\QueueFactory as ForterQueueFactory;
 use Forter\Forter\Model\RequestBuilder\Order;
 use Magento\Customer\Model\Session as CustomerSession;
@@ -172,6 +174,10 @@ class PaymentPlaceEnd implements ObserverInterface
 
             $order->setForterStatus($forterResponse->action);
             $order->addStatusHistoryComment(__('Forter (post) Decision: %1', $forterResponse->action));
+
+            $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'After Validation');
+            $message->metaData->order = $order;
+            ForterLogger::getInstance()->SendLog($message);
             $this->handleResponse($forterResponse->action, $order);
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);

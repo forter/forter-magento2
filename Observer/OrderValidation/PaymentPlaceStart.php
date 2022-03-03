@@ -6,6 +6,8 @@ use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\ActionsHandler\Decline;
 use Forter\Forter\Model\Config;
 use Forter\Forter\Model\Queue;
+use Forter\Forter\Common\ForterLogger;
+use Forter\Forter\Common\ForterLoggerMessage;
 use Forter\Forter\Model\RequestBuilder\BasicInfo;
 use Forter\Forter\Model\RequestBuilder\Order;
 use Magento\Checkout\Model\Session as CheckoutSession;
@@ -141,7 +143,7 @@ class PaymentPlaceStart implements ObserverInterface
             }
 
             $order = $observer->getEvent()->getPayment()->getOrder();
-
+            $storeId = $this->config->getStoreId();
             $connectionInformation = $this->basicInfo->getConnectionInformation(
                 $order->getRemoteIp() ?: $this->remote->getRemoteAddress()
             );
@@ -154,12 +156,13 @@ class PaymentPlaceStart implements ObserverInterface
             if ($this->config->getIsPost() && !$this->config->getIsPreAndPost()) {
                 return;
             }
+            
 
             if ($this->config->getIsCron()) {
                 $currentTime = $this->dateTime->gmtDate();
 
                 $this->queue->setEntityType('pre_sync_order');
-                $this->queue->setStoreId($this->config->getStoreId());
+                $this->queue->setStoreId($storeId);
                 $this->queue->setIncrementId($order->getIncrementId());
                 $this->queue->setSyncFlag(0);
                 $this->queue->setSyncDate($currentTime);
@@ -193,7 +196,9 @@ class PaymentPlaceStart implements ObserverInterface
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }
-
+        $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'Before Validation');
+        $message->metaData->order = $order;
+        ForterLogger::getInstance()->SendLog($message);
         $this->decline->handlePreTransactionDescision($order);
     }
 }

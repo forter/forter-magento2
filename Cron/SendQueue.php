@@ -6,6 +6,8 @@ use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\ActionsHandler\Approve;
 use Forter\Forter\Model\ActionsHandler\Decline;
 use Forter\Forter\Model\Config;
+use Forter\Forter\Common\ForterLogger;
+use Forter\Forter\Common\ForterLoggerMessage;
 use Forter\Forter\Model\QueueFactory;
 use Forter\Forter\Model\RequestBuilder\Order;
 use Magento\Framework\Api\SearchCriteriaBuilder;
@@ -114,8 +116,12 @@ class SendQueue
                 } elseif ($item->getEntityType() == 'order') {
                     $this->handleForterResponse($order, $item->getData('entity_body'));
                     $item->setSyncFlag('1');
+                    $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'CRON Validation');
+                    $message->metaData->order = $order;
+                    ForterLogger::getInstance()->SendLog($message);
                 }
 
+              
                 $item->save();
             }
         } catch (\Exception $e) {
