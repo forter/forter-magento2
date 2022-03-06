@@ -176,7 +176,8 @@ class PaymentPlaceEnd implements ObserverInterface
             $order->addStatusHistoryComment(__('Forter (post) Decision: %1', $forterResponse->action));
 
             $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'After Validation');
-            $message->metaData->order = $order;
+            $message->metaData->order = $order->getData();
+            $message->metaData->decision = $forterResponse->action;
             ForterLogger::getInstance()->SendLog($message);
             $this->handleResponse($forterResponse->action, $order);
         } catch (\Exception $e) {
@@ -186,6 +187,10 @@ class PaymentPlaceEnd implements ObserverInterface
 
     public function handleResponse($forterDecision, $order)
     {
+        $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'handleResponse');
+        $message->metaData->order = $order->getData();
+        $message->metaData->reciveStatus = $forterDecision;
+        ForterLogger::getInstance()->SendLog($message);
         if ($forterDecision == "decline") {
             $this->handleDecline($order);
         } elseif ($forterDecision == 'approve') {

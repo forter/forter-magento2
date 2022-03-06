@@ -116,13 +116,14 @@ class SendQueue
                 } elseif ($item->getEntityType() == 'order') {
                     $this->handleForterResponse($order, $item->getData('entity_body'));
                     $item->setSyncFlag('1');
-                    $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'CRON Validation');
-                    $message->metaData->order = $order;
-                    ForterLogger::getInstance()->SendLog($message);
                 }
 
               
                 $item->save();
+                $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'CRON Validation');
+                $message->metaData->order = $order;
+                $message->proccessItem = $item;
+                ForterLogger::getInstance()->SendLog($message);
             }
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);

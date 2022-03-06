@@ -21,7 +21,11 @@ class ForterLogger
     }
 
     public function SendLog(ForterLoggerMessage $data) {
-        $json = $data->ToJson();
-        new \GuzzleHttp\Psr7\Request('POST', $this->LOG_ENDPOINT, ['body' => $json]);
+        try {
+            $json = $data->ToJson();
+            new \GuzzleHttp\Psr7\Request('POST', $this->LOG_ENDPOINT, ['body' => $json]);
+        } catch (\Exception $e) {
+            $this->forterConfig->log('Error:' . $e->getMessage());
+        }
     }
 }

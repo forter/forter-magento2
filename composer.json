@@ -2,9 +2,10 @@
     "name": "forter/magento2-module-forter",
     "description": "Forter Fraud Prevention For Magento 2",
     "require": {
-        "php": ">=7.4.1",
+        "php": "~7.4.0||~8.1.0",
         "ext-json": "*",
-        "guzzlehttp/guzzle": "^7.4.1"
+        "ext-curl": "*",
+        "guzzlehttp/guzzle": "^7.3.0"
     },
     "require-dev": {
         "phpunit/phpunit": "~6.5.0",
