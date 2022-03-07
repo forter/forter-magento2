@@ -44,6 +44,10 @@ class SendQueue
      * @var Config
      */
     private $config;
+    /**
+     * @var ForterLogger
+     */
+    private $logger;
 
     public function __construct(
         Approve $approve,
@@ -54,7 +58,8 @@ class SendQueue
         OrderRepositoryInterface $orderRepository,
         Order $requestBuilderOrder,
         SearchCriteriaBuilder $searchCriteriaBuilder,
-        AbstractApi $abstractApi
+        AbstractApi $abstractApi,
+        ForterLogger $logger
     ) {
         $this->approve = $approve;
         $this->decline = $decline;
@@ -65,6 +70,7 @@ class SendQueue
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->requestBuilderOrder = $requestBuilderOrder;
         $this->abstractApi = $abstractApi;
+        $this->logger = $logger;
     }
 
     /**
@@ -116,9 +122,10 @@ class SendQueue
                 } elseif ($item->getEntityType() == 'order') {
                     $this->handleForterResponse($order, $item->getData('entity_body'));
                     $item->setSyncFlag('1');
+
                     $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'CRON Validation');
-                    $message->metaData->order = $order;
-                    ForterLogger::getInstance()->SendLog($message);
+                    $message->metaData->order = $order; 
+                    $this->logger->SendLog($message);
                 }
 
               
@@ -164,6 +171,11 @@ class SendQueue
             $order->addStatusHistoryComment(__('Forter (cron) Decision: %1', $responseArray->action));
             $order->setForterStatus($responseArray->action);
             $order->save();
+            
+            $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'Forter CRON Decision');
+            $message->metaData->order = $order; 
+            $message->metaData->forterStatus = $responseArray->action; 
+            $this->logger->SendLog($message);
 
             return $responseArray->status ? true : false;
         } catch (\Exception $e) {

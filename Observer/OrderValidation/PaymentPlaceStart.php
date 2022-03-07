@@ -83,6 +83,10 @@ class PaymentPlaceStart implements ObserverInterface
      * @var Registry
      */
     private $registry;
+    /**
+     * @var ForterLogger
+     */
+    private $logger;
 
     /**
      * @method __construct
@@ -98,6 +102,7 @@ class PaymentPlaceStart implements ObserverInterface
      * @param  Item             $modelCartItem
      * @param  BasicInfo        $basicInfo
      * @param  Registry         $registry
+     * @param  ForterLogger     $logger
      */
     public function __construct(
         RemoteAddress $remote,
@@ -111,7 +116,8 @@ class PaymentPlaceStart implements ObserverInterface
         Order $requestBuilderOrder,
         Item $modelCartItem,
         BasicInfo $basicInfo,
-        Registry $registry
+        Registry $registry,
+        ForterLogger $logger
     ) {
         $this->remote = $remote;
         $this->queue = $queue;
@@ -125,6 +131,7 @@ class PaymentPlaceStart implements ObserverInterface
         $this->requestBuilderOrder = $requestBuilderOrder;
         $this->basicInfo = $basicInfo;
         $this->registry = $registry;
+        $this->logger = $logger;
     }
 
     /**
@@ -196,9 +203,11 @@ class PaymentPlaceStart implements ObserverInterface
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }
-        $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'Before Validation');
+        $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'handle response');
         $message->metaData->order = $order;
-        ForterLogger::getInstance()->SendLog($message);
+        $message->metaData->forterDecision = $response->action; 
+        $message->metaData->pendingOnHoldEnabled = $this->forterConfig->isPendingOnHoldEnabled(); 
+        $this->logger->SendLog($message);
         $this->decline->handlePreTransactionDescision($order);
     }
 }

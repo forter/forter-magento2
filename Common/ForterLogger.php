@@ -1,27 +1,31 @@
 <?php
 
 namespace Forter\Forter\Common;
+use Forter\Forter\Model\Config as ForterConfig;
 const DebugMode =1;
 const ProductionMode = 0;
 class ForterLogger
 {
-    private $LOG_ENDPOINT = 'https://api.forter-secure.com/errors/';
-    private static $instance = null;
-    private function __construct()
-    {
-    }
-
-    public static function getInstance()
-    {
-        if (self::$instance == null) {
-            self::$instance = new ForterLogger();
-        }
-
-        return self::$instance;
+    private $httpClient;
+    private $LOG_ENDPOINT = 'https://api.forter-secure.com/errors';
+    /**
+     * @method __construct
+     * @param  ForterConfig    $forterConfig
+     */
+    public function __construct(ForterConfig $forterConfig) {
+        $this->forterConfig = $forterConfig;
+        $this->httpClient = new \GuzzleHttp\Client(['base_uri' => $this->LOG_ENDPOINT]);
     }
 
     public function SendLog(ForterLoggerMessage $data) {
         $json = $data->ToJson();
-        new \GuzzleHttp\Psr7\Request('POST', $this->LOG_ENDPOINT, ['body' => $json]);
+        $requestOps = [];
+        $requestOps['x-forter-siteid'] = $this->forterConfig->getSiteId();
+        $requestOps['api-version'] = $this->forterConfig->getApiVersion();
+        $requestOps['x-forter-extver'] = $this->forterConfig->getModuleVersion();
+        $requestOps['x-forter-client'] = $this->forterConfig->getMagentoFullVersion();
+        $requestOps['Accept'] = 'application/json';
+        $requestOps['json'] = $json;
+        $this->httpClient->requestAsync('post', '/',$requestOps);
     }
 }
