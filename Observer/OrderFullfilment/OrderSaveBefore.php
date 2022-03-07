@@ -66,6 +66,9 @@ class OrderSaveBefore implements ObserverInterface
             }
 
             $this->abstractApi->sendOrderStatus($order);
+            $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'Order Save Before Event');
+            $message->metaData->order = $order->getData();
+            ForterLogger::getInstance()->SendLog($message);
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }

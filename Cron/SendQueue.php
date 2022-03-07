@@ -130,6 +130,10 @@ class SendQueue
 
               
                 $item->save();
+                $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'CRON Validation');
+                $message->metaData->order = $order;
+                $message->proccessItem = $item;
+                ForterLogger::getInstance()->SendLog($message);
             }
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
@@ -171,7 +175,7 @@ class SendQueue
             $order->addStatusHistoryComment(__('Forter (cron) Decision: %1', $responseArray->action));
             $order->setForterStatus($responseArray->action);
             $order->save();
-            
+
             $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'Forter CRON Decision');
             $message->metaData->order = $order; 
             $message->metaData->forterStatus = $responseArray->action; 

@@ -182,11 +182,12 @@ class PaymentPlaceEnd implements ObserverInterface
 
             $order->setForterStatus($forterResponse->action);
             $order->addStatusHistoryComment(__('Forter (post) Decision: %1', $forterResponse->action));
+            $this->handleResponse($forterResponse->action, $order);
 
             $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'After Validation');
             $message->metaData->order = $order;
+            $message->metaData->decision = $forterResponse->action;
             $this->logger->SendLog($message);
-            $this->handleResponse($forterResponse->action, $order);
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }

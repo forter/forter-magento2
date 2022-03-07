@@ -18,14 +18,18 @@ class ForterLogger
     }
 
     public function SendLog(ForterLoggerMessage $data) {
-        $json = $data->ToJson();
-        $requestOps = [];
-        $requestOps['x-forter-siteid'] = $this->forterConfig->getSiteId();
-        $requestOps['api-version'] = $this->forterConfig->getApiVersion();
-        $requestOps['x-forter-extver'] = $this->forterConfig->getModuleVersion();
-        $requestOps['x-forter-client'] = $this->forterConfig->getMagentoFullVersion();
-        $requestOps['Accept'] = 'application/json';
-        $requestOps['json'] = $json;
-        $this->httpClient->requestAsync('post', '/',$requestOps);
+        try {
+            $json = $data->ToJson();
+            $requestOps = [];
+            $requestOps['x-forter-siteid'] = $this->forterConfig->getSiteId();
+            $requestOps['api-version'] = $this->forterConfig->getApiVersion();
+            $requestOps['x-forter-extver'] = $this->forterConfig->getModuleVersion();
+            $requestOps['x-forter-client'] = $this->forterConfig->getMagentoFullVersion();
+            $requestOps['Accept'] = 'application/json';
+            $requestOps['json'] = $json;
+            $this->httpClient->requestAsync('post', '/',$requestOps);
+        } catch (\Exception $e) {
+            $this->forterConfig->log('Error:' . $e->getMessage());
+        }
     }
 }
