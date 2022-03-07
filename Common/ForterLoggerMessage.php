@@ -9,11 +9,12 @@ class ForterLoggerMessage {
     public $orderId;
     public $transactionId = '';
     public $message;
-    public \StdClass $metaData = new \StdClass;
+    public \StdClass $metaData;
     public function __construct(string $storeId, string $orderId, string $message ) {
         $this->storeId = $storeId;
         $this->message = $message;
         $this->orderId = $orderId;
+        $this->metaData = new \StdClass();
     }
 
     public function ToJson() {
