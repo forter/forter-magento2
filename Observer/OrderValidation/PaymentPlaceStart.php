@@ -163,7 +163,7 @@ class PaymentPlaceStart implements ObserverInterface
             if ($this->config->getIsPost() && !$this->config->getIsPreAndPost()) {
                 return;
             }
-            
+
 
             if ($this->config->getIsCron()) {
                 $currentTime = $this->dateTime->gmtDate();
@@ -203,11 +203,11 @@ class PaymentPlaceStart implements ObserverInterface
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }
+        $this->decline->handlePreTransactionDescision($order);
         $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'handle response');
         $message->metaData->order = $order;
-        $message->metaData->forterDecision = $response->action; 
-        $message->metaData->pendingOnHoldEnabled = $this->forterConfig->isPendingOnHoldEnabled(); 
+        $message->metaData->forterDecision = $response->action;
+        $message->metaData->pendingOnHoldEnabled = $this->forterConfig->isPendingOnHoldEnabled();
         $this->logger->SendLog($message);
-        $this->decline->handlePreTransactionDescision($order);
     }
 }

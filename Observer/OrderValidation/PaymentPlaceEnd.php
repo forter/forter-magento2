@@ -195,14 +195,6 @@ class PaymentPlaceEnd implements ObserverInterface
 
     public function handleResponse($forterDecision, $order)
     {
-
-        if ($this->forterConfig->isDebugEnabled()) {
-            $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'handle response');
-            $message->metaData->order = $order;
-            $message->metaData->forterDecision = $forterDecision; 
-            $message->metaData->pendingOnHoldEnabled = $this->forterConfig->isPendingOnHoldEnabled(); 
-            $this->logger->SendLog($message);
-        }
         if ($forterDecision == "decline") {
             $this->handleDecline($order);
         } elseif ($forterDecision == 'approve') {
@@ -213,6 +205,13 @@ class PaymentPlaceEnd implements ObserverInterface
             if ($order->canHold()) {
                 $this->decline->holdOrder($order);
             }
+        }
+        if ($this->forterConfig->isDebugEnabled()) {
+            $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'handle response');
+            $message->metaData->order = $order;
+            $message->metaData->forterDecision = $forterDecision;
+            $message->metaData->pendingOnHoldEnabled = $this->forterConfig->isPendingOnHoldEnabled();
+            $this->logger->SendLog($message);
         }
     }
 
@@ -257,7 +256,7 @@ class PaymentPlaceEnd implements ObserverInterface
         if ($this->forterConfig->isDebugEnabled()) {
             $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'send message to queue');
             $message->metaData->order = $order;
-            $message->metaData->currentTime = $currentTime; 
+            $message->metaData->currentTime = $currentTime;
             $this->logger->SendLog($message);
         }
         $this->queue->create()
