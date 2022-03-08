@@ -1,20 +1,19 @@
 <?php
 
-namespace Forter\Forter\Common;
+namespace Forter\Forter\Model;
 use Forter\Forter\Model\Config as ForterConfig;
-const DebugMode =1;
-const ProductionMode = 0;
 class ForterLogger
 {
     private $httpClient;
-    private $LOG_ENDPOINT = 'https://api.forter-secure.com/errors';
+    private $BASE_URL = 'https://api.forter-secure.com';
     /**
      * @method __construct
      * @param  ForterConfig    $forterConfig
+     * @param  ClientInterface $clientInterface
      */
     public function __construct(ForterConfig $forterConfig) {
         $this->forterConfig = $forterConfig;
-        $this->httpClient = new \GuzzleHttp\Client(['base_uri' => $this->LOG_ENDPOINT]);
+        $this->httpClient = new \GuzzleHttp\Client(['base_uri' => $this->BASE_URL]);
     }
 
     public function SendLog(ForterLoggerMessage $data) {
@@ -25,14 +24,13 @@ class ForterLogger
             $requestOps['api-version'] = $this->forterConfig->getApiVersion();
             $requestOps['x-forter-extver'] = $this->forterConfig->getModuleVersion();
             $requestOps['x-forter-client'] = $this->forterConfig->getMagentoFullVersion();
+            $requestOps['Content-Type'] = 'application/json';
             $requestOps['Accept'] = 'application/json';
+            $requestOps['Authorization'] =['Basic '.$this->forterConfig->getSecretKey().':'];
             $requestOps['json'] = $json;
-            $this->forterConfig->log('send log request:' .$this->LOG_ENDPOINT.' -> [' . print_r($requestOps, true).']');
-            $this->httpClient->setOption(CURLOPT_USERNAME, $this->forterConfig->getSecretKey());
-            $this->httpClient->setOption(CURLOPT_RETURNTRANSFER, true);
-            $this->httpClient->setOption(CURLOPT_SSL_VERIFYPEER, true);
-            $this->httpClient->setOption(CURLOPT_SSL_VERIFYHOST, 2);
-            $this->httpClient->requestAsync('post', '/',$requestOps);
+            $this->forterConfig->log('send log request: ' .$this->BASE_URL.'/errors -> [' . print_r($requestOps, true).']');
+            $response = $this->httpClient->request('post', '/errors/',$requestOps);
+            $this->forterConfig->log(sprintf('send log status: %s', $response->getStatusCode()));
         } catch (\Exception $e) {
             $this->forterConfig->log('Error:' . $e->getMessage());
         }

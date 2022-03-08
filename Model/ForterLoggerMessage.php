@@ -1,8 +1,8 @@
 <?php
-namespace Forter\Forter\Common;
+namespace Forter\Forter\Model;
 /***
  * class ForterLoggerMessage
- * @package Forter\Forter\Common\ForterLoggerMessage
+ * @package Forter\Forter\Model\ForterLoggerMessage
  */
 class ForterLoggerMessage {
     public $storeId;

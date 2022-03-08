@@ -6,8 +6,8 @@ use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\ActionsHandler\Decline;
 use Forter\Forter\Model\Config;
 use Forter\Forter\Model\Queue;
-use Forter\Forter\Common\ForterLogger;
-use Forter\Forter\Common\ForterLoggerMessage;
+use Forter\Forter\Model\ForterLogger;
+use Forter\Forter\Model\ForterLoggerMessage;
 use Forter\Forter\Model\RequestBuilder\BasicInfo;
 use Forter\Forter\Model\RequestBuilder\Order;
 use Magento\Checkout\Model\Session as CheckoutSession;
@@ -194,7 +194,6 @@ class PaymentPlaceStart implements ObserverInterface
                 $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'handle response');
                 $message->metaData->order = $order;
                 $message->metaData->forterDecision = $response->action;
-                $message->metaData->pendingOnHoldEnabled = $this->forterConfig->isPendingOnHoldEnabled();
                 $this->logger->SendLog($message);
                 return;
             }
@@ -211,7 +210,6 @@ class PaymentPlaceStart implements ObserverInterface
         $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'handle response');
         $message->metaData->order = $order;
         $message->metaData->forterDecision = $response->action;
-        $message->metaData->pendingOnHoldEnabled = $this->forterConfig->isPendingOnHoldEnabled();
         $this->logger->SendLog($message);
         $this->decline->handlePreTransactionDescision($order);
     }
