@@ -191,6 +191,11 @@ class PaymentPlaceStart implements ObserverInterface
             if ($response->status != 'success' || !isset($response->action)) {
                 $this->registry->register('forter_pre_decision', 'error');
                 $order->setForterStatus('error');
+                $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'handle response');
+                $message->metaData->order = $order;
+                $message->metaData->forterDecision = $response->action;
+                $message->metaData->pendingOnHoldEnabled = $this->forterConfig->isPendingOnHoldEnabled();
+                $this->logger->SendLog($message);
                 return;
             }
 
@@ -203,11 +208,11 @@ class PaymentPlaceStart implements ObserverInterface
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }
-        $this->decline->handlePreTransactionDescision($order);
         $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'handle response');
         $message->metaData->order = $order;
         $message->metaData->forterDecision = $response->action;
         $message->metaData->pendingOnHoldEnabled = $this->forterConfig->isPendingOnHoldEnabled();
         $this->logger->SendLog($message);
+        $this->decline->handlePreTransactionDescision($order);
     }
 }

@@ -27,6 +27,11 @@ class ForterLogger
             $requestOps['x-forter-client'] = $this->forterConfig->getMagentoFullVersion();
             $requestOps['Accept'] = 'application/json';
             $requestOps['json'] = $json;
+            $this->forterConfig->log('send log request:' .$this->LOG_ENDPOINT.' -> [' . print_r($requestOps, true).']');
+            $this->httpClient->setOption(CURLOPT_USERNAME, $this->forterConfig->getSecretKey());
+            $this->httpClient->setOption(CURLOPT_RETURNTRANSFER, true);
+            $this->httpClient->setOption(CURLOPT_SSL_VERIFYPEER, true);
+            $this->httpClient->setOption(CURLOPT_SSL_VERIFYHOST, 2);
             $this->httpClient->requestAsync('post', '/',$requestOps);
         } catch (\Exception $e) {
             $this->forterConfig->log('Error:' . $e->getMessage());
