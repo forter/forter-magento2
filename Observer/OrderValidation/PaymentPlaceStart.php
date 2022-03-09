@@ -15,6 +15,7 @@ use Magento\Framework\Message\ManagerInterface;
 use Magento\Framework\Registry;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magento\Quote\Model\Quote\Item;
+use Magento\Store\Model\App\Emulation;
 
 /**
  * Class PaymentPlaceStart
@@ -109,7 +110,8 @@ class PaymentPlaceStart implements ObserverInterface
         Order $requestBuilderOrder,
         Item $modelCartItem,
         BasicInfo $basicInfo,
-        Registry $registry
+        Registry $registry,
+        Emulation $emulate
     ) {
         $this->remote = $remote;
         $this->queue = $queue;
@@ -132,6 +134,7 @@ class PaymentPlaceStart implements ObserverInterface
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
         try {
+            $this->emulate->stopEnvironmentEmulation();
             if (!$this->config->isEnabled()) {
                 return;
             }
@@ -141,7 +144,12 @@ class PaymentPlaceStart implements ObserverInterface
             }
 
             $order = $observer->getEvent()->getPayment()->getOrder();
-
+            // let bind the relevent store in case of multi store settings
+            $this->emulate->startEnvironmentEmulation(
+                $order->getStoreId(),
+                'frontend',
+                true
+            );
             $connectionInformation = $this->basicInfo->getConnectionInformation(
                 $order->getRemoteIp() ?: $this->remote->getRemoteAddress()
             );

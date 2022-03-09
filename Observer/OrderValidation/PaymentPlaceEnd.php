@@ -16,6 +16,7 @@ use Magento\Framework\Registry;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magento\Sales\Api\OrderManagementInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use Magento\Store\Model\App\Emulation;
 
 /**
  * Class PaymentPlaceEnd
@@ -119,7 +120,8 @@ class PaymentPlaceEnd implements ObserverInterface
         Order $requestBuilderOrder,
         OrderManagementInterface $orderManagement,
         StoreManagerInterface $storeManager,
-        Registry $registry
+        Registry $registry,
+        Emulation $emulate
     ) {
         $this->customerSession = $customerSession;
         $this->messageManager = $messageManager;
@@ -151,8 +153,15 @@ class PaymentPlaceEnd implements ObserverInterface
                 return;
             }
 
+            $this->emulate->stopEnvironmentEmulation();
             $this->clearTempSessionParams();
             $order = $observer->getEvent()->getPayment()->getOrder();
+            // let bind the relevent store in case of multi store settings
+            $this->emulate->startEnvironmentEmulation(
+                $order->getStoreId(),
+                'frontend',
+                true
+            );
 
             $data = $this->requestBuilderOrder->buildTransaction($order, 'AFTER_PAYMENT_ACTION');
             $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
