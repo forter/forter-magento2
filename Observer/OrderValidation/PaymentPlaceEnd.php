@@ -90,6 +90,10 @@ class PaymentPlaceEnd implements ObserverInterface
      * @var Registry
      */
     private $registry;
+    /**
+     * @var Emulation
+     */
+    private $emulate;
 
     /**
      * @method __construct
@@ -136,6 +140,7 @@ class PaymentPlaceEnd implements ObserverInterface
         $this->orderManagement = $orderManagement;
         $this->queue = $queue;
         $this->registry = $registry;
+        $this->emulate = $emulate;
     }
 
     /**

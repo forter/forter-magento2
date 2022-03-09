@@ -82,6 +82,10 @@ class PaymentPlaceStart implements ObserverInterface
      * @var Registry
      */
     private $registry;
+    /**
+     * @var Emulation
+     */
+    private $emulate;
 
     /**
      * @method __construct
@@ -125,6 +129,7 @@ class PaymentPlaceStart implements ObserverInterface
         $this->requestBuilderOrder = $requestBuilderOrder;
         $this->basicInfo = $basicInfo;
         $this->registry = $registry;
+        $this->emulate = $emulate;
     }
 
     /**
