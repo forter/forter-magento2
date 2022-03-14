@@ -85,7 +85,7 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
     /**
      * @var ForterLogger
      */
-    private $foterLogger;
+    private $forterLogger;
     /**
      * Validations constructor.
      * @method __construct
