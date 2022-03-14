@@ -115,7 +115,7 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
         PageFactory $pageFactory,
         OrderRepository $orderRepository,
         JsonFactory $jsonResultFactory,
-        ForterLogger $foterLogger
+        ForterLogger $forterLogger
     ) {
         $this->url = $url;
         $this->queue = $queue;
