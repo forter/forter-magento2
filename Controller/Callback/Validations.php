@@ -127,7 +127,7 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
         $this->orderRepository = $orderRepository;
         $this->jsonResultFactory = $jsonResultFactory;
         $this->abstractApi = $abstractApi;
-        $this->foterLogger = $foterLogger;
+        $this->forterLogger = $forterLogger;
         return parent::__construct($context);
     }
 
