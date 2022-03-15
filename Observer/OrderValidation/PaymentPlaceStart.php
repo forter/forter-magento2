@@ -86,7 +86,7 @@ class PaymentPlaceStart implements ObserverInterface
     /**
      * @var ForterLogger
      */
-    private $logger;
+    private $forterLogger;
 
     /**
      * @method __construct
@@ -102,7 +102,7 @@ class PaymentPlaceStart implements ObserverInterface
      * @param  Item             $modelCartItem
      * @param  BasicInfo        $basicInfo
      * @param  Registry         $registry
-     * @param  ForterLogger     $logger
+     * @param  ForterLogger     $forterLogger
      */
     public function __construct(
         RemoteAddress $remote,
@@ -117,7 +117,7 @@ class PaymentPlaceStart implements ObserverInterface
         Item $modelCartItem,
         BasicInfo $basicInfo,
         Registry $registry,
-        ForterLogger $logger
+        ForterLogger $forterLogger
     ) {
         $this->remote = $remote;
         $this->queue = $queue;
@@ -131,7 +131,7 @@ class PaymentPlaceStart implements ObserverInterface
         $this->requestBuilderOrder = $requestBuilderOrder;
         $this->basicInfo = $basicInfo;
         $this->registry = $registry;
-        $this->logger = $logger;
+        $this->forterLogger = $forterLogger;
     }
 
     /**
@@ -194,7 +194,7 @@ class PaymentPlaceStart implements ObserverInterface
                 $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'handle response');
                 $message->metaData->order = $order;
                 $message->metaData->forterDecision = $response->action;
-                $this->logger->SendLog($message);
+                $this->forterLogger->SendLog($message);
                 return;
             }
 
@@ -210,7 +210,7 @@ class PaymentPlaceStart implements ObserverInterface
         $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'handle response');
         $message->metaData->order = $order;
         $message->metaData->forterDecision = $response->action;
-        $this->logger->SendLog($message);
+        $this->forterLogger->SendLog($message);
         $this->decline->handlePreTransactionDescision($order);
     }
 }

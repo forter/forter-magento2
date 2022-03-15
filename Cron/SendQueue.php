@@ -47,7 +47,7 @@ class SendQueue
     /**
      * @var ForterLogger
      */
-    private $logger;
+    private $forterLogger;
 
     public function __construct(
         Approve $approve,
@@ -59,7 +59,7 @@ class SendQueue
         Order $requestBuilderOrder,
         SearchCriteriaBuilder $searchCriteriaBuilder,
         AbstractApi $abstractApi,
-        ForterLogger $logger
+        ForterLogger $forterLogger
     ) {
         $this->approve = $approve;
         $this->decline = $decline;
@@ -70,7 +70,7 @@ class SendQueue
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->requestBuilderOrder = $requestBuilderOrder;
         $this->abstractApi = $abstractApi;
-        $this->logger = $logger;
+        $this->forterLogger = $forterLogger;
     }
 
     /**
@@ -122,18 +122,14 @@ class SendQueue
                 } elseif ($item->getEntityType() == 'order') {
                     $this->handleForterResponse($order, $item->getData('entity_body'));
                     $item->setSyncFlag('1');
-
-                    $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'CRON Validation');
-                    $message->metaData->order = $order; 
-                    $this->logger->SendLog($message);
                 }
 
-              
+
                 $item->save();
                 $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'CRON Validation');
                 $message->metaData->order = $order;
                 $message->proccessItem = $item;
-                ForterLogger::getInstance()->SendLog($message);
+                $this->forterLogger->SendLog($message);
             }
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
@@ -177,9 +173,9 @@ class SendQueue
             $order->save();
 
             $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'Forter CRON Decision');
-            $message->metaData->order = $order; 
-            $message->metaData->forterStatus = $responseArray->action; 
-            $this->logger->SendLog($message);
+            $message->metaData->order = $order;
+            $message->metaData->forterStatus = $responseArray->action;
+            $this->forterLogger->SendLog($message);
 
             return $responseArray->status ? true : false;
         } catch (\Exception $e) {

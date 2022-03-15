@@ -95,7 +95,7 @@ class PaymentPlaceEnd implements ObserverInterface
     /**
      * @var ForterLogger
      */
-    private $logger;
+    private $forterLogger;
 
     /**
      * @method __construct
@@ -112,7 +112,7 @@ class PaymentPlaceEnd implements ObserverInterface
      * @param  OrderManagementInterface $orderManagement
      * @param  StoreManagerInterface    $storeManager
      * @param  Registry                 $registry
-     * @param  ForterLogger             $logger
+     * @param  ForterLogger             $forterLogger
      */
     public function __construct(
         ScopeConfigInterface $scopeConfig,
@@ -128,7 +128,7 @@ class PaymentPlaceEnd implements ObserverInterface
         OrderManagementInterface $orderManagement,
         StoreManagerInterface $storeManager,
         Registry $registry,
-        ForterLogger $logger
+        ForterLogger $forterLogger
     ) {
         $this->customerSession = $customerSession;
         $this->messageManager = $messageManager;
@@ -143,7 +143,7 @@ class PaymentPlaceEnd implements ObserverInterface
         $this->orderManagement = $orderManagement;
         $this->queue = $queue;
         $this->registry = $registry;
-        $this->logger = $logger;
+        $this->forterLogger = $forterLogger;
     }
 
     /**
@@ -187,7 +187,7 @@ class PaymentPlaceEnd implements ObserverInterface
             $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'After Validation');
             $message->metaData->order = $order;
             $message->metaData->decision = $forterResponse->action;
-            $this->logger->SendLog($message);
+            $this->forterLogger->SendLog($message);
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }
@@ -211,7 +211,7 @@ class PaymentPlaceEnd implements ObserverInterface
             $message->metaData->order = $order;
             $message->metaData->forterDecision = $forterDecision;
             $message->metaData->pendingOnHoldEnabled = $this->forterConfig->isPendingOnHoldEnabled();
-            $this->logger->SendLog($message);
+            $this->forterLogger->SendLog($message);
         }
     }
 
@@ -257,7 +257,7 @@ class PaymentPlaceEnd implements ObserverInterface
             $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'send message to queue');
             $message->metaData->order = $order;
             $message->metaData->currentTime = $currentTime;
-            $this->logger->SendLog($message);
+            $this->forterLogger->SendLog($message);
         }
         $this->queue->create()
             ->setStoreId($storeId)

@@ -182,10 +182,10 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
 
 
             $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'Forter Callback Controller Decision');
-            $message->metaData->order = $order; 
-            $message->metaData->forterStatus = $bodyRawParams['action']; 
-            $this->logger->SendLog($message);
-        } catch (Exception $e) {
+            $message->metaData->order = $order;
+            $message->metaData->forterStatus = $bodyRawParams['action'];
+            $this->forterLogger->SendLog($message);
+        } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
             $success = false;
             $reason = $e->getMessage();

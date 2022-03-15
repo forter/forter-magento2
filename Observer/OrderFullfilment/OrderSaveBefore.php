@@ -25,7 +25,7 @@ class OrderSaveBefore implements ObserverInterface
     /**
      * @var ForterLogger
      */
-    private $logger;
+    private $forterLogger;
 
     /**
      * OrderSaveAfter constructor.
@@ -37,12 +37,12 @@ class OrderSaveBefore implements ObserverInterface
         AbstractApi $abstractApi,
         Config $config,
         PaymentPrepere $paymentPrepere,
-        ForterLogger $logger
+        ForterLogger $forterLogger
     ) {
         $this->abstractApi = $abstractApi;
         $this->config = $config;
         $this->paymentPrepere = $paymentPrepere;
-        $this->logger = $logger;
+        $this->forterLogger = $forterLogger;
     }
 
     /**
@@ -78,7 +78,7 @@ class OrderSaveBefore implements ObserverInterface
             $message->metaData->order = $order;
             $message->metaData->orderState = $orderState;
             $message->metaData->orderOrigState = $orderOrigState;
-            $this->logger->SendLog($message);
+            $this->forterLogger->SendLog($message);
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }
