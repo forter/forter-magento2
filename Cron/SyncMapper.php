@@ -20,10 +20,18 @@ use Magento\Framework\Serialize\SerializerInterface;
  * Class SendQueue
  * @package Forter\Forter\Cron
  */
-class SendQueue
+class SyncMapper
 {
+    private \Magento\Framework\Filesystem $filesystem;
+
+    private \Magento\Framework\Filesystem\Directory\WriteFactory $writeFactory;
+
     /**
-     *
+     * local file name
+     */
+    const LOCAL_FILE_MAPPER = "mapping.json";
+    /**
+     *  mapper address location
      */
     const MAPPER_LOCATION = 'https://dev-file-dump.fra1.digitaloceanspaces.com/mapper.json';
     /**
@@ -40,10 +48,14 @@ class SendQueue
     private $forterLogger;
 
     public function __construct(
+        \Magento\Framework\Filesystem $filesystem,
+        \Magento\Framework\Filesystem\Directory\WriteFactory $writeFactory,
         Config $config,
         AbstractApi $abstractApi,
         ForterLogger $forterLogger
     ) {
+        $this->filesystem = $filesystem;
+        $this->writeFactory = $writeFactory;
         $this->forterConfig = $config;
         $this->abstractApi = $abstractApi;
         $this->forterLogger = $forterLogger;
@@ -55,68 +67,44 @@ class SendQueue
     public function execute()
     {
         try {
-                $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'CRON Validation');
-                $message->metaData->order = $order;
-                $message->proccessItem = $item;
-                $this->forterLogger->SendLog($message);
-            }
+            $isDebugMode = $this->forterConfig->isDebugEnabled();
+            $this->log(true , 'start Sync Mapping');
+            $res = $this->fetchMapping($isDebugMode);
+            $this->saveLocalFile($res, $isDebugMode);
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }
     }
 
-    /**
-     * this method will handle the pre payment and validation state
-     *
-     * @param $order holde the order model
-     * @param $item hold the item from the que that can get from at rest of the models such as order and more (use as ref incase this method override it will be in use)
-     * @return void
-     */
-    private function handlePreSyncMethod($order, $item)
-    {
-        try {
-            $data = $this->requestBuilderOrder->buildTransaction($order, 'AFTER_PAYMENT_ACTION');
-            $paymentMethod = $data['payment'][0]['paymentMethodNickname'];
+    private function saveLocalFile($res, bool $isDebugMode) {
+        $varDir = $this->filesystem->getDirectoryRead(\Magento\Framework\App\Filesystem\DirectoryList::VAR_DIR);
+        $forterDir = $this->writeFactory->create($varDir->getAbsolutePath('forter'));
+        $forterDir->getDriver()->fileWrite($varDir->getAbsolutePath('forter'),$res);
+        $metaData = new \stdClass();
+        $metaData->folder =  $varDir->getAbsolutePath('forter');
+        $metaData->context = $res;
+        $this->log($isDebugMode , sprintf('response Sync Mapping -> %s', self::MAPPER_LOCATION) , $metaData);
+    }
 
-            if ($paymentMethod == 'adyen_cc') {
-                if (!isset($data['payment'][0]['creditCard'])) {
-                    return false;
-                }
-                $creditCard = $data['payment'][0]['creditCard'];
-                if (!array_key_exists('expirationMonth', $creditCard) || !array_key_exists('expirationYear', $creditCard) || !array_key_exists('lastFourDigits', $creditCard)) {
-                    return false;
-                }
-            }
+    private function fetchMapping(bool $isDebugMode) {
+        $client = new \GuzzleHttp\Client();
+        $res = $client->request('GET', self::MAPPER_LOCATION);
+        if ($res->getStatusCode() !== 200) {
+            $this->log(true , sprintf('failed Sync Mapping -> %s', self::MAPPER_LOCATION));
+            throw new \Exception(sprintf('failed fetch %s', self::MAPPER_LOCATION));
+        }
+        $responseBody = $res->getBody();
+        $metaData = new \stdClass();
+        $metaData->responseBody =  $responseBody;
+        $this->log($isDebugMode , sprintf('response Sync Mapping -> %s', self::MAPPER_LOCATION) , $metaData);
+        return $responseBody;
+    }
 
-            $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
-
-            $response = $this->abstractApi->sendApiRequest($url, json_encode($data));
-            $responseArray = json_decode($response);
-
-            $this->abstractApi->sendOrderStatus($order);
-
-            $order->setForterResponse($response);
-
-            if ($responseArray->status != 'success' || !isset($responseArray->action)) {
-                $order->setForterStatus('error');
-                $order->save();
-                return true;
-            }
-
-            $this->handleForterResponse($order, $responseArray->action);
-            $order->addStatusHistoryComment(__('Forter (cron) Decision: %1', $responseArray->action));
-            $order->setForterStatus($responseArray->action);
-            $order->save();
-
-            $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'Forter CRON Decision');
-            $message->metaData->order = $order;
-            $message->metaData->forterStatus = $responseArray->action;
+    private function log(bool $isDebugMode, string $message ,\stdClass $metaData = new \stdClass()) {
+        if ($isDebugMode) {
+            $this->forterConfig->log($message, "info");
+            $message = new ForterLoggerMessage($this->config->getStoreId(),  -1, $message);
             $this->forterLogger->SendLog($message);
-
-            return $responseArray->status ? true : false;
-        } catch (\Exception $e) {
-            $this->abstractApi->reportToForterOnCatch($e);
         }
     }
-
 }

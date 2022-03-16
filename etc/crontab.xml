@@ -5,5 +5,8 @@
         <job name="forter_send_orders_queue" instance="Forter\Forter\Cron\SendQueue" method="execute">
             <schedule>* * * * *</schedule>
         </job>
+        <job name="forter_sync_mapper" instance="Forter\Forter\Cron\SyncMapper" method="execute">
+            <schedule>0 0 * * */1</schedule>
+        </job>
     </group>
 </config>
