@@ -6,6 +6,8 @@ use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\ActionsHandler\Approve;
 use Forter\Forter\Model\ActionsHandler\Decline;
 use Forter\Forter\Model\Config;
+use Forter\Forter\Model\ForterLogger;
+use Forter\Forter\Model\ForterLoggerMessage;
 use Forter\Forter\Model\QueueFactory as ForterQueueFactory;
 use Forter\Forter\Model\RequestBuilder\Order;
 use Magento\Customer\Model\Session as CustomerSession;
@@ -96,6 +98,11 @@ class PaymentPlaceEnd implements ObserverInterface
     private $emulate;
 
     /**
+     * @var ForterLogger
+     */
+    private $forterLogger;
+
+    /**
      * @method __construct
      * @param  ScopeConfigInterface     $scopeConfig
      * @param  CustomerSession          $customerSession
@@ -110,6 +117,7 @@ class PaymentPlaceEnd implements ObserverInterface
      * @param  OrderManagementInterface $orderManagement
      * @param  StoreManagerInterface    $storeManager
      * @param  Registry                 $registry
+     * @param  ForterLogger             $forterLogger
      */
     public function __construct(
         ScopeConfigInterface $scopeConfig,
@@ -125,7 +133,7 @@ class PaymentPlaceEnd implements ObserverInterface
         OrderManagementInterface $orderManagement,
         StoreManagerInterface $storeManager,
         Registry $registry,
-        Emulation $emulate
+        ForterLogger $forterLogger
     ) {
         $this->customerSession = $customerSession;
         $this->messageManager = $messageManager;
@@ -140,7 +148,7 @@ class PaymentPlaceEnd implements ObserverInterface
         $this->orderManagement = $orderManagement;
         $this->queue = $queue;
         $this->registry = $registry;
-        $this->emulate = $emulate;
+        $this->forterLogger = $forterLogger;
     }
 
     /**
@@ -187,6 +195,11 @@ class PaymentPlaceEnd implements ObserverInterface
             $order->setForterStatus($forterResponse->action);
             $order->addStatusHistoryComment(__('Forter (post) Decision: %1', $forterResponse->action));
             $this->handleResponse($forterResponse->action, $order);
+
+            $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'After Validation');
+            $message->metaData->order = $order;
+            $message->metaData->decision = $forterResponse->action;
+            $this->forterLogger->SendLog($message);
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }
@@ -204,6 +217,13 @@ class PaymentPlaceEnd implements ObserverInterface
             if ($order->canHold()) {
                 $this->decline->holdOrder($order);
             }
+        }
+        if ($this->forterConfig->isDebugEnabled()) {
+            $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'handle response');
+            $message->metaData->order = $order;
+            $message->metaData->forterDecision = $forterDecision;
+            $message->metaData->pendingOnHoldEnabled = $this->forterConfig->isPendingOnHoldEnabled();
+            $this->forterLogger->SendLog($message);
         }
     }
 
@@ -245,6 +265,12 @@ class PaymentPlaceEnd implements ObserverInterface
         $storeId = $order->getStore()->getId();
         $currentTime = $this->dateTime->gmtDate();
         $this->forterConfig->log('Increment ID:' . $order->getIncrementId());
+        if ($this->forterConfig->isDebugEnabled()) {
+            $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'send message to queue');
+            $message->metaData->order = $order;
+            $message->metaData->currentTime = $currentTime;
+            $this->forterLogger->SendLog($message);
+        }
         $this->queue->create()
             ->setStoreId($storeId)
             ->setEntityType('order')

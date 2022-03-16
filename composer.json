@@ -4,7 +4,8 @@
     "require": {
         "php": "~7.4.0||~8.1.0",
         "ext-json": "*",
-        "ext-curl": "*"
+        "ext-curl": "*",
+        "guzzlehttp/guzzle": "^7.3.0"
     },
     "type": "magento2-module",
     "license": [

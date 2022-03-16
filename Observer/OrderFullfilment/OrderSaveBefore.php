@@ -3,6 +3,8 @@
 namespace Forter\Forter\Observer\OrderFullfilment;
 
 use Forter\Forter\Model\AbstractApi;
+use Forter\Forter\Model\ForterLogger;
+use Forter\Forter\Model\ForterLoggerMessage;
 use Forter\Forter\Model\Config;
 use Forter\Forter\Model\RequestBuilder\Payment as PaymentPrepere;
 use Magento\Framework\Event\ObserverInterface;
@@ -21,6 +23,11 @@ class OrderSaveBefore implements ObserverInterface
     private $config;
 
     /**
+     * @var ForterLogger
+     */
+    private $forterLogger;
+
+    /**
      * OrderSaveAfter constructor.
      * @param AbstractApi $abstractApi
      * @param Config $config
@@ -29,11 +36,13 @@ class OrderSaveBefore implements ObserverInterface
     public function __construct(
         AbstractApi $abstractApi,
         Config $config,
-        PaymentPrepere $paymentPrepere
+        PaymentPrepere $paymentPrepere,
+        ForterLogger $forterLogger
     ) {
         $this->abstractApi = $abstractApi;
         $this->config = $config;
         $this->paymentPrepere = $paymentPrepere;
+        $this->forterLogger = $forterLogger;
     }
 
     /**
@@ -65,7 +74,11 @@ class OrderSaveBefore implements ObserverInterface
                 return false;
             }
 
-            $this->abstractApi->sendOrderStatus($order);
+            $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'After Validation');
+            $message->metaData->order = $order;
+            $message->metaData->orderState = $orderState;
+            $message->metaData->orderOrigState = $orderOrigState;
+            $this->forterLogger->SendLog($message);
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }
