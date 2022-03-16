@@ -100,10 +100,11 @@ class SyncMapper
         return $responseBody;
     }
 
-    private function log(bool $isDebugMode, string $message ,\stdClass $metaData = new \stdClass()) {
+    private function log(bool $isDebugMode, string $message ,$metaData = null) {
         if ($isDebugMode) {
             $this->forterConfig->log($message, "info");
             $message = new ForterLoggerMessage($this->config->getStoreId(),  -1, $message);
+            $message->metaData = ($metaData)?$metaData : new \stdClass();
             $this->forterLogger->SendLog($message);
         }
     }
