@@ -79,9 +79,14 @@ class SyncMapper
     private function saveLocalFile($res, bool $isDebugMode) {
         $varDir = $this->filesystem->getDirectoryRead(\Magento\Framework\App\Filesystem\DirectoryList::VAR_DIR);
         $forterDir = $this->writeFactory->create($varDir->getAbsolutePath('forter'));
-        $forterDir->getDriver()->fileWrite($varDir->getAbsolutePath('forter'),$res);
+        $filePath = sprintf('%s%s%s', $varDir->getAbsolutePath('forter') , PATH_SEPARATOR , self::LOCAL_FILE_MAPPER);
+        try {
+            $forterDir->getDriver()->deleteFile($filePath);
+        } catch (\Exception $e) {}
+        $file = fopen($filePath, 'w');
+        $forterDir->getDriver()->fileWrite($file,$res);
         $metaData = new \stdClass();
-        $metaData->folder =  $varDir->getAbsolutePath('forter');
+        $metaData->folder =  $filePath;
         $metaData->context = $res;
         $this->log($isDebugMode , sprintf('response Sync Mapping -> %s', self::MAPPER_LOCATION) , $metaData);
     }
