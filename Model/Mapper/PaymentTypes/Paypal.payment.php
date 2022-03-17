@@ -27,4 +27,8 @@ class PaypalPayment extends BasePayment
             "fullPaypalResponsePayload" => $payment->getAdditionalInformation()
         ];
     }
+    public function getExtraData($order, $payment)
+    {
+        return null;
+    }
 }

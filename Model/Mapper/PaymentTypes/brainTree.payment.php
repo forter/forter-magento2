@@ -57,4 +57,8 @@ class BrainTreePayment extends BasePayment
 
         return $this->preferCcDetails($payment, $detailsArray);
     }
+    public function getExtraData($order, $payment)
+    {
+        return null;
+    }
 }
