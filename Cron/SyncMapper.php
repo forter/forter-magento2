@@ -3,19 +3,10 @@
 namespace Forter\Forter\Cron;
 
 use Forter\Forter\Model\AbstractApi;
-use Forter\Forter\Model\ActionsHandler\Approve;
-use Forter\Forter\Model\ActionsHandler\Decline;
 use Forter\Forter\Model\Config;
 use Forter\Forter\Model\ForterLogger;
 use Forter\Forter\Model\ForterLoggerMessage;
-use Forter\Forter\Model\QueueFactory;
-use Forter\Forter\Model\RequestBuilder\Order;
-use Magento\Framework\Api\SearchCriteriaBuilder;
-use Magento\Framework\Stdlib\DateTime\DateTime;
-use Magento\Sales\Api\OrderRepositoryInterface;
-use Magento\Store\Model\App\Emulation;
-use Magento\Framework\Serialize\SerializerInterface;
-
+use Forter\Forter\Model\Mapper\Utils;
 /**
  * Class SendQueue
  * @package Forter\Forter\Cron
@@ -25,15 +16,6 @@ class SyncMapper
     private \Magento\Framework\Filesystem $filesystem;
 
     private \Magento\Framework\Filesystem\Directory\WriteFactory $writeFactory;
-
-    /**
-     * local file name
-     */
-    const LOCAL_FILE_MAPPER = "mapping.json";
-    /**
-     *  mapper address location
-     */
-    const MAPPER_LOCATION = 'https://dev-file-dump.fra1.digitaloceanspaces.com/mapper.json';
     /**
      * @var AbstractApi
      */
@@ -43,22 +25,24 @@ class SyncMapper
      */
     private $config;
     /**
-     * @var ForterLogger
+     * Mapper utils helper methods
+     *
+     * @var Utils
      */
-    private $forterLogger;
+    private $mapperUtils;
 
     public function __construct(
         \Magento\Framework\Filesystem $filesystem,
         \Magento\Framework\Filesystem\Directory\WriteFactory $writeFactory,
         Config $config,
         AbstractApi $abstractApi,
-        ForterLogger $forterLogger
+        Utils $mapperUtils
     ) {
         $this->filesystem = $filesystem;
         $this->writeFactory = $writeFactory;
         $this->forterConfig = $config;
         $this->abstractApi = $abstractApi;
-        $this->forterLogger = $forterLogger;
+        $this->mapperUtils = $mapperUtils;
     }
 
     /**
@@ -68,8 +52,8 @@ class SyncMapper
     {
         try {
             $isDebugMode = $this->forterConfig->isDebugEnabled();
-            $this->log(true , 'start Sync Mapping');
-            $res = $this->fetchMapping($isDebugMode);
+            $this->mapperUtils->log(true , 'start Sync Mapping');
+            $res = $this->mapperUtils->fetchMapping($isDebugMode);
             $this->saveLocalFile($res, $isDebugMode);
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
@@ -79,7 +63,7 @@ class SyncMapper
     private function saveLocalFile($res, bool $isDebugMode) {
         $varDir = $this->filesystem->getDirectoryRead(\Magento\Framework\App\Filesystem\DirectoryList::VAR_DIR);
         $forterDir = $this->writeFactory->create($varDir->getAbsolutePath('forter'));
-        $filePath = sprintf('%s%s%s', $varDir->getAbsolutePath('forter') , PATH_SEPARATOR , self::LOCAL_FILE_MAPPER);
+        $filePath = sprintf('%s%s%s', $varDir->getAbsolutePath('forter') , PATH_SEPARATOR , Utils::LOCAL_FILE_MAPPER);
         try {
             $forterDir->getDriver()->deleteFile($filePath);
         } catch (\Exception $e) {}
@@ -88,29 +72,7 @@ class SyncMapper
         $metaData = new \stdClass();
         $metaData->folder =  $filePath;
         $metaData->context = $res;
-        $this->log($isDebugMode , sprintf('response Sync Mapping -> %s', self::MAPPER_LOCATION) , $metaData);
+        $this->mapperUtils->log($isDebugMode , sprintf('response Sync Mapping -> %s', Utils::MAPPER_LOCATION) ,-1 , -1, $metaData);
     }
 
-    private function fetchMapping(bool $isDebugMode) {
-        $client = new \GuzzleHttp\Client();
-        $res = $client->request('GET', self::MAPPER_LOCATION);
-        if ($res->getStatusCode() !== 200) {
-            $this->log(true , sprintf('failed Sync Mapping -> %s', self::MAPPER_LOCATION));
-            throw new \Exception(sprintf('failed fetch %s', self::MAPPER_LOCATION));
-        }
-        $responseBody = $res->getBody();
-        $metaData = new \stdClass();
-        $metaData->responseBody =  $responseBody;
-        $this->log($isDebugMode , sprintf('response Sync Mapping -> %s', self::MAPPER_LOCATION) , $metaData);
-        return $responseBody;
-    }
-
-    private function log(bool $isDebugMode, string $message ,$metaData = null) {
-        if ($isDebugMode) {
-            $this->forterConfig->log($message, "info");
-            $message = new ForterLoggerMessage(-1,  -1, $message);
-            $message->metaData = ($metaData)?$metaData : new \stdClass();
-            $this->forterLogger->SendLog($message);
-        }
-    }
 }
