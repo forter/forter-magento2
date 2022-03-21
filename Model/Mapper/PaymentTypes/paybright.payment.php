@@ -1,4 +1,4 @@
-<?
+<?php
 
 namespace Forter\Forter\Model\Mapper\PaymentTypes;
 
@@ -20,7 +20,7 @@ class PaybrightPayment extends BasePayment
             "fullResponsePayload" => $payment->getAdditionalInformation()
         ];
     }
-    public function getExtraData($order, $payment)
+    public function installmentService($order, $payment)
     {
         return null;
     }

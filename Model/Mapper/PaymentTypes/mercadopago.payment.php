@@ -1,4 +1,4 @@
-<?
+<?php
 
 namespace Forter\Forter\Model\Mapper\PaymentTypes;
 
@@ -51,7 +51,7 @@ class MercadopagoPayment extends BasePayment
 
         return $this->preferCcDetails($payment, $detailsArray);
     }
-    public function getExtraData($order, $payment)
+    public function installmentService($order, $payment)
     {
         return null;
     }

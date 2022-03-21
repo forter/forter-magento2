@@ -1,23 +1,29 @@
-<?
-
+<?php
 namespace Forter\Forter\Model\Mapper;
 
 use Forter\Forter\Model\Mapper\PaymentTypes\IPaymentType;
 use Forter\Forter\Model\Config;
-use Forter\Forter\Model\ForterLoggeabstractr;
-use Forter\Forter\Model\ForterLoggerMessage;
-use stdClass;
 
 class PaymentHandler implements IPaymentType
 {
-    public function __construct(
-        protected IPaymentType $payment,
-        protected Utils $utilsMapping,
-        protected Config $config)
-    {
+    private IPaymentType $payment;
+    protected Config $config;
+    protected Utils $utilsMapping;
+    public function __construct()  {
     }
 
-    public function setMapper(stdClass $mapper, $storeId=-1, $orderId =-1)
+    public function setPayment(IPaymentType $payment,  Config $config,Utils $utilsMapping) {
+        $this->payment = $payment;
+        $this->config = $config;
+        $this->utilsMapping = $utilsMapping;
+        $this->setup($config, $utilsMapping);
+    }
+
+    public function setup(Config $config,Utils $utilsMapping) {
+        $this->payment->setup($config, $utilsMapping);
+    }
+
+    public function setMapper(\stdClass $mapper = null, $storeId=-1, $orderId =-1)
     {
         $mapping = $this->utilsMapping->locateLocalMapperOrFetch($this->config->isDebugEnabled(), $storeId, $orderId);
         $this->payment->setMapper(json_decode($mapping), $storeId, $orderId);
@@ -27,8 +33,8 @@ class PaymentHandler implements IPaymentType
         return $this->payment->process($order, $payment);
     }
 
-    public function getExtraData($order, $payment) {
-        return $this->payment->getExtraData($order, $payment);
+    public function installmentService($order, $payment) {
+        return $this->payment->installmentService($order, $payment);
     }
 
 }

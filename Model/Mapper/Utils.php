@@ -1,7 +1,6 @@
-<?
+<?php
 namespace Forter\Forter\Model\Mapper;
 
-use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\Config;
 use Forter\Forter\Model\ForterLogger;
 use Forter\Forter\Model\ForterLoggerMessage;
@@ -16,11 +15,6 @@ class Utils {
      *  mapper address location
      */
     const MAPPER_LOCATION = 'https://dev-file-dump.fra1.digitaloceanspaces.com/mapper.json';
-
-    /**
-     * @var AbstractApi
-     */
-    private $abstractApi;
     /**
      * @var Config
      */
@@ -34,13 +28,11 @@ class Utils {
         \Magento\Framework\Filesystem $filesystem,
         \Magento\Framework\Filesystem\Directory\WriteFactory $writeFactory,
         Config $config,
-        AbstractApi $abstractApi,
         ForterLogger $forterLogger
     ) {
         $this->filesystem = $filesystem;
         $this->writeFactory = $writeFactory;
         $this->forterConfig = $config;
-        $this->abstractApi = $abstractApi;
         $this->forterLogger = $forterLogger;
     }
 

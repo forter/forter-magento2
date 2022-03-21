@@ -1,15 +1,22 @@
-<?
+<?php
 namespace Forter\Forter\Model\Mapper\PaymentTypes;
 
-use stdClass;
+use Forter\Forter\Model\Config;
+use Forter\Forter\Model\Mapper\Utils;
 
 abstract class BasePayment implements IPaymentType {
     public function __construct() {}
     protected $mapper;
     protected $storeId;
     protected $orderId;
+    protected Config $config;
+    protected Utils $utilsMapping;
+    public function setup(Config $config,Utils $utilsMapping) {
+        $this->config = $config;
+        $this->utilsMapping = $utilsMapping;
+    }
 
-    public function setMapper(stdClass $mapper, $storeId=-1, $orderId =-1)
+    public function setMapper(\stdClass $mapper = null, $storeId=-1, $orderId =-1)
     {
         $this->storeId = $storeId;
         $this->orderId = $orderId;

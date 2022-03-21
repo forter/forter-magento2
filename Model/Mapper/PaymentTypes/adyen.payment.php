@@ -1,4 +1,4 @@
-<?
+<?php
 
 namespace Forter\Forter\Model\Mapper\PaymentTypes;
 
@@ -8,7 +8,7 @@ class AdyenPayment extends BasePayment
     {
     }
 
-    public function getExtraData($order, $payment)
+    public function installmentService($order, $payment)
     {
         $paymentMapping = $this->mapper->payments->adyen->klarna;
         return [
@@ -20,6 +20,7 @@ class AdyenPayment extends BasePayment
             "fullResponsePayload" => $payment->getAdditionalInformation()
         ];
     }
+
     public function process($order, $payment)
     {
         $paymentMapping = $this->mapper->payments->adyen;

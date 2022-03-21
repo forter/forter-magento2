@@ -1,4 +1,4 @@
-<?
+<?php
 
 namespace Forter\Forter\Model\Mapper\PaymentTypes;
 
@@ -7,6 +7,7 @@ class BrainTreePayment extends BasePayment
     public function __construct()
     {
     }
+
     public function process($order, $payment)
     {
         $paymentMapping = $this->mapper->payments->braintree;
@@ -57,7 +58,7 @@ class BrainTreePayment extends BasePayment
 
         return $this->preferCcDetails($payment, $detailsArray);
     }
-    public function getExtraData($order, $payment)
+    public function installmentService($order, $payment)
     {
         return null;
     }
