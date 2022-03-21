@@ -6,9 +6,13 @@ use stdClass;
 abstract class BasePayment implements IPaymentType {
     public function __construct() {}
     protected $mapper;
+    protected $storeId;
+    protected $orderId;
 
-    public function setMapper(stdClass $mapper)
+    public function setMapper(stdClass $mapper, $storeId=-1, $orderId =-1)
     {
+        $this->storeId = $storeId;
+        $this->orderId = $orderId;
         $this->mapper = $mapper;
     }
     /**

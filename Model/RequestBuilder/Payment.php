@@ -45,32 +45,32 @@ class Payment
             return [];
         }
 
-        $paymentData = [];
         $payment_method = $payment->getMethod();
+        $paymentData = $this->processPaymentByType($payment_method , $order, $payment);
         // If paypal:
-        if (strpos($payment_method, 'paypal') !== false) {
-            $paymentData["paypal"] = $this->paymentMethods->getPaypalDetails($payment);
-        } elseif (strpos($payment_method, 'paybright') !== false) {
-            $paymentData["installmentService"] = $this->paymentMethods->getPaybrightDetails($order, $payment);
-        } elseif (strpos($payment->getData('cc_type'), 'klarna_account') !== false) {
-            $paymentData["installmentService"] = $this->paymentMethods->getAdyenKlarnaDetails($order, $payment);
-        } else {
-            if (strpos($payment_method, 'adyen') !== false) {
-                $cardDetails = $this->paymentMethods->getAdyenDetails($payment);
-            } elseif (strpos($payment_method, 'authorizenet') !== false) {
-                $cardDetails = $this->paymentMethods->getAuthorizeNetDetails($payment);
-            } elseif (strpos($payment_method, 'braintree') !== false) {
-                $cardDetails = $this->paymentMethods->getBraintreeDetails($payment);
-            } elseif (strpos($payment_method, 'mercadopago') !== false) {
-                $cardDetails = $this->paymentMethods->getMercadopagoDetails($payment);
-            } else {
-                $cardDetails = $this->paymentMethods->preferCcDetails($payment);
-            }
+        // if (strpos($payment_method, 'paypal') !== false) {
+        //     $paymentData["paypal"] = $this->paymentMethods->getPaypalDetails($payment);
+        // } elseif (strpos($payment_method, 'paybright') !== false) {
+        //     $paymentData["installmentService"] = $this->paymentMethods->getPaybrightDetails($order, $payment);
+        // } elseif (strpos($payment->getData('cc_type'), 'klarna_account') !== false) {
+        //     $paymentData["installmentService"] = $this->paymentMethods->getAdyenKlarnaDetails($order, $payment);
+        // } else {
+        //     if (strpos($payment_method, 'adyen') !== false) {
+        //         $cardDetails = $this->paymentMethods->getAdyenDetails($payment);
+        //     } elseif (strpos($payment_method, 'authorizenet') !== false) {
+        //         $cardDetails = $this->paymentMethods->getAuthorizeNetDetails($payment);
+        //     } elseif (strpos($payment_method, 'braintree') !== false) {
+        //         $cardDetails = $this->paymentMethods->getBraintreeDetails($payment);
+        //     } elseif (strpos($payment_method, 'mercadopago') !== false) {
+        //         $cardDetails = $this->paymentMethods->getMercadopagoDetails($payment);
+        //     } else {
+        //         $cardDetails = $this->paymentMethods->preferCcDetails($payment);
+        //     }
 
-            if (array_key_exists("expirationMonth", $cardDetails) || array_key_exists("expirationYear", $cardDetails) || array_key_exists("lastFourDigits", $cardDetails)) {
-                $paymentData["creditCard"] = $cardDetails;
-            }
-        }
+        //     if (array_key_exists("expirationMonth", $cardDetails) || array_key_exists("expirationYear", $cardDetails) || array_key_exists("lastFourDigits", $cardDetails)) {
+        //         $paymentData["creditCard"] = $cardDetails;
+        //     }
+        // }
 
         $paymentData["billingDetails"] = $this->customerPreper->getBillingDetails($billingAddress);
         $paymentData["paymentMethodNickname"] = $payment->getMethod();
@@ -80,5 +80,8 @@ class Payment
         ];
 
         return [$paymentData];
+    }
+    private function processPaymentByType(string $payment_method, $order, $payment) {
+        $
     }
 }
