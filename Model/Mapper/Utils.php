@@ -54,12 +54,12 @@ class Utils {
         $varDir = $this->filesystem->getDirectoryRead(\Magento\Framework\App\Filesystem\DirectoryList::VAR_DIR);
         $forterDir = $this->writeFactory->create($varDir->getAbsolutePath('forter'));
         $filePath = sprintf('%s%s%s', $varDir->getAbsolutePath('forter') , PATH_SEPARATOR , Utils::LOCAL_FILE_MAPPER);
-        if (!file_exists($filePath)) {
+        if (file_exists($filePath)) {
             $content =  file_get_contents($filePath);
             $metaData = new \stdClass();
             $metaData->mapping = $content;
-            $this->log($isDebugMode, 'load mapping file', $storeId, $orderId,$content);
-            return file_get_contents($filePath);
+            $this->log($isDebugMode, 'load mapping file', $storeId, $orderId,$metaData);
+            return $content;
         }
         return $this->fetchMapping($isDebugMode);
     }
