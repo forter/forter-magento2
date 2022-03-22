@@ -133,7 +133,8 @@ class PaymentPlaceEnd implements ObserverInterface
         OrderManagementInterface $orderManagement,
         StoreManagerInterface $storeManager,
         Registry $registry,
-        ForterLogger $forterLogger
+        ForterLogger $forterLogger,
+        Emulation $emulate
     ) {
         $this->customerSession = $customerSession;
         $this->messageManager = $messageManager;
@@ -149,6 +150,7 @@ class PaymentPlaceEnd implements ObserverInterface
         $this->queue = $queue;
         $this->registry = $registry;
         $this->forterLogger = $forterLogger;
+        $this->emulate = $emulate;
     }
 
     /**
