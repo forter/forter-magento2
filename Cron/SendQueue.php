@@ -13,6 +13,7 @@ use Forter\Forter\Model\RequestBuilder\Order;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magento\Sales\Api\OrderRepositoryInterface;
+use Magento\Store\Model\App\Emulation;
 
 /**
  * Class SendQueue
@@ -59,6 +60,7 @@ class SendQueue
         Order $requestBuilderOrder,
         SearchCriteriaBuilder $searchCriteriaBuilder,
         AbstractApi $abstractApi,
+        Emulation $emulate,
         ForterLogger $forterLogger
     ) {
         $this->approve = $approve;
@@ -70,6 +72,7 @@ class SendQueue
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->requestBuilderOrder = $requestBuilderOrder;
         $this->abstractApi = $abstractApi;
+        $this->emulate = $emulate;
         $this->forterLogger = $forterLogger;
     }
 
@@ -86,17 +89,16 @@ class SendQueue
                 ->addFieldToFilter(
                     'sync_date',
                     [
-                      'from' => date('Y-m-d H:i:s', strtotime('-7 days'))
+                        'from' => date('Y-m-d H:i:s', strtotime('-7 days'))
                     ]
                 );
 
             $items->setPageSize(10000)->setCurPage(1);
-
             foreach ($items as $item) {
+                $this->emulate->stopEnvironmentEmulation(); // let detach the store meta data
                 $searchCriteria = $this->searchCriteriaBuilder
                     ->addFilter('increment_id', $item->getData('increment_id'), 'eq')
                     ->create();
-
                 $orderList = $this->orderRepository->getList($searchCriteria)->getItems();
                 $order = reset($orderList);
 
@@ -108,6 +110,12 @@ class SendQueue
                 }
 
                 $method = $order->getPayment()->getMethod();
+                // let bind the relevent store in case of multi store settings
+                $this->emulate->startEnvironmentEmulation(
+                    $order->getStoreId(),
+                    'frontend',
+                    true
+                );
 
                 if ($item->getEntityType() == 'pre_sync_order') {
                     if (strpos($method, 'adyen') !== false && !$order->getPayment()->getAdyenPspReference()) {
@@ -136,6 +144,13 @@ class SendQueue
         }
     }
 
+    /**
+     * this method will handle the pre payment and validation state
+     *
+     * @param $order holde the order model
+     * @param $item hold the item from the que that can get from at rest of the models such as order and more (use as ref incase this method override it will be in use)
+     * @return void
+     */
     private function handlePreSyncMethod($order, $item)
     {
         try {

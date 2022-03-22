@@ -17,6 +17,7 @@ use Magento\Framework\Message\ManagerInterface;
 use Magento\Framework\Registry;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magento\Quote\Model\Quote\Item;
+use Magento\Store\Model\App\Emulation;
 
 /**
  * Class PaymentPlaceStart
@@ -87,6 +88,10 @@ class PaymentPlaceStart implements ObserverInterface
      * @var ForterLogger
      */
     private $forterLogger;
+    /**
+     * @var Emulation
+     */
+    private $emulate;
 
     /**
      * @method __construct
@@ -117,6 +122,7 @@ class PaymentPlaceStart implements ObserverInterface
         Item $modelCartItem,
         BasicInfo $basicInfo,
         Registry $registry,
+        Emulation $emulate,
         ForterLogger $forterLogger
     ) {
         $this->remote = $remote;
@@ -131,6 +137,7 @@ class PaymentPlaceStart implements ObserverInterface
         $this->requestBuilderOrder = $requestBuilderOrder;
         $this->basicInfo = $basicInfo;
         $this->registry = $registry;
+        $this->emulate = $emulate;
         $this->forterLogger = $forterLogger;
     }
 
@@ -141,6 +148,7 @@ class PaymentPlaceStart implements ObserverInterface
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
         try {
+            $this->emulate->stopEnvironmentEmulation();
             if (!$this->config->isEnabled()) {
                 return;
             }
@@ -150,7 +158,13 @@ class PaymentPlaceStart implements ObserverInterface
             }
 
             $order = $observer->getEvent()->getPayment()->getOrder();
-            $storeId = $this->config->getStoreId();
+            $storeId = $order->getStoreId();
+            // let bind the relevent store in case of multi store settings
+            $this->emulate->startEnvironmentEmulation(
+                $order->getStoreId(),
+                'frontend',
+                true
+            );
             $connectionInformation = $this->basicInfo->getConnectionInformation(
                 $order->getRemoteIp() ?: $this->remote->getRemoteAddress()
             );
