@@ -10,7 +10,7 @@ class GeneralPayment extends BasePayment
 
     public function installmentService($order, $payment)
     {
-        return null
+        return null;
     }
 
     public function process($order, $payment)

@@ -1,6 +1,6 @@
 <?php
 
-namespace Forter\Forter\Model\Mapper\PaymentTypes;
+namespace Forter\Forter\Model\Mapper\Paymenttypes;
 
 class BrainTreePayment extends BasePayment
 {
