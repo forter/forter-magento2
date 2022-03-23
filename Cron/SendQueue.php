@@ -6,6 +6,8 @@ use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\ActionsHandler\Approve;
 use Forter\Forter\Model\ActionsHandler\Decline;
 use Forter\Forter\Model\Config;
+use Forter\Forter\Model\ForterLogger;
+use Forter\Forter\Model\ForterLoggerMessage;
 use Forter\Forter\Model\QueueFactory;
 use Forter\Forter\Model\RequestBuilder\Order;
 use Magento\Framework\Api\SearchCriteriaBuilder;
@@ -43,6 +45,10 @@ class SendQueue
      * @var Config
      */
     private $config;
+    /**
+     * @var ForterLogger
+     */
+    private $forterLogger;
 
     public function __construct(
         Approve $approve,
@@ -124,7 +130,12 @@ class SendQueue
                     $item->setSyncFlag('1');
                 }
 
+
                 $item->save();
+                $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'CRON Validation');
+                $message->metaData->order = $order;
+                $message->proccessItem = $item;
+                $this->forterLogger->SendLog($message);
             }
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
@@ -173,6 +184,11 @@ class SendQueue
             $order->addStatusHistoryComment(__('Forter (cron) Decision: %1', $responseArray->action));
             $order->setForterStatus($responseArray->action);
             $order->save();
+
+            $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'Forter CRON Decision');
+            $message->metaData->order = $order;
+            $message->metaData->forterStatus = $responseArray->action;
+            $this->forterLogger->SendLog($message);
 
             return $responseArray->status ? true : false;
         } catch (\Exception $e) {
