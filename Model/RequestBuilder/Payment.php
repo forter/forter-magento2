@@ -23,7 +23,6 @@ use Forter\Forter\Model\Mapper\PaymentTypes\PaybrightPayment;
 use Forter\Forter\Model\Mapper\PaymentTypes\PaypalPayment;
 use Forter\Forter\Model\Mapper\Utils;
 use Forter\Forter\Model\Config as ForterConfig;
-
 /**
  * Class Payment
  * @package Forter\Forter\Model\RequestBuilder
@@ -43,7 +42,8 @@ class Payment
         PaymentMethods $paymentMethods,
         CustomerPreper $customerPreper,
         Utils $utilsMapping,
-        ForterConfig $config
+        ForterConfig $config,
+        ForterLogger $forterLogger
     ) {
         $this->paymentMethods = $paymentMethods;
         $this->customerPreper = $customerPreper;
@@ -66,6 +66,8 @@ class Payment
 
         $payment_method = $payment->getMethod();
         $paymentData = [];
+
+        $this->utilsMapping->log($this->config->isDebugEnabled(), 'Start Payment Fetching Info'.$payment_method, $order->getStoreId(),  $order->getIncrementId());
         try {
             $paymentData = $this->processPaymentByType($payment_method, $order, $payment);
         } catch (\Exception $e) {
@@ -79,6 +81,8 @@ class Payment
             "amountLocalCurrency" => strval($order->getGrandTotal()),
             "currency" => $order->getOrderCurrency()->getCurrencyCode()
         ];
+        $this->utilsMapping->log($this->config->isDebugEnabled(), 'End Payment Fetching info'.$payment_method, $order->getStoreId(),  $order->getIncrementId());
+
 
         return [$paymentData];
     }
@@ -125,6 +129,10 @@ class Payment
                 $paymentData["creditCard"] = $cardDetails;
             }
         }
+        $metaData = new \stdClass();
+        $metaData->payment = $paymentData;
+        $this->utilsMapping->log($this->config->isDebugEnabled(), 'Payment info'.$payment_method, $order->getStoreId(),  $order->getIncrementId(),$metaData);
+
         return $paymentData;
     }
 
