@@ -5,13 +5,13 @@ namespace Forter\Forter\Model;
  * @package Forter\Forter\Model\ForterLoggerMessage
  */
 class ForterLoggerMessage {
-    public $storeId;
+    public $siteId;
     public $orderId;
     public $transactionId = '';
     public $message;
     public \StdClass $metaData;
-    public function __construct(string $storeId, string $orderId, string $message ) {
-        $this->storeId = $storeId;
+    public function __construct(string $siteId, string $orderId, string $message ) {
+        $this->siteId = $siteId;
         $this->message = $message;
         $this->orderId = $orderId;
         $this->metaData = new \StdClass();
