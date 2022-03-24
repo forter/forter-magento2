@@ -205,7 +205,7 @@ class PaymentPlaceStart implements ObserverInterface
             if ($response->status != 'success' || !isset($response->action)) {
                 $this->registry->register('forter_pre_decision', 'error');
                 $order->setForterStatus('error');
-                $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'handle response');
+                $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'Response Error - Pre-Auth');
                 $message->metaData->order = $order;
                 $message->metaData->forterDecision = $response->action;
                 $this->forterLogger->SendLog($message);
