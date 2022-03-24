@@ -191,6 +191,10 @@ class PaymentPlaceEnd implements ObserverInterface
                 $order->setForterStatus('error');
                 $order->addStatusHistoryComment(__('Forter (post) Decision: %1', 'error'));
                 $order->save();
+                $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'Response Error - Post-Auth');
+                $message->metaData->order = $order;
+                $message->metaData->decision = $forterResponse->action;
+                $this->forterLogger->SendLog($message);
                 return;
             }
 
@@ -221,7 +225,7 @@ class PaymentPlaceEnd implements ObserverInterface
             }
         }
         if ($this->forterConfig->isDebugEnabled()) {
-            $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'Handle Response - Post-Auth');
+            $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'handle response');
             $message->metaData->order = $order;
             $message->metaData->forterDecision = $forterDecision;
             $message->metaData->pendingOnHoldEnabled = $this->forterConfig->isPendingOnHoldEnabled();

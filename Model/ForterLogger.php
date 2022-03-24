@@ -28,7 +28,7 @@ class ForterLogger
             $requestOps['Accept'] = 'application/json';
             $requestOps['Authorization'] =['Basic '.$this->forterConfig->getSecretKey().':'];
             $requestOps['json'] = $json;
-            $this->forterConfig->log('send log request: ' .$this->BASE_URL.'/errors ');
+            $this->forterConfig->log('send log request: ' .$this->BASE_URL.'/magento/orderFlow/'.$data->storeId.'/'.$data->orderId);
             $response = $this->httpClient->request('post', '/errors/',$requestOps);
             $this->forterConfig->log(sprintf('send log status: %s', $response->getStatusCode()));
         } catch (\Exception $e) {
