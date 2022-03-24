@@ -221,7 +221,7 @@ class PaymentPlaceStart implements ObserverInterface
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }
-        $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'handle response');
+        $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'Handle Response - Pre-Auth');
         $message->metaData->order = $order;
         $message->metaData->forterDecision = $response->action;
         $this->forterLogger->SendLog($message);
