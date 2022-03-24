@@ -221,7 +221,7 @@ class PaymentPlaceEnd implements ObserverInterface
             }
         }
         if ($this->forterConfig->isDebugEnabled()) {
-            $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'handle response');
+            $message = new ForterLoggerMessage($order->getStoreId(),  $order->getIncrementId(), 'Handle Response - Post-Auth');
             $message->metaData->order = $order;
             $message->metaData->forterDecision = $forterDecision;
             $message->metaData->pendingOnHoldEnabled = $this->forterConfig->isPendingOnHoldEnabled();
