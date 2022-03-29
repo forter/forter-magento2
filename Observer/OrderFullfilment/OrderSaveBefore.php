@@ -74,7 +74,7 @@ class OrderSaveBefore implements ObserverInterface
                 return false;
             }
 
-            $message = new ForterLoggerMessage($order->getStore()->getWebsiteId(),  $order->getIncrementId(), 'Order Status Update');
+            $message = new ForterLoggerMessage($this->config->getSiteId(),  $order->getIncrementId(), 'Order Status Update');
             $message->metaData->order = $order;
             $message->metaData->orderState = $orderState;
             $message->metaData->orderOrigState = $orderOrigState;

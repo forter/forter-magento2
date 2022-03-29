@@ -191,7 +191,7 @@ class PaymentPlaceEnd implements ObserverInterface
                 $order->setForterStatus('error');
                 $order->addStatusHistoryComment(__('Forter (post) Decision: %1', 'error'));
                 $order->save();
-                $message = new ForterLoggerMessage($order->getStore()->getWebsiteId(),  $order->getIncrementId(), 'Response Error - Post-Auth');
+                $message = new ForterLoggerMessage($this->forterConfig->getSiteId(),  $order->getIncrementId(), 'Response Error - Post-Auth');
                 $message->metaData->order = $order;
                 $message->metaData->decision = $forterResponse->action;
                 $this->forterLogger->SendLog($message);
@@ -202,7 +202,7 @@ class PaymentPlaceEnd implements ObserverInterface
             $order->addStatusHistoryComment(__('Forter (post) Decision: %1', $forterResponse->action));
             $this->handleResponse($forterResponse->action, $order);
 
-            $message = new ForterLoggerMessage($order->getStore()->getWebsiteId(),  $order->getIncrementId(), 'After Validation');
+            $message = new ForterLoggerMessage($this->forterConfig->getSiteId(),  $order->getIncrementId(), 'After Validation');
             $message->metaData->order = $order;
             $message->metaData->decision = $forterResponse->action;
             $this->forterLogger->SendLog($message);
@@ -272,7 +272,7 @@ class PaymentPlaceEnd implements ObserverInterface
         $currentTime = $this->dateTime->gmtDate();
         $this->forterConfig->log('Increment ID:' . $order->getIncrementId());
         if ($this->forterConfig->isDebugEnabled()) {
-            $message = new ForterLoggerMessage($order->getStore()->getWebsiteId(),  $order->getIncrementId(), 'send message to queue');
+            $message = new ForterLoggerMessage($this->forterConfig->getSiteId(),  $order->getIncrementId(), 'send message to queue');
             $message->metaData->order = $order;
             $message->metaData->currentTime = $currentTime;
             $this->forterLogger->SendLog($message);
