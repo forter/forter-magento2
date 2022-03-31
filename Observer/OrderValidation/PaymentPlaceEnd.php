@@ -166,7 +166,7 @@ class PaymentPlaceEnd implements ObserverInterface
                     $order->save();
                     $message = new ForterLoggerMessage($this->forterConfig->getSiteId(),  $order->getIncrementId(), 'Pre-Auth');
                     $message->metaData->order = $order->getData();
-                    $message->metaData->payment = $order->getPayment()->getPayment()->getData('additional_data');
+                    $message->metaData->payment = $order->getPayment()->getData();
                     $this->forterLogger->SendLog($message);
                 }
                 return;
@@ -197,7 +197,7 @@ class PaymentPlaceEnd implements ObserverInterface
                 $order->save();
                 $message = new ForterLoggerMessage($this->forterConfig->getSiteId(),  $order->getIncrementId(), 'Post-Auth');
                 $message->metaData->order = $order->getData();
-                $message->metaData->payment = $order->getPayment()->getData('additional_data');
+                $message->metaData->payment = $order->getPayment()->getData();
                 $message->metaData->decision = $forterResponse->action;
                 $this->forterLogger->SendLog($message);
                 return;
@@ -209,7 +209,7 @@ class PaymentPlaceEnd implements ObserverInterface
 
             $message = new ForterLoggerMessage($this->forterConfig->getSiteId(),  $order->getIncrementId(), 'Post-Auth');
             $message->metaData->order = $order->getData();
-            $message->metaData->payment = $order->getPayment()->getData('additional_data');
+            $message->metaData->payment = $order->getPayment()->getData();
             $message->metaData->decision = $forterResponse->action;
             $this->forterLogger->SendLog($message);
         } catch (\Exception $e) {
@@ -233,7 +233,7 @@ class PaymentPlaceEnd implements ObserverInterface
         if ($this->forterConfig->isDebugEnabled()) {
             $message = new ForterLoggerMessage($order->getStore()->getWebsiteId(),  $order->getIncrementId(), 'Handling Order With Forter');
             $message->metaData->order = $order->getData();
-            $message->metaData->payment = $order->getPayment()->getData('additional_data');
+            $message->metaData->payment = $order->getPayment()->getData();
             $message->metaData->forterDecision = $forterDecision;
             $message->metaData->pendingOnHoldEnabled = $this->forterConfig->isPendingOnHoldEnabled();
             $this->forterLogger->SendLog($message);
