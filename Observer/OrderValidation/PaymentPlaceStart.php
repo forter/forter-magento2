@@ -206,7 +206,8 @@ class PaymentPlaceStart implements ObserverInterface
                 $this->registry->register('forter_pre_decision', 'error');
                 $order->setForterStatus('error');
                 $message = new ForterLoggerMessage($this->config->getSiteId(),  $order->getIncrementId(), 'Response Error - Pre-Auth');
-                $message->metaData->order = $order;
+                $message->metaData->order = $order->getData();
+                $message->metaData->payment = $order->getPayment()->getData('additional_data');
                 $message->metaData->forterDecision = $response->action;
                 $this->forterLogger->SendLog($message);
                 return;
@@ -222,7 +223,8 @@ class PaymentPlaceStart implements ObserverInterface
             $this->abstractApi->reportToForterOnCatch($e);
         }
         $message = new ForterLoggerMessage($this->config->getSiteId(),  $order->getIncrementId(), 'Handle Response - Pre-Auth');
-        $message->metaData->order = $order;
+        $message->metaData->order = $order->getData();
+        $message->metaData->payment = $order->getPayment()->getData('additional_data');
         $message->metaData->forterDecision = $response->action;
         $this->forterLogger->SendLog($message);
         $this->decline->handlePreTransactionDescision($order);

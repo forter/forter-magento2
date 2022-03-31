@@ -164,6 +164,10 @@ class PaymentPlaceEnd implements ObserverInterface
                     $order = $observer->getEvent()->getPayment()->getOrder();
                     $order->addStatusHistoryComment(__('Forter (pre) Decision: %1', $this->registry->registry('forter_pre_decision')));
                     $order->save();
+                    $message = new ForterLoggerMessage($this->forterConfig->getSiteId(),  $order->getIncrementId(), 'Pre-Auth');
+                    $message->metaData->order = $order->getData();
+                    $message->metaData->payment = $order->getPayment()->getPayment()->getData('additional_data');
+                    $this->forterLogger->SendLog($message);
                 }
                 return;
             }
@@ -191,8 +195,9 @@ class PaymentPlaceEnd implements ObserverInterface
                 $order->setForterStatus('error');
                 $order->addStatusHistoryComment(__('Forter (post) Decision: %1', 'error'));
                 $order->save();
-                $message = new ForterLoggerMessage($this->forterConfig->getSiteId(),  $order->getIncrementId(), 'Response Error - Post-Auth');
-                $message->metaData->order = $order;
+                $message = new ForterLoggerMessage($this->forterConfig->getSiteId(),  $order->getIncrementId(), 'Post-Auth');
+                $message->metaData->order = $order->getData();
+                $message->metaData->payment = $order->getPayment()->getData('additional_data');
                 $message->metaData->decision = $forterResponse->action;
                 $this->forterLogger->SendLog($message);
                 return;
@@ -202,8 +207,9 @@ class PaymentPlaceEnd implements ObserverInterface
             $order->addStatusHistoryComment(__('Forter (post) Decision: %1', $forterResponse->action));
             $this->handleResponse($forterResponse->action, $order);
 
-            $message = new ForterLoggerMessage($this->forterConfig->getSiteId(),  $order->getIncrementId(), 'After Validation');
-            $message->metaData->order = $order;
+            $message = new ForterLoggerMessage($this->forterConfig->getSiteId(),  $order->getIncrementId(), 'Post-Auth');
+            $message->metaData->order = $order->getData();
+            $message->metaData->payment = $order->getPayment()->getData('additional_data');
             $message->metaData->decision = $forterResponse->action;
             $this->forterLogger->SendLog($message);
         } catch (\Exception $e) {
@@ -225,8 +231,9 @@ class PaymentPlaceEnd implements ObserverInterface
             }
         }
         if ($this->forterConfig->isDebugEnabled()) {
-            $message = new ForterLoggerMessage($order->getStore()->getWebsiteId(),  $order->getIncrementId(), 'Handle Response - Post-Auth');
-            $message->metaData->order = $order;
+            $message = new ForterLoggerMessage($order->getStore()->getWebsiteId(),  $order->getIncrementId(), 'Handling Order With Forter');
+            $message->metaData->order = $order->getData();
+            $message->metaData->payment = $order->getPayment()->getData('additional_data');
             $message->metaData->forterDecision = $forterDecision;
             $message->metaData->pendingOnHoldEnabled = $this->forterConfig->isPendingOnHoldEnabled();
             $this->forterLogger->SendLog($message);
@@ -272,8 +279,9 @@ class PaymentPlaceEnd implements ObserverInterface
         $currentTime = $this->dateTime->gmtDate();
         $this->forterConfig->log('Increment ID:' . $order->getIncrementId());
         if ($this->forterConfig->isDebugEnabled()) {
-            $message = new ForterLoggerMessage($this->forterConfig->getSiteId(),  $order->getIncrementId(), 'send message to queue');
-            $message->metaData->order = $order;
+            $message = new ForterLoggerMessage($this->forterConfig->getSiteId(),  $order->getIncrementId(), 'processing message to queue');
+            $message->metaData->order = $order->getData();
+            $message->metaData->payment = $order->getPayment();
             $message->metaData->currentTime = $currentTime;
             $this->forterLogger->SendLog($message);
         }

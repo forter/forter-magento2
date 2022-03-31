@@ -120,7 +120,8 @@ class SendQueue
                 if ($item->getEntityType() == 'pre_sync_order') {
                     if (strpos($method, 'adyen') !== false && !$order->getPayment()->getAdyenPspReference()) {
                         $message = new ForterLoggerMessage($this->config->getSiteId(),  $order->getIncrementId(), 'Skip Adyen Order Missing Data');
-                        $message->metaData->order = $order;
+                        $message->metaData->order = $order->getData();
+                        $message->metaData->payment = $order->getPayment()->getData('additional_data');
                         $message->proccessItem = $item;
                         $this->forterLogger->SendLog($message);
                         continue;
@@ -128,7 +129,8 @@ class SendQueue
                     $result = $this->handlePreSyncMethod($order, $item);
                     if (!$result) {
                         $message = new ForterLoggerMessage($this->config->getSiteId(),  $order->getIncrementId(), 'No Mapped CC Adyen');
-                        $message->metaData->order = $order;
+                        $message->metaData->order = $order->getData();
+                        $message->metaData->payment = $order->getPayment()->getData('additional_data');
                         $message->proccessItem = $item;
                         $this->forterLogger->SendLog($message);
                         continue;
@@ -142,8 +144,9 @@ class SendQueue
 
 
                 $item->save();
-                $message = new ForterLoggerMessage($this->config->getSiteId(),  $order->getIncrementId(), 'CRON Validation');
+                $message = new ForterLoggerMessage($this->config->getSiteId(),  $order->getIncrementId(), 'CRON Validation Finished');
                 $message->metaData->order = $order;
+                $message->metaData->payment = $order->getPayment()->getData('additional_data');
                 $message->proccessItem = $item;
                 $this->forterLogger->SendLog($message);
             }
@@ -172,7 +175,8 @@ class SendQueue
                 $creditCard = $data['payment'][0]['creditCard'];
                 if (!array_key_exists('expirationMonth', $creditCard) || !array_key_exists('expirationYear', $creditCard) || !array_key_exists('lastFourDigits', $creditCard)) {
                     $message = new ForterLoggerMessage($this->config->getSiteId(),  $order->getIncrementId(), 'No Mapped CC Details Adyen');
-                    $message->metaData->order = $order;
+                    $message->metaData->order = $order->getData();
+                    $message->metaData->payment = $order->getPayment();
                     $message->proccessItem = $data;
                     $this->forterLogger->SendLog($message);
                     return false;
@@ -192,7 +196,8 @@ class SendQueue
                 $order->setForterStatus('error');
                 $order->save();
                 $message = new ForterLoggerMessage($this->config->getSiteId(),  $order->getIncrementId(), 'Response Error - SendQueue');
-                $message->metaData->order = $order;
+                $message->metaData->order = $order->getData();
+                $message->metaData->payment = $order->getPayment();
                 $message->proccessItem = $data;
                 $this->forterLogger->SendLog($message);
                 return true;
@@ -204,7 +209,8 @@ class SendQueue
             $order->save();
 
             $message = new ForterLoggerMessage($this->config->getSiteId(),  $order->getIncrementId(), 'Forter CRON Decision');
-            $message->metaData->order = $order;
+            $message->metaData->order = $order->getData();
+            $message->metaData->payment = $order->getPayment();
             $message->metaData->forterStatus = $responseArray->action;
             $this->forterLogger->SendLog($message);
 

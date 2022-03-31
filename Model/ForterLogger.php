@@ -29,7 +29,7 @@ class ForterLogger
             $requestOps['Authorization'] =['Basic '.$this->forterConfig->getSecretKey().':'];
             $requestOps['json'] = $json;
             $this->forterConfig->log('send log request: ' .$this->BASE_URL.'/magento/orderFlow/'.$this->forterConfig->getSiteId().'/'.$data->orderId);
-            $response = $this->httpClient->request('post', '/errors/',$requestOps);
+            $response = $this->httpClient->request('post','/magento/orderFlow/'.$this->forterConfig->getSiteId().'/'.$data->orderId, $requestOps);
             $this->forterConfig->log(sprintf('send log status: %s', $response->getStatusCode()));
         } catch (\Exception $e) {
             $this->forterConfig->log('Error:' . $e->getMessage());
