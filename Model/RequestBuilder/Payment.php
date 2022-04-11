@@ -49,7 +49,12 @@ class Payment
         $payment_method = $payment->getMethod();
         // If paypal:
         if (strpos($payment_method, 'paypal') !== false) {
-            $paymentData["paypal"] = $this->paymentMethods->getPaypalDetails($payment);
+            if (strpos($payment_method, 'adyen_hpp')!==false) {
+                $paymentData["installmentService"] = $this->paymentMethods->getAdyenKlarnaDetails($order, $payment);
+            }
+            else {
+                $paymentData["paypal"] = $this->paymentMethods->getPaypalDetails($payment);
+            }
         } elseif (strpos($payment_method, 'paybright') !== false) {
             $paymentData["installmentService"] = $this->paymentMethods->getPaybrightDetails($order, $payment);
         } elseif (strpos($payment->getData('cc_type'), 'klarna_account') !== false) {
