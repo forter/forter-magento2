@@ -5,6 +5,8 @@ use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\ActionsHandler\Decline;
 use Forter\Forter\Model\Config;
 use Forter\Forter\Model\QueueFactory;
+use Forter\Forter\Model\ForterLogger;
+use Forter\Forter\Model\ForterLoggerMessage;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Action\HttpPostActionInterface as HttpPostActionInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
@@ -79,6 +81,11 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
      */
     protected $url;
 
+
+    /**
+     * @var ForterLogger
+     */
+    private $forterLogger;
     /**
      * Validations constructor.
      * @method __construct
@@ -107,7 +114,8 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
         Context $context,
         PageFactory $pageFactory,
         OrderRepository $orderRepository,
-        JsonFactory $jsonResultFactory
+        JsonFactory $jsonResultFactory,
+        ForterLogger $forterLogger
     ) {
         $this->url = $url;
         $this->queue = $queue;
@@ -119,6 +127,7 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
         $this->orderRepository = $orderRepository;
         $this->jsonResultFactory = $jsonResultFactory;
         $this->abstractApi = $abstractApi;
+        $this->forterLogger = $forterLogger;
         return parent::__construct($context);
     }
 
@@ -170,7 +179,14 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
             $order->save();
 
             $this->handlePostDecisionCallback($bodyRawParams['action'], $order);
-        } catch (Exception $e) {
+
+
+            $message = new ForterLoggerMessage($this->forterConfig->getSiteId(),  $order->getIncrementId(), 'Forter Callback Controller Decision');
+            $message->metaData->order = $order->getData();
+            $message->metaData->payment = $order->getPayment()->getData();
+            $message->metaData->forterStatus = $bodyRawParams['action'];
+            $this->forterLogger->SendLog($message);
+        } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
             $success = false;
             $reason = $e->getMessage();
@@ -277,6 +293,9 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
             ->setEntityBody($type)
             ->setSyncDate($currentTime)
             ->save();
+            $message = new ForterLoggerMessage($this->forterConfig->getSiteId(),  $order->getIncrementId(), 'Sending Message To Que');
+            $message->metaData->order = $order->getData();
+            $this->forterLogger->SendLog($message);
     }
 
     public function createCsrfValidationException(RequestInterface $request): ? InvalidRequestException
