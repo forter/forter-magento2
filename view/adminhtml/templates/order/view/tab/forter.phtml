@@ -5,7 +5,7 @@
 $adminOrder = false;
 $order = $this->getOrder();
 $forterResponse = $order->getData('forter_response');
-$forterResponse = json_decode($forterResponse);
+$forterResponse = is_null( $forterResponse ) ? [] : json_decode($forterResponse);
 
 ?>
 

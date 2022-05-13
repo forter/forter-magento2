@@ -540,7 +540,7 @@ class Config
     public function getVerificationResultsMap($scope = null, $scopeId = null)
     {
         if ($this->verificationResultMap === null) {
-            $this->verificationResultMap = (array) json_decode($this->getConfigValue('advanced_settings/verification_results_map', $scope, $scopeId), true);
+            $this->verificationResultMap = (array) is_null( $this->getConfigValue('advanced_settings/verification_results_map', $scope, $scopeId) ) ? [] : json_decode($this->getConfigValue('advanced_settings/verification_results_map', $scope, $scopeId), true);
         }
         return $this->verificationResultMap;
     }
