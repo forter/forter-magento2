@@ -29,7 +29,8 @@ class Phone extends Template implements BlockInterface
      * @param Template\Context $context
      * @param array $data
      */
-    public function __construct(Template\Context $context, array $data = [], \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig)
+    public function __construct(
+        Template\Context $context, \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig, array  $data = [])
     {
         $this->validator = $context->getValidator();
         $this->resolver = $context->getResolver();
