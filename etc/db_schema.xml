@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+        
+    <table name="forter_send_queue" resource="default" engine="innodb" comment="Forter Send Queue Table">
+        <column xsi:type="int" padding="10" name="sync_id" unsigned="true" nullable="false" identity="true" comment="Id"/>
+        <column xsi:type="int" padding="10" name="store_id" unsigned="true" nullable="true" identity="false" default="null" comment="Store ID"/>
+        <column xsi:type="text" name="entity_type" nullable="true" length="50"  default="0" comment="Store ID"/>
+        <column xsi:type="text" name="increment_id" nullable="true" length="50" default="0" comment="Entity ID"/>
+        <column xsi:type="text" name="entity_body" nullable="true" comment="Request Body"/>
+        <column xsi:type="smallint" padding="6" name="sync_flag" nullable="true" default="0" comment="Sync Flag"/>
+        <column xsi:type="datetime" name="sync_date" nullable="false"  comment="Sync Date"/>
+        
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="sync_id"/>
+        </constraint>
+        
+    </table>
+
+    <table name="sales_order">
+        <column xsi:type="text" name="forter_status"  length="255" comment="Forter Response Status" />
+        <column xsi:type="text" name="forter_response"  comment="Forter Full Response'" />
+    </table>
+
+    <table name="sales_order_grid">
+        <column xsi:type="text" name="forter_status"  length="255" comment="Forter Response Status" />
+    </table>
+</schema>
