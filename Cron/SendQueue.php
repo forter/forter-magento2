@@ -118,7 +118,7 @@ class SendQueue
                 );
 
                 if ($item->getEntityType() == 'pre_sync_order') {
-                    if (strpos($method, 'adyen') !== false && !$order->getPayment()->getAdyenPspReference()) {
+                    if (strpos($method ?? '', 'adyen') !== false && !$order->getPayment()->getAdyenPspReference()) {
                         $message = new ForterLoggerMessage($this->forterConfig->getSiteId(),  $order->getIncrementId(), 'Skip Adyen Order Missing Data');
                         $message->metaData->order = $order->getData();
                         $message->metaData->payment = $order->getPayment()->getData();

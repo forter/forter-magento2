@@ -86,7 +86,7 @@ class GiftCard
     private function formatData($item)
     {
         $productOptions = $item->getProductOptions();
-        $name           = explode(" ", $productOptions["giftcard_recipient_name"], 2);
+        $name           = explode(" ", $productOptions["giftcard_recipient_name"] ?? '', 2);
 
         return [
             "firstName" => !empty($name[0]) ? (string)$name[0] : "",

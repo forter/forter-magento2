@@ -91,7 +91,7 @@ class Config
     /**
      * @var array|null
      */
-    private $verificationResultMap;
+    private $verificationResultMap = null;
 
     /**
      * @var ProductMetadataInterface
@@ -540,7 +540,7 @@ class Config
     public function getVerificationResultsMap($scope = null, $scopeId = null)
     {
         if ($this->verificationResultMap === null) {
-            $this->verificationResultMap = (array) is_null( $this->getConfigValue('advanced_settings/verification_results_map', $scope, $scopeId) ) ? [] : json_decode($this->getConfigValue('advanced_settings/verification_results_map', $scope, $scopeId), true);
+            $this->verificationResultMap = is_null($this->scopeConfig->getValue('forter/advanced_settings/verification_results_map',\Magento\Store\Model\ScopeInterface::SCOPE_STORE) ) ? [] : json_decode($this->scopeConfig->getValue('forter/advanced_settings/verification_results_map',\Magento\Store\Model\ScopeInterface::SCOPE_STORE), true);
         }
         return $this->verificationResultMap;
     }

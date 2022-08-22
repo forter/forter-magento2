@@ -71,7 +71,7 @@ class AbstractApi
             do {
                 $tries++;
                 $timeOutStatus = $this->calcTimeOut($tries);
-                $this->setCurlOptions(strlen($data), $tries);
+                $this->setCurlOptions(strlen($data ?? '') , $tries);
                 $this->forterConfig->log('[Forter Request attempt number] ' . $tries, "debug");
                 $this->forterConfig->log('[Forter Request Url] ' . $url, "debug");
                 $this->forterConfig->log('[Forter Request Body] ' . $data, "debug");

@@ -212,7 +212,7 @@ class PaymentMethods
         $detailsArray = [];
         if ($additonal_data) {
             if (isset($additonal_data['expiryDate'])) {
-                $cardDate = explode("/", $additonal_data['expiryDate']);
+                $cardDate = explode("/", $additonal_data['expiryDate'] ?? '');
                 $detailsArray['expirationMonth'] = strlen($cardDate[0]) > 1 ? $cardDate[0] : '0' . $cardDate[0];
                 $detailsArray['expirationYear'] = $cardDate[1];
             }
@@ -250,7 +250,7 @@ class PaymentMethods
 
         $adyenExpiryDate = $payment->getAdditionalInformation('adyen_expiry_date');
         if ($adyenExpiryDate) {
-            $date = explode("/", $adyenExpiryDate);
+            $date = explode("/", $adyenExpiryDate ?? '');
             $detailsArray['expirationMonth'] = $date[0];
             $detailsArray['expirationYear'] = $date[1];
         }
@@ -310,9 +310,31 @@ class PaymentMethods
                 return $detailsArray[$vrmKey];
             } elseif (!empty($detailsArray[$key])) {
                 return $detailsArray[$key];
+            } elseif (!is_null($this->getPaymentAdditionalData($payment,$vrmKey))) {
+                return $this->getPaymentAdditionalData($payment,$vrmKey);
             }
         }
         return $default;
+    }
+
+    protected function getPaymentAdditionalData($payment, $vrmKey)
+    {
+        $key = explode('.', $vrmKey ?? '');
+        if (isset($key[1]) && $payment->getAdditionalInformation($key[0])) {
+            $additionalData = $payment->getAdditionalInformation($key[0]);
+            if (isset($additionalData[$key[1]])) {
+                if ($key[1] == 'liabilityShift' || $key[1] == 'threeDAuthenticated' || $key[1] == 'threeDOffered') {
+                    if ($additionalData[$key[1]] == 'true') {
+                        $additionalData[$key[1]] = 1;
+                    }
+                    if ($additionalData[$key[1]] == 'false') {
+                        $additionalData[$key[1]] = 0;
+                    }
+                    return (bool)$additionalData[$key[1]];
+                }
+                return $additionalData[$key[1]];
+            }
+        }
     }
 
     public function preferCcDetails($payment, $detailsArray = [])
@@ -352,11 +374,11 @@ class PaymentMethods
         }
 
         if (array_key_exists("expirationMonth", $detailsArray) || $payment->getCcExpMonth()) {
-            $cardDetails["expirationMonth"] = array_key_exists("expirationMonth", $detailsArray) ? $detailsArray['expirationMonth'] : str_pad($payment->getCcExpMonth(), 2, "0", STR_PAD_LEFT);
+            $cardDetails["expirationMonth"] = array_key_exists("expirationMonth", $detailsArray) ? $detailsArray['expirationMonth'] : str_pad($payment->getCcExpMonth() ?? '', 2, "0", STR_PAD_LEFT);
         }
 
         if (array_key_exists("expirationYear", $detailsArray) || $payment->getCcExpYear()) {
-            $cardDetails["expirationYear"] = array_key_exists("expirationMonth", $detailsArray) ? $detailsArray['expirationYear'] : str_pad($payment->getCcExpYear(), 2, "0", STR_PAD_LEFT);
+            $cardDetails["expirationYear"] = array_key_exists("expirationMonth", $detailsArray) ? $detailsArray['expirationYear'] : str_pad($payment->getCcExpYear() ?? '', 2, "0", STR_PAD_LEFT);
         }
 
         if (array_key_exists("lastFourDigits", $detailsArray) || $payment->getCcLast4() || $last4cc) {

@@ -6,8 +6,8 @@ if ($isEnabled == true) {
     $font2 =  $block->getData('font-2');
     $font1Url = $url . $font1 . ")";
     $font2Url = $url . $font2 . ")";
-    $font1Name = str_replace("+", "", $font1);
-    $font2Name = str_replace("+", "", $font2);
+    $font1Name = str_replace("+", "", $font1 ?? '');
+    $font2Name = str_replace("+", "", $font2 ?? '');
 }
 ?>
 <?php if ($isEnabled == true): ?>

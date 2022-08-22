@@ -155,7 +155,7 @@ class Cart
             }
         }
 
-        $categories = implode("/", $categories);
+        $categories = implode("/", $categories ?? '');
         return $categories;
     }
 }
