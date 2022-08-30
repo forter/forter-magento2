@@ -74,6 +74,11 @@ class OrderSaveBefore implements ObserverInterface
                 return false;
             }
 
+            /* Sends the order status to Forter. */
+            $this->abstractApi->sendOrderStatus($order);
+
+
+            /* This is a logging mechanism that sends the order status to Forter. */
             $message = new ForterLoggerMessage($this->config->getSiteId(),  $order->getIncrementId(), 'Order Status Update');
             $message->metaData->order = $order->getData();
             $message->metaData->payment = $order->getPayment()->getData();

@@ -98,7 +98,7 @@ class Customer
         if ($shippingMethod == 'instore_pickup') {
             $deliveryMethod = "store pickup";
         } else {
-            $deliveryMethod = substr(str_replace($this::SHIPPING_METHOD_PREFIX, "", $order->getShippingDescription()), 0, 45);
+            $deliveryMethod = substr(str_replace($this::SHIPPING_METHOD_PREFIX, "", $order->getShippingDescription() ?? ''), 0, 45);
         }
 
         return [
