@@ -117,7 +117,7 @@ class Approve
 
                 return $invoice;
             }
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->forterConfig->addCommentToOrder($order, 'Forter: Magento Failed to Create Invoice. Internal Error');
             $this->abstractApi->reportToForterOnCatch($e);
         }
