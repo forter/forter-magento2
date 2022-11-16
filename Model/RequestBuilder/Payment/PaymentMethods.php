@@ -29,6 +29,12 @@ class PaymentMethods
      */
     private $forterConfig;
 
+    private $forterSanitizationMap = [
+        'liabilityShift'                => 'boolean',
+        'authenticationTriggered'       => 'boolean',
+        'authorizationProcessedWith3DS' => 'boolean'
+    ];
+
     /**
      * @method __construct
      * @param  Session      $customerSession
@@ -338,6 +344,10 @@ class PaymentMethods
                 /* Sent empty value instead of N/A as forter accespts 2 chars on some properties */
                 if ($additionalData[$key[1]] === 'N/A') {
                     return '';
+                }
+
+                if (isset($this->forterSanitizationMap[$key[1]])) {
+                    return settype($additionalData[$key[1]], $this->forterSanitizationMap[$key[1]]);
                 }
 
                 return $additionalData[$key[1]];
