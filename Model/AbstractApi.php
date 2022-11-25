@@ -8,6 +8,7 @@ use Magento\Checkout\Model\Session;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\HTTP\Client\Curl as ClientInterface;
 use Magento\Framework\ObjectManagerInterface;
+use Magento\Framework\Serialize\SerializerInterface;
 
 
 /**
@@ -55,6 +56,11 @@ class AbstractApi
      */
     protected $resource;
 
+    /**
+     * @var SerializerInterface
+     */
+    private $serializer;
+
 
     /**
      * @method __construct
@@ -71,7 +77,8 @@ class AbstractApi
         ClientInterface $clientInterface,
         ForterConfig $forterConfig,
         ObjectManagerInterface $objectManager,
-        ResourceConnection $resource
+        ResourceConnection $resource,
+        SerializerInterface $serializer
     ) {
         $this->paymentPrepere = $paymentPrepere;
         $this->checkoutSession = $checkoutSession;
@@ -79,6 +86,7 @@ class AbstractApi
         $this->forterConfig = $forterConfig;
         $this->objectManager = $objectManager;
         $this->resource = $resource;
+        $this->serializer = $serializer ?: ObjectManager::getInstance()->get(SerializerInterface::class);
     }
 
     /**
@@ -139,7 +147,7 @@ class AbstractApi
     private function setCurlOptions($bodyLen, $tries)
     {
 
-      /* Curl Headers */
+        /* Curl Headers */
         $this->clientInterface->addHeader('x-forter-siteid', $this->forterConfig->getSiteId());
         $this->clientInterface->addHeader('api-version', $this->forterConfig->getApiVersion());
         $this->clientInterface->addHeader('x-forter-extver', $this->forterConfig->getModuleVersion());
@@ -192,17 +200,17 @@ class AbstractApi
         $orderId = $this->checkoutSession->getQuote()->getReservedOrderId();
 
         $this->json = [
-        "orderID" => $orderId,
-        "exception" => [
-         "message" => [
-           "message" => $e->getMessage(),
-           "fileName" => $e->getFile(),
-           "lineNumber"=> $e->getLine(),
-           "name" => get_class($e),
-           "stack" => $e->getTrace()
-         ],
-         "debugInfo" => ""
-        ]
+            "orderID" => $orderId,
+            "exception" => [
+                "message" => [
+                    "message" => $e->getMessage(),
+                    "fileName" => $e->getFile(),
+                    "lineNumber"=> $e->getLine(),
+                    "name" => get_class($e),
+                    "stack" => $e->getTrace()
+                ],
+                "debugInfo" => ""
+            ]
         ];
         $this->json = json_encode($this->json);
         $this->forterConfig->log($this->json, "error");
@@ -227,11 +235,11 @@ class AbstractApi
     public function sendOrderStatus($order)
     {
         $this->json = [
-        "orderId" => $order->getIncrementId(),
-        "eventTime" => time(),
-        "updatedStatus" => $this->getUpdatedStatusEnum($order),
-        "payment" => $this->paymentPrepere->generatePaymentInfo($order)
-      ];
+            "orderId" => $order->getIncrementId(),
+            "eventTime" => time(),
+            "updatedStatus" => $this->getUpdatedStatusEnum($order),
+            "payment" => $this->paymentPrepere->generatePaymentInfo($order)
+        ];
 
         $this->addAdditionalPaymentData($order);
 
@@ -318,9 +326,8 @@ class AbstractApi
                 return;
             }
 
-            $this->notificationFactory = $this->objectManager->create(\Adyen\Payment\Model\ResourceModel\Notification\CollectionFactory::class);
-
-            $notifications = $this->notificationFactory->create();
+            $notificationFactory = $this->objectManager->create('Adyen\Payment\Model\ResourceModel\Notification\CollectionFactory');
+            $notifications = $notificationFactory->create();
 
             $notifications->addFilter('merchant_reference', $this->json['orderId'], 'eq');
             $notifications->addFilter('event_code', 'AUTHORISATION', 'eq');
@@ -341,7 +348,7 @@ class AbstractApi
             if ($method == 'adyen_cc') {
                 $logArray[3] = 'Forter Adyen Module:' . $this->json['orderId'] . ', Entered adyen_cc method';
                 $this->forterConfig->log('Forter Adyen Module:' . $this->json['orderId'] . ', Entered adyen_cc method');
-                $notificationAdditionalData = unserialize($notification->getAdditionalData());
+                $notificationAdditionalData = $this->serializer->unserialize($notification->getAdditionalData());
 
                 if ($notificationAdditionalData['expiryDate']) {
                     $ExpireDate = explode("/", $notificationAdditionalData['expiryDate']);
@@ -388,10 +395,10 @@ class AbstractApi
                 if (isset($notificationAdditionalData['cardSummary'])) {
                     $this->json['payment'][0]['creditCard']['lastFourDigits'] = $notificationAdditionalData['cardSummary'];
                 }
-            } elseif ($method == 'adyen_hpp' && (strpos($payment->getData('cc_type'), 'klarna_account') == false)) {
+            } elseif ($method == 'adyen_hpp' && (strpos($payment->getData('cc_type'), 'paypal') !== false)) {
                 $logArray[3] = 'Forter Adyen Module:' . $this->json['orderId'] . ', Entered adyen_hpp method';
                 $this->forterConfig->log('Forter Adyen Module:' . $this->json['orderId'] . ', Entered adyen_hpp method');
-                $notificationAdditionalData = unserialize($notification->getAdditionalData());
+                $notificationAdditionalData = $this->serializer->unserialize($notification->getAdditionalData());
 
                 if (isset($notificationAdditionalData['paypalPayerId'])) {
                     $this->json['payment'][0]['paypal']['payerId']= $notificationAdditionalData['paypalPayerId'];
@@ -434,7 +441,7 @@ class AbstractApi
                 $this->json['payment'][0]['paypal']['paymentGatewayData']['gatewayName'] = 'adyen_hpp';
                 $this->json['payment'][0]['paypal']['paymentMethod'] = $notification->getPaymentMethod() ? $notification->getPaymentMethod() : '';
                 $this->json['payment'][0]['paypal']['paymentGatewayData']['gatewayTransactionId'] = $order->getPayment()->getCcTransId() ? $order->getPayment()->getCcTransId() : '';
-                $this->json['payment'][0]['paypal']['fullPaypalResponsePayload'] = $notificationAdditionalData ? $notificationAdditionalData : '';
+                $this->json['payment'][0]['paypal']['fullPaypalResponsePayload'] = $notificationAdditionalData ?: '';
             }
             $logArray[4] = $this->json['payment'];
             $logArray[5] = json_encode('Forter Adyen Module integration end');
@@ -456,7 +463,7 @@ class AbstractApi
                 return;
             }
 
-            $this->checkoutComCollection = $this->objectManager->create(\CheckoutCom\Magento2\Model\ResourceModel\WebhookEntity\Collection::class);
+            $this->checkoutComCollection = $this->objectManager->create('CheckoutCom\Magento2\Model\ResourceModel\WebhookEntity\Collection');
 
             $collection = $this->checkoutComCollection;
             $collection->addFilter('order_id', $this->json['orderId'], 'eq');
