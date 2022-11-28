@@ -29,6 +29,12 @@ class PaymentMethods
      */
     private $forterConfig;
 
+    private $forterSanitizationMap = [
+        'liabilityShift'                => 'boolean',
+        'authenticationTriggered'       => 'boolean',
+        'authorizationProcessedWith3DS' => 'boolean'
+    ];
+
     /**
      * @method __construct
      * @param  Session      $customerSession
@@ -323,15 +329,27 @@ class PaymentMethods
         if (isset($key[1]) && $payment->getAdditionalInformation($key[0])) {
             $additionalData = $payment->getAdditionalInformation($key[0]);
             if (isset($additionalData[$key[1]])) {
-                if ($key[1] == 'liabilityShift' || $key[1] == 'threeDAuthenticated' || $key[1] == 'threeDOffered') {
-                    if ($additionalData[$key[1]] == 'true') {
-                        $additionalData[$key[1]] = 1;
-                    }
-                    if ($additionalData[$key[1]] == 'false') {
-                        $additionalData[$key[1]] = 0;
-                    }
-                    return (bool)$additionalData[$key[1]];
+
+
+                /* Force boolean value */
+                if ($additionalData[$key[1]] == 'true') {
+                    return true;
                 }
+
+                /* Force boolean value */
+                if ($additionalData[$key[1]] == 'false') {
+                    return false;
+                }
+
+                /* Sent empty value instead of N/A as forter accespts 2 chars on some properties */
+                if ($additionalData[$key[1]] === 'N/A') {
+                    return '';
+                }
+
+                if (isset($this->forterSanitizationMap[$key[1]])) {
+                    return settype($additionalData[$key[1]], $this->forterSanitizationMap[$key[1]]);
+                }
+
                 return $additionalData[$key[1]];
             }
         }
