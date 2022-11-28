@@ -126,11 +126,11 @@ class Decline
                 $this->holdOrder($order);
             }
             $this->sendDeclineMail($order);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             if ($order->canHold()) {
                 $this->holdOrder($order);
             }
-            $this->addCommentToOrder($order, 'Order Cancellation attempt failed. Internal Error');
+            $this->forterConfig->addCommentToOrder($order, 'Order Cancellation attempt failed. Internal Error');
             $this->abstractApi->reportToForterOnCatch($e);
         }
     }
