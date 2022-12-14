@@ -103,6 +103,7 @@ class SendQueue
                 $order = reset($orderList);
 
                 if (!$order) {
+                    $this->forterConfig->log('Order does not exist, remove from queue');
                     // order does not exist, remove from queue
                     $item->setSyncFlag('1')
                         ->save();
@@ -165,7 +166,10 @@ class SendQueue
     private function handlePreSyncMethod($order, $item)
     {
         try {
+            $this->forterConfig->log('Start pre payment and validation state for order number ' . $order->getIncrementId());
             $data = $this->requestBuilderOrder->buildTransaction($order, 'AFTER_PAYMENT_ACTION');
+            $this->forterConfig->log('Pre Payment Validation Request Data: ' . json_encode($data));
+
             $paymentMethod = $data['payment'][0]['paymentMethodNickname'];
 
             if ($paymentMethod == 'adyen_cc') {
@@ -186,6 +190,10 @@ class SendQueue
             $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
 
             $response = $this->abstractApi->sendApiRequest($url, json_encode($data));
+
+            $this->forterConfig->log('Request for Order ' . $order->getIncrementId() . ': ' . json_encode($data));
+            $this->forterConfig->log('Responsefor Order ' . $order->getIncrementId() . ': ' . $response);
+
             $responseArray = json_decode($response);
 
             $this->abstractApi->sendOrderStatus($order);
@@ -200,6 +208,9 @@ class SendQueue
                 $message->metaData->payment = $order->getPayment();
                 $message->proccessItem = $data;
                 $this->forterLogger->SendLog($message);
+
+                $this->forterConfig->log('Response Error for Order ' . $order->getIncrementId() . ' - Payment Data: ' . json_encode($order->getPayment()->getData()));
+
                 return true;
             }
 
@@ -213,6 +224,8 @@ class SendQueue
             $message->metaData->payment = $order->getPayment();
             $message->metaData->forterStatus = $responseArray->action;
             $this->forterLogger->SendLog($message);
+
+            $this->forterConfig->log('Payment Data for Order ' . $order->getIncrementId() . ' - Payment Data: ' . json_encode($order->getPayment()->getData()));
 
             return $responseArray->status ? true : false;
         } catch (\Exception $e) {
