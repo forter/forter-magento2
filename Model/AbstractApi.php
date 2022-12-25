@@ -4,8 +4,9 @@ namespace Forter\Forter\Model;
 
 use Forter\Forter\Model\Config as ForterConfig;
 use Forter\Forter\Model\RequestBuilder\Payment as PaymentPrepere;
-use Magento\Checkout\Model\Session;
+use Magento\Framework\Event\ManagerInterface;
 use Magento\Framework\HTTP\Client\Curl as ClientInterface;
+use Magento\Checkout\Model\Session;
 
 /**
  * Class AbstractApi
@@ -16,7 +17,7 @@ class AbstractApi
     /**
      *
      */
-    const ERROR_ENDPOINT = 'https://api.forter-secure.com/errors/';
+    public const ERROR_ENDPOINT = 'https://api.forter-secure.com/errors/';
 
     /**
      * Payment Prefer
@@ -41,21 +42,30 @@ class AbstractApi
     private $forterConfig;
 
     /**
+     * @var ManagerInterface
+     */
+    private $eventManager;
+
+    /**
      * @method __construct
-     * @param  Session         $checkoutSession
-     * @param  ClientInterface $clientInterface
-     * @param  ForterConfig    $forterConfig
+     * @param  PaymentPrepere   $paymentPrepere
+     * @param  Session          $checkoutSession
+     * @param  ClientInterface  $clientInterface
+     * @param  ForterConfig     $forterConfig
+     * @param  ManagerInterface $eventManager
      */
     public function __construct(
         PaymentPrepere $paymentPrepere,
         Session $checkoutSession,
         ClientInterface $clientInterface,
-        ForterConfig $forterConfig
+        ForterConfig $forterConfig,
+        ManagerInterface $eventManager
     ) {
         $this->paymentPrepere = $paymentPrepere;
         $this->checkoutSession = $checkoutSession;
         $this->clientInterface = $clientInterface;
         $this->forterConfig = $forterConfig;
+        $this->eventManager = $eventManager;
     }
 
     /**
@@ -71,7 +81,7 @@ class AbstractApi
             do {
                 $tries++;
                 $timeOutStatus = $this->calcTimeOut($tries);
-                $this->setCurlOptions(strlen($data ?? '') , $tries);
+                $this->setCurlOptions(strlen($data ?? ''), $tries);
                 $this->forterConfig->log('[Forter Request attempt number] ' . $tries, "debug");
                 $this->forterConfig->log('[Forter Request Url] ' . $url, "debug");
                 $this->forterConfig->log('[Forter Request Body] ' . $data, "debug");
@@ -169,17 +179,17 @@ class AbstractApi
         $orderId = $this->checkoutSession->getQuote()->getReservedOrderId();
 
         $json = [
-        "orderID" => $orderId,
-        "exception" => [
-         "message" => [
-           "message" => $e->getMessage(),
-           "fileName" => $e->getFile(),
-           "lineNumber"=> $e->getLine(),
-           "name" => get_class($e),
-           "stack" => $e->getTrace()
-         ],
-         "debugInfo" => ""
-        ]
+            "orderID" => $orderId,
+            "exception" => [
+                "message" => [
+                    "message" => $e->getMessage(),
+                    "fileName" => $e->getFile(),
+                    "lineNumber"=> $e->getLine(),
+                    "name" => get_class($e),
+                    "stack" => $e->getTrace()
+                ],
+                "debugInfo" => ""
+            ]
         ];
         $json = json_encode($json);
         $this->forterConfig->log($json, "error");
@@ -204,12 +214,45 @@ class AbstractApi
     public function sendOrderStatus($order)
     {
         $json = [
-        "orderId" => $order->getIncrementId(),
-        "eventTime" => time(),
-        "updatedStatus" => $this->getUpdatedStatusEnum($order),
-        "payment" => $this->paymentPrepere->generatePaymentInfo($order)
-      ];
+            "orderId" => $order->getIncrementId(),
+            "eventTime" => time(),
+            "updatedStatus" => $this->getUpdatedStatusEnum($order),
+            "payment" => $this->paymentPrepere->generatePaymentInfo($order)
+        ];
         $url = "https://api.forter-secure.com/v2/status/" . $order->getIncrementId();
         $this->sendApiRequest($url, json_encode($json));
+    }
+
+    /**
+     * @method triggerRecommendationEvents
+     * @param  object                         $response
+     * @param  object                         $order
+     * @param  string                         $timing (pre / post / cron)
+     * @return AbstractApi
+     */
+    public function triggerRecommendationEvents($response, $order, $timing = null)
+    {
+        if (($recommendations = $this->forterConfig->getRecommendationsFromResponse($response))) {
+            foreach ($recommendations as $recommendation) {
+                if (!$recommendation || !is_string($recommendation)) {
+                    continue;
+                }
+
+                $eventName = 'forter_recommendation_' . strtolower(preg_replace('/\s+/', '_', $recommendation));
+                $eventData = [
+                    'recommendation' => $recommendation,
+                    'forter_response' => $response,
+                    'order' => $order,
+                    'timing' => $timing
+                ];
+
+                $this->eventManager->dispatch($eventName, $eventData);
+
+                $eventData['order_increment_id'] = $order->getIncrementId(); //Log only order increment ID instead of the whole object.
+                $this->forterConfig->log('[Recommendation Event Triggered] ' . $eventName, "debug", ['event_data' => $eventData]);
+            }
+        }
+
+        return $this;
     }
 }

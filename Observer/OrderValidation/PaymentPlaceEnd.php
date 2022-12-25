@@ -26,7 +26,7 @@ use Magento\Store\Model\App\Emulation;
  */
 class PaymentPlaceEnd implements ObserverInterface
 {
-    const VALIDATION_API_ENDPOINT = 'https://api.forter-secure.com/v2/orders/';
+    public const VALIDATION_API_ENDPOINT = 'https://api.forter-secure.com/v2/orders/';
 
     /**
      * @var ScopeConfigInterface
@@ -164,7 +164,7 @@ class PaymentPlaceEnd implements ObserverInterface
                     $order = $observer->getEvent()->getPayment()->getOrder();
                     $order->addStatusHistoryComment(__('Forter (pre) Decision: %1', $this->registry->registry('forter_pre_decision')));
                     $order->save();
-                    $message = new ForterLoggerMessage($this->forterConfig->getSiteId(),  $order->getIncrementId(), 'Pre-Auth');
+                    $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'Pre-Auth');
                     $message->metaData->order = $order->getData();
                     $message->metaData->payment = $order->getPayment()->getData();
                     $this->forterLogger->SendLog($message);
@@ -195,7 +195,7 @@ class PaymentPlaceEnd implements ObserverInterface
                 $order->setForterStatus('error');
                 $order->addStatusHistoryComment(__('Forter (post) Decision: %1', 'error'));
                 $order->save();
-                $message = new ForterLoggerMessage($this->forterConfig->getSiteId(),  $order->getIncrementId(), 'Post-Auth');
+                $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'Post-Auth');
                 $message->metaData->order = $order->getData();
                 $message->metaData->payment = $order->getPayment()->getData();
                 $message->metaData->decision = $forterResponse->action;
@@ -204,10 +204,11 @@ class PaymentPlaceEnd implements ObserverInterface
             }
 
             $order->setForterStatus($forterResponse->action);
-            $order->addStatusHistoryComment(__('Forter (post) Decision: %1', $forterResponse->action));
+            $order->addStatusHistoryComment(__('Forter (post) Decision: %1%2', $forterResponse->action, $this->forterConfig->getResponseRecommendationsNote($forterResponse)));
             $this->handleResponse($forterResponse->action, $order);
+            $this->abstractApi->triggerRecommendationEvents($forterResponse, $order, 'post');
 
-            $message = new ForterLoggerMessage($this->forterConfig->getSiteId(),  $order->getIncrementId(), 'Post-Auth');
+            $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'Post-Auth');
             $message->metaData->order = $order->getData();
             $message->metaData->payment = $order->getPayment()->getData();
             $message->metaData->decision = $forterResponse->action;
@@ -231,7 +232,7 @@ class PaymentPlaceEnd implements ObserverInterface
             }
         }
         if ($this->forterConfig->isDebugEnabled()) {
-            $message = new ForterLoggerMessage($order->getStore()->getWebsiteId(),  $order->getIncrementId(), 'Handling Order With Forter');
+            $message = new ForterLoggerMessage($order->getStore()->getWebsiteId(), $order->getIncrementId(), 'Handling Order With Forter');
             $message->metaData->order = $order->getData();
             $message->metaData->payment = $order->getPayment()->getData();
             $message->metaData->forterDecision = $forterDecision;
@@ -279,7 +280,7 @@ class PaymentPlaceEnd implements ObserverInterface
         $currentTime = $this->dateTime->gmtDate();
         $this->forterConfig->log('Increment ID:' . $order->getIncrementId());
         if ($this->forterConfig->isDebugEnabled()) {
-            $message = new ForterLoggerMessage($this->forterConfig->getSiteId(),  $order->getIncrementId(), 'processing message to queue');
+            $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'processing message to queue');
             $message->metaData->order = $order->getData();
             $message->metaData->payment = $order->getPayment();
             $message->metaData->currentTime = $currentTime;

@@ -3,9 +3,13 @@
 namespace Forter\Forter\Block\Adminhtml\Order\View\Tab;
 
 use Magento\Backend\Block\Template\Context;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\Phrase;
 use Magento\Framework\Registry;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Helper\Admin;
+use Magento\Sales\Model\Order;
+use Forter\Forter\Model\Config as ForterConfig;
 
 /**
  * Class Forter
@@ -15,38 +19,47 @@ class Forter extends \Magento\Sales\Block\Adminhtml\Order\AbstractOrder implemen
     \Magento\Backend\Block\Widget\Tab\TabInterface
 {
     /**
-     * order Object
+     * @var OrderInterface
      */
     protected $orderInterface;
 
     /**
-     * @var \Magento\Framework\App\Config\ScopeConfigInterface
+     * @var ScopeConfigInterface
      */
     protected $scopeConfig;
 
     /**
-     * invoice constructor.
-     * @param \Magento\Backend\Block\Template\Context $context
-     * @param \Magento\Framework\Registry $registry
-     * @param \Magento\Sales\Api\Data\OrderInterface $orderInterface
-     * @param \Magento\Sales\Helper\Admin $adminHelper
-     * @param array $data
+     * @var ForterConfig
+     */
+    private $forterConfig;
+
+    /**
+     * @method __construct
+     * @param  ScopeConfigInterface $scopeConfig
+     * @param  Context              $context
+     * @param  Registry             $registry
+     * @param  OrderInterface       $orderInterface
+     * @param  Admin                $adminHelper
+     * @param  ForterConfig         $forterConfig
+     * @param  array                $data
      */
     public function __construct(
-        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
+        ScopeConfigInterface $scopeConfig,
         Context $context,
         Registry $registry,
         OrderInterface $orderInterface,
         Admin $adminHelper,
+        ForterConfig $forterConfig,
         array $data = []
     ) {
+        parent::__construct($context, $registry, $adminHelper, $data);
         $this->orderInterface = $orderInterface;
         $this->scopeConfig = $scopeConfig;
-        parent::__construct($context, $registry, $adminHelper, $data);
+        $this->forterConfig = $forterConfig;
     }
 
     /**
-     * @return \Magento\Framework\Phrase
+     * @return Phrase
      */
     public function getTabLabel()
     {
@@ -54,7 +67,7 @@ class Forter extends \Magento\Sales\Block\Adminhtml\Order\AbstractOrder implemen
     }
 
     /**
-     * @return \Magento\Framework\Phrase
+     * @return Phrase
      */
     public function getTabTitle()
     {
@@ -87,11 +100,21 @@ class Forter extends \Magento\Sales\Block\Adminhtml\Order\AbstractOrder implemen
     }
 
     /**
-     * @return \Magento\Sales\Model\Order
+     * @return Order
      */
     public function getOrder()
     {
         $order_id = $this->getRequest()->getParam('order_id');
         return $this->orderInterface->load($order_id);
+    }
+
+    /**
+     * @method getRecommendationMessageByKey
+     * @param  string                        $recommendationKey
+     * @return string
+     */
+    public function getRecommendationMessageByKey($recommendationKey)
+    {
+        return $this->forterConfig->getRecommendationMessageByKey($recommendationKey);
     }
 }
