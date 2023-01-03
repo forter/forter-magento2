@@ -11,15 +11,13 @@
     "license": [
         "proprietary"
     ],
-    "version": "2.4.7",
-    "authors": [
-        {
-            "name": "Forter Dev",
-            "email": "support@forter.com",
-            "role": "Developer",
-            "homepage": "https://www.forter.com/"
-        }
-    ],
+    "version": "2.4.8",
+    "authors": [{
+        "name": "Forter Dev",
+        "email": "support@forter.com",
+        "role": "Developer",
+        "homepage": "https://www.forter.com/"
+    }],
     "autoload": {
         "files": [
             "registration.php"

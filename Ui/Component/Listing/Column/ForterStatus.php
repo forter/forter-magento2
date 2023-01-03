@@ -7,6 +7,7 @@ use Magento\Framework\View\Element\UiComponent\ContextInterface;
 use Magento\Framework\View\Element\UiComponentFactory;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Ui\Component\Listing\Columns\Column;
+use Forter\Forter\Model\Config as ForterConfig;
 
 /**
  * Class ForterStatus
@@ -15,9 +16,15 @@ use Magento\Ui\Component\Listing\Columns\Column;
 class ForterStatus extends Column
 {
     /**
+     * @var ForterConfig
+     */
+    private $forterConfig;
+
+    /**
      * @var OrderRepositoryInterface
      */
     protected $_orderRepository;
+
     /**
      * @var SearchCriteriaBuilder
      */
@@ -29,6 +36,7 @@ class ForterStatus extends Column
      * @param UiComponentFactory $uiComponentFactory
      * @param OrderRepositoryInterface $orderRepository
      * @param SearchCriteriaBuilder $criteria
+     * @param ForterConfig $forterConfig
      * @param array $components
      * @param array $data
      */
@@ -37,12 +45,14 @@ class ForterStatus extends Column
         UiComponentFactory $uiComponentFactory,
         OrderRepositoryInterface $orderRepository,
         SearchCriteriaBuilder $criteria,
+        ForterConfig $forterConfig,
         array $components = [],
         array $data = []
     ) {
+        parent::__construct($context, $uiComponentFactory, $components, $data);
         $this->_orderRepository = $orderRepository;
         $this->_searchCriteria = $criteria;
-        parent::__construct($context, $uiComponentFactory, $components, $data);
+        $this->forterConfig = $forterConfig;
     }
 
     /**
@@ -54,10 +64,12 @@ class ForterStatus extends Column
         if (isset($dataSource['data']['items'])) {
             foreach ($dataSource['data']['items'] as & $item) {
                 $order = $this->_orderRepository->get($item["entity_id"]);
-
-                $order_id = $order->getEntityId();
-
-                $item[$this->getData('name')] = $order->getForterStatus();
+                $columnData = $order->getForterStatus();
+                if (($forterResponse = $order->getForterResponse())) {
+                    $forterResponse = json_decode((string) $forterResponse);
+                    $columnData .= $this->forterConfig->getResponseRecommendationsNote($forterResponse, false);
+                }
+                $item[$this->getData('name')] = $columnData;
             }
         }
         return $dataSource;

@@ -3,10 +3,9 @@
  * @var Eset\License\Block\Adminhtml\Order\View\Tab\Invoice $block
  */
 $adminOrder = false;
-$order = $this->getOrder();
+$order = $block->getOrder();
 $forterResponse = $order->getData('forter_response');
-$forterResponse = is_null( $forterResponse ) ? [] : json_decode($forterResponse);
-
+$forterResponse = is_null($forterResponse) ? [] : json_decode($forterResponse);
 ?>
 
 <section class="admin__page-section">
@@ -35,7 +34,24 @@ $forterResponse = is_null( $forterResponse ) ? [] : json_decode($forterResponse)
             <span class="title"><?php echo __("Forter Action (Decision)"); ?></span>
         </div>
         <div class="admin__page-section-item-content invoice_item_content">
-            <div class=""><?php echo $forterResponse->action;?></div>
+            <div class=""><?php echo $forterResponse->action ?></div>
+        </div>
+    </div>
+</section>
+<?php endif; ?>
+
+<?php if (!empty($forterResponse->recommendations) && is_array($forterResponse->recommendations)): ?>
+<section class="admin__page-section">
+    <div class="admin__page-section-content">
+        <div class="admin__page-section-item-title invoice_item_title">
+            <span class="title"><?php echo __("Forter Recommendations"); ?></span>
+        </div>
+        <div class="admin__page-section-item-content invoice_item_content">
+            <?php foreach ($forterResponse->recommendations as $recommendation): ?>
+                <?php if ($recommendation && is_string($recommendation)): ?>
+                    <div><?php echo $block->getRecommendationMessageByKey($recommendation) ?> (<?php echo $recommendation; ?>)</div>
+                <?php endif; ?>
+            <?php endforeach; ?>
         </div>
     </div>
 </section>

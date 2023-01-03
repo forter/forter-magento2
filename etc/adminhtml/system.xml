@@ -26,9 +26,6 @@
                 </field>
                 <field id="api_version" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Forter API Version</label>
-                    <comment>
-                        Only change if instructed by Forter.
-                    </comment>
                 </field>
                 <field id="module_version" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Extension Version</label>

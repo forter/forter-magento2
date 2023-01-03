@@ -29,9 +29,9 @@ class Config
     /**
      *
      */
-    const MODULE_NAME = 'Forter_Forter';
+    public const MODULE_NAME = 'Forter_Forter';
 
-    const VERIFICATION_RESULTS_DEFAULT_FIELDS = [
+    public const VERIFICATION_RESULTS_DEFAULT_FIELDS = [
         "authorizationCode",
         "authorizationPolicy",
         "avsFullResult",
@@ -43,6 +43,16 @@ class Config
         "eciValue",
         "processorResponseCode",
         "processorResponseText"
+    ];
+
+    public const RECOMENDATION_KEYS_MESSAGES_MAP = [
+        "ROUTING_RECOMMENDED" => "Re-route",
+        "ID_VERIFICATION_REQUIRED" => "ID Verification",
+        "MONITOR_POTENTIAL_COUPON_ABUSE" => "Coupon Abuse",
+        "MONITOR_POTENTIAL_SELLER_COLLUSION" => "Seller Collusion",
+        "MONITOR_POTENTIAL_REFUND_ABUSE" => "Refund Abuse",
+        "DECLINE_CHANEL_ABUSER" => "Channel Abuse",
+        "BORDERLINE" => "Borderline",
     ];
 
     /**
@@ -540,7 +550,7 @@ class Config
     public function getVerificationResultsMap($scope = null, $scopeId = null)
     {
         if ($this->verificationResultMap === null) {
-            $this->verificationResultMap = is_null($this->scopeConfig->getValue('forter/advanced_settings/verification_results_map',\Magento\Store\Model\ScopeInterface::SCOPE_STORE) ) ? [] : json_decode($this->scopeConfig->getValue('forter/advanced_settings/verification_results_map',\Magento\Store\Model\ScopeInterface::SCOPE_STORE), true);
+            $this->verificationResultMap = is_null($this->scopeConfig->getValue('forter/advanced_settings/verification_results_map', \Magento\Store\Model\ScopeInterface::SCOPE_STORE)) ? [] : json_decode($this->scopeConfig->getValue('forter/advanced_settings/verification_results_map', \Magento\Store\Model\ScopeInterface::SCOPE_STORE), true);
         }
         return $this->verificationResultMap;
     }
@@ -701,5 +711,62 @@ class Config
             default:
                 return $result;
         }
+    }
+
+
+    /**
+     * Convert Forter recommendation key to a human readable message (by internal map).
+     * @method getRecommendationMessageByKey
+     * @param  string                        $recommendationKey
+     * @return string
+     */
+    public function getRecommendationMessageByKey($recommendationKey)
+    {
+        if (!$recommendationKey || !is_string($recommendationKey)) {
+            return '';
+        }
+        if (isset(self::RECOMENDATION_KEYS_MESSAGES_MAP[$recommendationKey])) {
+            return __(self::RECOMENDATION_KEYS_MESSAGES_MAP[$recommendationKey]);
+        }
+        return __($recommendationKey);
+    }
+
+    /**
+     * @method getRecommendationsFromResponse
+     * @param  object                         $forterResponse
+     * @return string[]
+     */
+    public function getRecommendationsFromResponse($forterResponse)
+    {
+        if (
+            is_object($forterResponse) &&
+            !empty($forterResponse->recommendations) &&
+            is_array($forterResponse->recommendations)
+        ) {
+            return $forterResponse->recommendations;
+        }
+        return [];
+    }
+
+    /**
+     * @method getResponseRecommendationsNote
+     * @param  object                         $forterResponse
+     * @param  string                         $recommendationsHeading ('recommendations')
+     * @param  object                         $prefix (space)
+     * @return string
+     */
+    public function getResponseRecommendationsNote($forterResponse, $recommendationsHeading = 'recommendations', $prefix = ' ')
+    {
+        if (($recommendations = $this->getRecommendationsFromResponse($forterResponse))) {
+            $recommendations = implode(
+                ', ',
+                array_map(function ($recommendation) {
+                    return self::getRecommendationMessageByKey($recommendation);
+                }, $recommendations)
+            );
+            $recommendationsHeading = $recommendationsHeading ? __('%1: ', $recommendationsHeading) : '';
+            return $prefix . __('(%1%2)', $recommendationsHeading, $recommendations);
+        }
+        return '';
     }
 }
