@@ -174,6 +174,9 @@ class PaymentPlaceStart implements ObserverInterface
 
             $order->getPayment()->setAdditionalInformation('forter_client_details', $connectionInformation);
 
+            $this->forterLogger->forterConfig->log('Forter Client Details');
+            $this->forterLogger->forterConfig->log('Connection Information for Order ' . $order->getIncrementId() . ' : ' . json_encode($connectionInformation));
+
             if ($this->config->getIsPost() && !$this->config->getIsPreAndPost()) {
                 return;
             }
@@ -196,9 +199,13 @@ class PaymentPlaceStart implements ObserverInterface
             $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
             $response = $this->abstractApi->sendApiRequest($url, json_encode($data));
 
+            $this->forterLogger->forterConfig->log('BEFORE_PAYMENT_ACTION Order ' . $order->getIncrementId() . ' Data: ' . json_encode($data));
+
             $this->abstractApi->sendOrderStatus($order);
 
             $order->setForterResponse($response);
+
+            $this->forterLogger->forterConfig->log($response);
 
             $response = json_decode($response);
 

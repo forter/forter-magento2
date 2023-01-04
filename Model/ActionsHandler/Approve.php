@@ -96,6 +96,7 @@ class Approve
                     $invoices = $invoices->getFirstItem();
                     $invoice = $this->_invoiceRepository->get($invoices->getId());
                     $this->forterConfig->addCommentToOrder($order, 'Forter: Invoice Already Created for This Order');
+                    $this->forterConfig->log('Forter: Invoice Already Created for orderId ' . $order->getIncrementId());
                     return $invoice;
                 }
 
@@ -103,6 +104,7 @@ class Approve
                     $order->setCustomerNoteNotify(false);
                     $order->setIsInProcess(true);
                     $this->forterConfig->addCommentToOrder($order, 'Magento faild Creating invoice');
+                    $this->forterConfig->log('Magento faild Creating invoice for orderId ' . $order->getIncrementId());
                     return null;
                 }
 
@@ -112,6 +114,7 @@ class Approve
                 $invoice->getOrder()->setCustomerNoteNotify(false);
                 $invoice->getOrder()->setIsInProcess(true);
                 $this->forterConfig->addCommentToOrder($order, 'Invoice Has been Created');
+                $this->forterConfig->log('Invoice Has been Created for orderId ' . $order->getIncrementId());
                 $transactionSave = $this->_transactionFactory->create()->addObject($invoice)->addObject($invoice->getOrder());
                 $transactionSave->save();
 
@@ -119,6 +122,7 @@ class Approve
             }
         } catch (\Exception $e) {
             $this->forterConfig->addCommentToOrder($order, 'Forter: Magento Failed to Create Invoice. Internal Error');
+            $this->forterConfig->log('Forter: Magento Failed to Create Invoice. Internal Error - orderId ' . $order->getIncrementId());
             $this->abstractApi->reportToForterOnCatch($e);
         }
     }

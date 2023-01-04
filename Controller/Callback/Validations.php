@@ -157,7 +157,7 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
             $bodyRawParams = json_decode($request->getContent(), true);
 
             if ($siteId != $this->forterConfig->getSiteId()) {
-                throw new \Exception("Forter: Site Id Validation Faild");
+                throw new \Exception("Forter: Site Id Validation Failed");
             }
 
             if ($hash != $this->calculateHash($siteId, $key, $bodyRawParams)) {
@@ -293,9 +293,9 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
             ->setEntityBody($type)
             ->setSyncDate($currentTime)
             ->save();
-            $message = new ForterLoggerMessage($this->forterConfig->getSiteId(),  $order->getIncrementId(), 'Sending Message To Que');
-            $message->metaData->order = $order->getData();
-            $this->forterLogger->SendLog($message);
+        $message = new ForterLoggerMessage($this->forterConfig->getSiteId(),  $order->getIncrementId(), 'Sending Message To Que');
+        $message->metaData->order = $order->getData();
+        $this->forterLogger->SendLog($message);
     }
 
     public function createCsrfValidationException(RequestInterface $request): ? InvalidRequestException
