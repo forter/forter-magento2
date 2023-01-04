@@ -39,4 +39,9 @@
 			</argument>
 		</arguments>
 	</type>
+	<type name="Forter\Forter\Model\AbstractApi">
+		<arguments>
+			<argument name="serializer" xsi:type="object">Magento\Framework\Serialize\Serializer\Serialize</argument>
+		</arguments>
+	</type>
 </config>
