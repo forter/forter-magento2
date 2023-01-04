@@ -64,12 +64,16 @@ class OrderSaveBefore implements ObserverInterface
             $orderState = $order->getState();
             $orderOrigState = $order->getOrigData('state');
 
+            $this->forterLogger->forterConfig->log('Send order status to Forter - Order State :' . $orderState,"debug");
+
             if ($orderState == 'complete' && $orderOrigState != 'complete') {
                 $orderState = 'COMPLETED';
             } elseif ($orderState == 'processing' && $orderOrigState != 'processing') {
                 $orderState = 'PROCESSING';
             } elseif ($orderState == 'canceled' && $orderOrigState != 'canceled') {
                 $orderState = 'CANCELED_BY_MERCHANT';
+                $this->forterLogger->forterConfig->log('Order ' . $order->getIncrementId() . ' Canceled By Merchant - Data : ' . json_encode($order->getData()));
+                $this->forterLogger->forterConfig->log('Order ' . $order->getIncrementId() . ' Canceled By Merchant - Payment Data : ' . json_encode($order->getPayment()->getData()));
             } else {
                 return false;
             }
@@ -85,6 +89,7 @@ class OrderSaveBefore implements ObserverInterface
             $message->metaData->orderState = $orderState;
             $message->metaData->orderOrigState = $orderOrigState;
             $this->forterLogger->SendLog($message);
+            $this->forterLogger->forterConfig->log('Order ' . $order->getIncrementId() . ' Payment Data: ' . json_encode($order->getPayment()->getData()));
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }
