@@ -256,6 +256,10 @@ class AbstractApi
 
         $paymentMethod = $order->getPayment()->getMethod();
         switch ($paymentMethod) {
+            case 'worldpay_apm':
+            case 'worldpay_cc':
+                $this->worldpayAdditionalInformation($paymentMethod);
+                break;
             case 'adyen_cc':
             case 'adyen_hpp':
                 $this->adyenAdditionalPaymentData($order);
@@ -268,6 +272,45 @@ class AbstractApi
         }
     }
 
+    /**
+     * @param $method
+     * @return void
+     */
+    public function worldpayAdditionalInformation($method)
+    {
+        try {
+            if (!$this->forterConfig->isEnabled()) {
+                return;
+            }
+
+            if ($method == 'worldpay_cc' || $method == 'worldpay_apm') {
+                $connection = $this->resource->getConnection();
+                $tableName = $this->resource->getTableName('worldpay_payment');
+                $select_sql = "Select * FROM " . $tableName . " Where order_id=" . $this->json['orderId'];
+                $dataSet = $connection->fetchAll($select_sql);
+                $worldPayPayment = $dataSet[0];
+                if (isset($worldPayPayment['card_number'])) {
+                    $this->json['payment'][0]['creditCard']['bin'] = substr($worldPayPayment['card_number'], 0, 6);
+                    $this->json['payment'][0]['creditCard']['lastFourDigits'] = substr($worldPayPayment['card_number'], -4);
+                }
+
+                if (isset($worldPayPayment['payment_type'])) {
+                    $this->json['payment'][0]['creditCard']['cardBrand'] = $worldPayPayment['payment_type'];
+                }
+
+                if (isset($worldPayPayment['cvc_result'])) {
+                    $this->json['payment'][0]['creditCard']['verificationResults']['cvvResult'] = $worldPayPayment['cvc_result'];
+                }
+
+                if (isset($worldPayPayment['avs_result'])) {
+                    $this->json['payment'][0]['creditCard']['verificationResults']['avsFullResult'] = $worldPayPayment['avs_result'];
+                }
+            }
+
+        } catch (\Exception $e) {
+            $this->reportToForterOnCatch($e);
+        }
+    }
 
     /**
      * @param $order
