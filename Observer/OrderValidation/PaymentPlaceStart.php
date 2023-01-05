@@ -28,7 +28,7 @@ class PaymentPlaceStart implements ObserverInterface
     /**
      *
      */
-    const VALIDATION_API_ENDPOINT = 'https://api.forter-secure.com/v2/orders/';
+    public const VALIDATION_API_ENDPOINT = 'https://api.forter-secure.com/v2/orders/';
 
     /**
      * @var Decline
@@ -197,42 +197,43 @@ class PaymentPlaceStart implements ObserverInterface
             $data = $this->requestBuilderOrder->buildTransaction($order, 'BEFORE_PAYMENT_ACTION');
 
             $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
-            $response = $this->abstractApi->sendApiRequest($url, json_encode($data));
+            $forterResponse = $this->abstractApi->sendApiRequest($url, json_encode($data));
 
             $this->forterLogger->forterConfig->log('BEFORE_PAYMENT_ACTION Order ' . $order->getIncrementId() . ' Data: ' . json_encode($data));
 
             $this->abstractApi->sendOrderStatus($order);
 
-            $order->setForterResponse($response);
+            $order->setForterResponse($forterResponse);
 
-            $this->forterLogger->forterConfig->log($response);
+            $this->forterLogger->forterConfig->log($forterResponse);
 
-            $response = json_decode($response);
+            $forterResponse = json_decode($forterResponse);
 
-            if ($response->status != 'success' || !isset($response->action)) {
+            if ($forterResponse->status != 'success' || !isset($forterResponse->action)) {
                 $this->registry->register('forter_pre_decision', 'error');
                 $order->setForterStatus('error');
-                $message = new ForterLoggerMessage($this->config->getSiteId(),  $order->getIncrementId(), 'Response Error - Pre-Auth');
+                $message = new ForterLoggerMessage($this->config->getSiteId(), $order->getIncrementId(), 'Response Error - Pre-Auth');
                 $message->metaData->order = $order->getData();
                 $message->metaData->payment = $order->getPayment()->getData();
-                $message->metaData->forterDecision = $response->action;
+                $message->metaData->forterDecision = $forterResponse->action;
                 $this->forterLogger->SendLog($message);
                 return;
             }
 
-            $this->registry->register('forter_pre_decision', $response->action);
-            $order->setForterStatus($response->action);
-            $order->addStatusHistoryComment(__('Forter (pre) Decision: %1', $response->action));
-            if ($response->action != 'decline') {
+            $this->registry->register('forter_pre_decision', $forterResponse->action);
+            $order->setForterStatus($forterResponse->action);
+            $order->addStatusHistoryComment(__('Forter (pre) Decision: %1%2', $forterResponse->action, $this->config->getResponseRecommendationsNote($forterResponse)));
+            $this->abstractApi->triggerRecommendationEvents($forterResponse, $order, 'pre');
+            if ($forterResponse->action != 'decline') {
                 return;
             }
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }
-        $message = new ForterLoggerMessage($this->config->getSiteId(),  $order->getIncrementId(), 'Handle Response - Pre-Auth');
+        $message = new ForterLoggerMessage($this->config->getSiteId(), $order->getIncrementId(), 'Handle Response - Pre-Auth');
         $message->metaData->order = $order->getData();
         $message->metaData->payment = $order->getPayment()->getData();
-        $message->metaData->forterDecision = $response->action;
+        $message->metaData->forterDecision = $forterResponse->action;
         $this->forterLogger->SendLog($message);
         $this->decline->handlePreTransactionDescision($order);
     }

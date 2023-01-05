@@ -24,7 +24,7 @@ class SendQueue
     /**
      *
      */
-    const VALIDATION_API_ENDPOINT = 'https://api.forter-secure.com/v2/orders/';
+    public const VALIDATION_API_ENDPOINT = 'https://api.forter-secure.com/v2/orders/';
     /**
      * @var Decline
      */
@@ -120,7 +120,7 @@ class SendQueue
 
                 if ($item->getEntityType() == 'pre_sync_order') {
                     if (strpos($method ?? '', 'adyen') !== false && !$order->getPayment()->getAdyenPspReference()) {
-                        $message = new ForterLoggerMessage($this->forterConfig->getSiteId(),  $order->getIncrementId(), 'Skip Adyen Order Missing Data');
+                        $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'Skip Adyen Order Missing Data');
                         $message->metaData->order = $order->getData();
                         $message->metaData->payment = $order->getPayment()->getData();
                         $message->proccessItem = $item;
@@ -129,7 +129,7 @@ class SendQueue
                     }
                     $result = $this->handlePreSyncMethod($order, $item);
                     if (!$result) {
-                        $message = new ForterLoggerMessage($this->forterConfig->getSiteId(),  $order->getIncrementId(), 'No Mapped CC Adyen');
+                        $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'No Mapped CC Adyen');
                         $message->metaData->order = $order->getData();
                         $message->metaData->payment = $order->getPayment()->getData();
                         $message->proccessItem = $item;
@@ -145,7 +145,7 @@ class SendQueue
 
 
                 $item->save();
-                $message = new ForterLoggerMessage($this->forterConfig->getSiteId(),  $order->getIncrementId(), 'CRON Validation Finished');
+                $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'CRON Validation Finished');
                 $message->metaData->order = $order;
                 $message->metaData->payment = $order->getPayment()->getData();
                 $message->proccessItem = $item;
@@ -178,7 +178,7 @@ class SendQueue
                 }
                 $creditCard = $data['payment'][0]['creditCard'];
                 if (!array_key_exists('expirationMonth', $creditCard) || !array_key_exists('expirationYear', $creditCard) || !array_key_exists('lastFourDigits', $creditCard)) {
-                    $message = new ForterLoggerMessage($this->forterConfig->getSiteId(),  $order->getIncrementId(), 'No Mapped CC Details Adyen');
+                    $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'No Mapped CC Details Adyen');
                     $message->metaData->order = $order->getData();
                     $message->metaData->payment = $order->getPayment();
                     $message->proccessItem = $data;
@@ -194,16 +194,16 @@ class SendQueue
             $this->forterConfig->log('Request for Order ' . $order->getIncrementId() . ': ' . json_encode($data));
             $this->forterConfig->log('Responsefor Order ' . $order->getIncrementId() . ': ' . $response);
 
-            $responseArray = json_decode($response);
+            $forterResponse = json_decode($response);
 
             $this->abstractApi->sendOrderStatus($order);
 
             $order->setForterResponse($response);
 
-            if ($responseArray->status != 'success' || !isset($responseArray->action)) {
+            if ($forterResponse->status != 'success' || !isset($forterResponse->action)) {
                 $order->setForterStatus('error');
                 $order->save();
-                $message = new ForterLoggerMessage($this->forterConfig->getSiteId(),  $order->getIncrementId(), 'Response Error - SendQueue');
+                $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'Response Error - SendQueue');
                 $message->metaData->order = $order->getData();
                 $message->metaData->payment = $order->getPayment();
                 $message->proccessItem = $data;
@@ -214,20 +214,21 @@ class SendQueue
                 return true;
             }
 
-            $this->handleForterResponse($order, $responseArray->action);
-            $order->addStatusHistoryComment(__('Forter (cron) Decision: %1', $responseArray->action));
-            $order->setForterStatus($responseArray->action);
+            $this->handleForterResponse($order, $forterResponse->action);
+            $this->abstractApi->triggerRecommendationEvents($forterResponse, $order, 'cron');
+            $order->addStatusHistoryComment(__('Forter (cron) Decision: %1%2', $forterResponse->action, $this->forterConfig->getResponseRecommendationsNote($forterResponse)));
+            $order->setForterStatus($forterResponse->action);
             $order->save();
 
-            $message = new ForterLoggerMessage($this->forterConfig->getSiteId(),  $order->getIncrementId(), 'Forter CRON Decision');
+            $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'Forter CRON Decision');
             $message->metaData->order = $order->getData();
             $message->metaData->payment = $order->getPayment();
-            $message->metaData->forterStatus = $responseArray->action;
+            $message->metaData->forterStatus = $forterResponse->action;
             $this->forterLogger->SendLog($message);
 
             $this->forterConfig->log('Payment Data for Order ' . $order->getIncrementId() . ' - Payment Data: ' . json_encode($order->getPayment()->getData()));
 
-            return $responseArray->status ? true : false;
+            return $forterResponse->status ? true : false;
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }

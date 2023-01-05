@@ -9,7 +9,7 @@ use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\HTTP\Client\Curl as ClientInterface;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\Serialize\SerializerInterface;
-
+use Magento\Framework\Event\ManagerInterface;
 
 /**
  * Class AbstractApi
@@ -20,7 +20,7 @@ class AbstractApi
     /**
      *
      */
-    const ERROR_ENDPOINT = 'https://api.forter-secure.com/errors/';
+    public const ERROR_ENDPOINT = 'https://api.forter-secure.com/errors/';
 
     /**
      * Payment Prefer
@@ -63,11 +63,17 @@ class AbstractApi
 
 
     /**
+     * @var ManagerInterface
+     */
+    private $eventManager;
+
+    /**
      * @method __construct
-     * @param PaymentPrepere $paymentPrepere
-     * @param Session $checkoutSession
-     * @param ClientInterface $clientInterface
-     * @param ForterConfig $forterConfig
+     * @param  PaymentPrepere   $paymentPrepere
+     * @param  Session          $checkoutSession
+     * @param  ClientInterface  $clientInterface
+     * @param  ForterConfig     $forterConfig
+     * @param  ManagerInterface $eventManager
      * @param ObjectManagerInterface $objectManager
      * @param ResourceConnection $resource
      */
@@ -78,7 +84,8 @@ class AbstractApi
         ForterConfig $forterConfig,
         ObjectManagerInterface $objectManager,
         ResourceConnection $resource,
-        SerializerInterface $serializer
+        SerializerInterface $serializer,
+        ManagerInterface $eventManager
     ) {
         $this->paymentPrepere = $paymentPrepere;
         $this->checkoutSession = $checkoutSession;
@@ -87,6 +94,7 @@ class AbstractApi
         $this->objectManager = $objectManager;
         $this->resource = $resource;
         $this->serializer = $serializer ?: ObjectManager::getInstance()->get(SerializerInterface::class);
+        $this->eventManager = $eventManager;
     }
 
     /**
@@ -102,7 +110,7 @@ class AbstractApi
             do {
                 $tries++;
                 $timeOutStatus = $this->calcTimeOut($tries);
-                $this->setCurlOptions(strlen($data ?? '') , $tries);
+                $this->setCurlOptions(strlen($data ?? ''), $tries);
                 $this->forterConfig->log('[Forter Request attempt number] ' . $tries, "debug");
                 $this->forterConfig->log('[Forter Request Url] ' . $url, "debug");
                 $this->forterConfig->log('[Forter Request Body] ' . $data, "debug");
@@ -531,9 +539,42 @@ class AbstractApi
                 $this->json['payment'][0]['creditCard']['fullResponsePayload'] = $paymentCheckoutCom;
             }
             return;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->reportToForterOnCatch($e);
         }
         return;
+    }
+
+    /**
+     * @method triggerRecommendationEvents
+     * @param  object                         $response
+     * @param  object                         $order
+     * @param  string                         $timing (pre / post / cron)
+     * @return AbstractApi
+     */
+    public function triggerRecommendationEvents($response, $order, $timing = null)
+    {
+        if (($recommendations = $this->forterConfig->getRecommendationsFromResponse($response))) {
+            foreach ($recommendations as $recommendation) {
+                if (!$recommendation || !is_string($recommendation)) {
+                    continue;
+                }
+
+                $eventName = 'forter_recommendation_' . strtolower(preg_replace('/\s+/', '_', $recommendation));
+                $eventData = [
+                    'recommendation' => $recommendation,
+                    'forter_response' => $response,
+                    'order' => $order,
+                    'timing' => $timing
+                ];
+
+                $this->eventManager->dispatch($eventName, $eventData);
+
+                $eventData['order_increment_id'] = $order->getIncrementId(); //Log only order increment ID instead of the whole object.
+                $this->forterConfig->log('[Recommendation Event Triggered] ' . $eventName, "debug", ['event_data' => $eventData]);
+            }
+        }
+
+        return $this;
     }
 }
