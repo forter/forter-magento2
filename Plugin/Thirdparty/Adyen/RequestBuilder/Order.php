@@ -2,7 +2,7 @@
 
 namespace Forter\Forter\Plugin\Thirdparty\Adyen\RequestBuilder;
 
-use Adyen\Payment\Model\ResourceModel\Notification\CollectionFactory;
+use Magento\Framework\ObjectManagerInterface;
 use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\Config;
 use Forter\Forter\Model\RequestBuilder\Order as RequestBuilderOrder;
@@ -22,10 +22,9 @@ class Order
     protected $abstractApi;
 
     /**
-     *
-     * @var CollectionFactory
+     * @var ObjectManagerInterface
      */
-    protected $_notificationFactory;
+    private $objectManager;
 
     /**
      * Order Plugin constructor.
@@ -34,9 +33,9 @@ class Order
     public function __construct(
         Config $forterConfig,
         AbstractApi $abstractApi,
-        CollectionFactory $notificationFactory
+        ObjectManagerInterface $objectManager
     ) {
-        $this->_notificationFactory = $notificationFactory;
+        $this->objectManager = $objectManager;
         $this->forterConfig = $forterConfig;
         $this->abstractApi = $abstractApi;
     }
@@ -61,7 +60,8 @@ class Order
 
             $result = $proceed($order, $orderStage);
 
-            $notifications = $this->_notificationFactory->create();
+            $notificationFactory = $this->objectManager->create('Adyen\Payment\Model\ResourceModel\Notification\CollectionFactory');
+            $notifications = $notificationFactory->create();
 
             $notifications->addFilter('merchant_reference', $result['orderId'], 'eq');
             $notifications->addFilter('event_code', 'AUTHORISATION', 'eq');

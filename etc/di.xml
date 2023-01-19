@@ -39,11 +39,6 @@
 			</argument>
 		</arguments>
 	</type>
-	<type name="Forter\Forter\Model\AbstractApi">
-		<arguments>
-			<argument name="serializer" xsi:type="object">Magento\Framework\Serialize\Serializer\Serialize</argument>
-		</arguments>
-	</type>
 
 	<!-- Plugin Braintree functionality -->
 	<type name="Magento\Braintree\Gateway\Response\CardDetailsHandler">
