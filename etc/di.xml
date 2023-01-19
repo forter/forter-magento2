@@ -44,4 +44,53 @@
 			<argument name="serializer" xsi:type="object">Magento\Framework\Serialize\Serializer\Serialize</argument>
 		</arguments>
 	</type>
+
+	<!-- Plugin Braintree functionality -->
+	<type name="Magento\Braintree\Gateway\Response\CardDetailsHandler">
+   		<plugin 
+			name="forter_magento_braintree_card_details_handler" 
+			type="Forter\Forter\Plugin\Thirdparty\Braintree\Gateway\Response\CardDetailsHandler" />
+  	</type>
+
+	<!-- Plugin Braintree functionality -->
+	<type name="PayPal\Braintree\Gateway\Response\CardDetailsHandler">
+   		<plugin 
+			name="forter_paypal_braintree_card_details_handler" 
+			type="Forter\Forter\Plugin\Thirdparty\Braintree\Gateway\Response\CardDetailsHandler" />
+  	</type>
+
+	<!-- Plugin Worldpay functionality -->
+	<type name="Forter\Forter\Model\RequestBuilder\Order">
+    	<plugin 
+			name="forter_json_worldpay_plugin" 
+			type="Forter\Forter\Plugin\Thirdparty\Worldpay\RequestBuilder\Order" />
+  	</type>
+
+	<!-- Plugin Checkoutcom functionality -->
+	<type name="Forter\Forter\Model\RequestBuilder\Order">
+		<plugin 
+			name="forter_json_checkoutcom_plugin" 
+			type="Forter\Forter\Plugin\Thirdparty\Checkoutcom\RequestBuilder\Order" />
+  	</type>
+
+	<!-- Plugin Adyen functionality -->
+	<type name="Forter\Forter\Model\RequestBuilder\Order">
+		<plugin 
+			name="forter_json_adyen_plugin" 
+			type="Forter\Forter\Plugin\Thirdparty\Adyen\RequestBuilder\Order" />
+  	</type>
+
+	<!-- Plugin Paysafe functionality -->
+	<type name="Paysafe\Payment\Model\Adapter">
+        <plugin 
+			name="forter_paysafe_adapter_plugin" 
+			type="Forter\Forter\Plugin\Thirdparty\Paysafe\Adapter" />
+    </type>
+	 
+    <type name="Paysafe\Payment\Gateway\Http\Client\ClientMock">
+        <plugin 
+			name="forter_paysafe_clientmock_plugin" 
+			type="Forter\Forter\Plugin\Thirdparty\Paysafe\ClientMock" />
+    </type>
+
 </config>
