@@ -41,17 +41,10 @@
 	</type>
 
 	<!-- Plugin Braintree functionality -->
-	<type name="Magento\Braintree\Gateway\Response\CardDetailsHandler">
-   		<plugin 
-			name="forter_magento_braintree_card_details_handler" 
-			type="Forter\Forter\Plugin\Thirdparty\Braintree\Gateway\Response\CardDetailsHandler" />
-  	</type>
-
-	<!-- Plugin Braintree functionality -->
 	<type name="PayPal\Braintree\Gateway\Response\CardDetailsHandler">
    		<plugin 
 			name="forter_paypal_braintree_card_details_handler" 
-			type="Forter\Forter\Plugin\Thirdparty\Braintree\Gateway\Response\CardDetailsHandler" />
+			type="Forter\Forter\Plugin\Thirdparty\PaypalBraintree\Gateway\Response\CardDetailsHandler" />
   	</type>
 
 	<!-- Plugin Worldpay functionality -->

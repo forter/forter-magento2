@@ -1,6 +1,6 @@
 <?php
 
-namespace Forter\Forter\Plugin\Thirdparty\Braintree\Gateway\Response;
+namespace Forter\Forter\Plugin\Thirdparty\PaypalBraintree\Gateway\Response;
 
 use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\Config;
