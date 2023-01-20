@@ -166,10 +166,7 @@ class SendQueue
     private function handlePreSyncMethod($order, $item)
     {
         try {
-            $this->forterConfig->log('Start pre payment and validation state for order number ' . $order->getIncrementId());
             $data = $this->requestBuilderOrder->buildTransaction($order, 'AFTER_PAYMENT_ACTION');
-            $this->forterConfig->log('Pre Payment Validation Request Data: ' . json_encode($data));
-
             $paymentMethod = $data['payment'][0]['paymentMethodNickname'];
 
             if ($paymentMethod == 'adyen_cc') {
@@ -192,7 +189,7 @@ class SendQueue
             $response = $this->abstractApi->sendApiRequest($url, json_encode($data));
 
             $this->forterConfig->log('Request for Order ' . $order->getIncrementId() . ': ' . json_encode($data));
-            $this->forterConfig->log('Responsefor Order ' . $order->getIncrementId() . ': ' . $response);
+            $this->forterConfig->log('Response for Order ' . $order->getIncrementId() . ': ' . $response);
 
             $forterResponse = json_decode($response);
 

@@ -160,14 +160,10 @@ class PaymentPlaceEnd implements ObserverInterface
     {
         try {
             if (!$this->forterConfig->isEnabled() || (!$this->forterConfig->getIsPost() && !$this->forterConfig->getIsPreAndPost())) {
-
-                $this->forterConfig->log('Forter Pre-Decision started');
-
                 if ($this->registry->registry('forter_pre_decision')) {
                     $order = $observer->getEvent()->getPayment()->getOrder();
                     $order->addStatusHistoryComment(__('Forter (pre) Decision: %1', $this->registry->registry('forter_pre_decision')));
                     $order->save();
-                    $this->forterConfig->log('Added status (pre) Decision comment for order number: ' . $order->getIncrementId(),"debug");
                     $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'Pre-Auth');
                     $message->metaData->order = $order->getData();
                     $message->metaData->payment = $order->getPayment()->getData();
@@ -187,8 +183,6 @@ class PaymentPlaceEnd implements ObserverInterface
                 true
             );
 
-            $this->forterConfig->log('Start building transaction at AFTER_PAYMENT_ACTION orderStage - orderID ' . $order->getIncrementId());
-
             $data = $this->requestBuilderOrder->buildTransaction($order, 'AFTER_PAYMENT_ACTION');
             $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
             $forterResponse = $this->abstractApi->sendApiRequest($url, json_encode($data));
@@ -197,21 +191,15 @@ class PaymentPlaceEnd implements ObserverInterface
 
             $this->abstractApi->sendOrderStatus($order);
 
-            $this->forterConfig->log('Sent order status to Forter - orderID ' . $order->getIncrementId());
-
             $order->setForterResponse($forterResponse);
 
             $this->forterConfig->log('Forter Response for Order ' . $order->getIncrementId() . ': ' . $forterResponse);
 
             $forterResponse = json_decode($forterResponse);
 
-            $this->forterConfig->log('Forter Response received - orderID ' . $order->getIncrementId());
-
             if ($forterResponse->status != 'success' || !isset($forterResponse->action)) {
                 $order->setForterStatus('error');
                 $order->addStatusHistoryComment(__('Forter (post) Decision: %1', 'error'));
-                $this->forterConfig->log('Forter Response error - orderID ' . $order->getIncrementId());
-                $this->forterConfig->log('Response Error for Order ' . $order->getIncrementId() . ' - Order Data: ' . json_encode($order->getData()));
                 $this->forterConfig->log('Response Error for Order ' . $order->getIncrementId() . ' - Payment Data: ' . json_encode($order->getPayment()->getData()));
                 $order->save();
                 $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'Post-Auth');
@@ -223,7 +211,6 @@ class PaymentPlaceEnd implements ObserverInterface
             }
 
             $order->setForterStatus($forterResponse->action);
-            $this->forterConfig->log('Forter (post) Decision: - ' . $forterResponse->action . ' orderID ' . $order->getIncrementId());
             $order->addStatusHistoryComment(__('Forter (post) Decision: %1%2', $forterResponse->action, $this->forterConfig->getResponseRecommendationsNote($forterResponse)));
             $this->handleResponse($forterResponse->action, $order);
             $this->abstractApi->triggerRecommendationEvents($forterResponse, $order, 'post');
@@ -233,10 +220,7 @@ class PaymentPlaceEnd implements ObserverInterface
             $message->metaData->payment = $order->getPayment()->getData();
             $message->metaData->decision = $forterResponse->action;
             $this->forterLogger->SendLog($message);
-
-            $this->forterConfig->log('Order ' . $order->getIncrementId() . ' Data: ' . json_encode($order->getData()));
             $this->forterConfig->log('Order ' . $order->getIncrementId() .' Payment Data: ' . json_encode($order->getPayment()->getData()));
-
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }
@@ -246,17 +230,13 @@ class PaymentPlaceEnd implements ObserverInterface
     {
         if ($forterDecision == "decline") {
             $this->handleDecline($order);
-            $this->forterConfig->log('Order no. ' . $order->getIncrementId() . ' was declined');
         } elseif ($forterDecision == 'approve') {
             $this->handleApprove($order);
-            $this->forterConfig->log('Order no. ' . $order->getIncrementId() . ' was approved');
         } elseif ($forterDecision == "not reviewed") {
             $this->handleNotReviewed($order);
-            $this->forterConfig->log('Order no. ' . $order->getIncrementId() . ' was not reviewed');
         } elseif ($forterDecision == "pending" && $this->forterConfig->isPendingOnHoldEnabled()) {
             if ($order->canHold()) {
                 $this->decline->holdOrder($order);
-                $this->forterConfig->log('Order no. ' . $order->getIncrementId() . ' was set to on hold');
             }
         }
         if ($this->forterConfig->isDebugEnabled()) {

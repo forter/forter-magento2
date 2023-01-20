@@ -174,7 +174,6 @@ class PaymentPlaceStart implements ObserverInterface
 
             $order->getPayment()->setAdditionalInformation('forter_client_details', $connectionInformation);
 
-            $this->forterLogger->forterConfig->log('Forter Client Details');
             $this->forterLogger->forterConfig->log('Connection Information for Order ' . $order->getIncrementId() . ' : ' . json_encode($connectionInformation));
 
             if ($this->config->getIsPost() && !$this->config->getIsPreAndPost()) {

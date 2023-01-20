@@ -143,17 +143,12 @@ class Decline
         $order->cancel()->save();
         if ($order->isCanceled()) {
             $this->forterConfig->addCommentToOrder($order, 'Order Cancelled');
-            $this->forterConfig->log('Order Cancelled - orderID ' . $order->getIncrementId());
-            $this->forterConfig->log('Canceled Order '. $order->getIncrementId() . ' Data: ' . json_encode($order->getData()));
             $this->forterConfig->log('Canceled Order '. $order->getIncrementId() . ' Payment Data: ' .json_encode($order->getPayment()->getData()));
             return;
         }
 
         $this->forterConfig->addCommentToOrder($order, 'Order Cancellation attempt failed');
-        $this->forterConfig->log('Order Cancellation attempt failed - orderID ' . $order->getIncrementId());
-        $this->forterConfig->log('Cancellation Failure for Order ' . $order->getIncrementId() .' - Order Data: ' . json_encode($order->getData()));
         $this->forterConfig->log('Cancellation Failure for Order ' . $order->getIncrementId() .' - Payment Data: ' . json_encode($order->getPayment()->getData()));
-
         return;
     }
 
@@ -177,15 +172,12 @@ class Decline
 
             if ($totalRefunded > 0) {
                 $this->forterConfig->addCommentToOrder($order, $totalRefunded . ' Refunded');
-                $this->forterConfig->log('Order Refunded - orderID ' . $order->getIncrementId());
                 return;
             }
         }
 
         $this->forterConfig->addCommentToOrder($order, 'Order Refund attempt failed');
-        $this->forterConfig->log('Order '. $order->getIncrementId() . ' Refund attempt failed - orderID ' . $order->getIncrementId());
         $this->forterConfig->log('Refund Failure for Order ' . $order->getIncrementId() .' - Order Data: ' . json_encode($order->getData()));
-
         return;
     }
 
@@ -197,8 +189,7 @@ class Decline
         if ($this->forterConfig->isHoldingOrdersEnabled()) {
             $order->hold()->save();
             $this->forterConfig->addCommentToOrder($order, "Order Has been holded");
-            $this->forterConfig->log('Order Has been holded - orderID ' . $order->getIncrementId());
-            $this->forterConfig->log('Payment Hold for Order ' . $order->getIncrementId() . ' - Order Data: ' . json_encode($order->getPayment()->getData()));
+            $this->forterConfig->log('Payment Hold for Order ' . $order->getIncrementId() . ' - Order Payment Data: ' . json_encode($order->getPayment()->getData()));
         }
     }
 
