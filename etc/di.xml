@@ -39,6 +39,8 @@
 			</argument>
 		</arguments>
 	</type>
+	
+	<preference for="Magento\Framework\Serialize\SerializerInterface" type="Magento\Framework\Serialize\Serializer\Serialize" />
 
 	<!-- Plugin Braintree functionality -->
 	<type name="PayPal\Braintree\Gateway\Response\CardDetailsHandler">

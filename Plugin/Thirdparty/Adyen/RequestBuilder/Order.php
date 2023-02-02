@@ -6,6 +6,7 @@ use Magento\Framework\ObjectManagerInterface;
 use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\Config;
 use Forter\Forter\Model\RequestBuilder\Order as RequestBuilderOrder;
+use Magento\Framework\Serialize\SerializerInterface;
 
 class Order
 {
@@ -27,17 +28,24 @@ class Order
     private $objectManager;
 
     /**
+     * @var SerializerInterface
+     */
+    private $serializer;
+
+    /**
      * Order Plugin constructor.
      * @param Config $forterConfig
      */
     public function __construct(
         Config $forterConfig,
         AbstractApi $abstractApi,
-        ObjectManagerInterface $objectManager
+        ObjectManagerInterface $objectManager,
+        SerializerInterface $serializer
     ) {
         $this->objectManager = $objectManager;
         $this->forterConfig = $forterConfig;
         $this->abstractApi = $abstractApi;
+        $this->serializer = $serializer;
     }
 
     /**
@@ -82,7 +90,7 @@ class Order
             if ($method == 'adyen_cc') {
                 $logArray[3] = 'Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_cc method';
                 $this->forterConfig->log('Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_cc method');
-                $notificationAdditionalData = unserialize($notification->getAdditionalData());
+                $notificationAdditionalData = $this->serializer->unserialize($notification->getAdditionalData());
 
                 if ($notificationAdditionalData['expiryDate']) {
                     $ExpireDate = explode("/", $notificationAdditionalData['expiryDate']);
@@ -130,7 +138,7 @@ class Order
             } elseif ($method == 'adyen_hpp' && (strpos($payment->getData('cc_type'), 'klarna_account') == false)) {
                 $logArray[3] = 'Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_hpp method';
                 $this->forterConfig->log('Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_hpp method');
-                $notificationAdditionalData = unserialize($notification->getAdditionalData());
+                $notificationAdditionalData = $this->serializer->unserialize($notification->getAdditionalData());
 
                 if (isset($notificationAdditionalData['paypalPayerId'])) {
                     $result['payment'][0]['paypal']['payerId']= $notificationAdditionalData['paypalPayerId'];
