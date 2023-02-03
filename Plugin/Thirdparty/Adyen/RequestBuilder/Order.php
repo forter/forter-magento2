@@ -11,13 +11,11 @@ use Magento\Framework\Serialize\SerializerInterface;
 class Order
 {
     /**
-     *
      * @var Config
      */
     protected $forterConfig;
 
     /**
-     *
      * @var AbstractApi
      */
     protected $abstractApi;
@@ -135,7 +133,7 @@ class Order
                 if (isset($notificationAdditionalData['cardSummary'])) {
                     $result['payment'][0]['creditCard']['lastFourDigits'] = $notificationAdditionalData['cardSummary'];
                 }
-            } elseif ($method == 'adyen_hpp' && (strpos($payment->getData('cc_type'), 'klarna_account') == false)) {
+            } elseif ($method == 'adyen_hpp' && (strpos($payment->getData('cc_type'), 'paypal') !== false )) {
                 $logArray[3] = 'Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_hpp method';
                 $this->forterConfig->log('Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_hpp method');
                 $notificationAdditionalData = $this->serializer->unserialize($notification->getAdditionalData());
@@ -192,7 +190,5 @@ class Order
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }
-
-        return;
     }
 }
