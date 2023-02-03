@@ -75,6 +75,8 @@ class Payment
             $data = $this->requestBuilderOrder->buildTransaction($order, 'PAYMENT_ACTION_FAILURE');
             $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
             $this->abstractApi->sendApiRequest($url, json_encode($data));
+            $this->forterConfig->log('PAYMENT_ACTION_FAILURE Order' . $order->getIncrementId(). ' : ' . json_encode($data));
+            $this->forterConfig->log('Payment Failure for Order ' . $order->getIncrementId() . ' - Order Payment Data: ' . json_encode($order->getPayment()->getData()));
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }

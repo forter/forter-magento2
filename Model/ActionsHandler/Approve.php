@@ -102,7 +102,7 @@ class Approve
                 if (!$order->canInvoice()) {
                     $order->setCustomerNoteNotify(false);
                     $order->setIsInProcess(true);
-                    $this->forterConfig->addCommentToOrder($order, 'Magento faild Creating invoice');
+                    $this->forterConfig->addCommentToOrder($order, 'Magento failed Creating invoice');
                     return null;
                 }
 

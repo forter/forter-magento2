@@ -143,10 +143,12 @@ class Decline
         $order->cancel()->save();
         if ($order->isCanceled()) {
             $this->forterConfig->addCommentToOrder($order, 'Order Cancelled');
+            $this->forterConfig->log('Canceled Order '. $order->getIncrementId() . ' Payment Data: ' .json_encode($order->getPayment()->getData()));
             return;
         }
 
         $this->forterConfig->addCommentToOrder($order, 'Order Cancellation attempt failed');
+        $this->forterConfig->log('Cancellation Failure for Order ' . $order->getIncrementId() .' - Payment Data: ' . json_encode($order->getPayment()->getData()));
         return;
     }
 
@@ -175,6 +177,7 @@ class Decline
         }
 
         $this->forterConfig->addCommentToOrder($order, 'Order Refund attempt failed');
+        $this->forterConfig->log('Refund Failure for Order ' . $order->getIncrementId() .' - Order Data: ' . json_encode($order->getData()));
         return;
     }
 
@@ -186,6 +189,7 @@ class Decline
         if ($this->forterConfig->isHoldingOrdersEnabled()) {
             $order->hold()->save();
             $this->forterConfig->addCommentToOrder($order, "Order Has been holded");
+            $this->forterConfig->log('Payment Hold for Order ' . $order->getIncrementId() . ' - Order Payment Data: ' . json_encode($order->getPayment()->getData()));
         }
     }
 

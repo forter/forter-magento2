@@ -4,9 +4,10 @@ namespace Forter\Forter\Model;
 
 use Forter\Forter\Model\Config as ForterConfig;
 use Forter\Forter\Model\RequestBuilder\Payment as PaymentPrepere;
-use Magento\Framework\Event\ManagerInterface;
-use Magento\Framework\HTTP\Client\Curl as ClientInterface;
 use Magento\Checkout\Model\Session;
+use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\HTTP\Client\Curl as ClientInterface;
+use Magento\Framework\Event\ManagerInterface;
 
 /**
  * Class AbstractApi
@@ -42,6 +43,19 @@ class AbstractApi
     private $forterConfig;
 
     /**
+     * @var ObjectManagerInterface
+     */
+    private $objectManager;
+
+    public $json;
+
+    /**
+     * @var ResourceConnection
+     */
+    protected $resource;
+
+
+    /**
      * @var ManagerInterface
      */
     private $eventManager;
@@ -53,18 +67,22 @@ class AbstractApi
      * @param  ClientInterface  $clientInterface
      * @param  ForterConfig     $forterConfig
      * @param  ManagerInterface $eventManager
+     * @param ObjectManagerInterface $objectManager
+     * @param ResourceConnection $resource
      */
     public function __construct(
         PaymentPrepere $paymentPrepere,
         Session $checkoutSession,
         ClientInterface $clientInterface,
         ForterConfig $forterConfig,
+        ResourceConnection $resource,
         ManagerInterface $eventManager
     ) {
         $this->paymentPrepere = $paymentPrepere;
         $this->checkoutSession = $checkoutSession;
         $this->clientInterface = $clientInterface;
         $this->forterConfig = $forterConfig;
+        $this->resource = $resource;
         $this->eventManager = $eventManager;
     }
 
@@ -126,7 +144,7 @@ class AbstractApi
     private function setCurlOptions($bodyLen, $tries)
     {
 
-      /* Curl Headers */
+        /* Curl Headers */
         $this->clientInterface->addHeader('x-forter-siteid', $this->forterConfig->getSiteId());
         $this->clientInterface->addHeader('api-version', $this->forterConfig->getApiVersion());
         $this->clientInterface->addHeader('x-forter-extver', $this->forterConfig->getModuleVersion());
@@ -178,7 +196,7 @@ class AbstractApi
         $url = self::ERROR_ENDPOINT;
         $orderId = $this->checkoutSession->getQuote()->getReservedOrderId();
 
-        $json = [
+        $this->json = [
             "orderID" => $orderId,
             "exception" => [
                 "message" => [
@@ -191,9 +209,9 @@ class AbstractApi
                 "debugInfo" => ""
             ]
         ];
-        $json = json_encode($json);
-        $this->forterConfig->log($json, "error");
-        $this->sendApiRequest($url, $json);
+        $this->json = json_encode($this->json);
+        $this->forterConfig->log($this->json, "error");
+        $this->sendApiRequest($url, $this->json);
     }
 
     public function getUpdatedStatusEnum($order)
@@ -213,14 +231,15 @@ class AbstractApi
 
     public function sendOrderStatus($order)
     {
-        $json = [
+        $this->json = [
             "orderId" => $order->getIncrementId(),
             "eventTime" => time(),
             "updatedStatus" => $this->getUpdatedStatusEnum($order),
             "payment" => $this->paymentPrepere->generatePaymentInfo($order)
         ];
+
         $url = "https://api.forter-secure.com/v2/status/" . $order->getIncrementId();
-        $this->sendApiRequest($url, json_encode($json));
+        $this->sendApiRequest($url, json_encode($this->json));
     }
 
     /**

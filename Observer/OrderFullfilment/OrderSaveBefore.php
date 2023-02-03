@@ -85,6 +85,7 @@ class OrderSaveBefore implements ObserverInterface
             $message->metaData->orderState = $orderState;
             $message->metaData->orderOrigState = $orderOrigState;
             $this->forterLogger->SendLog($message);
+            $this->forterLogger->forterConfig->log('Order no. ' . $order->getIncrementId() .' Order State: '.$orderState. ' Payment Data: ' . json_encode($order->getPayment()->getData()));
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }

@@ -167,6 +167,7 @@ class PaymentPlaceEnd implements ObserverInterface
                     $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'Pre-Auth');
                     $message->metaData->order = $order->getData();
                     $message->metaData->payment = $order->getPayment()->getData();
+                    $this->forterConfig->log('Order ' . $order->getIncrementId() . ' Payment Data: ' . json_encode($order->getPayment()->getData()));
                     $this->forterLogger->SendLog($message);
                 }
                 return;
@@ -186,14 +187,20 @@ class PaymentPlaceEnd implements ObserverInterface
             $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
             $forterResponse = $this->abstractApi->sendApiRequest($url, json_encode($data));
 
+            $this->forterConfig->log(' Request Data for Order ' . $order->getIncrementId() . ': ' . json_encode($data));
+
             $this->abstractApi->sendOrderStatus($order);
 
             $order->setForterResponse($forterResponse);
+
+            $this->forterConfig->log('Forter Response for Order ' . $order->getIncrementId() . ': ' . $forterResponse);
+
             $forterResponse = json_decode($forterResponse);
 
             if ($forterResponse->status != 'success' || !isset($forterResponse->action)) {
                 $order->setForterStatus('error');
                 $order->addStatusHistoryComment(__('Forter (post) Decision: %1', 'error'));
+                $this->forterConfig->log('Response Error for Order ' . $order->getIncrementId() . ' - Payment Data: ' . json_encode($order->getPayment()->getData()));
                 $order->save();
                 $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'Post-Auth');
                 $message->metaData->order = $order->getData();
@@ -213,6 +220,7 @@ class PaymentPlaceEnd implements ObserverInterface
             $message->metaData->payment = $order->getPayment()->getData();
             $message->metaData->decision = $forterResponse->action;
             $this->forterLogger->SendLog($message);
+            $this->forterConfig->log('Order ' . $order->getIncrementId() .' Payment Data: ' . json_encode($order->getPayment()->getData()));
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }
