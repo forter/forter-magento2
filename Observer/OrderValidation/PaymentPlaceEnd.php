@@ -205,7 +205,7 @@ class PaymentPlaceEnd implements ObserverInterface
                 $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'Post-Auth');
                 $message->metaData->order = $order->getData();
                 $message->metaData->payment = $order->getPayment()->getData();
-                $message->metaData->decision = $forterResponse->action;
+                $message->metaData->decision = $forterResponse->action ? $forterResponse->action : null;
                 $this->forterLogger->SendLog($message);
                 return;
             }
