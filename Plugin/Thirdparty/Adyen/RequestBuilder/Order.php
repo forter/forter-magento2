@@ -66,6 +66,11 @@ class Order
 
             $result = $proceed($order, $orderStage);
 
+            $method = $order->getPayment()->getMethod();
+            if (strpos($method, 'adyen') === false) {
+                return $result;
+            }
+
             $notificationFactory = $this->objectManager->create('Adyen\Payment\Model\ResourceModel\Notification\CollectionFactory');
             $notifications = $notificationFactory->create();
 
@@ -80,7 +85,7 @@ class Order
                 return $result;
             }
 
-            $method = $order->getPayment()->getMethod();
+            
             $payment = $order->getPayment();
             $this->forterConfig->log('Forter Adyen Module:' . $result['orderId'] . ', Payment method is:' . $method);
             $logArray[2] = 'Forter Adyen Module:' . $result['orderId'] . ', Payment method is:' . $method;

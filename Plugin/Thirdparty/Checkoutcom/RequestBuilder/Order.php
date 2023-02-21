@@ -57,7 +57,7 @@ class Order
 
             $result = $proceed($order, $orderStage);
 
-            if ($result['payment'][0]['paymentMethodNickname'] != 'checkoutcom_card_payment') {
+            if ($result && $result['payment'][0]['paymentMethodNickname'] != 'checkoutcom_card_payment') {
                 return $result;
             }
 

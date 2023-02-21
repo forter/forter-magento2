@@ -3,7 +3,7 @@
     $ccListenerActive = $block->isCcListenerActive();
     $allowLast4CCListener = $block->getAllowLast4CCListener();
     $allowBinListener = $block->getAllowBinListener();
-    $elementToObserve = $block->getElementToObserve();
+    $elementToObserve = (string) $block->getElementToObserve();
 ?>
 
 <?php if ($ccListenerActive && strlen($elementToObserve) > 1): ?>
