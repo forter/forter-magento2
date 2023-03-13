@@ -46,45 +46,39 @@ class ShipmentSaveAfter implements ObserverInterface
             'trackingNumber' => ''
         ];
 
-        try {
-            $shipments = $order->getShipmentsCollection();
-            if (!$shipments) {
-                return $data;
-            }
+        $shipments = $order->getShipmentsCollection();
+        if (!$shipments) {
+            return $data;
+        }
 
-            $trackingNumbers = [];
-            $carrierCodes = [];
+        $trackingNumbers = [];
+        $carrierCodes = [];
 
-            foreach ($shipments as $shipment) {
-                if ($shipment->getId() == $currentShipment->getId()) {
-                    $tracksCollection = $currentShipment->getTracksCollection();
-                    foreach ($tracksCollection as $track) {
-                        $trackingNumbers[] = $track->getNumber() ?? '';
-                        $carrierCodes[] = $track->getTitle() ?? '';
-                    }
-                } else {
-                    $tracksCollection = $shipment->getTracksCollection();
-                    foreach ($tracksCollection as $track) {
-                        $trackingNumbers[] = $track->getNumber() ?? '';
-                        $carrierCodes[] = $track->getTitle() ?? '';
-                    }
+        foreach ($shipments as $shipment) {
+            if ($shipment->getId() == $currentShipment->getId()) {
+                $tracksCollection = $currentShipment->getTracksCollection();
+                foreach ($tracksCollection as $track) {
+                    $trackingNumbers[] = $track->getNumber() ?? '';
+                    $carrierCodes[] = $track->getTitle() ?? '';
+                }
+            } else {
+                $tracksCollection = $shipment->getTracksCollection();
+                foreach ($tracksCollection as $track) {
+                    $trackingNumbers[] = $track->getNumber() ?? '';
+                    $carrierCodes[] = $track->getTitle() ?? '';
                 }
             }
-
-            if (!empty($trackingNumbers)) {
-                $data['trackingNumber'] = implode(',', $trackingNumbers);
-            }
-
-            if (!empty($carrierCodes)) {
-                $data['carrier'] = implode(',', $carrierCodes);
-            }
-
-            $shipmentData['deliveryStatusInfo'] = $data;
-            $this->abstractApi->sendOrderStatus($order, $shipmentData);
-        } catch (\Exception $e) {
-            // Handle the exception here
-            // Log the error message, or throw a new exception, or return a default value, etc.
-            $data = ['error' => $e->getMessage()];
         }
+
+        if (!empty($trackingNumbers)) {
+            $data['trackingNumber'] = implode(',', $trackingNumbers);
+        }
+
+        if (!empty($carrierCodes)) {
+            $data['carrier'] = implode(',', $carrierCodes);
+        }
+
+        $shipmentData['deliveryStatusInfo'] = $data;
+        $this->abstractApi->sendOrderStatus($order, $shipmentData);
     }
 }
