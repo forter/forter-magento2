@@ -2,11 +2,11 @@
 
 namespace Forter\Forter\Plugin\Thirdparty\Adyen\RequestBuilder;
 
-use Magento\Framework\ObjectManagerInterface;
 use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\Config;
 use Forter\Forter\Model\RequestBuilder\Order as RequestBuilderOrder;
-use Magento\Framework\Serialize\SerializerInterface;
+use Magento\Framework\ObjectManagerInterface;
+use Magento\Framework\Serialize\Serializer\Serialize;
 
 class Order
 {
@@ -26,7 +26,7 @@ class Order
     private $objectManager;
 
     /**
-     * @var SerializerInterface
+     * @var Serialize
      */
     private $serializer;
 
@@ -38,7 +38,7 @@ class Order
         Config $forterConfig,
         AbstractApi $abstractApi,
         ObjectManagerInterface $objectManager,
-        SerializerInterface $serializer
+        Serialize $serializer
     ) {
         $this->objectManager = $objectManager;
         $this->forterConfig = $forterConfig;
@@ -85,7 +85,6 @@ class Order
                 return $result;
             }
 
-            
             $payment = $order->getPayment();
             $this->forterConfig->log('Forter Adyen Module:' . $result['orderId'] . ', Payment method is:' . $method);
             $logArray[2] = 'Forter Adyen Module:' . $result['orderId'] . ', Payment method is:' . $method;
@@ -138,7 +137,7 @@ class Order
                 if (isset($notificationAdditionalData['cardSummary'])) {
                     $result['payment'][0]['creditCard']['lastFourDigits'] = $notificationAdditionalData['cardSummary'];
                 }
-            } elseif ($method == 'adyen_hpp' && (strpos($payment->getData('cc_type'), 'paypal') !== false )) {
+            } elseif ($method == 'adyen_hpp' && (strpos($payment->getData('cc_type'), 'paypal') !== false)) {
                 $logArray[3] = 'Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_hpp method';
                 $this->forterConfig->log('Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_hpp method');
                 $notificationAdditionalData = $this->serializer->unserialize($notification->getAdditionalData());

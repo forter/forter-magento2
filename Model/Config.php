@@ -422,6 +422,30 @@ class Config
     /**
      * @return mixed
      */
+    public function isOrderCreditMemoStatusEnable($scope = null, $scopeId = null)
+    {
+        return $this->getConfigValue('advanced_settings/enable_order_creditmemo', $scope, $scopeId);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function isOrderRmaStatusEnable($scope = null, $scopeId = null)
+    {
+        return $this->getConfigValue('advanced_settings/enable_order_returns', $scope, $scopeId);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function isOrderShippingStatusEnable($scope = null, $scopeId = null)
+    {
+        return $this->getConfigValue('advanced_settings/enable_order_shipping', $scope, $scopeId);
+    }
+
+    /**
+     * @return mixed
+     */
     public function isPhoneOrderEnabled($scope = null, $scopeId = null)
     {
         return $this->getConfigValue('advanced_settings/phone_order_enabled', $scope, $scopeId);
