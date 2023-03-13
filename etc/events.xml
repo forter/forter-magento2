@@ -12,4 +12,13 @@
     <event name="admin_system_config_changed_section_forter">
       <observer name="admin_system_config_changed_section_forter" instance="Forter\Forter\Observer\ConfigObserver"/>
     </event>
+    <event name="sales_order_creditmemo_refund">
+        <observer name="credit_memo_refund_observer" instance="Forter\Forter\Observer\CreditMemo\CreditMemoRefund" />
+    </event>
+    <event name="rma_save_after">
+        <observer name="rma_save_after_observer" instance="Forter\Forter\Observer\Rma\RmaSaveAfter" />
+    </event>
+    <event name="sales_order_shipment_save_after">
+        <observer name="shipment_save_after_observer" instance="Forter\Forter\Observer\Shipment\ShipmentSaveAfter" />
+    </event>
 </config>

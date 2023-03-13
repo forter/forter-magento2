@@ -2,12 +2,14 @@
 
 namespace Forter\Forter\Model;
 
+use Forter\Forter\Helper\AdditionalDataHelper;
 use Forter\Forter\Model\Config as ForterConfig;
 use Forter\Forter\Model\RequestBuilder\Payment as PaymentPrepere;
 use Magento\Checkout\Model\Session;
 use Magento\Framework\App\ResourceConnection;
-use Magento\Framework\HTTP\Client\Curl as ClientInterface;
 use Magento\Framework\Event\ManagerInterface;
+use Magento\Framework\HTTP\Client\Curl as ClientInterface;
+use Magento\Framework\Module\Manager as ModuleManager;
 
 /**
  * Class AbstractApi
@@ -42,11 +44,6 @@ class AbstractApi
      */
     private $forterConfig;
 
-    /**
-     * @var ObjectManagerInterface
-     */
-    private $objectManager;
-
     public $json;
 
     /**
@@ -54,21 +51,26 @@ class AbstractApi
      */
     protected $resource;
 
-
     /**
      * @var ManagerInterface
      */
     private $eventManager;
 
     /**
+     * @var AdditionalDataHelper
+     */
+    protected $additionalDataHelper;
+
+    /**
      * @method __construct
-     * @param  PaymentPrepere   $paymentPrepere
-     * @param  Session          $checkoutSession
-     * @param  ClientInterface  $clientInterface
-     * @param  ForterConfig     $forterConfig
-     * @param  ManagerInterface $eventManager
-     * @param ObjectManagerInterface $objectManager
+     * @param PaymentPrepere $paymentPrepere
+     * @param Session $checkoutSession
+     * @param ClientInterface $clientInterface
+     * @param ForterConfig $forterConfig
      * @param ResourceConnection $resource
+     * @param ManagerInterface $eventManager
+     * @param ModuleManager $moduleManager
+     * @param AdditionalDataHelper $additionalDataHelper
      */
     public function __construct(
         PaymentPrepere $paymentPrepere,
@@ -76,7 +78,9 @@ class AbstractApi
         ClientInterface $clientInterface,
         ForterConfig $forterConfig,
         ResourceConnection $resource,
-        ManagerInterface $eventManager
+        ManagerInterface $eventManager,
+        ModuleManager $moduleManager,
+        AdditionalDataHelper $additionalDataHelper
     ) {
         $this->paymentPrepere = $paymentPrepere;
         $this->checkoutSession = $checkoutSession;
@@ -84,6 +88,8 @@ class AbstractApi
         $this->forterConfig = $forterConfig;
         $this->resource = $resource;
         $this->eventManager = $eventManager;
+        $this->moduleManager = $moduleManager;
+        $this->additionalDataHelper = $additionalDataHelper;
     }
 
     /**
@@ -217,7 +223,10 @@ class AbstractApi
     public function getUpdatedStatusEnum($order)
     {
         $orderState = $order->getState();
-        if ($orderState == "complete") {
+
+        if ($this->additionalDataHelper->getCreditMemoRmaSize($order)) {
+            $orderState = 'RETURNED';
+        } elseif ($orderState == "complete") {
             $orderState = "COMPLETED";
         } elseif ($orderState == "processing") {
             $orderState = "PROCESSING";
@@ -229,7 +238,7 @@ class AbstractApi
         return $orderState;
     }
 
-    public function sendOrderStatus($order)
+    public function sendOrderStatus($order, $additional = null)
     {
         $this->json = [
             "orderId" => $order->getIncrementId(),
@@ -238,8 +247,41 @@ class AbstractApi
             "payment" => $this->paymentPrepere->generatePaymentInfo($order)
         ];
 
+        $this->addAdditionalData($additional, $order);
+
         $url = "https://api.forter-secure.com/v2/status/" . $order->getIncrementId();
         $this->sendApiRequest($url, json_encode($this->json));
+    }
+
+    /**
+     * @param $additional
+     * @param $order
+     * @return void
+     */
+    public function addAdditionalData($additional, $order)
+    {
+        $configOptions = [
+            'deliveryStatusInfo' => $this->forterConfig->isOrderShippingStatusEnable(),
+            'compensationStatus' => $this->moduleManager->isEnabled('Magento_Rma') && $this->forterConfig->isOrderRmaStatusEnable(),
+            'refundInformation' => $this->forterConfig->isOrderCreditMemoStatusEnable()
+        ];
+
+        $dataOptions = [
+            'deliveryStatusInfo' => 'getShipmentData',
+            'compensationStatus' => 'getRmaData',
+            'refundInformation' => 'getCreditMemoData'
+        ];
+
+        foreach ($configOptions as $key => $enabled) {
+            if ($enabled) {
+                if (isset($dataOptions[$key])) {
+                    $this->json[$key] = $this->additionalDataHelper->{$dataOptions[$key]}($order);
+                }
+            }
+            if ($additional && isset($additional[$key])) {
+                $this->json[$key] = $additional[$key];
+            }
+        }
     }
 
     /**

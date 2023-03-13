@@ -17,8 +17,8 @@ use Magento\Framework\Message\ManagerInterface;
 use Magento\Framework\Registry;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magento\Sales\Api\OrderManagementInterface;
-use Magento\Store\Model\StoreManagerInterface;
 use Magento\Store\Model\App\Emulation;
+use Magento\Store\Model\StoreManagerInterface;
 
 /**
  * Class PaymentPlaceEnd
@@ -220,7 +220,7 @@ class PaymentPlaceEnd implements ObserverInterface
             $message->metaData->payment = $order->getPayment()->getData();
             $message->metaData->decision = $forterResponse->action;
             $this->forterLogger->SendLog($message);
-            $this->forterConfig->log('Order ' . $order->getIncrementId() .' Payment Data: ' . json_encode($order->getPayment()->getData()));
+            $this->forterConfig->log('Order ' . $order->getIncrementId() . ' Payment Data: ' . json_encode($order->getPayment()->getData()));
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }
