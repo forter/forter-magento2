@@ -60,6 +60,11 @@ class Customer
     private $forterConfig;
 
     /**
+     * @var CustomerRepositoryInterface
+     */
+    protected $customerRepository;
+
+    /**
      * Customer constructor.
      * @param OrderFactory $orderFactory
      * @param Review $review

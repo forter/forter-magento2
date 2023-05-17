@@ -49,6 +49,30 @@ class SendQueue
      * @var ForterLogger
      */
     private $forterLogger;
+    /**
+     * @var Approve
+     */
+    protected $approve;
+
+    /**
+     * @var QueueFactory
+     */
+    protected $forterQueue;
+
+    /**
+     * @var OrderRepositoryInterface
+     */
+    protected $orderRepository;
+
+    /**
+     * @var SearchCriteriaBuilder
+     */
+    protected $searchCriteriaBuilder;
+
+    /**
+     * @var Emulation
+     */
+    protected $emulate;
 
     public function __construct(
         Approve $approve,

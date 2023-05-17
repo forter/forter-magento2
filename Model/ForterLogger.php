@@ -4,8 +4,18 @@ namespace Forter\Forter\Model;
 use Forter\Forter\Model\Config as ForterConfig;
 class ForterLogger
 {
+    /**
+     * @var \GuzzleHttp\Client
+     */
     private $httpClient;
+
     private $BASE_URL = 'https://api.forter-secure.com';
+
+    /**
+     * @var ForterConfig
+     */
+    public $forterConfig;
+
     /**
      * @method __construct
      * @param  ForterConfig    $forterConfig

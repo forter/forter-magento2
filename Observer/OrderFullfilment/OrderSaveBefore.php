@@ -34,6 +34,16 @@ class OrderSaveBefore implements ObserverInterface
     protected $additionalDataHelper;
 
     /**
+     * @var AbstractApi
+     */
+    protected $abstractApi;
+
+    /**
+     * @var PaymentPrepere
+     */
+    protected $paymentPrepere;
+
+    /**
      * OrderSaveAfter constructor.
      * @param AbstractApi $abstractApi
      * @param Config $config

@@ -19,6 +19,20 @@ use Magento\Framework\Stdlib\CookieManagerInterface;
  */
 class BasicInfo
 {
+    /**
+     * @var Session
+     */
+    protected $customerSession;
+
+    /**
+     * @var CookieManagerInterface
+     */
+    protected $cookieManager;
+
+    /**
+     * @param Session $customerSession
+     * @param CookieManagerInterface $cookieManager
+     */
     public function __construct(
         Session $customerSession,
         CookieManagerInterface $cookieManager

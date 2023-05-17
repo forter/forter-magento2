@@ -85,6 +85,11 @@ class Order
     protected $request;
 
     /**
+     * @var CartPrepare
+     */
+    protected $cartPrepare;
+
+    /**
      * Order constructor.
      * @param BasicInfoPrepare $basicInfoPrepare
      * @param CartPrepare  $cartPrepare
