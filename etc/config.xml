@@ -28,6 +28,9 @@
                 <enabled_order_holding>1</enabled_order_holding>
                 <enabled_order_fulfillment>1</enabled_order_fulfillment>
                 <phone_order_enabled>0</phone_order_enabled>
+                <enable_order_creditmemo>1</enable_order_creditmemo>
+                <enable_order_returns>1</enable_order_returns>
+                <enable_order_shipping>1</enable_order_shipping>
             </advanced_settings>
             <sendmail_on_decline>
               <sendmail>
