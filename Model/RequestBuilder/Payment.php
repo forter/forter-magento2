@@ -19,10 +19,20 @@ use Forter\Forter\Model\RequestBuilder\Payment\PaymentMethods;
  */
 class Payment
 {
+    /**
+     * @var PaymentMethods
+     */
+    protected $paymentMethods;
+
+    /**
+     * @var CustomerPreper
+     */
+    protected $customerPreper;
 
   /**
    * Payment constructor.
-   * @param Subscriber $subscriber
+   * @param PaymentMethods $paymentMethods
+   * @param CustomerPreper $customerPreper
    */
     public function __construct(
         PaymentMethods $paymentMethods,

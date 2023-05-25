@@ -20,6 +20,10 @@ class Sessions extends Action implements HttpPostActionInterface, CsrfAwareActio
      * @var AbstractApi
      */
     protected $abstractApi;
+    /**
+     * @var Session
+     */
+    protected $customerSession;
 
     /**
      * @method __construct

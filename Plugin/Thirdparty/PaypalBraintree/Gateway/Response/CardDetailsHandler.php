@@ -10,8 +10,19 @@ use Paypal\Braintree\Gateway\Response\CardDetailsHandler as OrigCardDetailsHandl
 class CardDetailsHandler
 {
 
+    /**
+     * @var Config
+     */
     public $forterConfig;
+
+    /**
+     * @var SubjectReader
+     */
     public $subjectReader;
+
+    /**
+     * @var AbstractApi
+     */
     public $abstractApi;
 
     /**

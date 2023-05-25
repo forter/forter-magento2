@@ -4,9 +4,9 @@
         <forter>
             <settings>
                 <enabled>0</enabled>
-                <debug_mode>0</debug_mode>
+                <debug_mode>1</debug_mode>
                 <api_version>2.17</api_version>
-                <enhanced_data_mode>0</enhanced_data_mode>
+                <enhanced_data_mode>1</enhanced_data_mode>
                 <sandbox_mode>0</sandbox_mode>
             </settings>
             <immediate_post_pre_decision>
@@ -14,8 +14,8 @@
                 <decline_pre>1</decline_pre>
                 <pre_thanks_msg>We are sorry, but we could not process your order at this time.</pre_thanks_msg>
                 <decline_post>1</decline_post>
-                <not_review_post>3</not_review_post>
-                <approve_post>1</approve_post>
+                <not_review_post>2</not_review_post>
+                <approve_post>2</approve_post>
                 <post_thanks_msg>We are sorry, but we could not process your order at this time.</post_thanks_msg>
             </immediate_post_pre_decision>
             <connection_information>
@@ -26,8 +26,13 @@
             </connection_information>
             <advanced_settings>
                 <enabled_order_holding>1</enabled_order_holding>
+                <enabled_decision_controller>0</enabled_decision_controller>
+                <enabled_hold_order>0</enabled_hold_order>
                 <enabled_order_fulfillment>1</enabled_order_fulfillment>
                 <phone_order_enabled>0</phone_order_enabled>
+                <enable_order_creditmemo>1</enable_order_creditmemo>
+                <enable_order_returns>1</enable_order_returns>
+                <enable_order_shipping>1</enable_order_shipping>
             </advanced_settings>
             <sendmail_on_decline>
               <sendmail>

@@ -11,7 +11,7 @@
 namespace Forter\Forter\Model\RequestBuilder;
 
 use Forter\Forter\Model\Config as ForterConfig;
-use Magento\Customer\Api\CustomerRepositoryInterface;
+use Magento\Customer\Model\CustomerFactory;
 use Magento\Customer\Model\Session;
 use Magento\Newsletter\Model\Subscriber;
 use Magento\Review\Model\Review;
@@ -60,6 +60,11 @@ class Customer
     private $forterConfig;
 
     /**
+     * @var CustomerRepositoryInterface
+     */
+    protected $customerRepository;
+
+    /**
      * Customer constructor.
      * @param OrderFactory $orderFactory
      * @param Review $review
@@ -75,7 +80,7 @@ class Customer
         WishlistProviderInterface $wishlistProvider,
         StoreManagerInterface $storeManager,
         Subscriber $subscriber,
-        CustomerRepositoryInterface $customerRepository,
+        CustomerFactory $customerFactory,
         ForterConfig $forterConfig
     ) {
         $this->session = $session;
@@ -84,7 +89,7 @@ class Customer
         $this->review = $review;
         $this->storeManager = $storeManager;
         $this->subscriber = $subscriber;
-        $this->customerRepository = $customerRepository;
+        $this->customerFactory = $customerFactory;
         $this->forterConfig = $forterConfig;
     }
 
@@ -205,27 +210,26 @@ class Customer
 
     /**
      * @param null $order
-     * @param null $savedcustomer
      * @return array
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function getCustomerAccountData($order = null, $savedcustomer = null)
+    public function getCustomerAccountData($order = null)
     {
-        if ($savedcustomer) {
-            $isGuest = null;
-            $customerId = $savedcustomer->getId();
+        if ($order->getCustomerIsGuest()) {
+            $isGuest = true;
+            $customer = null;
+            $customerId = null;
         } else {
-            $isGuest = $order->getCustomerIsGuest();
-            $customer = $this->session->getCustomer();
+            $isGuest = false;
             $customerId = $order->getCustomerId();
+            $customer = $this->customerFactory->create()->load($customerId);
         }
 
-        $customer = $this->session->getCustomer();
         if ($isGuest || !$customer) {
             $accountStatus = "GUEST";
         } elseif ($customer->isCustomerLocked()) {
             $accountStatus = "SUSPENDED";
-        } elseif ($customer->getData("is_active") == 0) {
+        } elseif ($customer->getIsActive() == 0) {
             $accountStatus = "CLOSED";
         } else {
             $accountStatus = "ACTIVE";
@@ -270,7 +274,9 @@ class Customer
 
     /**
      * @param $order
-     * @return \Magento\Customer\Api\Data\CustomerInterface|null
+     * @return \Magento\Customer\Api\Data\CustomerInterface|\Magento\Customer\Model\Customer|null
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     private function getCustomer($order)
     {
@@ -280,7 +286,7 @@ class Customer
             return $this->session->getCustomerData();
         } elseif ($order->getCustomerId()) {
             // If can't get customer from session - for example in cases of order send failure
-            return $this->customerRepository->getById($order->getCustomerId());
+            return $this->customerFactory->create()->load($order->getCustomerId());
         } else {
             return null;
         }

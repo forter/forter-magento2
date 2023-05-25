@@ -85,6 +85,11 @@ class Order
     protected $request;
 
     /**
+     * @var CartPrepare
+     */
+    protected $cartPrepare;
+
+    /**
      * Order constructor.
      * @param BasicInfoPrepare $basicInfoPrepare
      * @param CartPrepare  $cartPrepare
@@ -147,7 +152,7 @@ class Order
             "primaryDeliveryDetails" => $this->customerPrepere->getPrimaryDeliveryDetails($order),
             "primaryRecipient" => $this->customerPrepere->getPrimaryRecipient($order),
             "accountOwner" => $this->customerPrepere->getAccountOwnerInfo($order),
-            "customerAccountData" => $this->customerPrepere->getCustomerAccountData($order, null),
+            "customerAccountData" => $this->customerPrepere->getCustomerAccountData($order),
             "totalDiscount" => $this->cartPrepare->getTotalDiscount($order),
             "payment" => $this->paymentPrepere->generatePaymentInfo($order)
         ];
