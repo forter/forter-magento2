@@ -92,7 +92,10 @@ class PaymentPlaceStart implements ObserverInterface
      * @var Emulation
      */
     private $emulate;
-
+    /**
+     * @var RemoteAddress
+     */
+    protected $remote;
     /**
      * @method __construct
      * @param  RemoteAddress    $remote

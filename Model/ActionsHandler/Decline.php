@@ -51,6 +51,14 @@ class Decline
      * @var Invoice
      */
     private $invoice;
+    /**
+     * @var Sendmail
+     */
+    protected $sendMail;
+    /**
+     * @var OrderManagementInterface
+     */
+    protected $orderManagement;
 
     /**
      * Decline constructor.

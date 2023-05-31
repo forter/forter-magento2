@@ -33,6 +33,11 @@ class RmaSaveAfter implements ObserverInterface
      */
     protected $additionalDataHelper;
 
+    /**
+     * @var AbstractApi
+     */
+    protected $abstractApi;
+
     protected $compensationStatus = [
         'totalGrantedAmount' => [
             'amountLocalCurrency' => '',

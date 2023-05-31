@@ -62,6 +62,11 @@ class AbstractApi
     protected $additionalDataHelper;
 
     /**
+     * @var ModuleManager
+     */
+    protected $moduleManager;
+
+    /**
      * @method __construct
      * @param PaymentPrepere $paymentPrepere
      * @param Session $checkoutSession

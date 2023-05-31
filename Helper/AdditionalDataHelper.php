@@ -44,6 +44,11 @@ class AdditionalDataHelper
      */
     protected $rmaCollectionFactory;
 
+    /**
+     * @var ModuleManager
+     */
+    protected $moduleManager;
+
     protected $refundInformation = [
         'refundMethod' => '',
         'refundAuthorizationCode' => '',
