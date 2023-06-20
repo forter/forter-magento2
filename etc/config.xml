@@ -6,7 +6,7 @@
                 <enabled>0</enabled>
                 <debug_mode>1</debug_mode>
                 <api_version>2.17</api_version>
-                <enhanced_data_mode>1</enhanced_data_mode>
+                <enhanced_data_mode>0</enhanced_data_mode>
                 <sandbox_mode>0</sandbox_mode>
             </settings>
             <immediate_post_pre_decision>
