@@ -38,6 +38,10 @@
                         Data related to the forter extensions will be logged to the logs files
                     </comment>
                 </field>
+                <field id="sandbox_mode" translate="label" type="select" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Sandbox Mode</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
                 <field id="enhanced_data_mode" translate="label" type="select" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Enhanced Data Mode</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>

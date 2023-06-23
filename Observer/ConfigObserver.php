@@ -7,6 +7,7 @@ use Forter\Forter\Model\Config;
 use Magento\Framework\App\Config\Storage\WriterInterface;
 use Magento\Framework\Event\Observer;
 use Magento\Store\Model\StoreManagerInterface;
+use Magento\Framework\App\Cache\TypeListInterface;
 
 /**
  * Class ConfigObserver
@@ -41,12 +42,14 @@ class ConfigObserver implements \Magento\Framework\Event\ObserverInterface
         WriterInterface $writeInterface,
         AbstractApi $abstractApi,
         Config $forterConfig,
-        StoreManagerInterface $storeManagerInterface
+        StoreManagerInterface $storeManagerInterface,
+        TypeListInterface $cacheTypeList
     ) {
         $this->writeInterface = $writeInterface;
         $this->abstractApi = $abstractApi;
         $this->forterConfig = $forterConfig;
         $this->storeManagerInterface = $storeManagerInterface;
+        $this->cacheTypeList = $cacheTypeList;
     }
 
     /**
@@ -60,8 +63,8 @@ class ConfigObserver implements \Magento\Framework\Event\ObserverInterface
         try {
             $website = $observer->getWebsite();
             $store   = $observer->getStore();
-            $scopeData['scope'] = null;
-            $scopeData['scope_id'] = null;
+            $scopeData['scope'] = 'default';
+            $scopeData['scope_id'] = 0;
 
             if ($website) {
                 $scopeData['scope']    = \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITES;
@@ -72,6 +75,9 @@ class ConfigObserver implements \Magento\Framework\Event\ObserverInterface
                 $scopeData['scope']    = \Magento\Store\Model\ScopeInterface::SCOPE_STORES;
                 $scopeData['scope_id'] = $store;
             }
+
+            $changedPaths = $observer->getChangedPaths();
+            $this->syncEnhancedDataModeWithSandboxMode($scopeData, $changedPaths);
 
             $this->validateCredentials();
 
@@ -135,6 +141,7 @@ class ConfigObserver implements \Magento\Framework\Event\ObserverInterface
 
             $url = self::SETTINGS_API_ENDPOINT;
             $this->abstractApi->sendApiRequest($url, json_encode($json));
+            $this->cacheTypeList->cleanType(\Magento\Framework\App\Cache\Type\Config::TYPE_IDENTIFIER);
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }
@@ -147,6 +154,18 @@ class ConfigObserver implements \Magento\Framework\Event\ObserverInterface
         $response = json_decode($response);
         if ($response->status == 'failed') {
             throw new \Exception('Site ID and Secret Key are incorrect');
+        }
+    }
+
+    private function syncEnhancedDataModeWithSandboxMode($scopeData, $changedPaths)
+    {
+        if (in_array('forter/settings/sandbox_mode', $changedPaths)) {
+            $sandboxMode = $this->forterConfig->getSandboxMode($scopeData['scope'], $scopeData['scope_id']);
+            if ($sandboxMode) {
+                $this->writeInterface->save('forter/settings/enhanced_data_mode', 1, $scopeData['scope'], $scopeData['scope_id']);
+            } else {
+                $this->writeInterface->save('forter/settings/enhanced_data_mode', 0, $scopeData['scope'], $scopeData['scope_id']);
+            }
         }
     }
 }
