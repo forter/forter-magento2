@@ -13,6 +13,13 @@
 			</argument>
 		</arguments>
 	</virtualType>
+    <virtualType name="Magento\Sales\Model\ResourceModel\Order\Grid" type="Magento\Sales\Model\ResourceModel\Grid">
+        <arguments>
+            <argument name="columns" xsi:type="array">
+                <item name="forter_reason" xsi:type="string">sales_order.forter_reason</item>
+            </argument>
+        </arguments>
+    </virtualType>
 	<type name="Forter\Forter\Logger\Handler\ErrorHandler">
 		<arguments>
 			<argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
