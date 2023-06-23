@@ -176,6 +176,7 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
 
             $order->setForterResponse($request->getContent());
             $order->setForterStatus($bodyRawParams['action']);
+            $order->setForterReason($bodyRawParams['reasonCode']);
             $order->save();
 
             $this->handlePostDecisionCallback($bodyRawParams['action'], $order);
@@ -185,6 +186,7 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
             $message->metaData->order = $order->getData();
             $message->metaData->payment = $order->getPayment()->getData();
             $message->metaData->forterStatus = $bodyRawParams['action'];
+            $message->metaData->forterReason = $bodyRawParams['reasonCode'];
             $this->forterLogger->SendLog($message);
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
