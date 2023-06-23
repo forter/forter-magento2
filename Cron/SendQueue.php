@@ -238,13 +238,16 @@ class SendQueue
             $this->handleForterResponse($order, $forterResponse->action);
             $this->abstractApi->triggerRecommendationEvents($forterResponse, $order, 'cron');
             $order->addStatusHistoryComment(__('Forter (cron) Decision: %1%2', $forterResponse->action, $this->forterConfig->getResponseRecommendationsNote($forterResponse)));
+            $order->addStatusHistoryComment(__('Forter (cron) Decision Reason: %1', $forterResponse->reasonCode));
             $order->setForterStatus($forterResponse->action);
+            $order->setForterReason($forterResponse->reasonCode);
             $order->save();
 
             $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'Forter CRON Decision');
             $message->metaData->order = $order->getData();
             $message->metaData->payment = $order->getPayment();
             $message->metaData->forterStatus = $forterResponse->action;
+            $message->metaData->forterReason = $forterResponse->reasonCode;
             $this->forterLogger->SendLog($message);
 
             $this->forterConfig->log('Payment Data for Order ' . $order->getIncrementId() . ' - Payment Data: ' . json_encode($order->getPayment()->getData()));
