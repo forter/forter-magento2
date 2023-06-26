@@ -5,6 +5,7 @@ namespace Forter\Forter\Plugin\Order;
 use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\Config as ForterConfig;
 use Forter\Forter\Model\RequestBuilder\Order;
+use Forter\Forter\Model\RequestBuilder\Payment as PaymentPrepere;
 use Magento\Sales\Model\Order\Payment as MagentoPayment;
 
 /**
@@ -13,6 +14,9 @@ use Magento\Sales\Model\Order\Payment as MagentoPayment;
  */
 class Payment
 {
+
+    const CANCELED_BY_MERCHANT = 'CANCELED_BY_MERCHANT';
+
     /**
      *
      */
@@ -31,6 +35,13 @@ class Payment
     private $requestBuilderOrder;
 
     /**
+     * Payment Prefer
+     *
+     * @var PaymentPrepere
+     */
+    private $paymentPrepere;
+
+    /**
      * Payment constructor.
      * @param AbstractApi $abstractApi
      * @param Order $requestBuilderOrder
@@ -38,11 +49,13 @@ class Payment
     public function __construct(
         ForterConfig $forterConfig,
         AbstractApi $abstractApi,
-        Order $requestBuilderOrder
+        Order $requestBuilderOrder,
+        PaymentPrepere $paymentPrepere
     ) {
         $this->forterConfig = $forterConfig;
         $this->abstractApi = $abstractApi;
         $this->requestBuilderOrder = $requestBuilderOrder;
+        $this->paymentPrepere = $paymentPrepere;
     }
 
     /**
@@ -77,8 +90,22 @@ class Payment
             $this->abstractApi->sendApiRequest($url, json_encode($data));
             $this->forterConfig->log('PAYMENT_ACTION_FAILURE Order' . $order->getIncrementId(). ' : ' . json_encode($data));
             $this->forterConfig->log('Payment Failure for Order ' . $order->getIncrementId() . ' - Order Payment Data: ' . json_encode($order->getPayment()->getData()));
+            $this->sendOrderStatus($order);
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }
+    }
+
+    public function sendOrderStatus($order)
+    {
+        $data = [
+            "orderId" => $order->getIncrementId(),
+            "eventTime" => time(),
+            "updatedStatus" => self::CANCELED_BY_MERCHANT,
+            "payment" => $this->paymentPrepere->generatePaymentInfo($order)
+        ];
+
+        $url = "https://api.forter-secure.com/v2/status/" . $order->getIncrementId();
+        $this->abstractApi->sendApiRequest($url, json_encode($data));
     }
 }
