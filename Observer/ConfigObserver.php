@@ -33,6 +33,12 @@ class ConfigObserver implements \Magento\Framework\Event\ObserverInterface
      * @var WriterInterface
      */
     protected $writeInterface;
+
+    /**
+     * @var TypeListInterface
+     */
+    protected $cacheTypeList;
+
     /**
      * ConfigObserver constructor.
      * @param AbstractApi $abstractApi
