@@ -5,12 +5,13 @@ namespace Forter\Forter\Observer\OrderValidation;
 use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\ActionsHandler\Decline;
 use Forter\Forter\Model\Config;
-use Forter\Forter\Model\Queue;
 use Forter\Forter\Model\ForterLogger;
 use Forter\Forter\Model\ForterLoggerMessage;
+use Forter\Forter\Model\Queue;
 use Forter\Forter\Model\RequestBuilder\BasicInfo;
 use Forter\Forter\Model\RequestBuilder\Order;
 use Magento\Checkout\Model\Session as CheckoutSession;
+use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\HTTP\PhpEnvironment\RemoteAddress;
 use Magento\Framework\Message\ManagerInterface;
@@ -95,7 +96,12 @@ class PaymentPlaceStart implements ObserverInterface
     /**
      * @var RemoteAddress
      */
-    protected $remote;
+    private $remote;
+    /**
+     * @var RequestInterface
+     */
+    private $request;
+
     /**
      * @method __construct
      * @param  RemoteAddress    $remote
@@ -126,7 +132,8 @@ class PaymentPlaceStart implements ObserverInterface
         BasicInfo $basicInfo,
         Registry $registry,
         Emulation $emulate,
-        ForterLogger $forterLogger
+        ForterLogger $forterLogger,
+        RequestInterface $request
     ) {
         $this->remote = $remote;
         $this->queue = $queue;
@@ -142,6 +149,7 @@ class PaymentPlaceStart implements ObserverInterface
         $this->registry = $registry;
         $this->emulate = $emulate;
         $this->forterLogger = $forterLogger;
+        $this->request = $request;
     }
 
     /**
@@ -177,12 +185,14 @@ class PaymentPlaceStart implements ObserverInterface
 
             $order->getPayment()->setAdditionalInformation('forter_client_details', $connectionInformation);
 
+            $cardData = $this->getCardExtraData();
+            $this->setPaymentExtraCardData($order, $cardData);
+
             $this->forterLogger->forterConfig->log('Connection Information for Order ' . $order->getIncrementId() . ' : ' . json_encode($connectionInformation));
 
             if ($this->config->getIsPost() && !$this->config->getIsPreAndPost()) {
                 return;
             }
-
 
             if ($this->config->getIsCron()) {
                 $currentTime = $this->dateTime->gmtDate();
@@ -226,7 +236,6 @@ class PaymentPlaceStart implements ObserverInterface
             $order->setForterStatus($forterResponse->action);
             $order->setForterReason($forterResponse->reasonCode);
             $order->addStatusHistoryComment(__('Forter (pre) Decision: %1%2', $forterResponse->action, $this->config->getResponseRecommendationsNote($forterResponse)));
-            $order->addStatusHistoryComment(__('Forter (pre) Decision Reason: %1', $forterResponse->reasonCode));
             $this->abstractApi->triggerRecommendationEvents($forterResponse, $order, 'pre');
             if ($forterResponse->action != 'decline') {
                 return;
@@ -241,4 +250,41 @@ class PaymentPlaceStart implements ObserverInterface
         $this->forterLogger->SendLog($message);
         $this->decline->handlePreTransactionDescision($order);
     }
+
+    /**
+     * @return array
+     */
+    public function getCardExtraData()
+    {
+        $cardData = [];
+        $requestData = json_decode($this->request->getContent());
+
+        if ($requestData && isset($requestData->paymentMethod->additional_data)) {
+            $cardData['cardBin'] = $requestData->paymentMethod->additional_data->cardBin ?? null;
+            $cardData['cardLast4'] = $requestData->paymentMethod->additional_data->cardLast4 ?? null;
+        }
+
+        return $cardData;
+    }
+
+    /**
+     * Sets additional information and ccLast4 for payment based on card data.
+     *
+     * @param \Magento\Sales\Model\Order $order
+     * @param array $cardData
+     */
+    private function setPaymentExtraCardData(\Magento\Sales\Model\Order $order, array $cardData)
+    {
+        if (isset($cardData['cardBin']) && $cardData['cardBin']) {
+            if ($order->getPayment()->getMethod() === 'adyen_cc') {
+                $order->getPayment()->setAdditionalInformation('adyen_card_bin', $cardData['cardBin']);
+            }
+            $order->getPayment()->setAdditionalInformation('forter_cc_bin', $cardData['cardBin']);
+        }
+
+        if (isset($cardData['cardLast4']) && $cardData['cardLast4']) {
+            $order->getPayment()->setCcLast4($cardData['cardLast4']);
+        }
+    }
+
 }
