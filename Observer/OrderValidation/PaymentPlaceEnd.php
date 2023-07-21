@@ -211,7 +211,9 @@ class PaymentPlaceEnd implements ObserverInterface
             }
 
             $order->setForterStatus($forterResponse->action);
+            $order->setForterReason($forterResponse->reasonCode);
             $order->addStatusHistoryComment(__('Forter (post) Decision: %1%2', $forterResponse->action, $this->forterConfig->getResponseRecommendationsNote($forterResponse)));
+            $order->addStatusHistoryComment(__('Forter (post) Decision Reason: %1', $forterResponse->reasonCode));
             $this->handleResponse($forterResponse->action, $order);
             $this->abstractApi->triggerRecommendationEvents($forterResponse, $order, 'post');
 

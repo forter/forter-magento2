@@ -1,18 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
-  <listingToolbar name="listing_top"/>
-  <columns name="sales_order_columns">
-    <column name="forter_status"  class="Forter\Forter\Ui\Component\Listing\Column\ForterStatus">
-        <argument name="data" xsi:type="array">
-            <item name="config" xsi:type="array">
-              <item name="visible" xsi:type="boolean">true</item>
-              <item name="label" xsi:type="string" translate="true">Forter Status</item>
-              <item name="filter" xsi:type="string">text</item>
-              <item name="editor" xsi:type="string">text</item>
-              <item name="sortable" xsi:type="string">false</item>
-              <item name="sortOrder" xsi:type="number">40</item>
-            </item>
-        </argument>
-    </column>
-  </columns>
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <listingToolbar name="listing_top"/>
+    <columns name="sales_order_columns">
+        <column name="forter_status" class="Forter\Forter\Ui\Component\Listing\Column\ForterStatus">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="visible" xsi:type="boolean">true</item>
+                    <item name="label" xsi:type="string" translate="true">Forter Status</item>
+                    <item name="filter" xsi:type="string">text</item>
+                    <item name="editor" xsi:type="string">text</item>
+                    <item name="sortable" xsi:type="string">false</item>
+                    <item name="sortOrder" xsi:type="number">40</item>
+                </item>
+            </argument>
+        </column>
+        <column name="forter_reason" class="Forter\Forter\Ui\Component\Listing\Column\ForterReason">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="visible" xsi:type="boolean">true</item>
+                    <item name="label" xsi:type="string" translate="true">Forter Reason</item>
+                    <item name="filter" xsi:type="string">text</item>
+                    <item name="editor" xsi:type="string">text</item>
+                    <item name="sortable" xsi:type="string">false</item>
+                    <item name="sortOrder" xsi:type="number">40</item>
+                </item>
+            </argument>
+        </column>
+    </columns>
 </listing>
