@@ -224,7 +224,9 @@ class PaymentPlaceStart implements ObserverInterface
 
             $this->registry->register('forter_pre_decision', $forterResponse->action);
             $order->setForterStatus($forterResponse->action);
+            $order->setForterReason($forterResponse->reasonCode);
             $order->addStatusHistoryComment(__('Forter (pre) Decision: %1%2', $forterResponse->action, $this->config->getResponseRecommendationsNote($forterResponse)));
+            $order->addStatusHistoryComment(__('Forter (pre) Decision Reason: %1', $forterResponse->reasonCode));
             $this->abstractApi->triggerRecommendationEvents($forterResponse, $order, 'pre');
             if ($forterResponse->action != 'decline') {
                 return;

@@ -326,6 +326,18 @@ class Config
     }
 
     /**
+     * Return bool value depends of that if payment method sandbox mode
+     * is enabled or not.
+     *
+     * @return bool
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function getSandboxMode($scope = null, $scopeId = null)
+    {
+        return (bool)$this->getConfigValue('settings/sandbox_mode', $scope, $scopeId);
+    }
+
+    /**
      * @method getCurrentStore
      */
     public function getCurrentStore()
