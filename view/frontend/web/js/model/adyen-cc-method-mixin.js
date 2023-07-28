@@ -171,7 +171,7 @@ define(
             return returnInformation;
         }
     };
-    if (window.checkoutConfig.forter.forterPreAuth === false) {
+    if (window.checkoutConfig.forter.forterPreAuth === false || window.checkoutConfig.forter.isAdyenVersionGreaterOrEqual === false) {
         mixin = {};
     }
     return function (target) {

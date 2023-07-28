@@ -56,7 +56,7 @@ class ConfigProvider implements \Magento\Checkout\Model\ConfigProviderInterface
     public function getConfig()
     {
         $isAdyenVersionGreaterOrEqual = $this->isAdyenVersionGreaterOrEqual();
-        $forterPreAuth = $this->isForterPreAuth() === '1' ? true : false;
+        $forterPreAuth = $this->isForterPreAuth() === '1' || $this->isForterPreAuth() === '4' ? true : false;
 
         return [
             'forter' => [
