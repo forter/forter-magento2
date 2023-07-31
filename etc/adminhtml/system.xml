@@ -31,6 +31,13 @@
                     <label>Extension Version</label>
                     <frontend_model>Forter\Forter\Block\Adminhtml\System\Config\ModuleVersion</frontend_model>
                 </field>
+                <field id="sandbox_mode" translate="label" type="select" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Sandbox mode</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>
+                        Please toggle this option to "Yes" if you want to debug in Sandbox Environment.
+                    </comment>
+                </field>
                 <field id="debug_mode" translate="label" type="select" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Debug Mode</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
@@ -234,7 +241,7 @@
                 <field id="verification_results_map" translate="label comment" type="textarea" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0" canRestore="1">
                     <label>Verification Results Mapping</label>
                     <comment>
-<![CDATA[
+                        <![CDATA[
 <p>Map Forter fields to your local payment fields.<br>Example:
 <pre>{
     "payment_method_code_1":{
@@ -251,41 +258,41 @@
 }</pre><p>]]>
                     </comment>
                 </field>
-              </group>
-              <group id="advanced_settings_cc_listener" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Advanced Settings Pre Auth</label>
-                    <field id="enabled_cc_listener" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
-                        <label>Enable CreditCard Listener</label>
-                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                        <comment>
-                            Enable Javascript Listener For CreditCard field in order to get bin and last4cc
-                        </comment>
-                    </field>
-                    <field id="enabled_cc_listener_last4cc" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
-                        <label>Enable Listener for last4cc</label>
-                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                        <comment>
-                            Enable Javascript Listener For CreditCard Last4cc
-                        </comment>
-                    </field>
-                    <field id="enabled_cc_listener_bin" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
-                        <label>Enable Listener for bin</label>
-                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                        <comment>
-                            Enable Javascript Listener For CreditCard Bin
-                        </comment>
-                    </field>
-                    <field id="class_id_identifier" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
-                      <label>Class or Id identifier for the Listener</label>
-                      <comment>
-                          <![CDATA[
+            </group>
+            <group id="advanced_settings_cc_listener" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Advanced Settings Pre Auth</label>
+                <field id="enabled_cc_listener" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable CreditCard Listener</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>
+                        Enable Javascript Listener For CreditCard field in order to get bin and last4cc
+                    </comment>
+                </field>
+                <field id="enabled_cc_listener_last4cc" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Listener for last4cc</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>
+                        Enable Javascript Listener For CreditCard Last4cc
+                    </comment>
+                </field>
+                <field id="enabled_cc_listener_bin" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Listener for bin</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>
+                        Enable Javascript Listener For CreditCard Bin
+                    </comment>
+                </field>
+                <field id="class_id_identifier" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Class or Id identifier for the Listener</label>
+                    <comment>
+                        <![CDATA[
                               Please add the CSS selector of the CC input you want to observe.<br>
                               Example selector: <i>.cc-number-field-wrapper input</i><br>
                               How to use: <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector">https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector</a>.
                           ]]>
-                      </comment>
-                    </field>
-                </group>
+                    </comment>
+                </field>
+            </group>
         </section>
     </system>
 </config>
