@@ -271,6 +271,12 @@ class AbstractApi
             'refundInformation' => $this->forterConfig->isOrderCreditMemoStatusEnable()
         ];
 
+        if ($this->forterConfig->getApiVersion() >= '2.18') {
+            if (isset($this->json['payment'][0]['creditCard']['verificationResults'])) {
+                $this->json['verificationResults'] = $this->json['payment'][0]['creditCard']['verificationResults'];
+            }
+        }
+
         $dataOptions = [
             'deliveryStatusInfo' => 'getShipmentData',
             'compensationStatus' => 'getRmaData',
