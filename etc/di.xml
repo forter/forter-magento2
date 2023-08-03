@@ -88,4 +88,12 @@
 			type="Forter\Forter\Plugin\Thirdparty\Paysafe\ClientMock" />
     </type>
 
+	<type name="Magento\Payment\Gateway\Request\BuilderComposite">
+		<arguments>
+			<argument name="builders" xsi:type="array">
+				<item name="recommendations" xsi:type="string">Forter\Forter\Model\ThirdParty\Adyen\Gateway\Request\RecommendationsDataBuilder</item>
+			</argument>
+		</arguments>
+	</type>
+
 </config>
