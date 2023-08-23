@@ -2,9 +2,8 @@
 
 namespace Forter\Forter\Observer\ThirdParty\Adyen;
 
-use Adyen\Payment\Helper\StateData;
-use Adyen\Service\Validator\DataArrayValidator;
 use Magento\Framework\Event\Observer;
+use Magento\Framework\Module\Manager as ModuleManager;
 use Magento\Payment\Observer\AbstractDataAssignObserver;
 use Magento\Quote\Api\Data\PaymentInterface;
 
@@ -32,17 +31,18 @@ class AdyenHppDataAssignObserver extends AbstractDataAssignObserver
         self::RECURRING_PROCESSING_MODEL
     ];
 
-    /** @var StateData */
-    private $stateData;
+    /**
+     * @var ModuleManager
+     */
+    protected $moduleManager;
 
     /**
-     * AdyenHppDataAssignObserver constructor.
-     * @param StateData $stateData
+     * @param ModuleManager $moduleManager
      */
     public function __construct(
-        StateData $stateData,
+        ModuleManager $moduleManager
     ) {
-        $this->stateData = $stateData;
+        $this->moduleManager = $moduleManager;
     }
 
     /**
@@ -51,6 +51,10 @@ class AdyenHppDataAssignObserver extends AbstractDataAssignObserver
      */
     public function execute(Observer $observer)
     {
+        if (!$this->moduleManager->isEnabled('Adyen_Payment')) {
+            return null;
+        }
+
         $data = $this->readDataArgument($observer);
         $paymentInfo = $this->readPaymentModelArgument($observer);
 
@@ -59,7 +63,7 @@ class AdyenHppDataAssignObserver extends AbstractDataAssignObserver
             return;
         }
 
-        $additionalData = DataArrayValidator::getArrayOnlyWithApprovedKeys(
+        $additionalData = \Adyen\Service\Validator\DataArrayValidator::getArrayOnlyWithApprovedKeys(
             $additionalData,
             self::$approvedAdditionalDataKeys
         );
