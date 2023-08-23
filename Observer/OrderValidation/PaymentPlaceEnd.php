@@ -205,16 +205,16 @@ class PaymentPlaceEnd implements ObserverInterface
                 $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'Post-Auth');
                 $message->metaData->order = $order->getData();
                 $message->metaData->payment = $order->getPayment()->getData();
-                $message->metaData->decision = $forterResponse->action ? $forterResponse->action : null;
+                $message->metaData->decision = $forterResponse->action ?? null;
                 $this->forterLogger->SendLog($message);
                 return;
             }
 
-            $order->setForterStatus($forterResponse->action);
-            $order->setForterReason($forterResponse->reasonCode);
+            $order->setForterStatus($forterResponse->action ?? '');
+            $order->setForterReason($forterResponse->reasonCode ?? '');
             $order->addStatusHistoryComment(__('Forter (post) Decision: %1%2', $forterResponse->action, $this->forterConfig->getResponseRecommendationsNote($forterResponse)));
             $order->addStatusHistoryComment(__('Forter (post) Decision Reason: %1', $forterResponse->reasonCode));
-            $this->handleResponse($forterResponse->action, $order);
+            $this->handleResponse($forterResponse->action ?? '', $order);
             $this->abstractApi->triggerRecommendationEvents($forterResponse, $order, 'post');
 
             $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'Post-Auth');

@@ -67,6 +67,7 @@ class Order
             $result = $proceed($order, $orderStage);
 
             $method = $order->getPayment()->getMethod();
+            $brandCode = $order->getPayment()->getAdditionalInformation()['brand_code'] ?? null;
             if (strpos($method, 'adyen') === false) {
                 return $result;
             }
@@ -137,7 +138,9 @@ class Order
                 if (isset($notificationAdditionalData['cardSummary'])) {
                     $result['payment'][0]['creditCard']['lastFourDigits'] = $notificationAdditionalData['cardSummary'];
                 }
-            } elseif ($method == 'adyen_hpp' && (strpos($payment->getData('cc_type'), 'paypal') !== false)) {
+            }
+
+            if ($method == 'adyen_hpp' && (strpos($payment->getData('cc_type'), 'paypal') !== false)) {
                 $logArray[3] = 'Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_hpp method';
                 $this->forterConfig->log('Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_hpp method');
                 $notificationAdditionalData = $this->serializer->unserialize($notification->getAdditionalData());
@@ -184,6 +187,67 @@ class Order
                 $result['payment'][0]['paypal']['paymentMethod'] = $notification->getPaymentMethod() ? $notification->getPaymentMethod() : '';
                 $result['payment'][0]['paypal']['paymentGatewayData']['gatewayTransactionId'] = $order->getPayment()->getCcTransId() ? $order->getPayment()->getCcTransId() : '';
                 $result['payment'][0]['paypal']['fullPaypalResponsePayload'] = $notificationAdditionalData ? $notificationAdditionalData : '';
+            }
+
+            if ($method == 'adyen_hpp' && $brandCode == 'googlepay') {
+                $logArray[3] = 'Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_hpp method';
+                $this->forterConfig->log('Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_hpp method');
+                $notificationAdditionalData = $this->serializer->unserialize($notification->getAdditionalData());
+
+                unset($result['payment'][0]['creditCard']);
+
+                if (isset($notificationAdditionalData['checkout.cardAddedBrand'])) {
+                    $result['payment'][0]['androidPay']['cardBrand']= $notificationAdditionalData['checkout.cardAddedBrand'];
+                }
+
+                if (isset($notificationAdditionalData['cardHolderName'])) {
+                    $result['payment'][0]['androidPay']['nameOnCard']= $notificationAdditionalData['cardHolderName'];
+                }
+
+                if (isset($notificationAdditionalData['expiryDate'])) {
+                    $expiryDate = explode("/", $notificationAdditionalData['expiryDate']);
+
+                    $month = $expiryDate[0];
+                    if (strlen($month) == 1) {
+                        $month = "0" . $month;
+                    }
+
+                    $result['payment'][0]['androidPay']['expirationMonth']= $month;
+                    $result['payment'][0]['androidPay']['expirationYear']= $expiryDate[1];
+                }
+
+                if (isset($notificationAdditionalData['cardSummary'])) {
+                    $result['payment'][0]['androidPay']['lastFourDigits']= $notificationAdditionalData['cardSummary'];
+                }
+
+                if (isset($notificationAdditionalData['authCode'])) {
+                    $result['payment'][0]['androidPay']['verificationResults']['authorizationCode']= $notificationAdditionalData['authCode'];
+                    $result['payment'][0]['androidPay']['verificationResults']['processorResponseCode']= $notificationAdditionalData['authCode'];
+                }
+
+                if (isset($notificationAdditionalData['avsResultRaw'])) { //sau avsResult , are text mai mult
+                    $result['payment'][0]['androidPay']['verificationResults']['avsFullResult']= $notificationAdditionalData['avsResultRaw'];
+                }
+
+                if (isset($notificationAdditionalData['cvcResultRaw'])) { // sau cvcResult
+                    $result['payment'][0]['androidPay']['verificationResults']['cvvResult']= $notificationAdditionalData['cvcResult'][0];
+                }
+
+                if (isset($notificationAdditionalData['eci'])) {
+                    $result['payment'][0]['androidPay']['verificationResults']['eciValue']= $notificationAdditionalData['eci'] === 'N/A' ? '' : $notificationAdditionalData['eci'];
+                }
+
+                if (isset($notificationAdditionalData['refusalReasonRaw'])) {
+                    $result['payment'][0]['androidPay']['verificationResults']['processorResponseText']= $notificationAdditionalData['refusalReasonRaw'];
+                }
+
+                if (isset($notificationAdditionalData['merchantReference'])) {
+                    $result['payment'][0]['androidPay']['paymentGatewayData']['gatewayMerchantId']= $notificationAdditionalData['merchantReference'];
+                }
+
+                $result['payment'][0]['androidPay']['cardType'] = 'CREDIT';
+                $result['payment'][0]['androidPay']['paymentGatewayData']['gatewayName'] = 'adyen_hpp';
+                $result['payment'][0]['androidPay']['paymentGatewayData']['gatewayTransactionId'] = $order->getPayment()->getCcTransId() ? $order->getPayment()->getCcTransId() : '';
             }
             $logArray[4] = $result['payment'];
             $logArray[5] = json_encode('Forter Adyen Module integration end');

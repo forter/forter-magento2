@@ -29,11 +29,11 @@ class Payment
      */
     protected $customerPreper;
 
-  /**
-   * Payment constructor.
-   * @param PaymentMethods $paymentMethods
-   * @param CustomerPreper $customerPreper
-   */
+    /**
+     * Payment constructor.
+     * @param PaymentMethods $paymentMethods
+     * @param CustomerPreper $customerPreper
+     */
     public function __construct(
         PaymentMethods $paymentMethods,
         CustomerPreper $customerPreper
@@ -62,11 +62,15 @@ class Payment
             $paymentData["paypal"] = $this->paymentMethods->getPaypalDetails($payment);
         } elseif (strpos($payment_method, 'paybright') !== false) {
             $paymentData["installmentService"] = $this->paymentMethods->getPaybrightDetails($order, $payment);
-        } elseif (  !is_null($payment->getData('cc_type')) && strpos($payment->getData('cc_type'), 'klarna_account') !== false) {
+        } elseif (!is_null($payment->getData('cc_type')) && strpos($payment->getData('cc_type'), 'klarna_account') !== false) {
             $paymentData["installmentService"] = $this->paymentMethods->getAdyenKlarnaDetails($order, $payment);
         } else {
             if (strpos($payment_method, 'adyen') !== false) {
-                $cardDetails = $this->paymentMethods->getAdyenDetails($payment);
+                if ($payment->getCcType() == 'googlepay' || $payment->getAdditionalInformation('brand_code') == 'googlepay') {
+                    $cardDetails = $this->paymentMethods->getAdyenHppGooglePayDetails($payment,$order);
+                } else {
+                    $cardDetails = $this->paymentMethods->getAdyenDetails($payment);
+                }
             } elseif (strpos($payment_method, 'authorizenet') !== false) {
                 $cardDetails = $this->paymentMethods->getAuthorizeNetDetails($payment);
             } elseif (strpos($payment_method, 'braintree') !== false) {
@@ -79,6 +83,11 @@ class Payment
 
             if (array_key_exists("expirationMonth", $cardDetails) || array_key_exists("expirationYear", $cardDetails) || array_key_exists("lastFourDigits", $cardDetails)) {
                 $paymentData["creditCard"] = $cardDetails;
+            }
+
+            if ($payment->getCcType() == 'googlepay' || $payment->getAdditionalInformation('brand_code') == 'googlepay') {
+                $paymentData['androidPay'] = $cardDetails;
+                unset($paymentData["creditCard"]);
             }
         }
 

@@ -21,4 +21,7 @@
     <event name="sales_order_shipment_save_after">
         <observer name="shipment_save_after_observer" instance="Forter\Forter\Observer\Shipment\ShipmentSaveAfter" />
     </event>
+    <event name="payment_method_assign_data_adyen_hpp">
+        <observer name="forter_adyen_hpp_gateway_data_assign" instance="Forter\Forter\Observer\ThirdParty\Adyen\AdyenHppDataAssignObserver" />
+    </event>
 </config>
