@@ -291,6 +291,90 @@ class PaymentMethods
         return $this->preferCcDetails($payment, $detailsArray);
     }
 
+    public function getAdyenHppGooglePayDetails($payment, $order)
+    {
+        $additonal_data = $payment->getAdditionalInformation('additionalData');
+        $forterData = $payment->getAdditionalInformation('forterData');
+        $detailsArray = [];
+        if ($additonal_data || $forterData) {
+            if (isset($forterData['paymentMethod']) && isset($forterData['paymentMethod']['googlePayCardNetwork'])) {
+                $detailsArray['cardBrand'] = $forterData['paymentMethod']['googlePayCardNetwork'];
+            }
+
+            if (isset($forterData['paymentMethod']) && isset($forterData['paymentMethod']['googlePayToken'])) {
+                $googlePayToken = json_decode($forterData['paymentMethod']['googlePayToken']);
+                if (isset($googlePayToken->signature)) {
+                    $detailsArray['token'] = $googlePayToken->signature;
+                }
+            }
+
+            if (isset($forterData['checkoutAttemptId'])) {
+                $detailsArray['fingerprint'] = $forterData['checkoutAttemptId'];
+            }
+
+            if (isset($forterData['paymentMethod']) && isset($forterData['paymentMethod']['checkoutAttemptId'])) {
+                $detailsArray['fingerprint'] = $forterData['paymentMethod']['checkoutAttemptId'];
+            }
+
+            if (isset($additonal_data['cardHolderName'])) {
+                $detailsArray['nameOnCard'] = $additonal_data['cardHolderName'];
+            } else {
+                $detailsArray['nameOnCard'] = $order->getCustomerFirstname() . ' ' . $order->getCustomerLastname();
+            }
+
+            if (isset($additonal_data['cardBin'])) {
+                $detailsArray['bin'] = $additonal_data['cardBin'];
+            }
+
+            if (isset($additonal_data['expiryDate'])) {
+                $expiryDate = explode("/", $additonal_data['expiryDate']);
+
+                $month = $expiryDate[0];
+                if (strlen($month) == 1) {
+                    $month = "0" . $month;
+                }
+
+                $detailsArray['expirationMonth']= $month;
+                $detailsArray['expirationYear']= $expiryDate[1];
+            }
+
+            if (isset($additonal_data['cardSummary'])) {
+                $detailsArray['lastFourDigits']= $additonal_data['cardSummary'];
+            }
+
+            if (isset($additonal_data['authCode'])) {
+                $detailsArray['verificationResults']['authorizationCode']= $additonal_data['authCode'];
+                $detailsArray['verificationResults']['processorResponseCode']= $additonal_data['authCode'];
+            }
+
+            if (isset($additonal_data['avsResultRaw'])) { //sau avsResult , are text mai mult
+                $detailsArray['verificationResults']['avsFullResult']= $additonal_data['avsResultRaw'];
+            }
+
+            if (isset($additonal_data['cvcResultRaw'])) { // sau cvcResult
+                $detailsArray['verificationResults']['cvvResult']= $additonal_data['cvcResult'][0];
+            }
+
+            if (isset($additonal_data['eci'])) {
+                $detailsArray['verificationResults']['eciValue']= $additonal_data['eci'] === 'N/A' ? '' : $additonal_data['eci'];
+            }
+
+            if (isset($additonal_data['refusalReasonRaw'])) {
+                $detailsArray['verificationResults']['processorResponseText']= $additonal_data['refusalReasonRaw'];
+            }
+
+            if (isset($additonal_data['merchantReference'])) {
+                $detailsArray['paymentGatewayData']['gatewayMerchantId']= $additonal_data['merchantReference'];
+            }
+
+            $detailsArray['cardType'] = 'CREDIT';
+        }
+        $preferCcDetailsArray = $this->preferCcDetails($payment, $detailsArray);
+
+        $mergedArray = array_merge($preferCcDetailsArray, $detailsArray);
+        return $mergedArray;
+    }
+
     /**
      * Get mapped forter field
      * @return mixed
@@ -316,8 +400,8 @@ class PaymentMethods
                 return $detailsArray[$vrmKey];
             } elseif (!empty($detailsArray[$key])) {
                 return $detailsArray[$key];
-            } elseif (!is_null($this->getPaymentAdditionalData($payment,$vrmKey))) {
-                return $this->getPaymentAdditionalData($payment,$vrmKey);
+            } elseif (!is_null($this->getPaymentAdditionalData($payment, $vrmKey))) {
+                return $this->getPaymentAdditionalData($payment, $vrmKey);
             }
         }
         return $default;
@@ -329,7 +413,6 @@ class PaymentMethods
         if (isset($key[1]) && $payment->getAdditionalInformation($key[0])) {
             $additionalData = $payment->getAdditionalInformation($key[0]);
             if (isset($additionalData[$key[1]])) {
-
 
                 /* Force boolean value */
                 if ($additionalData[$key[1]] == 'true') {
