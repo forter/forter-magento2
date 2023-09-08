@@ -7,11 +7,13 @@
 
 namespace Forter\Forter\Model;
 
+use Magento\Framework\Model\AbstractModel;
+
 /**
  * Class Queue
  * @package Forter\Forter\Model
  */
-class Queue extends \Magento\Framework\Model\AbstractModel
+class Queue extends AbstractModel
 {
     /**
      * Define main table

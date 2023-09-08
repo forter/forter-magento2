@@ -4,20 +4,24 @@ namespace Forter\Forter\Observer\Shipment;
 
 use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\Config;
+use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 
 class ShipmentSaveAfter implements ObserverInterface
 {
 
+    public const KEY_CARRIER = 'carrier';
+    public const KEY_TRACKING_NUMBER = 'trackingNumber';
+
     /**
      * @var Config
      */
-    private $config;
+    private Config $config;
 
     /**
      * @var AbstractApi
      */
-    protected $abstractApi;
+    protected AbstractApi $abstractApi;
 
     /**
      * OrderSaveAfter constructor.
@@ -32,7 +36,7 @@ class ShipmentSaveAfter implements ObserverInterface
         $this->config = $config;
     }
 
-    public function execute(\Magento\Framework\Event\Observer $observer)
+    public function execute(Observer $observer)
     {
         if (!$this->config->isEnabled() && !$this->config->isOrderShippingStatusEnable()) {
             return false;
@@ -42,8 +46,8 @@ class ShipmentSaveAfter implements ObserverInterface
         $order = $currentShipment->getOrder();
 
         $data = [
-            'carrier' => '',
-            'trackingNumber' => ''
+            self::KEY_CARRIER => '',
+            self::KEY_TRACKING_NUMBER => ''
         ];
 
         $shipments = $order->getShipmentsCollection();
@@ -71,11 +75,11 @@ class ShipmentSaveAfter implements ObserverInterface
         }
 
         if (!empty($trackingNumbers)) {
-            $data['trackingNumber'] = implode(',', $trackingNumbers);
+            $data[self::KEY_TRACKING_NUMBER] = implode(',', $trackingNumbers);
         }
 
         if (!empty($carrierCodes)) {
-            $data['carrier'] = implode(',', $carrierCodes);
+            $data[self::KEY_CARRIER] = implode(',', $carrierCodes);
         }
 
         $shipmentData['deliveryStatusInfo'] = $data;

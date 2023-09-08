@@ -22,7 +22,7 @@ class AdyenHppDataAssignObserver extends AbstractDataAssignObserver
      *
      * @var array
      */
-    private static $approvedAdditionalDataKeys = [
+    private const APPROVED_ADDITIONAL_DATA_KEYS = [
         self::BRAND_CODE,
         self::DF_VALUE,
         self::GUEST_EMAIL,
@@ -49,10 +49,10 @@ class AdyenHppDataAssignObserver extends AbstractDataAssignObserver
      * @param Observer $observer
      * @return void
      */
-    public function execute(Observer $observer)
+    public function execute(Observer $observer): void
     {
         if (!$this->moduleManager->isEnabled('Adyen_Payment')) {
-            return null;
+            return;
         }
 
         $data = $this->readDataArgument($observer);
@@ -65,7 +65,7 @@ class AdyenHppDataAssignObserver extends AbstractDataAssignObserver
 
         $additionalData = \Adyen\Service\Validator\DataArrayValidator::getArrayOnlyWithApprovedKeys(
             $additionalData,
-            self::$approvedAdditionalDataKeys
+            self::APPROVED_ADDITIONAL_DATA_KEYS
         );
 
         if (!empty($additionalData[self::STATE_DATA])) {

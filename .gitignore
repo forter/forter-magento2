@@ -13,6 +13,7 @@ atlassian*
 /pub/sitemap
 /pub/sitemap.xml
 /.idea
+/*.iml
 /.gitattributes
 /app/config_sandbox
 /app/etc/config.php
@@ -73,3 +74,4 @@ atlassian*
 auth.json
 /tasks/*
 *.todo
+/composer.lock

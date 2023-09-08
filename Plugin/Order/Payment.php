@@ -5,7 +5,7 @@ namespace Forter\Forter\Plugin\Order;
 use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\Config as ForterConfig;
 use Forter\Forter\Model\RequestBuilder\Order;
-use Forter\Forter\Model\RequestBuilder\Payment as PaymentPrepere;
+use Forter\Forter\Model\RequestBuilder\Payment as PaymentPrepare;
 use Magento\Sales\Model\Order\Payment as MagentoPayment;
 
 /**
@@ -15,31 +15,31 @@ use Magento\Sales\Model\Order\Payment as MagentoPayment;
 class Payment
 {
 
-    const CANCELED_BY_MERCHANT = 'CANCELED_BY_MERCHANT';
+    public const CANCELED_BY_MERCHANT = 'CANCELED_BY_MERCHANT';
 
     /**
      *
      */
-    const VALIDATION_API_ENDPOINT = 'https://api.forter-secure.com/v2/orders/';
+    public const VALIDATION_API_ENDPOINT = 'https://api.forter-secure.com/v2/orders/';
     /**
-     * @var forterConfig
+     * @var ForterConfig
      */
-    private $forterConfig;
+    private ForterConfig $forterConfig;
     /**
      * @var AbstractApi
      */
-    private $abstractApi;
+    private AbstractApi $abstractApi;
     /**
      * @var Order
      */
-    private $requestBuilderOrder;
+    private Order $requestBuilderOrder;
 
     /**
      * Payment Prefer
      *
-     * @var PaymentPrepere
+     * @var PaymentPrepare
      */
-    private $paymentPrepere;
+    private $paymentPrepare;
 
     /**
      * Payment constructor.
@@ -50,12 +50,12 @@ class Payment
         ForterConfig $forterConfig,
         AbstractApi $abstractApi,
         Order $requestBuilderOrder,
-        PaymentPrepere $paymentPrepere
+        PaymentPrepare $paymentPrepare
     ) {
         $this->forterConfig = $forterConfig;
         $this->abstractApi = $abstractApi;
         $this->requestBuilderOrder = $requestBuilderOrder;
-        $this->paymentPrepere = $paymentPrepere;
+        $this->paymentPrepare = $paymentPrepare;
     }
 
     /**
@@ -67,29 +67,36 @@ class Payment
     public function aroundPlace(MagentoPayment $subject, callable $proceed)
     {
         try {
-            $result = $proceed();
-            return $result;
+            return  $proceed();
         } catch (\Exception $e) {
             $this->notifyForterOfPaymentFailure($e, $subject);
             throw $e;
         }
     }
 
-    public function notifyForterOfPaymentFailure($e, $subject)
+    public function notifyForterOfPaymentFailure(\Throwable $e, $subject)
     {
         try {
             if (!$this->forterConfig->isEnabled()) {
                 return;
             }
-            if ($e->getMessage() == $this->forterConfig->getPreThanksMsg()) {
+            if ($e->getMessage() === $this->forterConfig->getPreThanksMsg()) {
                 return;
             }
             $order = $subject->getOrder();
             $data = $this->requestBuilderOrder->buildTransaction($order, 'PAYMENT_ACTION_FAILURE');
             $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
             $this->abstractApi->sendApiRequest($url, json_encode($data));
-            $this->forterConfig->log('PAYMENT_ACTION_FAILURE Order' . $order->getIncrementId(). ' : ' . json_encode($data));
-            $this->forterConfig->log('Payment Failure for Order ' . $order->getIncrementId() . ' - Order Payment Data: ' . json_encode($order->getPayment()->getData()));
+            $this->forterConfig->log(sprintf(
+                'PAYMENT_ACTION_FAILURE Order %s:%s',
+                $order->getIncrementId(),
+                json_encode($data)
+            ));
+            $this->forterConfig->log(sprintf(
+                'Payment Failure for Order %s  - Order Payment Data: %s',
+                 $order->getIncrementId(),
+                json_encode($order->getPayment()->getData())
+            ));
             $this->sendOrderStatus($order);
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
@@ -102,7 +109,7 @@ class Payment
             "orderId" => $order->getIncrementId(),
             "eventTime" => time(),
             "updatedStatus" => self::CANCELED_BY_MERCHANT,
-            "payment" => $this->paymentPrepere->generatePaymentInfo($order)
+            "payment" => $this->paymentPrepare->generatePaymentInfo($order)
         ];
 
         $url = "https://api.forter-secure.com/v2/status/" . $order->getIncrementId();

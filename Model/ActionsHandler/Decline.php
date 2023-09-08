@@ -22,43 +22,37 @@ class Decline
     /**
      * @var AbstractApi
      */
-    private $abstractApi;
-    /**
-     * @var Sendmail
-     */
-    private $sendmail;
-    /**
-     * @var CheckoutSession
-     */
-    private $checkoutSession;
+    private AbstractApi $abstractApi;
+
+
     /**
      * @var Order
      */
-    private $order;
+    private Order $order;
     /**
      * @var ForterConfig
      */
-    private $forterConfig;
+    private ForterConfig $forterConfig;
     /**
      * @var CreditmemoFactory
      */
-    private $creditmemoFactory;
+    private CreditmemoFactory $creditmemoFactory;
     /**
      * @var CreditmemoService
      */
-    private $creditmemoService;
+    private CreditmemoService $creditmemoService;
     /**
      * @var Invoice
      */
-    private $invoice;
+    private Invoice $invoice;
     /**
      * @var Sendmail
      */
-    protected $sendMail;
+    protected Sendmail $sendMail;
     /**
      * @var OrderManagementInterface
      */
-    protected $orderManagement;
+    protected OrderManagementInterface $orderManagement;
 
     /**
      * Decline constructor.
@@ -83,8 +77,6 @@ class Decline
         $this->abstractApi = $abstractApi;
         $this->sendMail = $sendMail;
         $this->orderManagement = $orderManagement;
-        $this->checkoutSession = $checkoutSession;
-        $this->order = $order;
         $this->forterConfig = $forterConfig;
         $this->creditmemoFactory = $creditmemoFactory;
         $this->creditmemoService = $creditmemoService;
@@ -92,14 +84,15 @@ class Decline
     }
 
     /**
-     * @param  Order $order
+     * @param Order $order
      * @return $this
+     * @throws PaymentException
      */
-    public function handlePreTransactionDescision($order)
+    public function handlePreTransactionDescision(Order $order): self
     {
         $this->sendDeclineMail($order);
         $forterDecision = $this->forterConfig->getDeclinePre();
-        if ($forterDecision == '1') {
+        if ($forterDecision === '1') {
             throw new PaymentException(__($this->forterConfig->getPreThanksMsg()));
         }
 
@@ -110,16 +103,16 @@ class Decline
      * @param  Order $order
      * @return $this
      */
-    public function sendDeclineMail($order)
+    public function sendDeclineMail($order): self
     {
         $this->sendMail->sendMail($order);
         return $this;
     }
 
     /**
-     * @param $order
+     * @param Order $order
      */
-    public function handlePostTransactionDescision($order)
+    public function handlePostTransactionDescision(Order $order): void
     {
         try {
             if ($order->canCancel()) {
@@ -144,9 +137,9 @@ class Decline
     }
 
     /**
-     * @param $order
+     * @param Order $order
      */
-    private function cancelOrder($order)
+    private function cancelOrder(Order $order): void
     {
         $order->cancel()->save();
         if ($order->isCanceled()) {
@@ -161,10 +154,10 @@ class Decline
     }
 
     /**
-     * @param $order
+     * @param Order $order
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    private function createCreditMemo($order)
+    private function createCreditMemo(Order $order): void
     {
         $invoices = $order->getInvoiceCollection();
         foreach ($invoices as $invoice) {
@@ -176,23 +169,21 @@ class Decline
                 $creditmemo->setInvoice($invoiceobj);
                 $this->creditmemoService->refund($creditmemo);
                 $totalRefunded = $order->getTotalRefunded();
-            }
-
-            if ($totalRefunded > 0) {
-                $this->forterConfig->addCommentToOrder($order, $totalRefunded . ' Refunded');
-                return;
+                if ($totalRefunded > 0) {
+                    $this->forterConfig->addCommentToOrder($order, $totalRefunded . ' Refunded');
+                    return;
+                }
             }
         }
 
         $this->forterConfig->addCommentToOrder($order, 'Order Refund attempt failed');
         $this->forterConfig->log('Refund Failure for Order ' . $order->getIncrementId() .' - Order Data: ' . json_encode($order->getData()));
-        return;
     }
 
     /**
-     * @param $order
+     * @param Order $order
      */
-    public function holdOrder($order)
+    public function holdOrder(Order $order): void
     {
         if ($this->forterConfig->isHoldingOrdersEnabled()) {
             $order->hold()->save();
@@ -201,7 +192,7 @@ class Decline
         }
     }
 
-    public function markOrderPaymentReview($order)
+    public function markOrderPaymentReview(Order $order): void
     {
         $orderState = Order::STATE_PAYMENT_REVIEW;
         $order->setState($orderState)->setStatus(Order::STATE_PAYMENT_REVIEW);

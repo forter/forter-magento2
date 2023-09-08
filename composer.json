@@ -25,5 +25,21 @@
         "psr-4": {
             "Forter\\Forter\\": ""
         }
+    },
+    "require-dev": {
+        "phpunit/phpunit": ">=9.5",
+        "magento/magento2ce": ">=2.4.4"
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://repo.magento.com/"
+        }
+    ],
+    "config": {
+        "allow-plugins": {
+            "magento/composer-dependency-version-audit-plugin": true,
+            "magento/magento-composer-installer": false
+        }
     }
 }
