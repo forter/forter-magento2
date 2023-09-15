@@ -63,7 +63,7 @@ class AdyenHppDataAssignObserver extends AbstractDataAssignObserver
             return;
         }
 
-        $additionalData = \Adyen\Service\Validator\DataArrayValidator::getArrayOnlyWithApprovedKeys(
+        $additionalData = \Adyen\Payment\Helper\Util\DataArrayValidator::getArrayOnlyWithApprovedKeys(
             $additionalData,
             self::$approvedAdditionalDataKeys
         );
