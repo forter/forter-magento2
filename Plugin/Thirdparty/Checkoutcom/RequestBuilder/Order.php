@@ -15,6 +15,7 @@ class Order
      */
     public $forterConfig;
 
+    public $checkoutComCollection;
 
     /**
      * @var AbstractApi
