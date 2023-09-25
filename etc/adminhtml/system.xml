@@ -207,6 +207,13 @@
                     <label>Enable Order Holding</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
+                <field id="force_order_holding" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Force Order Holding</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>
+                        Force order holding even if the order state is in an unholdable state.
+                    </comment>
+                </field>
                 <field id="enabled_decision_controller" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Enable Decision Change Controller</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
