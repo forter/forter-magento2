@@ -159,7 +159,15 @@ class PaymentPlaceEnd implements ObserverInterface
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
         try {
-            if (!$this->forterConfig->isEnabled() || (!$this->forterConfig->getIsPost() && !$this->forterConfig->getIsPreAndPost())) {
+            
+            $order = $observer->getEvent()->getPayment()->getOrder();
+
+            if (    !$this->forterConfig->isEnabled() || 
+                    (
+                        (!$this->forterConfig->getIsPost() && !$this->forterConfig->getIsPreAndPost()) || 
+                        ( $this->forterConfig->getMappedPrePos($order->getPayment()->getMethod()) != 'post' && !$this->forterConfig->getMappedPrePos($order->getPayment()->getMethod()) != 'prepost' )
+                    )
+                ) {
                 if ($this->registry->registry('forter_pre_decision')) {
                     $order = $observer->getEvent()->getPayment()->getOrder();
                     $order->addStatusHistoryComment(__('Forter (pre) Decision: %1', $this->registry->registry('forter_pre_decision')));

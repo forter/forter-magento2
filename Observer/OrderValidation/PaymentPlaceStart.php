@@ -190,11 +190,13 @@ class PaymentPlaceStart implements ObserverInterface
 
             $this->forterLogger->forterConfig->log('Connection Information for Order ' . $order->getIncrementId() . ' : ' . json_encode($connectionInformation));
 
-            if ($this->config->getIsPost() && !$this->config->getIsPreAndPost()) {
+            if ( 
+                ($this->config->getIsPost() && !$this->config->getIsPreAndPost()) || 
+                ($this->config->getMappedPrePos($order->getPayment()->getMethod()) == 'post') ) {
                 return;
             }
 
-            if ($this->config->getIsCron()) {
+            if ($this->config->getIsCron() || $this->config->getMappedPrePos($order->getPayment()->getMethod()) == 'cron' ) {
                 $currentTime = $this->dateTime->gmtDate();
 
                 $this->queue->setEntityType('pre_sync_order');

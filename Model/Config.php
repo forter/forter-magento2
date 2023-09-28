@@ -580,6 +580,28 @@ class Config
     }
 
     /**
+     * Return the element to observe
+     *
+     * @return string
+     */
+    public function getPrePostMap($scope = null, $scopeId = null)
+    {
+        return $this->getConfigValue('advanced_settings/pre_post_map', $scope, $scopeId);
+    }
+
+    public function getMappedPrePos($method)
+    {
+        $map = $this->getConfigValue('advanced_settings/pre_post_map');
+        $map = is_null($map) ? [] : json_decode($map, true);
+
+        if (isset($map[$method])) {
+            return $map[$method];
+        }
+        
+        return false;
+    }
+
+    /**
      * @method getVerificationResultsMap
      * @return array
      */
