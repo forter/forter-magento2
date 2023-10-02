@@ -264,6 +264,11 @@ class PaymentPlaceStart implements ObserverInterface
             $cardData['cardLast4'] = $requestData->paymentMethod->additional_data->cardLast4 ?? null;
         }
 
+        if ($this->request->getParam('methodId') && $this->request->getParam('methodId') == "checkoutcom_card_payment") {
+            $cardData['cardBin'] = $this->request->getParam('cardBin') ?? null;
+            $cardData['cardToken'] = $this->request->getParam('cardToken') ?? null;
+        }
+
         return $cardData;
     }
 
@@ -280,6 +285,10 @@ class PaymentPlaceStart implements ObserverInterface
                 $order->getPayment()->setAdditionalInformation('adyen_card_bin', $cardData['cardBin']);
             }
             $order->getPayment()->setAdditionalInformation('forter_cc_bin', $cardData['cardBin']);
+        }
+
+        if ( isset( $cardData['cardToken']) ) {
+            $order->getPayment()->setAdditionalInformation('forter_cc_token', $cardData['cardToken']);
         }
 
         if (isset($cardData['cardLast4']) && $cardData['cardLast4']) {
