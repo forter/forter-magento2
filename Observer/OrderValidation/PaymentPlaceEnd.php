@@ -257,6 +257,12 @@ class PaymentPlaceEnd implements ObserverInterface
         $result = $this->forterConfig->getDeclinePost();
         if ($result == '1') {
             $this->customerSession->setForterMessage($this->forterConfig->getPostThanksMsg());
+
+            // the order will be canceled only if the order is in hold state and the force holding orders is disabled
+            if ( $this->forterConfig->forceHoldingOrders() && !$order->canHold() ) {
+                $order->setState( \Magento\Sales\Model\Order::STATE_PROCESSING );
+            }
+
             if ($order->canHold()) {
                 $order->setCanSendNewEmailFlag(false);
                 $this->decline->holdOrder($order);

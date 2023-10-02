@@ -426,6 +426,14 @@ class Config
     /**
      * @return mixed
      */
+    public function forceHoldingOrders($scope = null, $scopeId = null)
+    {
+        return $this->getConfigValue('advanced_settings/force_order_holding', $scope, $scopeId);
+    }
+
+    /**
+     * @return mixed
+     */
     public function isOrderFulfillmentEnable($scope = null, $scopeId = null)
     {
         return $this->getConfigValue('advanced_settings/enabled_order_fulfillment', $scope, $scopeId);
