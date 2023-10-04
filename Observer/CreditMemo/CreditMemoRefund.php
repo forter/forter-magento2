@@ -11,26 +11,26 @@ use Magento\Sales\Model\Order\Creditmemo;
 
 class CreditMemoRefund implements ObserverInterface
 {
-    const STATE_OPEN = Creditmemo::STATE_OPEN;
-    const STATE_REFUNDED = Creditmemo::STATE_REFUNDED;
-    const STATE_CANCELED = Creditmemo::STATE_CANCELED;
+    public const STATE_OPEN = Creditmemo::STATE_OPEN;
+    public const STATE_REFUNDED = Creditmemo::STATE_REFUNDED;
+    public const STATE_CANCELED = Creditmemo::STATE_CANCELED;
 
     /**
      * @var Config
      */
-    private $config;
+    private Config $config;
 
     /**
      * @var AbstractApi
      */
-    protected $abstractApi;
+    protected AbstractApi $abstractApi;
 
     /**
      * @var AdditionalDataHelper
      */
-    protected $additionalDataHelper;
+    protected AdditionalDataHelper $additionalDataHelper;
 
-    protected $refundInformation = [
+    protected array $refundInformation = [
         'refundMethod' => '',
         'refundAuthorizationCode' => '',
         'refundStatus' => '',
@@ -59,10 +59,13 @@ class CreditMemoRefund implements ObserverInterface
         $this->additionalDataHelper = $additionalDataHelper;
     }
 
-    public function execute(Observer $observer)
+    /**
+     * @inheirtDoc
+     */
+    public function execute(Observer $observer): void
     {
         if (!$this->config->isEnabled() && !$this->config->isOrderCreditMemoStatusEnable()) {
-            return false;
+            return;
         }
 
         /** @var Creditmemo $creditMemo */
@@ -71,7 +74,6 @@ class CreditMemoRefund implements ObserverInterface
         $payment = $order->getPayment();
         $refundMethod = $creditMemo->getTransactionId() ? 'ORIGINAL_PAYMENT_METHOD' : 'DIFFERENT_PAYMENT_METHOD';
         $refundAmount = $creditMemo->getGrandTotal();
-        $baseRefundAmount = $creditMemo->getBaseGrandTotal();
 
         // Refund Information
         $this->refundInformation = [
@@ -80,9 +82,9 @@ class CreditMemoRefund implements ObserverInterface
             'refundStatus' => $this->additionalDataHelper->getCreditMemoState($creditMemo->getState()),
             'refundInitiatedBy' => 'MERCHANT',
             'isAutomatedRefund' => false,
-            'isFullRefund' => $refundAmount == $order->getGrandTotal(),
+            'isFullRefund' => $refundAmount === $order->getGrandTotal(),
             'refundAmount' => [
-                'amountLocalCurrency' => strval($refundAmount),
+                'amountLocalCurrency' => (string) $refundAmount,
                 'currency' => $creditMemo->getOrderCurrencyCode(),
             ]
         ];

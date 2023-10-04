@@ -8,6 +8,7 @@ use Forter\Forter\Model\Config;
 use Forter\Forter\Model\ForterLogger;
 use Forter\Forter\Model\ForterLoggerMessage;
 use Forter\Forter\Model\RequestBuilder\Payment as PaymentPrepere;
+use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 
 /**
@@ -16,7 +17,7 @@ use Magento\Framework\Event\ObserverInterface;
  */
 class OrderSaveBefore implements ObserverInterface
 {
-    const ORDER_FULFILLMENT_STATUS_ENDPOINT = "https://api.forter-secure.com/v2/status/";
+    public const ORDER_FULFILLMENT_STATUS_ENDPOINT = "https://api.forter-secure.com/v2/status/";
 
     /**
      * @var Config
@@ -66,34 +67,33 @@ class OrderSaveBefore implements ObserverInterface
     }
 
     /**
-     * @param \Magento\Framework\Event\Observer $observer
-     * @return bool|void
+     * @inheirtDoc
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function execute(\Magento\Framework\Event\Observer $observer)
+    public function execute(Observer $observer)
     {
         if (!$this->config->isEnabled() || !$this->config->isOrderFulfillmentEnable()) {
-            return false;
+            return;
         }
 
         try {
             $order = $observer->getEvent()->getOrder();
             if (!$order->getForterStatus()) {
-                return false;
+                return;
             }
             $orderState = $order->getState();
             $orderOrigState = $order->getOrigData('state');
 
             if ($this->additionalDataHelper->getCreditMemoRmaSize($order)) {
                 $orderState = 'RETURNED';
-            } elseif ($orderState == 'complete' && $orderOrigState != 'complete') {
+            } elseif ($orderState === 'complete' && $orderOrigState !== 'complete') {
                 $orderState = 'COMPLETED';
-            } elseif ($orderState == 'processing' && $orderOrigState != 'processing') {
+            } elseif ($orderState === 'processing' && $orderOrigState !== 'processing') {
                 $orderState = 'PROCESSING';
-            } elseif ($orderState == 'canceled' && $orderOrigState != 'canceled') {
+            } elseif ($orderState === 'canceled' && $orderOrigState !== 'canceled') {
                 $orderState = 'CANCELED_BY_MERCHANT';
             } else {
-                return false;
+                return;
             }
 
             /* Sends the order status to Forter. */
