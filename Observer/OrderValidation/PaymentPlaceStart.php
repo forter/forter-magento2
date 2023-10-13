@@ -190,22 +190,25 @@ class PaymentPlaceStart implements ObserverInterface
 
             $this->forterLogger->forterConfig->log('Connection Information for Order ' . $order->getIncrementId() . ' : ' . json_encode($connectionInformation));
 
-            if ( 
-                ($this->config->getIsPost() && !$this->config->getIsPreAndPost()) || 
-                ($this->config->getMappedPrePos($order->getPayment()->getMethod()) == 'post') ) {
+            $paymentMethod = $order->getPayment()->getMethod();
+            $subMethod = $order->getPayment()->getCcType();
+            $methodSetting = $this->config->getMappedPrePos($paymentMethod, $subMethod);
+
+            if ($methodSetting === 'post') {
                 return;
             }
 
-            if ($this->config->getIsCron() || $this->config->getMappedPrePos($order->getPayment()->getMethod()) == 'cron' ) {
-                $currentTime = $this->dateTime->gmtDate();
-
-                $this->queue->setEntityType('pre_sync_order');
-                $this->queue->setStoreId($storeId);
-                $this->queue->setIncrementId($order->getIncrementId());
-                $this->queue->setSyncFlag(0);
-                $this->queue->setSyncDate($currentTime);
-                $this->queue->save();
+            // If methodSetting is 'cron' or no methodSetting and global cron is set, we queue the order.
+            if ($methodSetting === 'cron' || (!$methodSetting && $this->config->getIsCron())) {
+                $this->queueOrder($order, $storeId);
                 return;
+            }
+
+            // No methodSetting specified, fallback to global settings
+            if (!$methodSetting) {
+                if ($this->config->getIsPost() && !$this->config->getIsPreAndPost()) {
+                    return;
+                }
             }
 
             $data = $this->requestBuilderOrder->buildTransaction($order, 'BEFORE_PAYMENT_ACTION');
@@ -229,7 +232,7 @@ class PaymentPlaceStart implements ObserverInterface
                 $message = new ForterLoggerMessage($this->config->getSiteId(), $order->getIncrementId(), 'Response Error - Pre-Auth');
                 $message->metaData->order = $order->getData();
                 $message->metaData->payment = $order->getPayment()->getData();
-                $message->metaData->forterDecision = $forterResponse->action;
+                $message->metaData->forterDecision = $forterResponse->action ?? null;
                 $this->forterLogger->SendLog($message);
                 return;
             }
@@ -248,7 +251,7 @@ class PaymentPlaceStart implements ObserverInterface
         $message = new ForterLoggerMessage($this->config->getSiteId(), $order->getIncrementId(), 'Handle Response - Pre-Auth');
         $message->metaData->order = $order->getData();
         $message->metaData->payment = $order->getPayment()->getData();
-        $message->metaData->forterDecision = $forterResponse->action;
+        $message->metaData->forterDecision = $forterResponse->action ?? null;
         $this->forterLogger->SendLog($message);
         $this->decline->handlePreTransactionDescision($order);
     }
@@ -289,4 +292,15 @@ class PaymentPlaceStart implements ObserverInterface
         }
     }
 
+    protected function queueOrder($order, $storeId)
+    {
+        $currentTime = $this->dateTime->gmtDate();
+
+        $this->queue->setEntityType('pre_sync_order')
+            ->setStoreId($storeId)
+            ->setIncrementId($order->getIncrementId())
+            ->setSyncFlag(0)
+            ->setSyncDate($currentTime)
+            ->save();
+    }
 }
