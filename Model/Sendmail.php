@@ -12,7 +12,7 @@ use Magento\Sales\Model\Order;
 class Sendmail
 {
     const EMAIL_TEMPLATE = 'sendmail_on_decline/email_template';
-    const EMAIL_SERVICE_ENABLE = 'sendmail_on_decline/enabled';
+    const EMAIL_SERVICE_ENABLE = 'sendmail_on_decline/sendmail_on_decline_enabled';
     const EMAIL_SENDER = 'sendmail_on_decline/sender';
     const EMAIL_RECEIVER = 'sendmail_on_decline/receiver';
 
