@@ -452,6 +452,17 @@ class PaymentMethods
             $last4cc = $this->customerSession->getForterLast4cc() ? $this->customerSession->getForterLast4cc() : $payment->getCcLast4();
         }
 
+        $additionalDetails = $payment->getAdditionalInformation();
+
+        if ( !$binNumber && isset($additionalDetails['forter_cc_bin'])) {
+            $binNumber = $additionalDetails['forter_cc_bin'];
+        }
+        
+        $ccToken = null;
+        if ( isset($additionalDetails['forter_cc_token'])) {
+            $ccToken = $additionalDetails['forter_cc_token'];
+        }
+
         $detailsArray["avsFullResult"] = !empty($detailsArray["avsFullResult"]) ? $detailsArray["avsFullResult"] : $payment->getCcAvsStatus();
         $detailsArray["cvvResult"] = !empty($detailsArray["cvvResult"]) ? $detailsArray["cvvResult"] : $payment->getCcCidStatus();
         $detailsArray["cavvResult"] = !empty($detailsArray["cavvResult"]) ? $detailsArray["cavvResult"] : $payment->getCcCidStatus();

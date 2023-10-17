@@ -74,6 +74,11 @@
 			name="forter_json_adyen_plugin" 
 			type="Forter\Forter\Plugin\Thirdparty\Adyen\RequestBuilder\Order" />
   	</type>
+	<type name="Adyen\Payment\Helper\Order">
+		<plugin 
+			name="forter_adyen_order" 
+			type="Forter\Forter\Plugin\Thirdparty\Adyen\Helper\Order" />
+  	</type>
 
 	<!-- Plugin Paysafe functionality -->
 	<type name="Paysafe\Payment\Model\Adapter">
