@@ -141,11 +141,13 @@ class Order
      */
     public function buildTransaction($order, $orderStage)
     {
+
         $data = [
             "orderId" => strval($order->getIncrementId()),
             "orderType" => "WEB",
             "timeSentToForter" => time()*1000,
             "checkoutTime" => time(),
+            "authorizationStep" => $orderStage === "BEFORE_PAYMENT_ACTION" ? "PRE_AUTHORIZATION" : "POST_AUTHORIZATION",
             "additionalIdentifiers" => $this->basicInfoPrepare->getAdditionalIdentifiers($order, $orderStage),
             "totalAmount" => $this->cartPrepare->getTotalAmount($order),
             "cartItems" => $this->cartPrepare->generateCartItems($order),
