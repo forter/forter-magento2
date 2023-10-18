@@ -193,23 +193,37 @@ class PaymentPlaceStart implements ObserverInterface
             $paymentMethod = $order->getPayment()->getMethod();
             $subMethod = $order->getPayment()->getCcType();
             $methodSetting = $this->config->getMappedPrePos($paymentMethod, $subMethod);
+            $writer = new \Zend_Log_Writer_Stream(BP . '/var/log/custom.log');
+            $logger = new \Zend_Log();
+            $logger->addWriter($writer);
+            $logger->info('PRE_AUTHORIZATION submethod = '.$subMethod ?? 'non existent');
+            $logger->info('method value '.$methodSetting);
+
 
             if ($methodSetting === 'post') {
+                $logger->info(' Exit PreAuthorization 1');
+
                 return;
             }
 
             // If methodSetting is 'cron' or no methodSetting and global cron is set, we queue the order.
             if ($methodSetting === 'cron' || (!$methodSetting && $this->config->getIsCron())) {
                 $this->queueOrder($order, $storeId);
+                $logger->info(' Exit PreAuthorization 2');
+
                 return;
             }
 
             // No methodSetting specified, fallback to global settings
             if (!$methodSetting) {
                 if ($this->config->getIsPost() && !$this->config->getIsPreAndPost()) {
+                    $logger->info(' Exit PreAuthorization 3');
+
                     return;
                 }
             }
+
+            $order->setData('sub_payment_method',$subMethod);
 
             $data = $this->requestBuilderOrder->buildTransaction($order, 'BEFORE_PAYMENT_ACTION');
 
@@ -223,10 +237,13 @@ class PaymentPlaceStart implements ObserverInterface
             $order->setForterResponse($forterResponse);
 
             $this->forterLogger->forterConfig->log($forterResponse);
+            $logger->info(' Pre-Authorization flow 1');
 
             $forterResponse = json_decode($forterResponse);
 
             if ($forterResponse->status != 'success' || !isset($forterResponse->action)) {
+                $logger->info(' Pre-Authorization flow 2');
+
                 $this->registry->register('forter_pre_decision', 'error');
                 $order->setForterStatus('error');
                 $message = new ForterLoggerMessage($this->config->getSiteId(), $order->getIncrementId(), 'Response Error - Pre-Auth');
