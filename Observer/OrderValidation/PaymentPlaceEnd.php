@@ -159,16 +159,39 @@ class PaymentPlaceEnd implements ObserverInterface
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
         try {
-            if (!$this->forterConfig->isEnabled() || (!$this->forterConfig->getIsPost() && !$this->forterConfig->getIsPreAndPost())) {
+            $order = $observer->getEvent()->getPayment()->getOrder();
+            $paymentMethod = $order->getPayment()->getMethod();
+            $subMethod = $order->getData('sub_payment_method') ? $order->getData('sub_payment_method') : $order->getPayment()->getCcType(); // This will return 'googlepay', 'applepay', etc.
+            $methodSetting = $this->forterConfig->getMappedPrePos($paymentMethod, $subMethod);
+
+            $writer = new \Zend_Log_Writer_Stream(BP . '/var/log/custom.log');
+            $logger = new \Zend_Log();
+            $logger->addWriter($writer);
+            $logger->info('PPOST_AUTHORIZATION submethod = '.$subMethod ?? 'non existent');
+            $logger->info('method value '.$methodSetting);
+
+
+            if (!$this->forterConfig->isEnabled()) {
                 if ($this->registry->registry('forter_pre_decision')) {
-                    $order = $observer->getEvent()->getPayment()->getOrder();
-                    $order->addStatusHistoryComment(__('Forter (pre) Decision: %1', $this->registry->registry('forter_pre_decision')));
-                    $order->save();
-                    $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'Pre-Auth');
-                    $message->metaData->order = $order->getData();
-                    $message->metaData->payment = $order->getPayment()->getData();
-                    $this->forterConfig->log('Order ' . $order->getIncrementId() . ' Payment Data: ' . json_encode($order->getPayment()->getData()));
-                    $this->forterLogger->SendLog($message);
+                    $this->logForterPreDecision($observer->getEvent()->getPayment()->getOrder());
+                    $logger->info(' Exit POST-Authorization 1');
+                }
+                return;
+            }
+
+            if ($methodSetting && $methodSetting !== 'post' && $methodSetting !== 'prepost') {
+                $logger->info('cron if');
+                if ($this->registry->registry('forter_pre_decision')) {
+                    $this->logForterPreDecision($observer->getEvent()->getPayment()->getOrder());
+                    $logger->info(' Exit POST-Authorization 2');
+                }
+                return;
+            }
+
+            if (!$methodSetting && !$this->forterConfig->getIsPost() && !$this->forterConfig->getIsPreAndPost()) {
+                if ($this->registry->registry('forter_pre_decision')) {
+                    $this->logForterPreDecision($observer->getEvent()->getPayment()->getOrder());
+                    $logger->info(' Exit POST-Authorization 3');
                 }
                 return;
             }
@@ -196,7 +219,7 @@ class PaymentPlaceEnd implements ObserverInterface
             $this->forterConfig->log('Forter Response for Order ' . $order->getIncrementId() . ': ' . $forterResponse);
 
             $forterResponse = json_decode($forterResponse);
-
+            $logger->info(' POST-Authorization flow 1');
             if ($forterResponse->status != 'success' || !isset($forterResponse->action)) {
                 $order->setForterStatus('error');
                 $order->addStatusHistoryComment(__('Forter (post) Decision: %1', 'error'));
@@ -216,6 +239,7 @@ class PaymentPlaceEnd implements ObserverInterface
             $order->addStatusHistoryComment(__('Forter (post) Decision Reason: %1', $forterResponse->reasonCode));
             $this->handleResponse($forterResponse->action ?? '', $order);
             $this->abstractApi->triggerRecommendationEvents($forterResponse, $order, 'post');
+            $logger->info(' POST-Authorization flow 2');
 
             $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'Post-Auth');
             $message->metaData->order = $order->getData();
@@ -315,5 +339,16 @@ class PaymentPlaceEnd implements ObserverInterface
     {
         $this->customerSession->unsForterBin();
         $this->customerSession->unsForterLast4cc();
+    }
+
+    protected function logForterPreDecision($order)
+    {
+        $order->addStatusHistoryComment(__('Forter (pre) Decision: %1', $this->registry->registry('forter_pre_decision')));
+        $order->save();
+        $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'Pre-Auth');
+        $message->metaData->order = $order->getData();
+        $message->metaData->payment = $order->getPayment()->getData();
+        $this->forterConfig->log('Order ' . $order->getIncrementId() . ' Payment Data: ' . json_encode($order->getPayment()->getData()));
+        $this->forterLogger->SendLog($message);
     }
 }

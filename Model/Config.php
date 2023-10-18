@@ -588,6 +588,38 @@ class Config
     }
 
     /**
+     * Return the element to observe
+     *
+     * @return string
+     */
+    public function getPrePostMap($scope = null, $scopeId = null)
+    {
+        return $this->getConfigValue('advanced_settings/pre_post_map', $scope, $scopeId);
+    }
+
+    public function getMappedPrePos($method, $subMethod = null)
+    {
+        $map = $this->getConfigValue('advanced_settings/pre_post_map');
+        $map = is_null($map) ? [] : json_decode($map, true);
+
+        // Check for sub-method (e.g., google_pay inside adyen_hpp)
+        if ($subMethod && isset($map[$method]) && isset($map[$method][$subMethod])) {
+            return $map[$method][$subMethod];
+        }
+
+        // Check if method has a default action
+        if (isset($map[$method]) && isset($map[$method]['default'])) {
+            return $map[$method]['default'];
+        }
+
+        // Check for top-level payment method
+        if (isset($map[$method])) {
+            return $map[$method];
+        }
+        return false;
+    }
+
+    /**
      * @method getVerificationResultsMap
      * @return array
      */

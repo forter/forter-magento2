@@ -190,21 +190,40 @@ class PaymentPlaceStart implements ObserverInterface
 
             $this->forterLogger->forterConfig->log('Connection Information for Order ' . $order->getIncrementId() . ' : ' . json_encode($connectionInformation));
 
-            if ($this->config->getIsPost() && !$this->config->getIsPreAndPost()) {
+            $paymentMethod = $order->getPayment()->getMethod();
+            $subMethod = $order->getPayment()->getCcType();
+            $methodSetting = $this->config->getMappedPrePos($paymentMethod, $subMethod);
+            $writer = new \Zend_Log_Writer_Stream(BP . '/var/log/custom.log');
+            $logger = new \Zend_Log();
+            $logger->addWriter($writer);
+            $logger->info('PRE_AUTHORIZATION submethod = '.$subMethod ?? 'non existent');
+            $logger->info('method value '.$methodSetting);
+
+
+            if ($methodSetting === 'post') {
+                $logger->info(' Exit PreAuthorization 1');
+
                 return;
             }
 
-            if ($this->config->getIsCron()) {
-                $currentTime = $this->dateTime->gmtDate();
+            // If methodSetting is 'cron' or no methodSetting and global cron is set, we queue the order.
+            if ($methodSetting === 'cron' || (!$methodSetting && $this->config->getIsCron())) {
+                $this->queueOrder($order, $storeId);
+                $logger->info(' Exit PreAuthorization 2');
 
-                $this->queue->setEntityType('pre_sync_order');
-                $this->queue->setStoreId($storeId);
-                $this->queue->setIncrementId($order->getIncrementId());
-                $this->queue->setSyncFlag(0);
-                $this->queue->setSyncDate($currentTime);
-                $this->queue->save();
                 return;
             }
+
+            // No methodSetting specified, fallback to global settings
+            if (!$methodSetting) {
+                if ($this->config->getIsPost() && !$this->config->getIsPreAndPost()) {
+                    $logger->info(' Exit PreAuthorization 3');
+
+                    return;
+                }
+            }
+
+            $order->setData('sub_payment_method',$subMethod);
 
             $data = $this->requestBuilderOrder->buildTransaction($order, 'BEFORE_PAYMENT_ACTION');
 
@@ -218,16 +237,19 @@ class PaymentPlaceStart implements ObserverInterface
             $order->setForterResponse($forterResponse);
 
             $this->forterLogger->forterConfig->log($forterResponse);
+            $logger->info(' Pre-Authorization flow 1');
 
             $forterResponse = json_decode($forterResponse);
 
             if ($forterResponse->status != 'success' || !isset($forterResponse->action)) {
+                $logger->info(' Pre-Authorization flow 2');
+
                 $this->registry->register('forter_pre_decision', 'error');
                 $order->setForterStatus('error');
                 $message = new ForterLoggerMessage($this->config->getSiteId(), $order->getIncrementId(), 'Response Error - Pre-Auth');
                 $message->metaData->order = $order->getData();
                 $message->metaData->payment = $order->getPayment()->getData();
-                $message->metaData->forterDecision = $forterResponse->action;
+                $message->metaData->forterDecision = $forterResponse->action ?? null;
                 $this->forterLogger->SendLog($message);
                 return;
             }
@@ -246,7 +268,7 @@ class PaymentPlaceStart implements ObserverInterface
         $message = new ForterLoggerMessage($this->config->getSiteId(), $order->getIncrementId(), 'Handle Response - Pre-Auth');
         $message->metaData->order = $order->getData();
         $message->metaData->payment = $order->getPayment()->getData();
-        $message->metaData->forterDecision = $forterResponse->action;
+        $message->metaData->forterDecision = $forterResponse->action ?? null;
         $this->forterLogger->SendLog($message);
         $this->decline->handlePreTransactionDescision($order);
     }
@@ -296,4 +318,15 @@ class PaymentPlaceStart implements ObserverInterface
         }
     }
 
+    protected function queueOrder($order, $storeId)
+    {
+        $currentTime = $this->dateTime->gmtDate();
+
+        $this->queue->setEntityType('pre_sync_order')
+            ->setStoreId($storeId)
+            ->setIncrementId($order->getIncrementId())
+            ->setSyncFlag(0)
+            ->setSyncDate($currentTime)
+            ->save();
+    }
 }
