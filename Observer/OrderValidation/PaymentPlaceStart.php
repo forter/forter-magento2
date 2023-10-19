@@ -262,6 +262,8 @@ class PaymentPlaceStart implements ObserverInterface
         if ($requestData && isset($requestData->paymentMethod->additional_data)) {
             $cardData['cardBin'] = $requestData->paymentMethod->additional_data->cardBin ?? null;
             $cardData['cardLast4'] = $requestData->paymentMethod->additional_data->cardLast4 ?? null;
+            $cardData['cardExpMonth'] = $requestData->paymentMethod->additional_data->cardExpiryMonth ?? null;
+            $cardData['cardExpYear'] = $requestData->paymentMethod->additional_data->cardExpiryYear ?? null;
         }
 
         if ($this->request->getParam('methodId') && $this->request->getParam('methodId') == "checkoutcom_card_payment") {
@@ -293,6 +295,14 @@ class PaymentPlaceStart implements ObserverInterface
 
         if (isset($cardData['cardLast4']) && $cardData['cardLast4']) {
             $order->getPayment()->setCcLast4($cardData['cardLast4']);
+        }
+
+        if (isset($cardData['cardExpMonth']) && $cardData['cardExpMonth']) {
+            $order->getPayment()->setCcExpMonth($cardData['cardExpMonth']);
+        }
+
+        if (isset($cardData['cardExpYear']) && $cardData['cardExpYear']) {
+            $order->getPayment()->setCcExpYear($cardData['cardExpYear']);
         }
     }
 
