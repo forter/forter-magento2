@@ -12,6 +12,7 @@ use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\CreditmemoFactory;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Service\CreditmemoService;
+use Magento\Framework\App\RequestInterface;
 
 /**
  * Class Decline
@@ -61,6 +62,11 @@ class Decline
     protected $orderManagement;
 
     /**
+     * @var RequestInterface
+     */
+    protected $request;
+
+    /**
      * Decline constructor.
      * @param Order $order
      * @param CreditmemoFactory $creditmemoFactory
@@ -70,6 +76,7 @@ class Decline
      * @param CreditmemoService $creditmemoService
      */
     public function __construct(
+        RequestInterface $request,
         AbstractApi $abstractApi,
         Sendmail $sendMail,
         Order $order,
@@ -80,6 +87,7 @@ class Decline
         CreditmemoService $creditmemoService,
         OrderManagementInterface $orderManagement
     ) {
+        $this->request = $request;
         $this->abstractApi = $abstractApi;
         $this->sendMail = $sendMail;
         $this->orderManagement = $orderManagement;
@@ -171,6 +179,8 @@ class Decline
             $invoiceincrementid = $invoice->getIncrementId();
             $invoiceobj = $this->invoice->loadByIncrementId($invoiceincrementid);
             $creditmemo = $this->creditmemoFactory->createByOrder($order);
+
+            $this->request->setParam('invoice_id', $invoiceobj->getId() );
 
             if ($invoiceobj || isset($invoiceobj)) {
                 $creditmemo->setInvoice($invoiceobj);
