@@ -99,7 +99,9 @@ class Decline
     {
         $this->sendDeclineMail($order);
         $forterDecision = $this->forterConfig->getDeclinePre();
-        if ($forterDecision == '1') {
+        $isVerificationRequired3dsChallenge = \Forter\Forter\Model\Order\Recommendation::isVerificationRequired3dsChallenge($order);
+
+        if ( $forterDecision == '1' &&  !$isVerificationRequired3dsChallenge ) {
             throw new PaymentException(__($this->forterConfig->getPreThanksMsg()));
         }
 
