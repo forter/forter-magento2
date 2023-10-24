@@ -8,6 +8,7 @@
 
 namespace Forter\Forter\Helper;
 
+use Forter\Forter\Model\Config;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Module\ModuleListInterface;
 use Magento\Framework\Serialize\Serializer\Json as JsonSerializer;
@@ -15,6 +16,8 @@ use Magento\Store\Model\StoreManagerInterface;
 
 class ConfigProvider implements \Magento\Checkout\Model\ConfigProviderInterface
 {
+    const PAYMENT_METHOD = 'adyen_cc';
+
     /**
      * @var StoreManagerInterface
      */
@@ -36,6 +39,11 @@ class ConfigProvider implements \Magento\Checkout\Model\ConfigProviderInterface
     protected $jsonSerializer;
 
     /**
+     * @var Config
+     */
+    protected $config;
+
+    /**
      * @param StoreManagerInterface $storeManager
      * @param ModuleListInterface $moduleList
      * @param ScopeConfigInterface $scopeConfig
@@ -45,18 +53,27 @@ class ConfigProvider implements \Magento\Checkout\Model\ConfigProviderInterface
         StoreManagerInterface $storeManager,
         ModuleListInterface $moduleList,
         ScopeConfigInterface $scopeConfig,
-        JsonSerializer $jsonSerializer
+        JsonSerializer $jsonSerializer,
+        Config $config
     ) {
         $this->storeManager = $storeManager;
         $this->moduleList = $moduleList;
         $this->scopeConfig = $scopeConfig;
         $this->jsonSerializer = $jsonSerializer;
+        $this->config = $config;
     }
 
     public function getConfig()
     {
+        $methodSetting = $this->config->getMappedPrePos(self::PAYMENT_METHOD);
         $isAdyenVersionGreaterOrEqual = $this->isAdyenVersionGreaterOrEqual();
-        $forterPreAuth = $this->isForterPreAuth() === '1' || $this->isForterPreAuth() === '4' ? true : false;
+
+        if ($methodSetting) {
+            $customMap = $this->mapCustomPrePostSelect($methodSetting);
+            $forterPreAuth = $customMap === '1' || $customMap === '4' ? true : false;
+        } else {
+            $forterPreAuth = $this->isForterPreAuth() === '1' || $this->isForterPreAuth() === '4' ? true : false;
+        }
 
         return [
             'forter' => [
@@ -81,5 +98,17 @@ class ConfigProvider implements \Magento\Checkout\Model\ConfigProviderInterface
     protected function isForterPreAuth()
     {
         return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/pre_post_select');
+    }
+
+    protected function mapCustomPrePostSelect($methodSetting)
+    {
+        $mapping = [
+            'pre' => '1',
+            'post' => '2',
+            'prepost' => '4',
+            'cron' => '3'
+        ];
+
+        return isset($mapping[$methodSetting]) ? $mapping[$methodSetting] : false;
     }
 }
