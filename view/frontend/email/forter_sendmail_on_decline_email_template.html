@@ -1,4 +1,12 @@
 <!--@subject {{trans "Forter declined order #%increment_id" increment_id=$order.getIncrementId()}} @-->
+<!--@vars {
+    "var increment_id":"Order Id",
+    "var order_date":"Order Date",
+    "var grand_total":"Grand Total",
+    "var currency":"Currency",
+    "var customer_name":"Customer Name",
+    "var customer_email":"Customer Email"
+} @-->
 
 {{template config_path="design/email/header_template"}}
 
@@ -7,18 +15,18 @@
         <td>
             <p>
                 {{trans "Hi"}},<br>
-                {{trans "Forter declined order #%increment_id" increment_id=$order.getIncrementId()}}
+                {{trans "Forter declined order #%increment_id" increment_id=$order.getIncrementId()}
             </p>
             <p>
                 {{trans "The order details are"}}:<br>
                 <ul>
-                    <li>{{trans "Date: %order_date" order_date=$order.getCreatedAtFormatted(2)}}</li>
-                    <li>{{trans "Total amount: %grand_total %currency"  grand_total=$order.getGrandTotal() currency=$order.getOrderCurrencyCode()}}</li>
+                    <li>{{trans "Date: %order_date" order_date=$order_date}}</li>
+                    <li>{{trans "Total amount: %grand_total %currency"  grand_total=$grand_total currency=$currency}}</li>
                 </ul>
                 {{trans "The client details are"}}:<br>
                 <ul>
-                    <li>{{trans "Name: %customer_name" customer_name=$order.getCustomerName()}}</li>
-                    <li>{{trans "Email: %customer_email"  customer_email=$order.getCustomerEmail()}}</li>
+                    <li>{{trans "Name: %customer_name" customer_name=$customer_name}}</li>
+                    <li>{{trans "Email: %customer_email"  customer_email=$customer_email}}</li>
                 </ul>
             </p>
         </td>
