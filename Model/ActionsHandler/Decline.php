@@ -152,7 +152,7 @@ class Decline
             //}
 
             $retries    = (int)$item->getSyncRetries() + 1;
-            $date       = date('Y-m-d H:i:s',  strtotime(' + ' . ( 3 * $retries ) . ' hours'));
+            $date       = date('Y-m-d H:i:s',  strtotime(' + ' . $retries . ' hours'));
 
             $item->setSyncRetries( $retries );
             $item->setSyncDate($date);
