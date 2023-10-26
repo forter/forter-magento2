@@ -20,6 +20,7 @@ use Magento\Framework\Module\ModuleListInterface;
 use Magento\Framework\UrlInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Psr\Log\LoggerInterface;
+use Magento\Sales\Model\Order\Status\HistoryFactory;
 
 /**
  * Forter Forter config model.
@@ -109,6 +110,11 @@ class Config
     private $productMetadata;
 
     /**
+     * @var HistoryFactory
+     */
+    private $history;
+
+    /**
      * @method __construct
      * @param  ScopeConfigInterface     $scopeConfig
      * @param  StoreManagerInterface    $storeManager
@@ -119,6 +125,7 @@ class Config
      * @param  DebugLogger              $forterDebugLogger
      * @param  ErrorLogger              $forterErrorLogger
      * @param  ProductMetadataInterface $productMetadata
+     * @param  History $history
      */
     public function __construct(
         ScopeConfigInterface $scopeConfig,
@@ -129,7 +136,8 @@ class Config
         UrlInterface $urlBuilder,
         DebugLogger $forterDebugLogger,
         ErrorLogger $forterErrorLogger,
-        ProductMetadataInterface $productMetadata
+        ProductMetadataInterface $productMetadata,
+        HistoryFactory $history
     ) {
         $this->scopeConfig = $scopeConfig;
         $this->storeManager = $storeManager;
@@ -140,6 +148,7 @@ class Config
         $this->forterDebugLogger = $forterDebugLogger;
         $this->forterErrorLogger = $forterErrorLogger;
         $this->productMetadata = $productMetadata;
+        $this->history = $history;
     }
 
     /**
@@ -669,11 +678,13 @@ class Config
      */
     public function addCommentToOrder($order, $message)
     {
-        $order->addStatusHistoryComment('Forter: ' . $message)
-          ->setIsCustomerNotified(false)
-          ->setEntityName('order');
 
-        $order->save();
+        $this->history->create()
+                    ->setParentId($order->getId())
+                    ->setEntityName('order')
+                    ->setComment($message)
+                    ->save();
+
     }
 
     /**
