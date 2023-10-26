@@ -110,10 +110,16 @@ class SendQueue
                 ->create()
                 ->getCollection()
                 ->addFieldToFilter('sync_flag', '0')
+                ->addFieldToFilter('sync_retries', ['lt' => 10])
                 ->addFieldToFilter(
                     'sync_date',
                     [
-                        'from' => date('Y-m-d H:i:s', strtotime('-7 days'))
+                        'from'  => date('Y-m-d H:i:s', strtotime('-7 days'))
+                    ]
+                )->addFieldToFilter(
+                    'sync_date',
+                    [
+                        'to'  => date('Y-m-d H:i:s')
                     ]
                 );
 
@@ -163,8 +169,7 @@ class SendQueue
                         $item->setSyncFlag('1');
                     }
                 } elseif ($item->getEntityType() == 'order') {
-                    $this->handleForterResponse($order, $item->getData('entity_body'));
-                    $item->setSyncFlag('1');
+                    $this->handleForterResponse($order, $item->getData('entity_body'), $item);
                 }
 
 
@@ -258,10 +263,10 @@ class SendQueue
         }
     }
 
-    private function handleForterResponse($order, $response)
+    private function handleForterResponse($order, $response, $item = null)
     {
         if ($order->canUnhold()) {
-            $order->unhold()->save();
+            $order->unhold();
         }
 
         if ($this->forterConfig->getIsCron()) {
@@ -276,7 +281,7 @@ class SendQueue
             } elseif ($response == 'decline') {
                 switch ($this->forterConfig->getDeclineCron()) {
                     case 1:
-                        $this->decline->handlePostTransactionDescision($order);
+                        $this->decline->handlePostTransactionDescision($order, $item );
                         return;
                     case 2:
                         $this->decline->markOrderPaymentReview();
@@ -289,7 +294,7 @@ class SendQueue
             if ($response == 'approve') {
                 $this->approve->handleApproveImmediatly($order);
             } elseif ($response == 'decline') {
-                $this->decline->handlePostTransactionDescision($order);
+                $this->decline->handlePostTransactionDescision($order, $item );
             }
         }
     }
