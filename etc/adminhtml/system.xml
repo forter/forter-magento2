@@ -265,6 +265,24 @@
 }</pre><p>]]>
                     </comment>
                 </field>
+                <field id="pre_post_map" translate="Module" type="textarea" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Order Validation Map</label>
+                    <comment>
+                        <![CDATA[
+                        <p>Map order validation per payment method.<br>Example:
+                        <pre>{
+    "paypal_express": "pre",
+    "braintree": "post",
+    "authorizenet_directpost": "prepost",
+    "authorizenet": "cron",
+    "adyen_hpp": {
+        "default": "post",
+        "googlepay": "pre"
+        },
+    ...
+}</pre><p>]]>
+                    </comment>
+                </field>
             </group>
             <group id="advanced_settings_cc_listener" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Advanced Settings Pre Auth</label>

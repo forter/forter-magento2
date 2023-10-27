@@ -35,11 +35,9 @@
                 <enable_order_shipping>1</enable_order_shipping>
             </advanced_settings>
             <sendmail_on_decline>
-              <sendmail>
-                <enabled>1</enabled>
+                <enabled>0</enabled>
                 <sender>general</sender>
                 <email_template>forter_sendmail_on_decline_email_template</email_template>
-              </sendmail>
             </sendmail_on_decline>
         </forter>
     </default>

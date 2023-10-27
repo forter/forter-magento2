@@ -74,6 +74,11 @@ class SendQueue
      */
     protected $emulate;
 
+    /**
+     * @var Config
+     */
+    protected $forterConfig;
+
     public function __construct(
         Approve $approve,
         Decline $decline,
@@ -110,10 +115,16 @@ class SendQueue
                 ->create()
                 ->getCollection()
                 ->addFieldToFilter('sync_flag', '0')
+                ->addFieldToFilter('sync_retries', ['lt' => 10])
                 ->addFieldToFilter(
                     'sync_date',
                     [
-                        'from' => date('Y-m-d H:i:s', strtotime('-7 days'))
+                        'from'  => date('Y-m-d H:i:s', strtotime('-7 days'))
+                    ]
+                )->addFieldToFilter(
+                    'sync_date',
+                    [
+                        'to'  => date('Y-m-d H:i:s')
                     ]
                 );
 
@@ -159,14 +170,11 @@ class SendQueue
                         $message->proccessItem = $item;
                         $this->forterLogger->SendLog($message);
                         continue;
-                    } else {
-                        $item->setSyncFlag('1');
-                    }
+                    } 
+                    
                 } elseif ($item->getEntityType() == 'order') {
-                    $this->handleForterResponse($order, $item->getData('entity_body'));
-                    $item->setSyncFlag('1');
+                    $this->handleForterResponse($order, $item->getData('entity_body'), $item);
                 }
-
 
                 $item->save();
                 $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'CRON Validation Finished');
@@ -235,14 +243,19 @@ class SendQueue
                 return true;
             }
 
-            $this->handleForterResponse($order, $forterResponse->action);
-            $this->abstractApi->triggerRecommendationEvents($forterResponse, $order, 'cron');
+            if ( $forterResponse->status ) {
+                $item->setSyncFlag(1);
+            }
+
             $order->addStatusHistoryComment(__('Forter (cron) Decision: %1%2', $forterResponse->action, $this->forterConfig->getResponseRecommendationsNote($forterResponse)));
             $order->addStatusHistoryComment(__('Forter (cron) Decision Reason: %1', $forterResponse->reasonCode));
             $order->setForterStatus($forterResponse->action);
             $order->setForterReason($forterResponse->reasonCode);
             $order->save();
 
+            $this->handleForterResponse($order, $forterResponse->action, $item );
+            $this->abstractApi->triggerRecommendationEvents($forterResponse, $order, 'cron');
+            
             $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'Forter CRON Decision');
             $message->metaData->order = $order->getData();
             $message->metaData->payment = $order->getPayment();
@@ -258,10 +271,10 @@ class SendQueue
         }
     }
 
-    private function handleForterResponse($order, $response)
+    private function handleForterResponse($order, $response, $item = null)
     {
         if ($order->canUnhold()) {
-            $order->unhold()->save();
+            $order->unhold();
         }
 
         if ($this->forterConfig->getIsCron()) {
@@ -276,10 +289,10 @@ class SendQueue
             } elseif ($response == 'decline') {
                 switch ($this->forterConfig->getDeclineCron()) {
                     case 1:
-                        $this->decline->handlePostTransactionDescision($order);
+                        $this->decline->handlePostTransactionDescision($order, $item );
                         return;
                     case 2:
-                        $this->decline->markOrderPaymentReview();
+                        $this->decline->markOrderPaymentReview($order);
                         return;
                 }
             }
@@ -289,7 +302,7 @@ class SendQueue
             if ($response == 'approve') {
                 $this->approve->handleApproveImmediatly($order);
             } elseif ($response == 'decline') {
-                $this->decline->handlePostTransactionDescision($order);
+                $this->decline->handlePostTransactionDescision($order, $item );
             }
         }
     }

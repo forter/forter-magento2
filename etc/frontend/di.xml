@@ -3,7 +3,7 @@
     <type name="Magento\Checkout\Model\CompositeConfigProvider">
         <arguments>
             <argument name="configProviders" xsi:type="array">
-                <item name="template_vars" xsi:type="object">\Forter\Forter\Helper\ConfigProvider</item>
+                <item name="template_vars_forter" xsi:type="object">\Forter\Forter\Helper\ConfigProvider</item>
             </argument>
         </arguments>
     </type>

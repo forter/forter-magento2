@@ -12,7 +12,7 @@ use Magento\Sales\Model\Order;
 class Sendmail
 {
     const EMAIL_TEMPLATE = 'sendmail_on_decline/email_template';
-    const EMAIL_SERVICE_ENABLE = 'sendmail_on_decline/enabled';
+    const EMAIL_SERVICE_ENABLE = 'sendmail_on_decline/sendmail_on_decline_enabled';
     const EMAIL_SENDER = 'sendmail_on_decline/sender';
     const EMAIL_RECEIVER = 'sendmail_on_decline/receiver';
 
@@ -70,8 +70,14 @@ class Sendmail
                 'area' => Area::AREA_FRONTEND,
                 'store' => $this->forterConfig->getStoreId()
             ])->setTemplateVars([
-                'order' => $order,
-                'store' => $this->forterConfig->getCurrentStore()
+                'order'             => $order,
+                'increment_id'      => $order->getIncrementId(),
+                'order_date'        => $order->getCreatedAtFormatted(2),
+                'grand_total'       => $order->getGrandTotal(),
+                'currency'          => $order->getOrderCurrencyCode(),
+                'customer_name'     => $order->getCustomerName(),
+                'customer_email'    => $order->getCustomerEmail(),
+                'store'         => $this->forterConfig->getCurrentStore()
             ])->setFromByScope(
                 $this->forterConfig->getConfigValue(self::EMAIL_SENDER),
                 $this->forterConfig->getStoreId()

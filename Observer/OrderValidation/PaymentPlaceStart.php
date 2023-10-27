@@ -190,21 +190,26 @@ class PaymentPlaceStart implements ObserverInterface
 
             $this->forterLogger->forterConfig->log('Connection Information for Order ' . $order->getIncrementId() . ' : ' . json_encode($connectionInformation));
 
-            if ($this->config->getIsPost() && !$this->config->getIsPreAndPost()) {
+            $paymentMethod = $order->getPayment()->getMethod();
+            $subMethod = $order->getPayment()->getCcType();
+            $methodSetting = $this->config->getMappedPrePos($paymentMethod, $subMethod);
+
+            if ($methodSetting === 'post') {
                 return;
             }
 
-            if ($this->config->getIsCron()) {
-                $currentTime = $this->dateTime->gmtDate();
-
-                $this->queue->setEntityType('pre_sync_order');
-                $this->queue->setStoreId($storeId);
-                $this->queue->setIncrementId($order->getIncrementId());
-                $this->queue->setSyncFlag(0);
-                $this->queue->setSyncDate($currentTime);
-                $this->queue->save();
+            if ($methodSetting === 'cron' || (!$methodSetting && $this->config->getIsCron())) {
+                $this->queueOrder($order, $storeId);
                 return;
             }
+
+            if (!$methodSetting) {
+                if ($this->config->getIsPost() && !$this->config->getIsPreAndPost()) {
+                    return;
+                }
+            }
+
+            $order->setData('sub_payment_method', $subMethod);
 
             $data = $this->requestBuilderOrder->buildTransaction($order, 'BEFORE_PAYMENT_ACTION');
 
@@ -227,7 +232,7 @@ class PaymentPlaceStart implements ObserverInterface
                 $message = new ForterLoggerMessage($this->config->getSiteId(), $order->getIncrementId(), 'Response Error - Pre-Auth');
                 $message->metaData->order = $order->getData();
                 $message->metaData->payment = $order->getPayment()->getData();
-                $message->metaData->forterDecision = $forterResponse->action;
+                $message->metaData->forterDecision = $forterResponse->action ?? null;
                 $this->forterLogger->SendLog($message);
                 return;
             }
@@ -246,7 +251,7 @@ class PaymentPlaceStart implements ObserverInterface
         $message = new ForterLoggerMessage($this->config->getSiteId(), $order->getIncrementId(), 'Handle Response - Pre-Auth');
         $message->metaData->order = $order->getData();
         $message->metaData->payment = $order->getPayment()->getData();
-        $message->metaData->forterDecision = $forterResponse->action;
+        $message->metaData->forterDecision = $forterResponse->action ?? null;
         $this->forterLogger->SendLog($message);
         $this->decline->handlePreTransactionDescision($order);
     }
@@ -262,6 +267,8 @@ class PaymentPlaceStart implements ObserverInterface
         if ($requestData && isset($requestData->paymentMethod->additional_data)) {
             $cardData['cardBin'] = $requestData->paymentMethod->additional_data->cardBin ?? null;
             $cardData['cardLast4'] = $requestData->paymentMethod->additional_data->cardLast4 ?? null;
+            $cardData['cardExpMonth'] = $requestData->paymentMethod->additional_data->cardExpiryMonth ?? null;
+            $cardData['cardExpYear'] = $requestData->paymentMethod->additional_data->cardExpiryYear ?? null;
         }
 
         if ($this->request->getParam('methodId') && $this->request->getParam('methodId') == "checkoutcom_card_payment") {
@@ -287,13 +294,32 @@ class PaymentPlaceStart implements ObserverInterface
             $order->getPayment()->setAdditionalInformation('forter_cc_bin', $cardData['cardBin']);
         }
 
-        if ( isset( $cardData['cardToken']) ) {
+        if (isset($cardData['cardToken'])) {
             $order->getPayment()->setAdditionalInformation('forter_cc_token', $cardData['cardToken']);
         }
 
         if (isset($cardData['cardLast4']) && $cardData['cardLast4']) {
             $order->getPayment()->setCcLast4($cardData['cardLast4']);
         }
+
+        if (isset($cardData['cardExpMonth']) && $cardData['cardExpMonth']) {
+            $order->getPayment()->setCcExpMonth($cardData['cardExpMonth']);
+        }
+
+        if (isset($cardData['cardExpYear']) && $cardData['cardExpYear']) {
+            $order->getPayment()->setCcExpYear($cardData['cardExpYear']);
+        }
     }
 
+    protected function queueOrder($order, $storeId)
+    {
+        $currentTime = $this->dateTime->gmtDate();
+
+        $this->queue->setEntityType('pre_sync_order')
+            ->setStoreId($storeId)
+            ->setIncrementId($order->getIncrementId())
+            ->setSyncFlag(0)
+            ->setSyncDate($currentTime)
+            ->save();
+    }
 }
