@@ -74,6 +74,11 @@ class SendQueue
      */
     protected $emulate;
 
+    /**
+     * @var Config
+     */
+    protected $forterConfig;
+
     public function __construct(
         Approve $approve,
         Decline $decline,
