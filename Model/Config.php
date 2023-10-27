@@ -713,6 +713,7 @@ class Config
 
         $this->history->create()
                     ->setParentId($order->getId())
+                    ->setStatus($order->getStatus())
                     ->setEntityName('order')
                     ->setComment($message)
                     ->save();
