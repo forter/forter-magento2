@@ -154,6 +154,9 @@ class Decline
             $retries    = (int)$item->getSyncRetries() + 1;
             $date       = date('Y-m-d H:i:s',  strtotime(' + ' . $retries . ' hours'));
 
+            $item->setSyncFlag(0);
+            $item->setEntityType( 'order' );
+            $item->setEntityBody( $order->getForterStatus() );
             $item->setSyncRetries( $retries );
             $item->setSyncDate($date);
             $item->setSyncLastError( $e->getMessage() );

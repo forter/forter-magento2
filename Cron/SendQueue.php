@@ -165,13 +165,11 @@ class SendQueue
                         $message->proccessItem = $item;
                         $this->forterLogger->SendLog($message);
                         continue;
-                    } else {
-                        $item->setSyncFlag('1');
-                    }
+                    } 
+                    
                 } elseif ($item->getEntityType() == 'order') {
                     $this->handleForterResponse($order, $item->getData('entity_body'), $item);
                 }
-
 
                 $item->save();
                 $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'CRON Validation Finished');
@@ -240,14 +238,19 @@ class SendQueue
                 return true;
             }
 
-            $this->handleForterResponse($order, $forterResponse->action);
-            $this->abstractApi->triggerRecommendationEvents($forterResponse, $order, 'cron');
+            if ( $forterResponse->status ) {
+                $item->setSyncFlag(1);
+            }
+
             $order->addStatusHistoryComment(__('Forter (cron) Decision: %1%2', $forterResponse->action, $this->forterConfig->getResponseRecommendationsNote($forterResponse)));
             $order->addStatusHistoryComment(__('Forter (cron) Decision Reason: %1', $forterResponse->reasonCode));
             $order->setForterStatus($forterResponse->action);
             $order->setForterReason($forterResponse->reasonCode);
             $order->save();
 
+            $this->handleForterResponse($order, $forterResponse->action, $item );
+            $this->abstractApi->triggerRecommendationEvents($forterResponse, $order, 'cron');
+            
             $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'Forter CRON Decision');
             $message->metaData->order = $order->getData();
             $message->metaData->payment = $order->getPayment();
@@ -284,7 +287,7 @@ class SendQueue
                         $this->decline->handlePostTransactionDescision($order, $item );
                         return;
                     case 2:
-                        $this->decline->markOrderPaymentReview();
+                        $this->decline->markOrderPaymentReview($order);
                         return;
                 }
             }
