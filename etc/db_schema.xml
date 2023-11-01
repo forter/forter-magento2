@@ -9,6 +9,8 @@
         <column xsi:type="text" name="entity_body" nullable="true" comment="Request Body"/>
         <column xsi:type="smallint" padding="6" name="sync_flag" nullable="true" default="0" comment="Sync Flag"/>
         <column xsi:type="datetime" name="sync_date" nullable="false"  comment="Sync Date"/>
+        <column xsi:type="smallint" padding="6" name="sync_retries" nullable="true" default="0" comment="Sync Retries"/>
+        <column xsi:type="varchar" name="sync_last_error" nullable="true" length="255" comment="Sync Last Error"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="sync_id"/>
         </constraint>

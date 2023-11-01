@@ -143,7 +143,7 @@ class Cart
         }
 
         $categoryIds = $product->getCategoryIds();
-        if ($categoryIds) {
+        if (!$categoryIds) {
             return null;
         }
 
