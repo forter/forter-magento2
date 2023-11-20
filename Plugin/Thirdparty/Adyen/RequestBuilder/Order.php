@@ -140,7 +140,7 @@ class Order
                 }
             }
 
-            if ($method == 'adyen_hpp' && (strpos($payment->getData('cc_type'), 'paypal') !== false)) {
+            if (($method == 'adyen_hpp' && (strpos($payment->getData('cc_type'), 'paypal') !== false)) || $method === 'adyen_paypal') {
                 $logArray[3] = 'Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_hpp method';
                 $this->forterConfig->log('Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_hpp method');
                 $notificationAdditionalData = $this->serializer->unserialize($notification->getAdditionalData());
@@ -189,7 +189,7 @@ class Order
                 $result['payment'][0]['paypal']['fullPaypalResponsePayload'] = $notificationAdditionalData ? $notificationAdditionalData : '';
             }
 
-            if ($method == 'adyen_hpp' && $brandCode == 'googlepay') {
+            if (($method == 'adyen_hpp' && $brandCode == 'googlepay') || ($method === 'adyen_googlepay')) {
                 $logArray[3] = 'Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_hpp method';
                 $this->forterConfig->log('Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_hpp method');
                 $notificationAdditionalData = $this->serializer->unserialize($notification->getAdditionalData());
@@ -246,7 +246,7 @@ class Order
                 }
 
                 $result['payment'][0]['androidPay']['cardType'] = 'CREDIT';
-                $result['payment'][0]['androidPay']['paymentGatewayData']['gatewayName'] = 'adyen_hpp';
+                $result['payment'][0]['androidPay']['paymentGatewayData']['gatewayName'] = $method;
                 $result['payment'][0]['androidPay']['paymentGatewayData']['gatewayTransactionId'] = $order->getPayment()->getCcTransId() ? $order->getPayment()->getCcTransId() : '';
             }
             $logArray[4] = $result['payment'];

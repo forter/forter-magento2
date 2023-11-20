@@ -291,7 +291,7 @@ class PaymentMethods
         return $this->preferCcDetails($payment, $detailsArray);
     }
 
-    public function getAdyenHppGooglePayDetails($payment, $order)
+    public function getAdyenGooglePayDetails($payment, $order)
     {
         $additonal_data = $payment->getAdditionalInformation('additionalData');
         $forterData = $payment->getAdditionalInformation('forterData');
@@ -457,7 +457,7 @@ class PaymentMethods
         if ( !$binNumber && isset($additionalDetails['forter_cc_bin'])) {
             $binNumber = $additionalDetails['forter_cc_bin'];
         }
-        
+
         $ccToken = null;
         if ( isset($additionalDetails['forter_cc_token'])) {
             $ccToken = $additionalDetails['forter_cc_token'];
