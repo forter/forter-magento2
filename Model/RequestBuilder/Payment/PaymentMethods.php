@@ -51,8 +51,8 @@ class PaymentMethods
     public function getPaypalDetails($payment)
     {
         return [
-          "payerId" => $payment->getAdditionalInformation("paypal_payer_id"),
-          "payerEmail" => $payment->getAdditionalInformation("paypal_payer_email"),
+          "payerId" => $payment->getAdditionalInformation("paypal_payer_id") ?? '',
+          "payerEmail" => $payment->getAdditionalInformation("paypal_payer_email") ?? '',
           "payerStatus" => $payment->getAdditionalInformation("paypal_payer_status"),
           "payerAddressStatus" => $payment->getAdditionalInformation("paypal_address_status"),
           "paymentMethod" => $payment->getMethod(),

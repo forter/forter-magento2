@@ -147,10 +147,14 @@ class Order
 
                 if (isset($notificationAdditionalData['paypalPayerId'])) {
                     $result['payment'][0]['paypal']['payerId']= $notificationAdditionalData['paypalPayerId'];
+                } else {
+                    $result['payment'][0]['paypal']['payerId'] = '';
                 }
 
                 if (isset($notificationAdditionalData['paypalEmail'])) {
                     $result['payment'][0]['paypal']['payerEmail']= $notificationAdditionalData['paypalEmail'];
+                } else {
+                    $result['payment'][0]['paypal']['payerEmail']= '';
                 }
 
                 if (isset($notificationAdditionalData['paypalAddressStatus'])) {
