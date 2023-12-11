@@ -246,6 +246,19 @@ class PaymentMethods
             if (isset($additonal_data['refusalReasonRaw'])) {
                 $detailsArray['processorResponseText'] = $additonal_data['refusalReasonRaw'];
             }
+            //3DS mapping
+            if (isset($additonal_data['liabilityShift'])) {
+                $detailsArray['verificationResults']['liabilityShift'] = $additonal_data['liabilityShift'] === 'true' ? true : false;
+            }
+            if (isset($additonal_data['threeDAuthenticatedResponse'])) {
+                $detailsArray['verificationResults']['threeDsStatusCode'] = $additonal_data['threeDAuthenticatedResponse'];
+            }
+            if (isset($additonal_data['threeDSVersion'])) {
+                $detailsArray['verificationResults']['threeDsVersion'] = $additonal_data['threeDSVersion'];
+            }
+            if (isset($additonal_data['challengeCancel'])) {
+                $detailsArray['verificationResults']['threeDsChallengeCancelCode'] = $additonal_data['challengeCancel'];
+            }
             $detailsArray['fullResponsePayload'] = $additonal_data;
         }
 
@@ -457,7 +470,7 @@ class PaymentMethods
         if ( !$binNumber && isset($additionalDetails['forter_cc_bin'])) {
             $binNumber = $additionalDetails['forter_cc_bin'];
         }
-        
+
         $ccToken = null;
         if ( isset($additionalDetails['forter_cc_token'])) {
             $ccToken = $additionalDetails['forter_cc_token'];
