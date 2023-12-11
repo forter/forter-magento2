@@ -223,7 +223,7 @@ class PaymentMethods
                 $detailsArray['expirationYear'] = $cardDate[1];
             }
             if (isset($additonal_data['authCode'])) {
-                $detailsArray['authorizationCode'] = $additonal_data['authCode'];
+                $detailsArray['verificationResults']['authorizationCode'] = $additonal_data['authCode'];
             }
             if (isset($additonal_data['cardHolderName'])) {
                 $detailsArray['nameOnCard'] = $additonal_data['cardHolderName'];
@@ -238,20 +238,20 @@ class PaymentMethods
                 $detailsArray['lastFourDigits'] = $additonal_data['cardSummary'];
             }
             if (isset($additonal_data['avsResultRaw'])) {
-                $detailsArray['avsFullResult'] = $additonal_data['avsResultRaw'];
+                $detailsArray['verificationResults']['avsFullResult'] = $additonal_data['avsResultRaw'];
             }
             if (isset($additonal_data['cvcResultRaw'])) {
-                $detailsArray['cvvResult'] = $additonal_data['cvcResultRaw'];
+                $detailsArray['verificationResults']['cvvResult'] = $additonal_data['cvcResultRaw'];
             }
             if (isset($additonal_data['refusalReasonRaw'])) {
-                $detailsArray['processorResponseText'] = $additonal_data['refusalReasonRaw'];
+                $detailsArray['verificationResults']['processorResponseText'] = $additonal_data['refusalReasonRaw'];
             }
             //3DS mapping
             if (isset($additonal_data['liabilityShift'])) {
                 $detailsArray['verificationResults']['liabilityShift'] = $additonal_data['liabilityShift'] === 'true' ? true : false;
             }
             if (isset($additonal_data['threeDAuthenticatedResponse'])) {
-                $detailsArray['verificationResults']['threeDsStatusCode'] = $additonal_data['threeDAuthenticatedResponse'];
+                $detailsArray['verificationResults']['threeDsStatusCode'] = $additonal_data['threeDAuthenticatedResponse'] !== 'N/A' ? $additonal_data['threeDAuthenticatedResponse'] : '';
             }
             if (isset($additonal_data['threeDSVersion'])) {
                 $detailsArray['verificationResults']['threeDsVersion'] = $additonal_data['threeDSVersion'];
