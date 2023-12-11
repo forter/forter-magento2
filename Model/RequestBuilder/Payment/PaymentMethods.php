@@ -281,27 +281,30 @@ class PaymentMethods
 
         $authCode = $payment->getAdditionalInformation('adyen_auth_code');
         if ($authCode) {
-            $detailsArray['authorizationCode'] = $authCode;
+            $detailsArray['verificationResults']['authorizationCode'] = $authCode;
         }
 
         $avsFullResult = $payment->getAdditionalInformation('adyen_avs_result');
         if ($avsFullResult) {
             $avsFullResult = (int) $avsFullResult;
-            $detailsArray['avsFullResult'] = strval($avsFullResult);
+            $detailsArray['verificationResults']['avsFullResult'] = strval($avsFullResult);
         }
 
         $cvcFullResult = $payment->getAdditionalInformation('adyen_cvc_result');
         if ($cvcFullResult) {
             $cvcFullResult = (int) $cvcFullResult;
-            $detailsArray['cvvResult'] = strval($cvcFullResult);
+            $detailsArray['verificationResults']['cvvResult'] = strval($cvcFullResult);
         }
 
         $processorResponseText = $payment->getAdditionalInformation('adyen_refusal_reason_raw');
         if ($processorResponseText) {
-            $detailsArray['processorResponseText'] = $processorResponseText;
+            $detailsArray['verificationResults']['processorResponseText'] = $processorResponseText;
         }
 
-        return $this->preferCcDetails($payment, $detailsArray);
+        $preferCcDetailsArray = $this->preferCcDetails($payment, $detailsArray);
+        $mergedArray = array_merge($preferCcDetailsArray, $detailsArray);
+
+        return $mergedArray;
     }
 
     public function getAdyenHppGooglePayDetails($payment, $order)
