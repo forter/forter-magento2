@@ -72,12 +72,14 @@ class OrderSaveBefore implements ObserverInterface
      */
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
-        if (!$this->config->isEnabled() || !$this->config->isOrderFulfillmentEnable()) {
+        $order = $observer->getEvent()->getOrder();
+
+        if (!$this->config->isEnabled(null,$order->getStoreId()) ||
+            !$this->config->isOrderFulfillmentEnable(null,$order->getStoreId())) {
             return false;
         }
 
         try {
-            $order = $observer->getEvent()->getOrder();
             if (!$order->getForterStatus()) {
                 return false;
             }
