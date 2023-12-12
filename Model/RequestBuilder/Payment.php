@@ -58,7 +58,7 @@ class Payment
         $paymentData = [];
         $payment_method = $payment->getMethod();
         // If paypal:
-        if (strpos($payment_method, 'paypal') !== false) {
+        if (strpos($payment_method, 'paypal') !== false && $payment_method != 'adyen_paypal') {
             $paymentData["paypal"] = $this->paymentMethods->getPaypalDetails($payment);
         } elseif (strpos($payment_method, 'paybright') !== false) {
             $paymentData["installmentService"] = $this->paymentMethods->getPaybrightDetails($order, $payment);
@@ -66,8 +66,8 @@ class Payment
             $paymentData["installmentService"] = $this->paymentMethods->getAdyenKlarnaDetails($order, $payment);
         } else {
             if (strpos($payment_method, 'adyen') !== false) {
-                if ($payment->getCcType() == 'googlepay' || $payment->getAdditionalInformation('brand_code') == 'googlepay') {
-                    $cardDetails = $this->paymentMethods->getAdyenHppGooglePayDetails($payment,$order);
+                if ($payment->getCcType() == 'googlepay' || $payment->getAdditionalInformation('brand_code') == 'googlepay' || $payment_method == 'adyen_googlepay') {
+                    $cardDetails = $this->paymentMethods->getAdyenGooglePayDetails($payment, $order);
                 } else {
                     $cardDetails = $this->paymentMethods->getAdyenDetails($payment);
                 }
@@ -85,7 +85,7 @@ class Payment
                 $paymentData["creditCard"] = $cardDetails;
             }
 
-            if ($payment->getCcType() == 'googlepay' || $payment->getAdditionalInformation('brand_code') == 'googlepay') {
+            if ($payment->getCcType() == 'googlepay' || $payment->getAdditionalInformation('brand_code') == 'googlepay' || $payment_method == 'adyen_googlepay') {
                 $paymentData['androidPay'] = $cardDetails;
                 unset($paymentData["creditCard"]);
             }

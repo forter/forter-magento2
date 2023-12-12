@@ -51,8 +51,8 @@ class PaymentMethods
     public function getPaypalDetails($payment)
     {
         return [
-          "payerId" => $payment->getAdditionalInformation("paypal_payer_id"),
-          "payerEmail" => $payment->getAdditionalInformation("paypal_payer_email"),
+          "payerId" => $payment->getAdditionalInformation("paypal_payer_id") ?? '',
+          "payerEmail" => $payment->getAdditionalInformation("paypal_payer_email") ?? '',
           "payerStatus" => $payment->getAdditionalInformation("paypal_payer_status"),
           "payerAddressStatus" => $payment->getAdditionalInformation("paypal_address_status"),
           "paymentMethod" => $payment->getMethod(),
@@ -223,7 +223,7 @@ class PaymentMethods
                 $detailsArray['expirationYear'] = $cardDate[1];
             }
             if (isset($additonal_data['authCode'])) {
-                $detailsArray['authorizationCode'] = $additonal_data['authCode'];
+                $detailsArray['verificationResults']['authorizationCode'] = $additonal_data['authCode'];
             }
             if (isset($additonal_data['cardHolderName'])) {
                 $detailsArray['nameOnCard'] = $additonal_data['cardHolderName'];
@@ -238,13 +238,26 @@ class PaymentMethods
                 $detailsArray['lastFourDigits'] = $additonal_data['cardSummary'];
             }
             if (isset($additonal_data['avsResultRaw'])) {
-                $detailsArray['avsFullResult'] = $additonal_data['avsResultRaw'];
+                $detailsArray['verificationResults']['avsFullResult'] = $additonal_data['avsResultRaw'];
             }
             if (isset($additonal_data['cvcResultRaw'])) {
-                $detailsArray['cvvResult'] = $additonal_data['cvcResultRaw'];
+                $detailsArray['verificationResults']['cvvResult'] = $additonal_data['cvcResultRaw'];
             }
             if (isset($additonal_data['refusalReasonRaw'])) {
-                $detailsArray['processorResponseText'] = $additonal_data['refusalReasonRaw'];
+                $detailsArray['verificationResults']['processorResponseText'] = $additonal_data['refusalReasonRaw'];
+            }
+            //3DS mapping
+            if (isset($additonal_data['liabilityShift'])) {
+                $detailsArray['verificationResults']['liabilityShift'] = $additonal_data['liabilityShift'] === 'true' ? true : false;
+            }
+            if (isset($additonal_data['threeDAuthenticatedResponse'])) {
+                $detailsArray['verificationResults']['threeDsStatusCode'] = $additonal_data['threeDAuthenticatedResponse'] !== 'N/A' ? $additonal_data['threeDAuthenticatedResponse'] : '';
+            }
+            if (isset($additonal_data['threeDSVersion'])) {
+                $detailsArray['verificationResults']['threeDsVersion'] = $additonal_data['threeDSVersion'];
+            }
+            if (isset($additonal_data['challengeCancel'])) {
+                $detailsArray['verificationResults']['threeDsChallengeCancelCode'] = $additonal_data['challengeCancel'];
             }
             $detailsArray['fullResponsePayload'] = $additonal_data;
         }
@@ -268,30 +281,33 @@ class PaymentMethods
 
         $authCode = $payment->getAdditionalInformation('adyen_auth_code');
         if ($authCode) {
-            $detailsArray['authorizationCode'] = $authCode;
+            $detailsArray['verificationResults']['authorizationCode'] = $authCode;
         }
 
         $avsFullResult = $payment->getAdditionalInformation('adyen_avs_result');
         if ($avsFullResult) {
             $avsFullResult = (int) $avsFullResult;
-            $detailsArray['avsFullResult'] = strval($avsFullResult);
+            $detailsArray['verificationResults']['avsFullResult'] = strval($avsFullResult);
         }
 
         $cvcFullResult = $payment->getAdditionalInformation('adyen_cvc_result');
         if ($cvcFullResult) {
             $cvcFullResult = (int) $cvcFullResult;
-            $detailsArray['cvvResult'] = strval($cvcFullResult);
+            $detailsArray['verificationResults']['cvvResult'] = strval($cvcFullResult);
         }
 
         $processorResponseText = $payment->getAdditionalInformation('adyen_refusal_reason_raw');
         if ($processorResponseText) {
-            $detailsArray['processorResponseText'] = $processorResponseText;
+            $detailsArray['verificationResults']['processorResponseText'] = $processorResponseText;
         }
 
-        return $this->preferCcDetails($payment, $detailsArray);
+        $preferCcDetailsArray = $this->preferCcDetails($payment, $detailsArray);
+        $mergedArray = array_merge($preferCcDetailsArray, $detailsArray);
+
+        return $mergedArray;
     }
 
-    public function getAdyenHppGooglePayDetails($payment, $order)
+    public function getAdyenGooglePayDetails($payment, $order)
     {
         $additonal_data = $payment->getAdditionalInformation('additionalData');
         $forterData = $payment->getAdditionalInformation('forterData');
@@ -457,7 +473,7 @@ class PaymentMethods
         if ( !$binNumber && isset($additionalDetails['forter_cc_bin'])) {
             $binNumber = $additionalDetails['forter_cc_bin'];
         }
-        
+
         $ccToken = null;
         if ( isset($additionalDetails['forter_cc_token'])) {
             $ccToken = $additionalDetails['forter_cc_token'];

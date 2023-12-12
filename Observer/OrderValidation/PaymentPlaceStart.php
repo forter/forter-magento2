@@ -160,7 +160,11 @@ class PaymentPlaceStart implements ObserverInterface
     {
         try {
             $this->emulate->stopEnvironmentEmulation();
-            if (!$this->config->isEnabled()) {
+
+            $order = $observer->getEvent()->getPayment()->getOrder();
+            $storeId = $order->getStoreId();
+
+            if (!$this->config->isEnabled(null,$storeId)) {
                 return;
             }
 
@@ -168,8 +172,7 @@ class PaymentPlaceStart implements ObserverInterface
                 $this->registry->unregister('forter_pre_decision');
             }
 
-            $order = $observer->getEvent()->getPayment()->getOrder();
-            $storeId = $order->getStoreId();
+
             // let bind the relevent store in case of multi store settings
             $this->emulate->startEnvironmentEmulation(
                 $order->getStoreId(),
