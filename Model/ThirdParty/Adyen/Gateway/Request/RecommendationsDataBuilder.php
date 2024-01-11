@@ -83,6 +83,6 @@ class RecommendationsDataBuilder implements BuilderInterface
 
     protected function isForterPreAuth()
     {
-        return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/pre_post_select');
+        return $this->scopeConfig->getValue('forter/immediate_post_pre_decision/pre_post_select', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
     }
 }

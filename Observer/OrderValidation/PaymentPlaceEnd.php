@@ -164,7 +164,7 @@ class PaymentPlaceEnd implements ObserverInterface
             $subMethod = $order->getData('sub_payment_method') ? $order->getData('sub_payment_method') : $order->getPayment()->getCcType(); // This will return 'googlepay', 'applepay', etc.
             $methodSetting = $this->forterConfig->getMappedPrePos($paymentMethod, $subMethod);
 
-            if (!$this->forterConfig->isEnabled()) {
+            if (!$this->forterConfig->isEnabled(null, $order->getStoreId())) {
                 if ($this->registry->registry('forter_pre_decision')) {
                     $this->logForterPreDecision($observer->getEvent()->getPayment()->getOrder());
                 }
