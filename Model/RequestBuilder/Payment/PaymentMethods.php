@@ -249,6 +249,9 @@ class PaymentMethods
             if (isset($additonal_data['eci'])) {
                 $detailsArray['verificationResults']['eciValue']= $additonal_data['eci'] === 'N/A' ? '' : $additonal_data['eci'];
             }
+            if (isset($additonal_data['threeds2.threeDS2Result.eci'])) {
+                $detailsArray['verificationResults']['eciValue']= $additonal_data['threeds2.threeDS2Result.eci'] === 'N/A' ? '' : $additonal_data['threeds2.threeDS2Result.eci'];
+            }
             //3DS mapping
             if (isset($additonal_data['liabilityShift'])) {
                 $detailsArray['verificationResults']['liabilityShift'] = $additonal_data['liabilityShift'] === 'true' ? true : false;
