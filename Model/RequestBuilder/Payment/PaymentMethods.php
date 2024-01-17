@@ -317,7 +317,7 @@ class PaymentMethods
         }
 
         $preferCcDetailsArray = $this->preferCcDetails($payment, $detailsArray);
-        $mergedArray = array_merge($preferCcDetailsArray, $detailsArray);
+        $mergedArray = $this->mergeArrays($preferCcDetailsArray, $detailsArray);
 
         return $mergedArray;
     }
@@ -401,8 +401,7 @@ class PaymentMethods
             $detailsArray['cardType'] = 'CREDIT';
         }
         $preferCcDetailsArray = $this->preferCcDetails($payment, $detailsArray);
-
-        $mergedArray = array_merge($preferCcDetailsArray, $detailsArray);
+        $mergedArray = $this->mergeArrays($preferCcDetailsArray, $detailsArray);
         return $mergedArray;
     }
 
@@ -529,5 +528,24 @@ class PaymentMethods
         }
 
         return $cardDetails;
+    }
+
+    protected function mergeArrays($array1, $array2) {
+
+        if (!is_array($array1)) {
+            $array1 = [];
+        }
+        if (!is_array($array2)) {
+            return $array1;
+        }
+
+        foreach ($array2 as $key => $value) {
+            if (isset($array1[$key]) && is_array($value) && is_array($array1[$key])) {
+                $array1[$key] = $this->mergeArrays($array1[$key], $value);
+            } else {
+                $array1[$key] = $value;
+            }
+        }
+        return $array1;
     }
 }
