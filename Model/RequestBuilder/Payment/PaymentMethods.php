@@ -246,9 +246,21 @@ class PaymentMethods
             if (isset($additonal_data['refusalReasonRaw'])) {
                 $detailsArray['verificationResults']['processorResponseText'] = $additonal_data['refusalReasonRaw'];
             }
+            if (isset($additonal_data['eci'])) {
+                $detailsArray['verificationResults']['eciValue']= $additonal_data['eci'] === 'N/A' ? '' : $additonal_data['eci'];
+            }
+            if (isset($additonal_data['threeds2.threeDS2Result.eci'])) {
+                $detailsArray['verificationResults']['eciValue']= $additonal_data['threeds2.threeDS2Result.eci'] === 'N/A' ? '' : $additonal_data['threeds2.threeDS2Result.eci'];
+            }
             //3DS mapping
             if (isset($additonal_data['liabilityShift'])) {
                 $detailsArray['verificationResults']['liabilityShift'] = $additonal_data['liabilityShift'] === 'true' ? true : false;
+            }
+            if (isset($additonal_data['threeDAuthenticated'])) {
+                $detailsArray['verificationResults']['authorizationProcessedWith3DS'] = $additonal_data['threeDAuthenticated'] === 'true' ? true : false;
+            }
+            if (isset($additonal_data['threeDOffered'])) {
+                $detailsArray['verificationResults']['authenticationTriggered'] = $additonal_data['threeDOffered'] === 'true' ? true : false;
             }
             if (isset($additonal_data['threeDAuthenticatedResponse'])) {
                 $detailsArray['verificationResults']['threeDsStatusCode'] = $additonal_data['threeDAuthenticatedResponse'] !== 'N/A' ? $additonal_data['threeDAuthenticatedResponse'] : '';
@@ -258,6 +270,9 @@ class PaymentMethods
             }
             if (isset($additonal_data['challengeCancel'])) {
                 $detailsArray['verificationResults']['threeDsChallengeCancelCode'] = $additonal_data['challengeCancel'];
+            }
+            if (isset($additonal_data['cavv'])) {
+                $detailsArray['verificationResults']['cavvResult'] = $additonal_data['cavv'];
             }
             $detailsArray['fullResponsePayload'] = $additonal_data;
         }
@@ -302,7 +317,7 @@ class PaymentMethods
         }
 
         $preferCcDetailsArray = $this->preferCcDetails($payment, $detailsArray);
-        $mergedArray = array_merge($preferCcDetailsArray, $detailsArray);
+        $mergedArray = $this->mergeArrays($preferCcDetailsArray, $detailsArray);
 
         return $mergedArray;
     }
@@ -386,8 +401,7 @@ class PaymentMethods
             $detailsArray['cardType'] = 'CREDIT';
         }
         $preferCcDetailsArray = $this->preferCcDetails($payment, $detailsArray);
-
-        $mergedArray = array_merge($preferCcDetailsArray, $detailsArray);
+        $mergedArray = $this->mergeArrays($preferCcDetailsArray, $detailsArray);
         return $mergedArray;
     }
 
@@ -514,5 +528,24 @@ class PaymentMethods
         }
 
         return $cardDetails;
+    }
+
+    protected function mergeArrays($array1, $array2) {
+
+        if (!is_array($array1)) {
+            $array1 = [];
+        }
+        if (!is_array($array2)) {
+            return $array1;
+        }
+
+        foreach ($array2 as $key => $value) {
+            if (isset($array1[$key]) && is_array($value) && is_array($array1[$key])) {
+                $array1[$key] = $this->mergeArrays($array1[$key], $value);
+            } else {
+                $array1[$key] = $value;
+            }
+        }
+        return $array1;
     }
 }
