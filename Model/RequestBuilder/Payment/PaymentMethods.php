@@ -224,6 +224,7 @@ class PaymentMethods
             }
             if (isset($additonal_data['authCode'])) {
                 $detailsArray['verificationResults']['authorizationCode'] = $additonal_data['authCode'];
+                $detailsArray['verificationResults']['processorResponseCode'] = $additonal_data['authCode'];
             }
             if (isset($additonal_data['cardHolderName'])) {
                 $detailsArray['nameOnCard'] = $additonal_data['cardHolderName'];
