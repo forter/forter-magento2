@@ -319,6 +319,11 @@ class PaymentMethods
             $detailsArray['verificationResults']['cvvResult'] = strval($cvcFullResult);
         }
 
+        $processorResponseText = $payment->getAdditionalInformation('resultCode');
+        if ($processorResponseText) {
+            $detailsArray['verificationResults']['processorResponseText'] = $processorResponseText;
+        }
+
         $processorResponseText = $payment->getAdditionalInformation('adyen_refusal_reason_raw');
         if ($processorResponseText) {
             $detailsArray['verificationResults']['processorResponseText'] = $processorResponseText;
