@@ -3,8 +3,8 @@
  * @var Eset\License\Block\Adminhtml\Order\View\Tab\Invoice $block
  */
 $adminOrder = false;
-$order = $block->getOrder();
-$forterResponse = $order->getData('forter_response');
+$entity = $block->getForterEntity();
+$forterResponse = $entity->getData('forter_response');
 $forterResponse = is_null($forterResponse) ? [] : json_decode($forterResponse);
 ?>
 

@@ -2,10 +2,13 @@
 
 namespace Forter\Forter\Observer\OrderValidation;
 
+use Forter\Forter\Helper\EntityHelper;
 use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\ActionsHandler\Approve;
 use Forter\Forter\Model\ActionsHandler\Decline;
 use Forter\Forter\Model\Config;
+use Forter\Forter\Model\Entity as ForterEntity;
+use Forter\Forter\Model\EntityFactory as ForterEntityFactory;
 use Forter\Forter\Model\ForterLogger;
 use Forter\Forter\Model\ForterLoggerMessage;
 use Forter\Forter\Model\QueueFactory as ForterQueueFactory;
@@ -28,6 +31,9 @@ class PaymentPlaceEnd implements ObserverInterface
 {
     public const VALIDATION_API_ENDPOINT = 'https://api.forter-secure.com/v2/orders/';
 
+    const FORTER_STATUS_WAITING = "waiting_for_data";
+    const FORTER_STATUS_PRE_POST_VALIDATION = "pre_post_validation";
+    const FORTER_STATUS_COMPLETE = "complete";
     /**
      * @var ScopeConfigInterface
      */
@@ -103,6 +109,19 @@ class PaymentPlaceEnd implements ObserverInterface
     private $forterLogger;
 
     /**
+     * @var ForterEntity
+     */
+    protected $forterEntity;
+    /**
+     * @var ForterEntityFactory
+     */
+    protected $forterEntityFactory;
+    /**
+     * @var EntityHelper
+     */
+    protected $entityHelper;
+
+    /**
      * @method __construct
      * @param  ScopeConfigInterface     $scopeConfig
      * @param  CustomerSession          $customerSession
@@ -134,7 +153,10 @@ class PaymentPlaceEnd implements ObserverInterface
         StoreManagerInterface $storeManager,
         Registry $registry,
         Emulation $emulate,
-        ForterLogger $forterLogger
+        ForterLogger $forterLogger,
+        ForterEntity $forterEntity,
+        ForterEntityFactory $forterEntityFactory,
+        EntityHelper $entityHelper
     ) {
         $this->customerSession = $customerSession;
         $this->messageManager = $messageManager;
@@ -151,6 +173,9 @@ class PaymentPlaceEnd implements ObserverInterface
         $this->registry = $registry;
         $this->emulate = $emulate;
         $this->forterLogger = $forterLogger;
+        $this->forterEntity = $forterEntity;
+        $this->forterEntityFactory = $forterEntityFactory;
+        $this->entityHelper = $entityHelper;
     }
 
     /**
@@ -169,6 +194,12 @@ class PaymentPlaceEnd implements ObserverInterface
                     $this->logForterPreDecision($observer->getEvent()->getPayment()->getOrder());
                 }
                 return;
+            }
+
+            $forterEntity = $this->entityHelper->getForterEntityByIncrementId($order->getIncrementId());
+            if (!$forterEntity->getId()) {
+                $validationType = 'post-authorization';
+                $forterEntity = $this->entityHelper->createForterEntity($order, $order->getStoreId(), $validationType);
             }
 
             if ($methodSetting && $methodSetting !== 'post' && $methodSetting !== 'prepost') {
@@ -197,19 +228,31 @@ class PaymentPlaceEnd implements ObserverInterface
 
             $data = $this->requestBuilderOrder->buildTransaction($order, 'AFTER_PAYMENT_ACTION');
             $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
+            $payment = $order->getPayment();
+
+            if (!$payment->getCcTransId()) {
+                $forterEntity->setStatus(self::FORTER_STATUS_WAITING)
+                    ->save();
+                return;
+            }
+
             $forterResponse = $this->abstractApi->sendApiRequest($url, json_encode($data));
 
+            $retries = $forterEntity->getRetries();
+            $forterEntity->setRetries($retries++);
             $this->forterConfig->log(' Request Data for Order ' . $order->getIncrementId() . ': ' . json_encode($data));
 
             $this->abstractApi->sendOrderStatus($order);
 
-            $order->setForterResponse($forterResponse);
+//            $order->setForterResponse($forterResponse);
+//            $forterEntity->setForterResponse($forterResponse);
 
             $this->forterConfig->log('Forter Response for Order ' . $order->getIncrementId() . ': ' . $forterResponse);
 
             $forterResponse = json_decode($forterResponse);
             if ($forterResponse->status != 'success' || !isset($forterResponse->action)) {
-                $order->setForterStatus('error');
+            //    $order->setForterStatus('error');
+                $forterEntity->setForterStatus('error');
                 $order->addStatusHistoryComment(__('Forter (post) Decision: %1', 'error'));
                 $this->forterConfig->log('Response Error for Order ' . $order->getIncrementId() . ' - Payment Data: ' . json_encode($order->getPayment()->getData()));
                 $order->save();
@@ -218,15 +261,16 @@ class PaymentPlaceEnd implements ObserverInterface
                 $message->metaData->payment = $order->getPayment()->getData();
                 $message->metaData->decision = $forterResponse->action ?? null;
                 $this->forterLogger->SendLog($message);
+                $this->entityHelper->updateForterEntity($forterEntity, $order, $forterResponse, $message);
+                $forterEntity->save();
                 return;
             }
 
-            $order->setForterStatus($forterResponse->action ?? '');
-            $order->setForterReason($forterResponse->reasonCode ?? '');
+  //          $order->setForterStatus($forterResponse->action ?? '');
+  //          $order->setForterReason($forterResponse->reasonCode ?? '');
             $order->addStatusHistoryComment(__('Forter (post) Decision: %1%2', $forterResponse->action, $this->forterConfig->getResponseRecommendationsNote($forterResponse)));
             $order->addStatusHistoryComment(__('Forter (post) Decision Reason: %1', $forterResponse->reasonCode));
             $this->handleResponse($forterResponse->action ?? '', $order);
-            $this->abstractApi->triggerRecommendationEvents($forterResponse, $order, 'post');
 
             $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'Post-Auth');
             $message->metaData->order = $order->getData();
@@ -234,6 +278,9 @@ class PaymentPlaceEnd implements ObserverInterface
             $message->metaData->decision = $forterResponse->action;
             $this->forterLogger->SendLog($message);
             $this->forterConfig->log('Order ' . $order->getIncrementId() . ' Payment Data: ' . json_encode($order->getPayment()->getData()));
+            $this->entityHelper->updateForterEntity($forterEntity, $order, $forterResponse, $message, null);
+            $forterEntity->save();
+            $this->abstractApi->triggerRecommendationEvents($forterResponse, $order, 'post');
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }
@@ -270,14 +317,14 @@ class PaymentPlaceEnd implements ObserverInterface
             $this->customerSession->setForterMessage($this->forterConfig->getPostThanksMsg());
 
             // the order will be canceled only if the order is in hold state and the force holding orders is disabled
-            if ( $this->forterConfig->forceHoldingOrders() && !$order->canHold() ) {
-                $order->setState( \Magento\Sales\Model\Order::STATE_PROCESSING );
+            if ($this->forterConfig->forceHoldingOrders() && !$order->canHold()) {
+                $order->setState(\Magento\Sales\Model\Order::STATE_PROCESSING);
             }
 
             if ($order->canHold()) {
                 $order->setCanSendNewEmailFlag(false);
                 $this->decline->holdOrder($order);
-                $this->setMessageToQueue($order, 'decline');
+                $this->setMessage($order, 'decline');
             }
         } elseif ($result == '2') {
             $order->setCanSendNewEmailFlag(false);
@@ -289,7 +336,7 @@ class PaymentPlaceEnd implements ObserverInterface
     {
         $result = $this->forterConfig->getApprovePost();
         if ($result == '1') {
-            $this->setMessageToQueue($order, 'approve');
+            $this->setMessage($order, 'approve');
         }
     }
 
@@ -297,11 +344,11 @@ class PaymentPlaceEnd implements ObserverInterface
     {
         $result = $this->forterConfig->getNotReviewPost();
         if ($result == '1') {
-            $this->setMessageToQueue($order, 'approve');
+            $this->setMessage($order, 'approve');
         }
     }
 
-    public function setMessageToQueue($order, $type)
+    public function setMessage($order, $type)
     {
         $storeId = $order->getStore()->getId();
         $currentTime = $this->dateTime->gmtDate();
@@ -313,13 +360,6 @@ class PaymentPlaceEnd implements ObserverInterface
             $message->metaData->currentTime = $currentTime;
             $this->forterLogger->SendLog($message);
         }
-        $this->queue->create()
-            ->setStoreId($storeId)
-            ->setEntityType('order')
-            ->setIncrementId($order->getIncrementId()) //TODO need to make this field a text in the table not int
-            ->setEntityBody($type)
-            ->setSyncDate($currentTime)
-            ->save();
     }
 
     private function clearTempSessionParams()

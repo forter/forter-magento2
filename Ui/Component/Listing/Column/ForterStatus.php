@@ -8,6 +8,7 @@ use Magento\Framework\View\Element\UiComponentFactory;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Ui\Component\Listing\Columns\Column;
 use Forter\Forter\Model\Config as ForterConfig;
+use Forter\Forter\Helper\EntityHelper;
 
 /**
  * Class ForterStatus
@@ -31,6 +32,11 @@ class ForterStatus extends Column
     protected $_searchCriteria;
 
     /**
+     * @var EntityHelper
+     */
+    protected $entityHelper;
+
+    /**
      * ForterStatus constructor.
      * @param ContextInterface $context
      * @param UiComponentFactory $uiComponentFactory
@@ -46,6 +52,7 @@ class ForterStatus extends Column
         OrderRepositoryInterface $orderRepository,
         SearchCriteriaBuilder $criteria,
         ForterConfig $forterConfig,
+        EntityHelper $entityHelper,
         array $components = [],
         array $data = []
     ) {
@@ -53,6 +60,7 @@ class ForterStatus extends Column
         $this->_orderRepository = $orderRepository;
         $this->_searchCriteria = $criteria;
         $this->forterConfig = $forterConfig;
+        $this->entityHelper = $entityHelper;
     }
 
     /**
@@ -64,8 +72,9 @@ class ForterStatus extends Column
         if (isset($dataSource['data']['items'])) {
             foreach ($dataSource['data']['items'] as & $item) {
                 $order = $this->_orderRepository->get($item["entity_id"]);
-                $columnData = $order->getForterStatus();
-                if (($forterResponse = $order->getForterResponse())) {
+                $forterEntity = $this->entityHelper->getForterEntityByIncrementId($order->getIncrementId());
+                $columnData = $forterEntity->getForterStatus();
+                if (($forterResponse = $forterEntity->getForterResponse())) {
                     $forterResponse = json_decode((string) $forterResponse);
                     $columnData .= $this->forterConfig->getResponseRecommendationsNote($forterResponse, false);
                 }

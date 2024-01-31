@@ -3,8 +3,9 @@
 namespace Forter\Forter\Plugin\Thirdparty\Adyen\Helper;
 
 use Adyen\Payment\Helper\Order as AdyenOrderHelper;
-use Magento\Sales\Model\Order as MagentoOrder;
 use Forter\Forter\Model\Config;
+use Forter\Forter\Helper\EntityHelper;
+use Magento\Sales\Model\Order as MagentoOrder;
 
 class Order
 {
@@ -14,19 +15,30 @@ class Order
      */
     private $forterConfig;
 
-    public function __construct(Config $forterConfig)
-    {
+    /**
+     * @var EntityHelper
+     */
+    protected $entityHelper;
+
+    public function __construct(
+        Config $forterConfig,
+        ForterEntityFactory $forterEntityFactory,
+        EntityHelper $entityHelper
+    ) {
         $this->forterConfig = $forterConfig;
-    
+        $this->entityHelper = $entityHelper;
     }
     public function afterFinalizeOrder(AdyenOrderHelper $subject, MagentoOrder $order)
     {
 
+        $forterEntity = $this->entityHelper->getForterEntityByIncrementId($order->getIncrementId());
+        if (!$forterEntity->getId()) {
+            return;
+        }
         if (
-            $order->getForterStatus() == 'decline' && 
-            $order->getState() != MagentoOrder::STATE_PAYMENT_REVIEW && 
+            $forterEntity->getForterStatus() == 'decline' &&
+            $order->getState() != MagentoOrder::STATE_PAYMENT_REVIEW &&
             $this->forterConfig->getDeclinePost() == '2') {
-
             $orderState = MagentoOrder::STATE_PAYMENT_REVIEW;
             $order->setState($orderState)->setStatus(MagentoOrder::STATE_PAYMENT_REVIEW);
             $this->forterConfig->addCommentToOrder($order, 'Order Has been re-marked for Payment Review');

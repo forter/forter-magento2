@@ -6,13 +6,13 @@ use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\Config as ForterConfig;
 use Forter\Forter\Model\Sendmail;
 use Magento\Checkout\Model\Session as CheckoutSession;
+use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Exception\PaymentException;
 use Magento\Sales\Api\OrderManagementInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\CreditmemoFactory;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Service\CreditmemoService;
-use Magento\Framework\App\RequestInterface;
 
 /**
  * Class Decline
@@ -131,7 +131,6 @@ class Decline
      */
     public function handlePostTransactionDescision($order, $item )
     {
-
         try {
             if ($order->canCancel()) {
                 $this->cancelOrder($order);
@@ -153,16 +152,17 @@ class Decline
                 //$this->holdOrder($order);
             //}
 
-            $retries    = (int)$item->getSyncRetries() + 1;
-            $date       = date('Y-m-d H:i:s',  strtotime(' + ' . $retries . ' hours'));
+            $retries    = (int)$item->getRetries() + 1;
+//            $date       = date('Y-m-d H:i:s',  strtotime(' + ' . $retries . ' hours'));
 
             $item->setSyncFlag(0);
-            $item->setEntityType( 'order' );
-            $item->setEntityBody( $order->getForterStatus() );
-            $item->setSyncRetries( $retries );
-            $item->setSyncDate($date);
-            $item->setSyncLastError( $e->getMessage() );
-            
+//            $item->setEntityType( 'order' );
+//            $item->setForterStatus( $order->getForterStatus() );
+            $item->setRetries( $retries );
+//            $item->setUpdatedAt( $date );
+//            $item->setSyncDate($date);
+            $item->setSyncLastError($e->getMessage());
+
             $this->forterConfig->addCommentToOrder($order, 'Order Cancellation attempt failed. Internal Error');
             $this->abstractApi->reportToForterOnCatch($e);
         }

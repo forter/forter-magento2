@@ -26,4 +26,26 @@
         <column xsi:type="varchar" name="forter_status"  length="255" comment="Forter Response Status" />
         <column xsi:type="varchar" name="forter_reason"  length="255" comment="Forter Response Reason" />
     </table>
+
+    <table comment="Forter Entity Table" engine="innodb" name="forter_entity" resource="default">
+        <constraint referenceId="PRIMARY" xsi:type="primary">
+            <column name="entity_id"/>
+        </constraint>
+        <column xsi:type="int" name="entity_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Entity ID"/>
+        <column xsi:type="int" padding="10" name="store_id" unsigned="true" nullable="true" identity="false" default="null" comment="Store ID"/>
+        <column length="255" name="order_increment_id" nullable="false" xsi:type="varchar" comment="Order Increment ID"/>
+        <column name="created_at" nullable="false" xsi:type="timestamp" comment="Creation Time"/>
+        <column name="updated_at" nullable="false" xsi:type="timestamp" comment="Update Time" on_update="true"/>
+        <column xsi:type="int" name="retries" nullable="false" default="0" comment="Retries"/>
+        <column length="255" name="sync_flag" nullable="false" default="0" xsi:type="varchar" comment="Sync Flag"/>
+        <column length="255" name="status" nullable="false" xsi:type="varchar" default="new" comment="Status"/>
+        <column length="255" name="validation_type" nullable="false" xsi:type="varchar" comment="Order Validation Type"/>
+        <column length="255" name="additional_information" nullable="false" xsi:type="varchar" comment="Additional Information"/>
+        <column xsi:type="varchar" name="forter_status" default="new"  length="255" comment="Forter Response Status" />
+        <column xsi:type="varchar" name="forter_action" length="255" comment="Forter Action" />
+        <column xsi:type="text" name="forter_response" comment="Forter Full Response" />
+        <column length="32" name="origin_store_code" default="NULL" nullable="true" xsi:type="varchar"/>
+        <column xsi:type="varchar" name="forter_reason"  length="255" comment="Forter Response Reason" />
+        <column xsi:type="varchar" name="sync_last_error" nullable="true" length="255" comment="Sync Last Error"/>
+    </table>
 </schema>

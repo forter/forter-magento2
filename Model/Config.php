@@ -550,11 +550,11 @@ class Config
     /**
      * @return bool
      */
-    public function getIsCron()
-    {
-        $prePostSelect = $this->getConfigValue('immediate_post_pre_decision/pre_post_select');
-        return ($prePostSelect == '3' ? true : false);
-    }
+//    public function getIsCron()
+//    {
+//        $prePostSelect = $this->getConfigValue('immediate_post_pre_decision/pre_post_select');
+//        return ($prePostSelect == '3' ? true : false);
+//    }
 
     /**
      * Return boolean regarding active/disable pre-auth card observing
