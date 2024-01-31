@@ -224,6 +224,7 @@ class PaymentMethods
             }
             if (isset($additonal_data['authCode'])) {
                 $detailsArray['verificationResults']['authorizationCode'] = $additonal_data['authCode'];
+                $detailsArray['verificationResults']['processorResponseCode'] = $additonal_data['authCode'];
             }
             if (isset($additonal_data['cardHolderName'])) {
                 $detailsArray['nameOnCard'] = $additonal_data['cardHolderName'];
@@ -233,6 +234,12 @@ class PaymentMethods
             }
             if (isset($additonal_data['cardBin'])) {
                 $detailsArray['bin'] = $additonal_data['cardBin'];
+            }
+            if (isset($additonal_data['cardIssuingCountry'])) {
+                $detailsArray['countryOfIssuance'] = $additonal_data['cardIssuingCountry'];
+            }
+            if (isset($additonal_data['fundingSource'])) {
+                $detailsArray['cardType'] = $additonal_data['fundingSource'];
             }
             if (isset($additonal_data['cardSummary'])) {
                 $detailsArray['lastFourDigits'] = $additonal_data['cardSummary'];
@@ -297,6 +304,7 @@ class PaymentMethods
         $authCode = $payment->getAdditionalInformation('adyen_auth_code');
         if ($authCode) {
             $detailsArray['verificationResults']['authorizationCode'] = $authCode;
+            $detailsArray['verificationResults']['processorResponseCode']= $authCode;
         }
 
         $avsFullResult = $payment->getAdditionalInformation('adyen_avs_result');
