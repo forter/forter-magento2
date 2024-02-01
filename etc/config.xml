@@ -39,6 +39,9 @@
                 <sender>general</sender>
                 <email_template>forter_sendmail_on_decline_email_template</email_template>
             </sendmail_on_decline>
+            <general>
+                <async_payment_methods>adyen_pay_by_link,stripe_payments</async_payment_methods>
+            </general>
         </forter>
     </default>
 </config>

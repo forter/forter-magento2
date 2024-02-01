@@ -18,9 +18,9 @@ use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\Module\ModuleListInterface;
 use Magento\Framework\UrlInterface;
+use Magento\Sales\Model\Order\Status\HistoryFactory;
 use Magento\Store\Model\StoreManagerInterface;
 use Psr\Log\LoggerInterface;
-use Magento\Sales\Model\Order\Status\HistoryFactory;
 
 /**
  * Forter Forter config model.
@@ -710,14 +710,12 @@ class Config
      */
     public function addCommentToOrder($order, $message)
     {
-
         $this->history->create()
                     ->setParentId($order->getId())
                     ->setStatus($order->getStatus())
                     ->setEntityName('order')
                     ->setComment($message)
                     ->save();
-
     }
 
     /**
@@ -801,7 +799,6 @@ class Config
         }
     }
 
-
     /**
      * Convert Forter recommendation key to a human readable message (by internal map).
      * @method getRecommendationMessageByKey
@@ -856,5 +853,16 @@ class Config
             return $prefix . __('(%1%2)', $recommendationsHeading, $recommendations);
         }
         return '';
+    }
+
+    /**
+     * @param $scope
+     * @param $scopeId
+     * @return string[]
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function asyncPaymentMethods($scope = null, $scopeId = null)
+    {
+        return explode(',', $this->getConfigValue('forter/general/async_payment_methods', $scope, $scopeId));
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Forter\Forter\Observer\OrderValidation;
 
+use Forter\Forter\Helper\EntityHelper;
 use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\ActionsHandler\Decline;
 use Forter\Forter\Model\Config;
@@ -20,7 +21,7 @@ use Magento\Framework\Registry;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magento\Quote\Model\Quote\Item;
 use Magento\Store\Model\App\Emulation;
-use Forter\Forter\Helper\EntityHelper;
+
 /**
  * Class PaymentPlaceStart
  * @package Forter\Forter\Observer\OrderValidation
@@ -147,8 +148,7 @@ class PaymentPlaceStart implements ObserverInterface
         RequestInterface $request,
         ForterEntity     $forterEntity,
         EntityHelper     $entityHelper
-    )
-    {
+    ) {
         $this->remote = $remote;
         $this->queue = $queue;
         $this->decline = $decline;
@@ -180,14 +180,13 @@ class PaymentPlaceStart implements ObserverInterface
             $order = $observer->getEvent()->getPayment()->getOrder();
             $storeId = $order->getStoreId();
 
-            if (!$this->config->isEnabled(null,$storeId)) {
+            if (!$this->config->isEnabled(null, $storeId)) {
                 return;
             }
 
             if ($this->registry->registry('forter_pre_decision')) {
                 $this->registry->unregister('forter_pre_decision');
             }
-
 
             // let bind the relevent store in case of multi store settings
             $this->emulate->startEnvironmentEmulation(
@@ -211,6 +210,11 @@ class PaymentPlaceStart implements ObserverInterface
             $this->forterLogger->forterConfig->log('Connection Information for Order ' . $order->getIncrementId() . ' : ' . json_encode($connectionInformation));
 
             $paymentMethod = $order->getPayment()->getMethod();
+
+            if (in_array($paymentMethod, $this->config->asyncPaymentMethods())) {
+                return;
+            }
+
             $subMethod = $order->getPayment()->getCcType();
             $methodSetting = $this->config->getMappedPrePos($paymentMethod, $subMethod);
 
@@ -231,12 +235,12 @@ class PaymentPlaceStart implements ObserverInterface
 
             if ($methodSetting === 'pre_post' || (!$methodSetting && $this->config->getIsPreAndPost())) {
                 $validationType = 'pre-and-post-authorization';
-            } else  {
+            } else {
                 $validationType = 'pre-authorization';
             }
 
             //creare entitate
-            $forterEntity = $this->entityHelper->createForterEntity($order, $storeId,$validationType);
+            $forterEntity = $this->entityHelper->createForterEntity($order, $storeId, $validationType);
 
             $order->setData('sub_payment_method', $subMethod);
 
@@ -272,8 +276,8 @@ class PaymentPlaceStart implements ObserverInterface
             }
 
             $this->registry->register('forter_pre_decision', $forterResponse->action);
-           // $order->setForterStatus($forterResponse->action);
-           // $order->setForterReason($forterResponse->reasonCode);
+            // $order->setForterStatus($forterResponse->action);
+            // $order->setForterReason($forterResponse->reasonCode);
             $order->addStatusHistoryComment(__('Forter (pre) Decision: %1%2', $forterResponse->action, $this->config->getResponseRecommendationsNote($forterResponse)));
             $this->entityHelper->updateForterEntity($forterEntity, $order, $forterResponse, null);
             $this->abstractApi->triggerRecommendationEvents($forterResponse, $order, 'pre');

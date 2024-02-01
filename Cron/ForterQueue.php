@@ -131,24 +131,6 @@ class ForterQueue
         try {
 
             $items = $this->entityHelper->getForterEntities();
-//            $items = $this->forterEntityFactory
-//                ->create()
-//                ->getCollection()
-//                ->addFieldToFilter('status', ['in' => [self::FORTER_STATUS_WAITING, self::FORTER_STATUS_NEW, self::FORTER_STATUS_PRE_POST_VALIDATION]])
-//                ->addFieldToFilter('sync_flag', 0)
-//                ->addFieldToFilter('sync_retries', ['lt' => 10])
-//                ->addFieldToFilter(
-//                    'updated_at',
-//                    [
-//                        'from' => date('Y-m-d H:i:s', strtotime('-7 days'))
-//                    ]
-//                )->addFieldToFilter(
-//                    'updated_at',
-//                    [
-//                        'to' => date('Y-m-d H:i:s')
-//                    ]
-//                );
-
             $items->setPageSize(10000)->setCurPage(1);
             foreach ($items as $item) {
                 $this->emulate->stopEnvironmentEmulation(); // let detach the store meta data
