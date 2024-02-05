@@ -233,7 +233,7 @@ class PaymentPlaceEnd implements ObserverInterface
             if (!$payment->getCcTransId()) {
                 $forterEntity->setStatus(self::FORTER_STATUS_WAITING)
                     ->save();
-                $order->canHold() ?? $order->hold()->save();
+                //$order->canHold() ?? $order->hold()->save();
                 return;
             }
 
