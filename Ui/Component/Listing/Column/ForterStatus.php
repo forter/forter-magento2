@@ -73,10 +73,27 @@ class ForterStatus extends Column
             foreach ($dataSource['data']['items'] as & $item) {
                 $order = $this->_orderRepository->get($item["entity_id"]);
                 $forterEntity = $this->entityHelper->getForterEntityByIncrementId($order->getIncrementId());
-                $columnData = $forterEntity->getForterStatus();
-                if (($forterResponse = $forterEntity->getForterResponse())) {
-                    $forterResponse = json_decode((string) $forterResponse);
-                    $columnData .= $this->forterConfig->getResponseRecommendationsNote($forterResponse, false);
+                $columnData = '';
+                if ($forterEntity && $forterEntity->getForterAction()) {
+                    $columnData .= $forterEntity->getForterAction();
+                }
+
+                if ($order && $order->getForterStatus()) {
+                    $columnData .= $order->getForterStatus();
+                }
+
+                if ($forterEntity && $forterEntity->getForterResponse()) {
+                    $forterResponse = json_decode((string) $forterEntity->getForterResponse());
+                    if ($forterResponse) {
+                        $columnData .= $this->forterConfig->getResponseRecommendationsNote($forterResponse, false);
+                    }
+                }
+
+                if ($order && $order->getForterResponse()) {
+                    $forterResponse = json_decode((string) $order->getForterResponse());
+                    if ($forterResponse) {
+                        $columnData .= $this->forterConfig->getResponseRecommendationsNote($forterResponse, false);
+                    }
                 }
                 $item[$this->getData('name')] = $columnData;
             }
