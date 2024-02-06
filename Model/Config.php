@@ -863,6 +863,6 @@ class Config
      */
     public function asyncPaymentMethods($scope = null, $scopeId = null)
     {
-        return explode(',', $this->getConfigValue('forter/general/async_payment_methods', $scope, $scopeId));
+        return explode(',', $this->getConfigValue('general/async_payment_methods', $scope, $scopeId));
     }
 }
