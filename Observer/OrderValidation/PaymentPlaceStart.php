@@ -275,6 +275,9 @@ class PaymentPlaceStart implements ObserverInterface
                 return;
             }
 
+            if ($validationType !== 'pre-and-post-authorization') {
+                $forterEntity->setSyncFlag(1);
+            }
             $this->registry->register('forter_pre_decision', $forterResponse->action);
             // $order->setForterStatus($forterResponse->action);
             // $order->setForterReason($forterResponse->reasonCode);
