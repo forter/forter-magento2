@@ -2,13 +2,13 @@
 
 namespace Forter\Forter\Ui\Component\Listing\Column;
 
+use Forter\Forter\Helper\EntityHelper;
+use Forter\Forter\Model\Config as ForterConfig;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\View\Element\UiComponent\ContextInterface;
 use Magento\Framework\View\Element\UiComponentFactory;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Ui\Component\Listing\Columns\Column;
-use Forter\Forter\Model\Config as ForterConfig;
-use Forter\Forter\Helper\EntityHelper;
 
 /**
  * Class ForterReason
@@ -73,10 +73,10 @@ class ForterReason extends Column
             foreach ($dataSource['data']['items'] as & $item) {
                 $order = $this->_orderRepository->get($item["entity_id"]);
                 $forterEntity = $this->entityHelper->getForterEntityByIncrementId($order->getIncrementId());
-
-                if ($forterEntity) {
+                $columnData = '';
+                if ($forterEntity->getForterReason()) {
                     $columnData = $forterEntity->getForterReason();
-                } else {
+                } elseif ($order->getForterReason()) {
                     $columnData = $order->getForterReason();
                 }
 
