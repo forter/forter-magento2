@@ -130,7 +130,7 @@ class ForterQueue
     {
         try {
 
-            $items = $this->entityHelper->getForterEntities();
+            $items = $this->entityHelper->getForterEntitiesPreSync();
             $items->setPageSize(10000)->setCurPage(1);
             foreach ($items as $item) {
                 $this->emulate->stopEnvironmentEmulation(); // let detach the store meta data
@@ -163,7 +163,6 @@ class ForterQueue
                     continue;
                 }
 
-                //de adaugat si getLastTransId() POATE/De discutat
                 if (!$payment->getCcTransId()) {
                     continue;
                 }

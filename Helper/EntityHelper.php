@@ -68,8 +68,8 @@ class EntityHelper
         return $collection->getFirstItem();
     }
 
-    public function getForterEntities () {
-
+    public function getForterEntitiesPreSync()
+    {
         return $this->forterEntityFactory
             ->create()
             ->getCollection()
@@ -87,6 +87,17 @@ class EntityHelper
                     'to' => date('Y-m-d H:i:s')
                 ]
             );
+    }
+
+    public function getForterEntitiesPostDecisionAction()
+    {
+        return $this->forterEntityFactory
+            ->create()
+            ->getCollection()
+            ->addFieldToFilter('status', ['in' => [self::FORTER_STATUS_COMPLETE]])
+            ->addFieldToFilter('sync_flag', 1)
+            ->addFieldToFilter('post_decision_actions_flag', 0)
+            ->addFieldToFilter('entity_type', 'order');
     }
 
     public function updateForterEntity($forterEntity, $order, $forterResponse, $message)

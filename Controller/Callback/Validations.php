@@ -1,10 +1,10 @@
 <?php
 namespace Forter\Forter\Controller\Callback;
 
+use Forter\Forter\Helper\EntityHelper;
 use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\ActionsHandler\Decline;
 use Forter\Forter\Model\Config;
-use Forter\Forter\Model\EntityFactory as ForterEntityFactory;
 use Forter\Forter\Model\ForterLogger;
 use Forter\Forter\Model\ForterLoggerMessage;
 use Forter\Forter\Model\QueueFactory;
@@ -20,7 +20,6 @@ use Magento\Framework\UrlInterface;
 use Magento\Framework\View\Result\PageFactory;
 use Magento\Sales\Model\Order as OrderRepository;
 use Psr\Log\LoggerInterface;
-use Forter\Forter\Helper\EntityHelper;
 
 /**
  * Class Validations
@@ -192,7 +191,7 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
             $forterEntity->setForterReason($bodyRawParams['reasonCode']);
             $forterEntity->save();
 
-            $this->handlePostDecisionCallback($bodyRawParams['action'], $order);
+            $this->handlePostDecisionCallback($bodyRawParams['action'], $order, $forterEntity);
 
             $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'Forter Callback Controller Decision');
             $message->metaData->order = $order->getData();
@@ -242,14 +241,14 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
      * @param $order
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function handlePostDecisionCallback($forterDecision, $order)
+    public function handlePostDecisionCallback($forterDecision, $order, $forterEntity)
     {
         if ($forterDecision == "decline") {
-            $this->handleDecline($order);
+            $this->handleDecline($order, $forterEntity);
         } elseif ($forterDecision == 'approve') {
-            $this->handleApprove($order);
+            $this->handleApprove($order, $forterEntity);
         } elseif ($forterDecision == "not reviewed") {
-            $this->handleNotReviewed($order);
+            $this->handleNotReviewed($order, $forterEntity);
         } else {
             throw new \Exception("Forter: Unsupported action from Forter");
         }
@@ -258,11 +257,11 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
     /**
      * @param $order
      */
-    public function handleDecline($order)
+    public function handleDecline($order, $forterEntity)
     {
         $result = $this->forterConfig->getDeclinePost();
         if ($result == '1') {
-            $this->setMessage($order, 'decline');
+            $this->setMessage($order, 'decline', $forterEntity);
         } elseif ($result == '2') {
             $this->decline->markOrderPaymentReview($order);
         }
@@ -271,22 +270,22 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
     /**
      * @param $order
      */
-    public function handleApprove($order)
+    public function handleApprove($order, $forterEntity)
     {
         $result = $this->forterConfig->getApprovePost();
         if ($result == '1') {
-            $this->setMessage($order, 'approve');
+            $this->setMessage($order, 'approve', $forterEntity);
         }
     }
 
     /**
      * @param $order
      */
-    public function handleNotReviewed($order)
+    public function handleNotReviewed($order, $forterEntity)
     {
         $result = $this->forterConfig->getNotReviewPost();
         if ($result == '1') {
-            $this->setMessage($order, 'approve');
+            $this->setMessage($order, 'approve', $forterEntity);
         }
     }
 
@@ -295,18 +294,12 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
      * @param $type
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function setMessage($order, $type)
+    public function setMessage($order, $type, $forterEntity)
     {
-        $storeId = $order->getStore()->getId();
-        $currentTime = $this->dateTime->gmtDate();
         $this->forterConfig->log('Increment ID:' . $order->getIncrementId());
-//        $this->queue->create()
-//            ->setStoreId($storeId)
-//            ->setEntityType('order')
-//            ->setIncrementId($order->getIncrementId())
-//            ->setEntityBody($type)
-//            ->setSyncDate($currentTime)
-//            ->save();
+        $forterEntity->setEntityType('order');
+        $forterEntity->setEntityBody($type);
+        $forterEntity->save();
         $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'Sending Message To Que');
         $message->metaData->order = $order->getData();
         $this->forterLogger->SendLog($message);

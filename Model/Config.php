@@ -323,6 +323,18 @@ class Config
     }
 
     /**
+     * Return bool value for holding orders before forter decision
+     * is enabled or not.
+     *
+     * @return bool
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function isHoldPredicsionEnabled($scope = null, $scopeId = null)
+    {
+        return (bool)$this->getConfigValue('immediate_post_pre_decision/hold_orders_predicision', $scope, $scopeId);
+    }
+
+    /**
      * Return bool value depends of that if payment method sandbox mode
      * is enabled or not.
      *

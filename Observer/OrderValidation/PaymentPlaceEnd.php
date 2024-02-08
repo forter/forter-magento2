@@ -233,7 +233,9 @@ class PaymentPlaceEnd implements ObserverInterface
             if (!$payment->getCcTransId()) {
                 $forterEntity->setStatus(self::FORTER_STATUS_WAITING)
                     ->save();
-                //$order->canHold() ?? $order->hold()->save();
+                if ($this->forterConfig->isHoldingOrdersEnabled()) {
+                    $order->canHold() ?? $order->hold()->save();
+                }
                 return;
             }
 
@@ -272,7 +274,7 @@ class PaymentPlaceEnd implements ObserverInterface
             $forterEntity->setSyncFlag(1);
             $order->addStatusHistoryComment(__('Forter (post) Decision: %1%2', $forterResponse->action, $this->forterConfig->getResponseRecommendationsNote($forterResponse)));
             $order->addStatusHistoryComment(__('Forter (post) Decision Reason: %1', $forterResponse->reasonCode));
-            $this->handleResponse($forterResponse->action ?? '', $order);
+            $this->handleResponse($forterResponse->action ?? '', $order, $forterEntity);
 
             $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'Post-Auth');
             $message->metaData->order = $order->getData();
@@ -288,14 +290,14 @@ class PaymentPlaceEnd implements ObserverInterface
         }
     }
 
-    public function handleResponse($forterDecision, $order)
+    public function handleResponse($forterDecision, $order, $forterEntity)
     {
         if ($forterDecision == "decline") {
-            $this->handleDecline($order);
+            $this->handleDecline($order, $forterEntity);
         } elseif ($forterDecision == 'approve') {
-            $this->handleApprove($order);
+            $this->handleApprove($order, $forterEntity);
         } elseif ($forterDecision == "not reviewed") {
-            $this->handleNotReviewed($order);
+            $this->handleNotReviewed($order, $forterEntity);
         } elseif ($forterDecision == "pending" && $this->forterConfig->isPendingOnHoldEnabled()) {
             if ($order->canHold()) {
                 $this->decline->holdOrder($order);
@@ -311,7 +313,7 @@ class PaymentPlaceEnd implements ObserverInterface
         }
     }
 
-    public function handleDecline($order)
+    public function handleDecline($order, $forterEntity)
     {
         $this->decline->sendDeclineMail($order);
         $result = $this->forterConfig->getDeclinePost();
@@ -326,7 +328,7 @@ class PaymentPlaceEnd implements ObserverInterface
             if ($order->canHold()) {
                 $order->setCanSendNewEmailFlag(false);
                 $this->decline->holdOrder($order);
-                $this->setMessage($order, 'decline');
+                $this->setMessage($order, 'decline', $forterEntity);
             }
         } elseif ($result == '2') {
             $order->setCanSendNewEmailFlag(false);
@@ -334,23 +336,23 @@ class PaymentPlaceEnd implements ObserverInterface
         }
     }
 
-    public function handleApprove($order)
+    public function handleApprove($order, $forterEntity)
     {
         $result = $this->forterConfig->getApprovePost();
         if ($result == '1') {
-            $this->setMessage($order, 'approve');
+            $this->setMessage($order, 'approve', $forterEntity);
         }
     }
 
-    public function handleNotReviewed($order)
+    public function handleNotReviewed($order, $forterEntity)
     {
         $result = $this->forterConfig->getNotReviewPost();
         if ($result == '1') {
-            $this->setMessage($order, 'approve');
+            $this->setMessage($order, 'approve', $forterEntity);
         }
     }
 
-    public function setMessage($order, $type)
+    public function setMessage($order, $type, $forterEntity)
     {
         $storeId = $order->getStore()->getId();
         $currentTime = $this->dateTime->gmtDate();
@@ -362,6 +364,9 @@ class PaymentPlaceEnd implements ObserverInterface
             $message->metaData->currentTime = $currentTime;
             $this->forterLogger->SendLog($message);
         }
+        $forterEntity->setEntityType('order');
+        $forterEntity->setEntityBody($type);
+        $forterEntity->save();
     }
 
     private function clearTempSessionParams()

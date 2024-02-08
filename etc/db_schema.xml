@@ -37,7 +37,7 @@
         <column name="created_at" nullable="false" xsi:type="timestamp" comment="Creation Time" default="CURRENT_TIMESTAMP" on_update="false"/>
         <column name="updated_at" nullable="false" xsi:type="timestamp" comment="Update Time" default="CURRENT_TIMESTAMP" on_update="true"/>
         <column xsi:type="int" name="retries" nullable="false" default="0" comment="Retries"/>
-        <column length="255" name="sync_flag" nullable="false" default="0" xsi:type="varchar" comment="Sync Flag"/>
+        <column xsi:type="smallint" padding="6" name="sync_flag" nullable="true" default="0" comment="Sync Flag"/>
         <column length="255" name="status" nullable="false" xsi:type="varchar" default="new" comment="Status"/>
         <column length="255" name="validation_type" nullable="false" xsi:type="varchar" comment="Order Validation Type"/>
         <column length="255" name="additional_information" nullable="false" xsi:type="varchar" comment="Additional Information"/>
@@ -47,5 +47,8 @@
         <column length="32" name="origin_store_code" default="NULL" nullable="true" xsi:type="varchar"/>
         <column xsi:type="varchar" name="forter_reason"  length="255" comment="Forter Response Reason" />
         <column xsi:type="varchar" name="sync_last_error" nullable="true" length="255" comment="Sync Last Error"/>
+        <column xsi:type="text" name="entity_body" nullable="true" comment="Request Body"/>
+        <column xsi:type="varchar" name="entity_type" nullable="true" length="50"  default="0" comment="Store ID"/>
+        <column xsi:type="smallint" padding="6" name="post_decision_actions_flag" nullable="true" default="0" comment="Post Decision actions Taken Flag"/>
     </table>
 </schema>

@@ -155,7 +155,7 @@ class OrderPlacementTestBraintreeCronAuth extends TestCase
         $orderId = $quoteManagement->placeOrder($quote->getId());
 
         //Executing cron
-        $cron = $this->objectManager->create(\Forter\Forter\Cron\SendQueue::class);
+        $cron = $this->objectManager->create(\Forter\Forter\Cron\PostDecisionActions::class);
         $cron->execute();
 
         //Load queue collection
