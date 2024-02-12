@@ -65,6 +65,10 @@ class EntityHelper
             $collection->addFieldToFilter('status', ['in' => $statuses]);
         }
 
+        if ($collection->getSize() == 0) {
+            return null;
+        }
+
         return $collection->getFirstItem();
     }
 
