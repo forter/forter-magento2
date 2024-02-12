@@ -13,6 +13,7 @@ use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\CreditmemoFactory;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Service\CreditmemoService;
+use Forter\Forter\Model\Order\Recommendation;
 
 /**
  * Class Decline
@@ -67,6 +68,11 @@ class Decline
     protected $request;
 
     /**
+     * @var Recommendation
+     */
+    protected $recommendation;
+
+    /**
      * Decline constructor.
      * @param Order $order
      * @param CreditmemoFactory $creditmemoFactory
@@ -85,7 +91,8 @@ class Decline
         CheckoutSession $checkoutSession,
         Invoice $invoice,
         CreditmemoService $creditmemoService,
-        OrderManagementInterface $orderManagement
+        OrderManagementInterface $orderManagement,
+        Recommendation $recommendation
     ) {
         $this->request = $request;
         $this->abstractApi = $abstractApi;
@@ -97,6 +104,7 @@ class Decline
         $this->creditmemoFactory = $creditmemoFactory;
         $this->creditmemoService = $creditmemoService;
         $this->invoice = $invoice;
+        $this->recommendation = $recommendation;
     }
 
     /**
@@ -107,7 +115,7 @@ class Decline
     {
         $this->sendDeclineMail($order);
         $forterDecision = $this->forterConfig->getDeclinePre();
-        $isVerificationRequired3dsChallenge = \Forter\Forter\Model\Order\Recommendation::isVerificationRequired3dsChallenge($order);
+        $isVerificationRequired3dsChallenge = $this->recommendation->isVerificationRequired3dsChallenge($order);
 
         if ( $forterDecision == '1' &&  !$isVerificationRequired3dsChallenge ) {
             throw new PaymentException(__($this->forterConfig->getPreThanksMsg()));
