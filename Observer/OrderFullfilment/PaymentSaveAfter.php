@@ -207,7 +207,7 @@ class PaymentSaveAfter implements ObserverInterface
         try {
             $forterEntity = $this->entityHelper->getForterEntityByIncrementId($order->getIncrementId(), [self::FORTER_STATUS_COMPLETE]);
 
-            if (!$forterEntity->getId()) {
+            if (!$forterEntity) {
                 return false;
             }
             $this->emulate->stopEnvironmentEmulation();

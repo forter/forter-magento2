@@ -197,7 +197,7 @@ class PaymentPlaceEnd implements ObserverInterface
             }
 
             $forterEntity = $this->entityHelper->getForterEntityByIncrementId($order->getIncrementId());
-            if (!$forterEntity->getId()) {
+            if (!$forterEntity) {
                 $validationType = 'post-authorization';
                 $forterEntity = $this->entityHelper->createForterEntity($order, $order->getStoreId(), $validationType);
             }

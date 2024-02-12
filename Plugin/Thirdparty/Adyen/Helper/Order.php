@@ -32,7 +32,7 @@ class Order
     {
 
         $forterEntity = $this->entityHelper->getForterEntityByIncrementId($order->getIncrementId());
-        if (!$forterEntity->getId()) {
+        if (!$forterEntity) {
             return;
         }
         if (

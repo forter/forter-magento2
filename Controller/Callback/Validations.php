@@ -182,7 +182,7 @@ class Validations extends \Magento\Framework\App\Action\Action implements HttpPo
             }
 
             $forterEntity = $this->entityHelper->getForterEntityByIncrementId($order->getIncrementId());
-            if (!$forterEntity->getId()) {
+            if ($forterEntity) {
                 return;
             }
 

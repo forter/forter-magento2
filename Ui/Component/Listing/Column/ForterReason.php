@@ -74,7 +74,7 @@ class ForterReason extends Column
                 $order = $this->_orderRepository->get($item["entity_id"]);
                 $forterEntity = $this->entityHelper->getForterEntityByIncrementId($order->getIncrementId());
                 $columnData = '';
-                if ($forterEntity->getForterReason()) {
+                if ($forterEntity && $forterEntity->getForterReason()) {
                     $columnData = $forterEntity->getForterReason();
                 } elseif ($order->getForterReason()) {
                     $columnData = $order->getForterReason();
