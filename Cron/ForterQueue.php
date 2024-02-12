@@ -2,6 +2,7 @@
 
 namespace Forter\Forter\Cron;
 
+use Forter\Forter\Helper\EntityHelper;
 use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\ActionsHandler\Approve;
 use Forter\Forter\Model\ActionsHandler\Decline;
@@ -15,8 +16,6 @@ use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Store\Model\App\Emulation;
-use Forter\Forter\Helper\EntityHelper;
-
 
 /**
  * Class SendQueue
@@ -91,7 +90,6 @@ class ForterQueue
     protected $orderFactory;
     protected $entityHelper;
 
-
     public function __construct(
         Approve                           $approve,
         Decline                           $decline,
@@ -129,7 +127,6 @@ class ForterQueue
     public function execute()
     {
         try {
-
             $items = $this->entityHelper->getForterEntitiesPreSync();
             $items->setPageSize(10000)->setCurPage(1);
             foreach ($items as $item) {
@@ -143,9 +140,6 @@ class ForterQueue
                 }
                 $payment = $order->getPayment();
                 $method = $payment->getMethod();
-
-
-
 
                 // let bind the relevent store in case of multi store settings
                 $this->emulate->startEnvironmentEmulation(
@@ -164,6 +158,9 @@ class ForterQueue
                 }
 
                 if (!$payment->getCcTransId()) {
+                    if ($this->forterConfig->isHoldingOrdersEnabled()) {
+                        $order->canHold() ?? $order->hold()->save();
+                    }
                     continue;
                 }
 
@@ -260,7 +257,6 @@ class ForterQueue
 
             $this->handleForterResponse($order, $forterResponse->action, $item);
 
-
             $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'Forter CRON Decision');
             $message->metaData->order = $order->getData();
             $message->metaData->payment = $order->getPayment();
@@ -287,6 +283,5 @@ class ForterQueue
         } elseif ($response == 'decline') {
             $this->decline->handlePostTransactionDescision($order, $item);
         }
-
     }
 }
