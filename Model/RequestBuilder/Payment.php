@@ -90,6 +90,11 @@ class Payment
                 unset($paymentData["creditCard"]);
             }
 
+            if ($payment->getCcType() == 'applepay' || $payment->getAdditionalInformation('brand_code') == 'applepay' || $payment_method == 'adyen_applepay') {
+                $paymentData['applePay'] = $cardDetails;
+                unset($paymentData["creditCard"]);
+            }
+
             // Attempt to set tokenized card information if available
             if ( !isset($paymentData["creditCard"]) && $payment->getAdditionalInformation('forter_cc_token') && $payment->getAdditionalInformation('forter_cc_bin') ) {
                 $paymentData["tokenizedCard"] = array(
