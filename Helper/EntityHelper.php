@@ -129,13 +129,10 @@ class EntityHelper
         }
 
         if ($message) {
-            if (!is_string($message)) {
-                $message = json_encode($message);
-                $forterEntity->setAdditionalInformation($message);
-            } else {
-                $forterEntity->setAdditionalInformation($message);
-            }
+            $message = is_string($message) ? $message : json_encode($message);
+            $forterEntity->setAdditionalInformation($message);
         }
+
         if ($forterResponse && isset($forterResponse->reasonCode)) {
             $forterEntity->setForterReason($forterResponse->reasonCode);
         }
