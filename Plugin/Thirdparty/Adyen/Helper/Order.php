@@ -22,7 +22,6 @@ class Order
 
     public function __construct(
         Config $forterConfig,
-        ForterEntityFactory $forterEntityFactory,
         EntityHelper $entityHelper
     ) {
         $this->forterConfig = $forterConfig;
