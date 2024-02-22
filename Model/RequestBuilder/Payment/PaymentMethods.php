@@ -370,6 +370,10 @@ class PaymentMethods
                 $detailsArray['bin'] = $additonal_data['cardBin'];
             }
 
+            if (isset($additonal_data['cardIssuingCountry'])) {
+                $detailsArray['countryOfIssuance'] = $additonal_data['cardIssuingCountry'];
+            }
+
             if (isset($additonal_data['expiryDate'])) {
                 $expiryDate = explode("/", $additonal_data['expiryDate']);
 
