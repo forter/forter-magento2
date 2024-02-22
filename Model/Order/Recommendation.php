@@ -30,7 +30,7 @@ class Recommendation
         $forterEntity = $this->entityHelper->getForterEntityByIncrementId($order->getIncrementId());
 
         if (!$forterEntity) {
-            return;
+            return false;
         }
         $forterResponse = $forterEntity->getForterResponse();
 
