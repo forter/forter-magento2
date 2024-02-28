@@ -278,10 +278,24 @@ class ForterQueue
         if ($order->canUnhold()) {
             $order->unhold();
         }
+
         if ($response == 'approve') {
-            $this->approve->handleApproveImmediatly($order);
+            if ($this->forterConfig->getApprovePost() == '1') {
+                $this->approve->handleApproveImmediatly($order);
+            }
+        } elseif ($response == 'not reviewed') {
+            if ($this->forterConfig->getNotReviewPost() == '1') {
+                $this->approve->handleApproveImmediatly($order);
+            }
         } elseif ($response == 'decline') {
-            $this->decline->handlePostTransactionDescision($order, $item);
+            switch ($this->forterConfig->getDeclinePost()) {
+                case 1:
+                    $this->decline->handlePostTransactionDescision($order, $item);
+                    return;
+                case 2:
+                    $this->decline->markOrderPaymentReview($order);
+                    return;
+            }
         }
     }
 }
