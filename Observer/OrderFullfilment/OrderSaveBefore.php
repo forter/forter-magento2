@@ -96,7 +96,7 @@ class OrderSaveBefore implements ObserverInterface
         $order = $observer->getEvent()->getOrder();
         $forterEntity = $this->entityHelper->getForterEntityByIncrementId($order->getIncrementId(),[self::FORTER_STATUS_PRE_POST_VALIDATION,self::FORTER_STATUS_COMPLETE]);
         try {
-            if (!$order->getForterStatus() && !$forterEntity) {
+            if (!$forterEntity) {
                 return false;
             }
             $orderState = $order->getState();

@@ -113,7 +113,7 @@ class EntityHelper
         }
 
         if (!$order->getData('isPreAndPost')) {
-            if ($forterResponse->status === 'success' && ($forterResponse->action === 'approve' || $forterResponse->action === 'decline')) {
+            if ($forterResponse->status === 'success' && ($forterResponse->action === 'approve' || $forterResponse->action === 'decline' || $forterResponse->action === 'not reviewed')) {
                 $forterEntity->setStatus(self::FORTER_STATUS_COMPLETE);
             }
         } else {
