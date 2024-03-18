@@ -157,7 +157,7 @@ class ForterQueue
                     continue;
                 }
 
-                if (!$payment->getCcTransId()) {
+                if ($this->forterConfig->getIsPaymentMethodAccepted($payment->getMethod()) && !$payment->getCcTransId()) {
                     if ($this->forterConfig->isHoldingOrdersEnabled()) {
                         $order->canHold() ?? $order->hold()->save();
                     }

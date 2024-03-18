@@ -877,4 +877,31 @@ class Config
     {
         return explode(',', $this->getConfigValue('general/async_payment_methods', $scope, $scopeId));
     }
+
+    /**
+     * @param $scope
+     * @param $scopeId
+     * @return string[]
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function acceptedPaymentMethods($scope = null, $scopeId = null)
+    {
+        return explode(',', $this->getConfigValue('general/accepted_payment_methods', $scope, $scopeId));
+    }
+
+    /**
+     * @param $scope
+     * @param $scopeId
+     * @return bool
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function getIsPaymentMethodAccepted($paymentMethod)
+    {
+        foreach ($this->acceptedPaymentMethods() as $acceptedPaymentMethod) {
+            if (strpos($paymentMethod, $acceptedPaymentMethod)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
