@@ -41,7 +41,7 @@
             </sendmail_on_decline>
             <general>
                 <async_payment_methods>adyen_pay_by_link,stripe_payments</async_payment_methods>
-                <accepted_payment_methods>adyen,braintree,paypal,authorize,checkoutcom</accepted_payment_methods>
+                <accepted_payment_methods>adyen,braintree,paypal</accepted_payment_methods>
             </general>
         </forter>
     </default>
