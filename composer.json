@@ -5,7 +5,8 @@
         "php": "~7.4.0||~8.1.0||~8.2.0",
         "ext-json": "*",
         "ext-curl": "*",
-        "guzzlehttp/guzzle": "^7.3.0"
+        "guzzlehttp/guzzle": "^7.3.0",
+        "adyen/module-payment": ">=8.22.6"
     },
     "type": "magento2-module",
     "license": [
