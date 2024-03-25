@@ -76,9 +76,7 @@ class ForterStatus extends Column
                 $columnData = '';
                 if ($forterEntity && $forterEntity->getForterAction()) {
                     $columnData .= $forterEntity->getForterAction();
-                }
-
-                if ($order && $order->getForterStatus()) {
+                } elseif ($order && $order->getForterStatus()) {
                     $columnData .= $order->getForterStatus();
                 }
 
@@ -87,9 +85,7 @@ class ForterStatus extends Column
                     if ($forterResponse) {
                         $columnData .= $this->forterConfig->getResponseRecommendationsNote($forterResponse, false);
                     }
-                }
-
-                if ($order && $order->getForterResponse()) {
+                } elseif ($order && $order->getForterResponse()) {
                     $forterResponse = json_decode((string) $order->getForterResponse());
                     if ($forterResponse) {
                         $columnData .= $this->forterConfig->getResponseRecommendationsNote($forterResponse, false);
