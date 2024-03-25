@@ -253,6 +253,62 @@ class Order
                 $result['payment'][0]['androidPay']['paymentGatewayData']['gatewayName'] = $method;
                 $result['payment'][0]['androidPay']['paymentGatewayData']['gatewayTransactionId'] = $order->getPayment()->getCcTransId() ? $order->getPayment()->getCcTransId() : '';
             }
+
+            if (($method == 'adyen_hpp' && $brandCode == 'applepay') || ($method === 'adyen_applepay')) {
+                $logArray[3] = 'Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_hpp method';
+                $this->forterConfig->log('Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_hpp method');
+                $notificationAdditionalData = $this->serializer->unserialize($notification->getAdditionalData());
+
+                unset($result['payment'][0]['creditCard']);
+
+                if ($notificationAdditionalData['expiryDate']) {
+                    $ExpireDate = explode("/", $notificationAdditionalData['expiryDate']);
+                }
+
+                if (isset($notificationAdditionalData['cardHolderName'])) {
+                    $result['payment'][0]['applePay']['nameOnCard'] = $notificationAdditionalData['cardHolderName'];
+                }
+
+                if (isset($notificationAdditionalData['cardPaymentMethod'])) {
+                    $result['payment'][0]['applePay']['cardBrand'] = $notificationAdditionalData['cardPaymentMethod'];
+                }
+
+                if (isset($notificationAdditionalData['cardBin'])) {
+                    $result['payment'][0]['applePay']['bin'] = $notificationAdditionalData['cardBin'];
+                }
+
+                if (isset($notificationAdditionalData['cardIssuingCountry'])) {
+                    $result['payment'][0]['applePay']['countryOfIssuance'] = $notificationAdditionalData['cardIssuingCountry'];
+                }
+
+                if (isset($notificationAdditionalData['cvcResult'])) {
+                    $result['payment'][0]['applePay']['verificationResults']['cvvResult'] = $notificationAdditionalData['cvcResult'];
+                }
+
+                if (isset($notificationAdditionalData['authCode'])) {
+                    $result['payment'][0]['applePay']['verificationResults']['authorizationCode'] = $notificationAdditionalData['authCode'];
+                }
+
+                if (isset($notificationAdditionalData['avsResult'])) {
+                    $result['payment'][0]['applePay']['verificationResults']['avsFullResult'] = $notificationAdditionalData['avsResult'];
+                }
+
+                if (isset($ExpireDate[0])) {
+                    $result['payment'][0]['applePay']['expirationMonth'] = $ExpireDate[0];
+                }
+
+                if (isset($ExpireDate[1])) {
+                    $result['payment'][0]['applePay']['expirationYear'] = $ExpireDate[1];
+                }
+
+                if (isset($notificationAdditionalData['cardSummary'])) {
+                    $result['payment'][0]['applePay']['lastFourDigits'] = $notificationAdditionalData['cardSummary'];
+                }
+
+                $result['payment'][0]['applePay']['cardType'] = 'CREDIT';
+                $result['payment'][0]['applePay']['paymentGatewayData']['gatewayName'] = $method;
+                $result['payment'][0]['applePay']['paymentGatewayData']['gatewayTransactionId'] = $order->getPayment()->getCcTransId() ? $order->getPayment()->getCcTransId() : '';
+            }
             $logArray[4] = $result['payment'];
             $logArray[5] = json_encode('Forter Adyen Module integration end');
             $this->forterConfig->log('Forter Adyen Module integration end');

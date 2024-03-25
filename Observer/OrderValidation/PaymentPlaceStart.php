@@ -2,9 +2,11 @@
 
 namespace Forter\Forter\Observer\OrderValidation;
 
+use Forter\Forter\Helper\EntityHelper;
 use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\ActionsHandler\Decline;
 use Forter\Forter\Model\Config;
+use Forter\Forter\Model\Entity as ForterEntity;
 use Forter\Forter\Model\ForterLogger;
 use Forter\Forter\Model\ForterLoggerMessage;
 use Forter\Forter\Model\Queue;
@@ -30,6 +32,9 @@ class PaymentPlaceStart implements ObserverInterface
      *
      */
     public const VALIDATION_API_ENDPOINT = 'https://api.forter-secure.com/v2/orders/';
+
+    const FORTER_STATUS_PRE_POST_VALIDATION = "pre_post_validation";
+    const FORTER_STATUS_COMPLETE = "complete";
 
     /**
      * @var Decline
@@ -103,37 +108,46 @@ class PaymentPlaceStart implements ObserverInterface
     private $request;
 
     /**
+     * @var ForterEntity
+     */
+    protected $forterEntity;
+
+    protected $entityHelper;
+
+    /**
      * @method __construct
-     * @param  RemoteAddress    $remote
-     * @param  Queue            $queue
-     * @param  Decline          $decline
-     * @param  ManagerInterface $messageManager
-     * @param  CheckoutSession  $checkoutSession
-     * @param  AbstractApi      $abstractApi
-     * @param  DateTime         $dateTime
-     * @param  Config           $config
-     * @param  Order            $requestBuilderOrder
-     * @param  Item             $modelCartItem
-     * @param  BasicInfo        $basicInfo
-     * @param  Registry         $registry
-     * @param  ForterLogger     $forterLogger
+     * @param RemoteAddress $remote
+     * @param Queue $queue
+     * @param Decline $decline
+     * @param ManagerInterface $messageManager
+     * @param CheckoutSession $checkoutSession
+     * @param AbstractApi $abstractApi
+     * @param DateTime $dateTime
+     * @param Config $config
+     * @param Order $requestBuilderOrder
+     * @param Item $modelCartItem
+     * @param BasicInfo $basicInfo
+     * @param Registry $registry
+     * @param ForterLogger $forterLogger
      */
     public function __construct(
-        RemoteAddress $remote,
-        Queue $queue,
-        Decline $decline,
+        RemoteAddress    $remote,
+        Queue            $queue,
+        Decline          $decline,
         ManagerInterface $messageManager,
-        CheckoutSession $checkoutSession,
-        AbstractApi $abstractApi,
-        DateTime $dateTime,
-        Config $config,
-        Order $requestBuilderOrder,
-        Item $modelCartItem,
-        BasicInfo $basicInfo,
-        Registry $registry,
-        Emulation $emulate,
-        ForterLogger $forterLogger,
-        RequestInterface $request
+        CheckoutSession  $checkoutSession,
+        AbstractApi      $abstractApi,
+        DateTime         $dateTime,
+        Config           $config,
+        Order            $requestBuilderOrder,
+        Item             $modelCartItem,
+        BasicInfo        $basicInfo,
+        Registry         $registry,
+        Emulation        $emulate,
+        ForterLogger     $forterLogger,
+        RequestInterface $request,
+        ForterEntity     $forterEntity,
+        EntityHelper     $entityHelper
     ) {
         $this->remote = $remote;
         $this->queue = $queue;
@@ -150,6 +164,8 @@ class PaymentPlaceStart implements ObserverInterface
         $this->emulate = $emulate;
         $this->forterLogger = $forterLogger;
         $this->request = $request;
+        $this->forterEntity = $forterEntity;
+        $this->entityHelper = $entityHelper;
     }
 
     /**
@@ -164,7 +180,7 @@ class PaymentPlaceStart implements ObserverInterface
             $order = $observer->getEvent()->getPayment()->getOrder();
             $storeId = $order->getStoreId();
 
-            if (!$this->config->isEnabled(null,$storeId)) {
+            if (!$this->config->isEnabled(null, $storeId)) {
                 return;
             }
 
@@ -172,13 +188,13 @@ class PaymentPlaceStart implements ObserverInterface
                 $this->registry->unregister('forter_pre_decision');
             }
 
-
             // let bind the relevent store in case of multi store settings
             $this->emulate->startEnvironmentEmulation(
                 $order->getStoreId(),
                 'frontend',
                 true
             );
+
             $connectionInformation = $this->basicInfo->getConnectionInformation(
                 $order->getRemoteIp() ?: $this->remote->getRemoteAddress()
             );
@@ -194,6 +210,11 @@ class PaymentPlaceStart implements ObserverInterface
             $this->forterLogger->forterConfig->log('Connection Information for Order ' . $order->getIncrementId() . ' : ' . json_encode($connectionInformation));
 
             $paymentMethod = $order->getPayment()->getMethod();
+
+            if (in_array($paymentMethod, $this->config->asyncPaymentMethods())) {
+                return;
+            }
+
             $subMethod = $order->getPayment()->getCcType();
             $methodSetting = $this->config->getMappedPrePos($paymentMethod, $subMethod);
 
@@ -201,16 +222,25 @@ class PaymentPlaceStart implements ObserverInterface
                 return;
             }
 
-            if ($methodSetting === 'cron' || (!$methodSetting && $this->config->getIsCron())) {
-                $this->queueOrder($order, $storeId);
-                return;
-            }
+//            if ($methodSetting === 'cron' || (!$methodSetting && $this->config->getIsCron())) {
+//                $this->queueOrder($order, $storeId);
+//                return;
+//            }
 
             if (!$methodSetting) {
                 if ($this->config->getIsPost() && !$this->config->getIsPreAndPost()) {
                     return;
                 }
             }
+
+            if ($methodSetting === 'pre_post' || (!$methodSetting && $this->config->getIsPreAndPost())) {
+                $validationType = 'pre-and-post-authorization';
+            } else {
+                $validationType = 'pre-authorization';
+            }
+
+            //creare entitate
+            $forterEntity = $this->entityHelper->createForterEntity($order, $storeId, $validationType);
 
             $order->setData('sub_payment_method', $subMethod);
 
@@ -219,11 +249,14 @@ class PaymentPlaceStart implements ObserverInterface
             $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
             $forterResponse = $this->abstractApi->sendApiRequest($url, json_encode($data));
 
+            $retries = $forterEntity->getRetries();
+            $forterEntity->setRetries($retries++);
+
             $this->forterLogger->forterConfig->log('BEFORE_PAYMENT_ACTION Order ' . $order->getIncrementId() . ' Data: ' . json_encode($data));
 
             $this->abstractApi->sendOrderStatus($order);
 
-            $order->setForterResponse($forterResponse);
+//            $order->setForterResponse($forterResponse);
 
             $this->forterLogger->forterConfig->log($forterResponse);
 
@@ -231,19 +264,25 @@ class PaymentPlaceStart implements ObserverInterface
 
             if ($forterResponse->status != 'success' || !isset($forterResponse->action)) {
                 $this->registry->register('forter_pre_decision', 'error');
-                $order->setForterStatus('error');
+//                $order->setForterStatus('error');
+                $forterEntity->setForterStatus('error');
                 $message = new ForterLoggerMessage($this->config->getSiteId(), $order->getIncrementId(), 'Response Error - Pre-Auth');
                 $message->metaData->order = $order->getData();
                 $message->metaData->payment = $order->getPayment()->getData();
                 $message->metaData->forterDecision = $forterResponse->action ?? null;
                 $this->forterLogger->SendLog($message);
+                $this->entityHelper->updateForterEntity($forterEntity, $order, $forterResponse, $message);
                 return;
             }
 
+            if ($validationType !== 'pre-and-post-authorization') {
+                $forterEntity->setSyncFlag(1);
+            }
             $this->registry->register('forter_pre_decision', $forterResponse->action);
-            $order->setForterStatus($forterResponse->action);
-            $order->setForterReason($forterResponse->reasonCode);
+            // $order->setForterStatus($forterResponse->action);
+            // $order->setForterReason($forterResponse->reasonCode);
             $order->addStatusHistoryComment(__('Forter (pre) Decision: %1%2', $forterResponse->action, $this->config->getResponseRecommendationsNote($forterResponse)));
+            $this->entityHelper->updateForterEntity($forterEntity, $order, $forterResponse, null);
             $this->abstractApi->triggerRecommendationEvents($forterResponse, $order, 'pre');
             if ($forterResponse->action != 'decline') {
                 return;
@@ -312,17 +351,5 @@ class PaymentPlaceStart implements ObserverInterface
         if (isset($cardData['cardExpYear']) && $cardData['cardExpYear']) {
             $order->getPayment()->setCcExpYear($cardData['cardExpYear']);
         }
-    }
-
-    protected function queueOrder($order, $storeId)
-    {
-        $currentTime = $this->dateTime->gmtDate();
-
-        $this->queue->setEntityType('pre_sync_order')
-            ->setStoreId($storeId)
-            ->setIncrementId($order->getIncrementId())
-            ->setSyncFlag(0)
-            ->setSyncDate($currentTime)
-            ->save();
     }
 }

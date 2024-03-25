@@ -2,10 +2,12 @@
 
 namespace Forter\Forter\Cron;
 
+use Forter\Forter\Helper\EntityHelper;
 use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\ActionsHandler\Approve;
 use Forter\Forter\Model\ActionsHandler\Decline;
 use Forter\Forter\Model\Config;
+use Forter\Forter\Model\EntityFactory as ForterEntityFactory;
 use Forter\Forter\Model\ForterLogger;
 use Forter\Forter\Model\ForterLoggerMessage;
 use Forter\Forter\Model\QueueFactory;
@@ -19,12 +21,16 @@ use Magento\Store\Model\App\Emulation;
  * Class SendQueue
  * @package Forter\Forter\Cron
  */
-class SendQueue
+class ForterQueue
 {
     /**
      *
      */
     public const VALIDATION_API_ENDPOINT = 'https://api.forter-secure.com/v2/orders/';
+
+    const FORTER_STATUS_NEW = "new";
+    const FORTER_STATUS_WAITING = "waiting_for_data";
+    const FORTER_STATUS_PRE_POST_VALIDATION = "pre_post_validation";
     /**
      * @var Decline
      */
@@ -79,18 +85,26 @@ class SendQueue
      */
     protected $forterConfig;
 
+    protected $forterEntityFactory;
+
+    protected $orderFactory;
+    protected $entityHelper;
+
     public function __construct(
-        Approve $approve,
-        Decline $decline,
-        Config $config,
-        QueueFactory $forterQueue,
-        DateTime $dateTime,
-        OrderRepositoryInterface $orderRepository,
-        Order $requestBuilderOrder,
-        SearchCriteriaBuilder $searchCriteriaBuilder,
-        AbstractApi $abstractApi,
-        Emulation $emulate,
-        ForterLogger $forterLogger
+        Approve                           $approve,
+        Decline                           $decline,
+        Config                            $config,
+        QueueFactory                      $forterQueue,
+        DateTime                          $dateTime,
+        OrderRepositoryInterface          $orderRepository,
+        Order                             $requestBuilderOrder,
+        SearchCriteriaBuilder             $searchCriteriaBuilder,
+        AbstractApi                       $abstractApi,
+        Emulation                         $emulate,
+        ForterLogger                      $forterLogger,
+        ForterEntityFactory               $forterEntityFactory,
+        \Magento\Sales\Model\OrderFactory $orderFactory,
+        EntityHelper     $entityHelper
     ) {
         $this->approve = $approve;
         $this->decline = $decline;
@@ -103,6 +117,8 @@ class SendQueue
         $this->abstractApi = $abstractApi;
         $this->emulate = $emulate;
         $this->forterLogger = $forterLogger;
+        $this->orderFactory = $orderFactory;
+        $this->entityHelper = $entityHelper;
     }
 
     /**
@@ -111,41 +127,20 @@ class SendQueue
     public function execute()
     {
         try {
-            $items = $this->forterQueue
-                ->create()
-                ->getCollection()
-                ->addFieldToFilter('sync_flag', '0')
-                ->addFieldToFilter('sync_retries', ['lt' => 10])
-                ->addFieldToFilter(
-                    'sync_date',
-                    [
-                        'from'  => date('Y-m-d H:i:s', strtotime('-7 days'))
-                    ]
-                )->addFieldToFilter(
-                    'sync_date',
-                    [
-                        'to'  => date('Y-m-d H:i:s')
-                    ]
-                );
-
+            $items = $this->entityHelper->getForterEntitiesPreSync();
             $items->setPageSize(10000)->setCurPage(1);
             foreach ($items as $item) {
                 $this->emulate->stopEnvironmentEmulation(); // let detach the store meta data
-                $searchCriteria = $this->searchCriteriaBuilder
-                    ->addFilter('increment_id', $item->getData('increment_id'), 'eq')
-                    ->create();
-                $orderList = $this->orderRepository->getList($searchCriteria)->getItems();
-                $order = reset($orderList);
-
+                $order = $this->orderFactory->create()->loadByIncrementId($item->getData('order_increment_id'));
                 if (!$order) {
                     $this->forterConfig->log('Order does not exist, remove from queue');
                     // order does not exist, remove from queue
-                    $item->setSyncFlag('1')
-                        ->save();
+                    $item->delete();
                     continue;
                 }
+                $payment = $order->getPayment();
+                $method = $payment->getMethod();
 
-                $method = $order->getPayment()->getMethod();
                 // let bind the relevent store in case of multi store settings
                 $this->emulate->startEnvironmentEmulation(
                     $order->getStoreId(),
@@ -153,29 +148,31 @@ class SendQueue
                     true
                 );
 
-                if ($item->getEntityType() == 'pre_sync_order') {
-                    if (strpos($method ?? '', 'adyen') !== false && !$order->getPayment()->getAdyenPspReference()) {
-                        $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'Skip Adyen Order Missing Data');
-                        $message->metaData->order = $order->getData();
-                        $message->metaData->payment = $order->getPayment()->getData();
-                        $message->proccessItem = $item;
-                        $this->forterLogger->SendLog($message);
-                        continue;
-                    }
-                    $result = $this->handlePreSyncMethod($order, $item);
-                    if (!$result) {
-                        $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'No Mapped CC Adyen');
-                        $message->metaData->order = $order->getData();
-                        $message->metaData->payment = $order->getPayment()->getData();
-                        $message->proccessItem = $item;
-                        $this->forterLogger->SendLog($message);
-                        continue;
-                    } 
-                    
-                } elseif ($item->getEntityType() == 'order') {
-                    $this->handleForterResponse($order, $item->getData('entity_body'), $item);
+                if (strpos($method ?? '', 'adyen') !== false && !$order->getPayment()->getAdyenPspReference()) {
+                    $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'Skip Adyen Order Missing Data');
+                    $message->metaData->order = $order->getData();
+                    $message->metaData->payment = $order->getPayment()->getData();
+                    $message->proccessItem = $item;
+                    $this->forterLogger->SendLog($message);
+                    continue;
                 }
 
+                if ($this->forterConfig->getIsPaymentMethodAccepted($payment->getMethod()) && !$payment->getCcTransId()) {
+                    if ($this->forterConfig->isHoldingOrdersEnabled()) {
+                        $order->canHold() ?? $order->hold()->save();
+                    }
+                    continue;
+                }
+
+                $result = $this->handlePreSyncMethod($order, $item);
+                if (!$result) {
+                    $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'No Mapped CC Adyen');
+                    $message->metaData->order = $order->getData();
+                    $message->metaData->payment = $order->getPayment()->getData();
+                    $message->proccessItem = $item;
+                    $this->forterLogger->SendLog($message);
+                    continue;
+                }
                 $item->save();
                 $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'CRON Validation Finished');
                 $message->metaData->order = $order;
@@ -193,7 +190,7 @@ class SendQueue
      *
      * @param $order holde the order model
      * @param $item hold the item from the que that can get from at rest of the models such as order and more (use as ref incase this method override it will be in use)
-     * @return void
+     * @return boolean
      */
     private function handlePreSyncMethod($order, $item)
     {
@@ -226,11 +223,15 @@ class SendQueue
             $forterResponse = json_decode($response);
 
             $this->abstractApi->sendOrderStatus($order);
+            $retries = $item->getRetries();
+            $item->setRetries($retries++);
 
+            $item->setForterResponse($response);
             $order->setForterResponse($response);
 
             if ($forterResponse->status != 'success' || !isset($forterResponse->action)) {
                 $order->setForterStatus('error');
+                $item->setForterStatus('error');
                 $order->save();
                 $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'Response Error - SendQueue');
                 $message->metaData->order = $order->getData();
@@ -239,11 +240,12 @@ class SendQueue
                 $this->forterLogger->SendLog($message);
 
                 $this->forterConfig->log('Response Error for Order ' . $order->getIncrementId() . ' - Payment Data: ' . json_encode($order->getPayment()->getData()));
+                $this->entityHelper->updateForterEntity($item, $order, $forterResponse, $message, null);
 
                 return true;
             }
 
-            if ( $forterResponse->status ) {
+            if ($forterResponse->status) {
                 $item->setSyncFlag(1);
             }
 
@@ -253,16 +255,16 @@ class SendQueue
             $order->setForterReason($forterResponse->reasonCode);
             $order->save();
 
-            $this->handleForterResponse($order, $forterResponse->action, $item );
-            $this->abstractApi->triggerRecommendationEvents($forterResponse, $order, 'cron');
-            
+            $this->handleForterResponse($order, $forterResponse->action, $item);
+
             $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'Forter CRON Decision');
             $message->metaData->order = $order->getData();
             $message->metaData->payment = $order->getPayment();
             $message->metaData->forterStatus = $forterResponse->action;
             $message->metaData->forterReason = $forterResponse->reasonCode;
+            $this->entityHelper->updateForterEntity($item, $order, $forterResponse, $message);
+            $this->abstractApi->triggerRecommendationEvents($forterResponse, $order, 'cron');
             $this->forterLogger->SendLog($message);
-
             $this->forterConfig->log('Payment Data for Order ' . $order->getIncrementId() . ' - Payment Data: ' . json_encode($order->getPayment()->getData()));
 
             return $forterResponse->status ? true : false;
@@ -277,32 +279,22 @@ class SendQueue
             $order->unhold();
         }
 
-        if ($this->forterConfig->getIsCron()) {
-            if ($response == 'approve') {
-                if ($this->forterConfig->getApproveCron() == '1') {
-                    $this->approve->handleApproveImmediatly($order);
-                }
-            } elseif ($response == 'not reviewed') {
-                if ($this->forterConfig->getNotReviewCron() == '1') {
-                    $this->approve->handleApproveImmediatly($order);
-                }
-            } elseif ($response == 'decline') {
-                switch ($this->forterConfig->getDeclineCron()) {
-                    case 1:
-                        $this->decline->handlePostTransactionDescision($order, $item );
-                        return;
-                    case 2:
-                        $this->decline->markOrderPaymentReview($order);
-                        return;
-                }
-            }
-
-            return;
-        } else {
-            if ($response == 'approve') {
+        if ($response == 'approve') {
+            if ($this->forterConfig->getApprovePost() == '1') {
                 $this->approve->handleApproveImmediatly($order);
-            } elseif ($response == 'decline') {
-                $this->decline->handlePostTransactionDescision($order, $item );
+            }
+        } elseif ($response == 'not reviewed') {
+            if ($this->forterConfig->getNotReviewPost() == '1') {
+                $this->approve->handleApproveImmediatly($order);
+            }
+        } elseif ($response == 'decline') {
+            switch ($this->forterConfig->getDeclinePost()) {
+                case 1:
+                    $this->decline->handlePostTransactionDescision($order, $item);
+                    return;
+                case 2:
+                    $this->decline->markOrderPaymentReview($order);
+                    return;
             }
         }
     }

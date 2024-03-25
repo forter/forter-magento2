@@ -9,6 +9,8 @@ use Forter\Forter\Model\ForterLogger;
 use Forter\Forter\Model\ForterLoggerMessage;
 use Forter\Forter\Model\RequestBuilder\Payment as PaymentPrepere;
 use Magento\Framework\Event\ObserverInterface;
+use Forter\Forter\Model\EntityFactory as ForterEntityFactory;
+use Forter\Forter\Helper\EntityHelper;
 
 /**
  * Class OrderSaveAfter
@@ -17,6 +19,11 @@ use Magento\Framework\Event\ObserverInterface;
 class OrderSaveBefore implements ObserverInterface
 {
     const ORDER_FULFILLMENT_STATUS_ENDPOINT = "https://api.forter-secure.com/v2/status/";
+    const FORTER_STATUS_NEW = "new";
+    const FORTER_STATUS_WAITING = "waiting_for_data";
+    const FORTER_STATUS_PRE_POST_VALIDATION = "pre_post_validation";
+    const FORTER_STATUS_COMPLETE = "complete";
+
 
     /**
      * @var Config
@@ -44,6 +51,11 @@ class OrderSaveBefore implements ObserverInterface
     protected $paymentPrepere;
 
     /**
+     * @var EntityHelper
+     */
+    protected $entityHelper;
+
+    /**
      * OrderSaveAfter constructor.
      * @param AbstractApi $abstractApi
      * @param Config $config
@@ -56,13 +68,15 @@ class OrderSaveBefore implements ObserverInterface
         Config $config,
         PaymentPrepere $paymentPrepere,
         ForterLogger $forterLogger,
-        AdditionalDataHelper $additionalDataHelper
+        AdditionalDataHelper $additionalDataHelper,
+        EntityHelper $entityHelper
     ) {
         $this->abstractApi = $abstractApi;
         $this->config = $config;
         $this->paymentPrepere = $paymentPrepere;
         $this->forterLogger = $forterLogger;
         $this->additionalDataHelper = $additionalDataHelper;
+        $this->entityHelper = $entityHelper;
     }
 
     /**
@@ -79,8 +93,10 @@ class OrderSaveBefore implements ObserverInterface
             return false;
         }
 
+        $order = $observer->getEvent()->getOrder();
+        $forterEntity = $this->entityHelper->getForterEntityByIncrementId($order->getIncrementId(),[self::FORTER_STATUS_PRE_POST_VALIDATION,self::FORTER_STATUS_COMPLETE]);
         try {
-            if (!$order->getForterStatus()) {
+            if (!$forterEntity) {
                 return false;
             }
             $orderState = $order->getState();
