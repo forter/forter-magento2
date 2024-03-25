@@ -898,7 +898,7 @@ class Config
     public function getIsPaymentMethodAccepted($paymentMethod)
     {
         foreach ($this->acceptedPaymentMethods() as $acceptedPaymentMethod) {
-            if (strpos($paymentMethod, $acceptedPaymentMethod)) {
+            if (strpos($paymentMethod, $acceptedPaymentMethod) !== false) {
                 return true;
             }
         }
