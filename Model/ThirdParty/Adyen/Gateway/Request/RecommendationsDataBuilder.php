@@ -2,10 +2,11 @@
 
 namespace Forter\Forter\Model\ThirdParty\Adyen\Gateway\Request;
 
+use Forter\Forter\Model\EntityFactory as ForterEntityFactory;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Request\BuilderInterface;
-
+use Forter\Forter\Helper\EntityHelper;
 class RecommendationsDataBuilder implements BuilderInterface
 {
     protected const VERIFICATION_REQUIRED_3DS_CHALLENGE = "VERIFICATION_REQUIRED_3DS_CHALLENGE";
@@ -20,12 +21,19 @@ class RecommendationsDataBuilder implements BuilderInterface
     protected $scopeConfig;
 
     /**
+     * @var EntityHelper
+     */
+    protected $entityHelper;
+
+    /**
      * @param ScopeConfigInterface $scopeConfig
      */
     public function __construct(
-        ScopeConfigInterface $scopeConfig
+        ScopeConfigInterface $scopeConfig,
+        EntityHelper $entityHelper
     ) {
         $this->scopeConfig = $scopeConfig;
+        $this->entityHelper = $entityHelper;
     }
 
     /**
@@ -48,8 +56,16 @@ class RecommendationsDataBuilder implements BuilderInterface
 
                 // Ensuring payment method is adyen_cc before proceeding
                 if ($payment && $payment->getMethod() === "adyen_cc") {
-                    $forterResponse = $payment->getOrder()->getForterResponse();
+                    $order = $payment->getOrder();
 
+                    $forterEntity = $this->entityHelper->getForterEntityByIncrementId($order->getIncrementId());
+                    if (!$forterEntity) {
+                        return null;
+                    }
+
+                    $forterResponse = $payment->getOrder()->getForterResponse();
+                    $forterResponse = $forterEntity->getForterResponse();
+                    //de facut
                     if ($forterResponse !== null) {
                         $response = json_decode($forterResponse, true);
 

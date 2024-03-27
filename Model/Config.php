@@ -18,9 +18,9 @@ use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\Module\ModuleListInterface;
 use Magento\Framework\UrlInterface;
+use Magento\Sales\Model\Order\Status\HistoryFactory;
 use Magento\Store\Model\StoreManagerInterface;
 use Psr\Log\LoggerInterface;
-use Magento\Sales\Model\Order\Status\HistoryFactory;
 
 /**
  * Forter Forter config model.
@@ -323,6 +323,18 @@ class Config
     }
 
     /**
+     * Return bool value for holding orders before forter decision
+     * is enabled or not.
+     *
+     * @return bool
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function isHoldPredicsionEnabled($scope = null, $scopeId = null)
+    {
+        return (bool)$this->getConfigValue('immediate_post_pre_decision/hold_orders_predicision', $scope, $scopeId);
+    }
+
+    /**
      * Return bool value depends of that if payment method sandbox mode
      * is enabled or not.
      *
@@ -550,11 +562,11 @@ class Config
     /**
      * @return bool
      */
-    public function getIsCron()
-    {
-        $prePostSelect = $this->getConfigValue('immediate_post_pre_decision/pre_post_select');
-        return ($prePostSelect == '3' ? true : false);
-    }
+//    public function getIsCron()
+//    {
+//        $prePostSelect = $this->getConfigValue('immediate_post_pre_decision/pre_post_select');
+//        return ($prePostSelect == '3' ? true : false);
+//    }
 
     /**
      * Return boolean regarding active/disable pre-auth card observing
@@ -710,14 +722,12 @@ class Config
      */
     public function addCommentToOrder($order, $message)
     {
-
         $this->history->create()
                     ->setParentId($order->getId())
                     ->setStatus($order->getStatus())
                     ->setEntityName('order')
                     ->setComment($message)
                     ->save();
-
     }
 
     /**
@@ -801,7 +811,6 @@ class Config
         }
     }
 
-
     /**
      * Convert Forter recommendation key to a human readable message (by internal map).
      * @method getRecommendationMessageByKey
@@ -856,5 +865,43 @@ class Config
             return $prefix . __('(%1%2)', $recommendationsHeading, $recommendations);
         }
         return '';
+    }
+
+    /**
+     * @param $scope
+     * @param $scopeId
+     * @return string[]
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function asyncPaymentMethods($scope = null, $scopeId = null)
+    {
+        return explode(',', $this->getConfigValue('general/async_payment_methods', $scope, $scopeId));
+    }
+
+    /**
+     * @param $scope
+     * @param $scopeId
+     * @return string[]
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function acceptedPaymentMethods($scope = null, $scopeId = null)
+    {
+        return explode(',', $this->getConfigValue('general/accepted_payment_methods', $scope, $scopeId));
+    }
+
+    /**
+     * @param $scope
+     * @param $scopeId
+     * @return bool
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function getIsPaymentMethodAccepted($paymentMethod)
+    {
+        foreach ($this->acceptedPaymentMethods() as $acceptedPaymentMethod) {
+            if (strpos($paymentMethod, $acceptedPaymentMethod) !== false) {
+                return true;
+            }
+        }
+        return false;
     }
 }

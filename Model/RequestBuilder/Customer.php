@@ -243,12 +243,12 @@ class Customer
 
         $reviews_count = $this->getCustomerReviewsCount($customerId, $storeId);
 
-        if (!$this->forterConfig->getIsCron()) {
+//        if (!$this->forterConfig->getIsCron()) {
             $currentUserWishlist = $this->wishlistProvider->getWishlist();
             $wishlistItemsCount = $currentUserWishlist ? count($currentUserWishlist->getItemCollection()) : 0;
-        } else {
-            $wishlistItemsCount = 0;
-        }
+//        } else {
+          //  $wishlistItemsCount = 0;
+//        }
 
         $checkSubscriber = $this->subscriber->loadByCustomerId($customerId);
 

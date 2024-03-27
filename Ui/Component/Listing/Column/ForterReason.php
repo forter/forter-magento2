@@ -2,12 +2,13 @@
 
 namespace Forter\Forter\Ui\Component\Listing\Column;
 
+use Forter\Forter\Helper\EntityHelper;
+use Forter\Forter\Model\Config as ForterConfig;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\View\Element\UiComponent\ContextInterface;
 use Magento\Framework\View\Element\UiComponentFactory;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Ui\Component\Listing\Columns\Column;
-use Forter\Forter\Model\Config as ForterConfig;
 
 /**
  * Class ForterReason
@@ -31,6 +32,11 @@ class ForterReason extends Column
     protected $_searchCriteria;
 
     /**
+     * @var EntityHelper
+     */
+    protected $entityHelper;
+
+    /**
      * ForterReason constructor.
      * @param ContextInterface $context
      * @param UiComponentFactory $uiComponentFactory
@@ -46,6 +52,7 @@ class ForterReason extends Column
         OrderRepositoryInterface $orderRepository,
         SearchCriteriaBuilder $criteria,
         ForterConfig $forterConfig,
+        EntityHelper $entityHelper,
         array $components = [],
         array $data = []
     ) {
@@ -53,6 +60,7 @@ class ForterReason extends Column
         $this->_orderRepository = $orderRepository;
         $this->_searchCriteria = $criteria;
         $this->forterConfig = $forterConfig;
+        $this->entityHelper = $entityHelper;
     }
 
     /**
@@ -64,7 +72,14 @@ class ForterReason extends Column
         if (isset($dataSource['data']['items'])) {
             foreach ($dataSource['data']['items'] as & $item) {
                 $order = $this->_orderRepository->get($item["entity_id"]);
-                $columnData = $order->getForterReason();
+                $forterEntity = $this->entityHelper->getForterEntityByIncrementId($order->getIncrementId());
+                $columnData = '';
+                if ($forterEntity && $forterEntity->getForterReason()) {
+                    $columnData = $forterEntity->getForterReason();
+                } elseif ($order->getForterReason()) {
+                    $columnData = $order->getForterReason();
+                }
+
                 $item[$this->getData('name')] = $columnData;
             }
         }

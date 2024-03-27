@@ -120,7 +120,7 @@ class OrderPlacementTestCheckmoCronAuth extends TestCase
         $orderId = $quoteManagement->placeOrder($quote->getId());
 
         //Executing Cron
-        $cron = $this->objectManager->create(\Forter\Forter\Cron\SendQueue::class);
+        $cron = $this->objectManager->create(\Forter\Forter\Cron\PostDecisionActions::class);
         $cron->execute();
 
         //Load queue collection

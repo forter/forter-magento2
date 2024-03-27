@@ -6,13 +6,14 @@ use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\Config as ForterConfig;
 use Forter\Forter\Model\Sendmail;
 use Magento\Checkout\Model\Session as CheckoutSession;
+use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Exception\PaymentException;
 use Magento\Sales\Api\OrderManagementInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\CreditmemoFactory;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Service\CreditmemoService;
-use Magento\Framework\App\RequestInterface;
+use Forter\Forter\Model\Order\Recommendation;
 
 /**
  * Class Decline
@@ -67,6 +68,11 @@ class Decline
     protected $request;
 
     /**
+     * @var Recommendation
+     */
+    protected $recommendation;
+
+    /**
      * Decline constructor.
      * @param Order $order
      * @param CreditmemoFactory $creditmemoFactory
@@ -85,7 +91,8 @@ class Decline
         CheckoutSession $checkoutSession,
         Invoice $invoice,
         CreditmemoService $creditmemoService,
-        OrderManagementInterface $orderManagement
+        OrderManagementInterface $orderManagement,
+        Recommendation $recommendation
     ) {
         $this->request = $request;
         $this->abstractApi = $abstractApi;
@@ -97,6 +104,7 @@ class Decline
         $this->creditmemoFactory = $creditmemoFactory;
         $this->creditmemoService = $creditmemoService;
         $this->invoice = $invoice;
+        $this->recommendation = $recommendation;
     }
 
     /**
@@ -107,7 +115,7 @@ class Decline
     {
         $this->sendDeclineMail($order);
         $forterDecision = $this->forterConfig->getDeclinePre();
-        $isVerificationRequired3dsChallenge = \Forter\Forter\Model\Order\Recommendation::isVerificationRequired3dsChallenge($order);
+        $isVerificationRequired3dsChallenge = $this->recommendation->isVerificationRequired3dsChallenge($order);
 
         if ( $forterDecision == '1' &&  !$isVerificationRequired3dsChallenge ) {
             throw new PaymentException(__($this->forterConfig->getPreThanksMsg()));
@@ -131,7 +139,6 @@ class Decline
      */
     public function handlePostTransactionDescision($order, $item )
     {
-
         try {
             if ($order->canCancel()) {
                 $this->cancelOrder($order);
@@ -153,16 +160,17 @@ class Decline
                 //$this->holdOrder($order);
             //}
 
-            $retries    = (int)$item->getSyncRetries() + 1;
-            $date       = date('Y-m-d H:i:s',  strtotime(' + ' . $retries . ' hours'));
+            $retries    = (int)$item->getRetries() + 1;
+//            $date       = date('Y-m-d H:i:s',  strtotime(' + ' . $retries . ' hours'));
 
             $item->setSyncFlag(0);
-            $item->setEntityType( 'order' );
-            $item->setEntityBody( $order->getForterStatus() );
-            $item->setSyncRetries( $retries );
-            $item->setSyncDate($date);
-            $item->setSyncLastError( $e->getMessage() );
-            
+//            $item->setEntityType( 'order' );
+//            $item->setForterStatus( $order->getForterStatus() );
+            $item->setRetries( $retries );
+//            $item->setUpdatedAt( $date );
+//            $item->setSyncDate($date);
+            $item->setSyncLastError($e->getMessage());
+
             $this->forterConfig->addCommentToOrder($order, 'Order Cancellation attempt failed. Internal Error');
             $this->abstractApi->reportToForterOnCatch($e);
         }
