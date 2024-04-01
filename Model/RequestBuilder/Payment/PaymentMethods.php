@@ -252,6 +252,7 @@ class PaymentMethods
             }
             if (isset($additonal_data['refusalReasonRaw'])) {
                 $detailsArray['verificationResults']['processorResponseText'] = $additonal_data['refusalReasonRaw'];
+                $detailsArray['verificationResults']['processorResponseCode'] = $additonal_data['refusalReasonRaw'];
             }
             if (isset($additonal_data['eci'])) {
                 $detailsArray['verificationResults']['eciValue']= $additonal_data['eci'] === 'N/A' ? '' : $additonal_data['eci'];
@@ -327,6 +328,7 @@ class PaymentMethods
         $processorResponseText = $payment->getAdditionalInformation('adyen_refusal_reason_raw');
         if ($processorResponseText) {
             $detailsArray['verificationResults']['processorResponseText'] = $processorResponseText;
+            $detailsArray['verificationResults']['processorResponseCode'] = $processorResponseText;
         }
 
         $preferCcDetailsArray = $this->preferCcDetails($payment, $detailsArray);
@@ -409,6 +411,7 @@ class PaymentMethods
 
             if (isset($additonal_data['refusalReasonRaw'])) {
                 $detailsArray['verificationResults']['processorResponseText']= $additonal_data['refusalReasonRaw'];
+                $detailsArray['verificationResults']['processorResponseCode']= $additonal_data['refusalReasonRaw'];
             }
 
             if (isset($additonal_data['merchantReference'])) {
