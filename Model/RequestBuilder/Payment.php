@@ -12,6 +12,7 @@ namespace Forter\Forter\Model\RequestBuilder;
 
 use Forter\Forter\Model\RequestBuilder\Customer as CustomerPreper;
 use Forter\Forter\Model\RequestBuilder\Payment\PaymentMethods;
+use Forter\Forter\Model\ThirdParty\Stripe\StripePayment;
 
 /**
  * Class Payment
@@ -29,6 +30,8 @@ class Payment
      */
     protected $customerPreper;
 
+    protected $stripePayment;
+
     /**
      * Payment constructor.
      * @param PaymentMethods $paymentMethods
@@ -36,10 +39,12 @@ class Payment
      */
     public function __construct(
         PaymentMethods $paymentMethods,
-        CustomerPreper $customerPreper
+        CustomerPreper $customerPreper,
+        StripePayment $stripePayment
     ) {
         $this->paymentMethods = $paymentMethods;
         $this->customerPreper = $customerPreper;
+        $this->stripePayment = $stripePayment;
     }
 
     /**
@@ -77,11 +82,13 @@ class Payment
                 $cardDetails = $this->paymentMethods->getBraintreeDetails($payment);
             } elseif (strpos($payment_method, 'mercadopago') !== false) {
                 $cardDetails = $this->paymentMethods->getMercadopagoDetails($payment);
+            } elseif (strpos($payment_method, 'stripe') !== false){
+                $cardDetails = $this->paymentMethods->getStripePaymentDetails($payment,$this->stripePayment->getPaymentData($order));
             } else {
                 $cardDetails = $this->paymentMethods->preferCcDetails($payment);
             }
 
-            if (array_key_exists("expirationMonth", $cardDetails) || array_key_exists("expirationYear", $cardDetails) || array_key_exists("lastFourDigits", $cardDetails)) {
+            if (array_key_exists("expirationMonth", $cardDetails ?? []) || array_key_exists("expirationYear", $cardDetails ?? []) || array_key_exists("lastFourDigits", $cardDetails ?? [])) {
                 $paymentData["creditCard"] = $cardDetails;
             }
 

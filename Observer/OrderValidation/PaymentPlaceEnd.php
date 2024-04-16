@@ -230,7 +230,7 @@ class PaymentPlaceEnd implements ObserverInterface
             $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
             $payment = $order->getPayment();
 
-            if ($this->forterConfig->getIsPaymentMethodAccepted($paymentMethod) && !$payment->getCcTransId()) { //de adaugat aici metodele agreate cu cc_trans_id populat, in rest sa mearga mai departe
+            if ($this->forterConfig->getIsPaymentMethodAccepted($paymentMethod) && !$this->forterConfig->getIsReadyForForter($payment)) { //de adaugat aici metodele agreate cu cc_trans_id populat, in rest sa mearga mai departe
                 $forterEntity->setStatus(self::FORTER_STATUS_WAITING)
                     ->save();
                 if ($this->forterConfig->isHoldingOrdersEnabled()) {

@@ -904,4 +904,13 @@ class Config
         }
         return false;
     }
+
+    public function getIsReadyForForter($payment)
+    {
+        if (strpos($payment->getMethod(), 'stripe') !== false) {
+            return $payment->getAdditionalInformation('stripe_approved') ?? false;
+        }
+
+        return $payment->getCcTransId();
+    }
 }

@@ -12,6 +12,7 @@ namespace Forter\Forter\Model\RequestBuilder\Payment;
 
 use Forter\Forter\Model\Config as ForterConfig;
 use Magento\Customer\Model\Session;
+use Forter\Forter\Model\ThirdParty\Stripe;
 
 /**
  * Class Payment
@@ -35,6 +36,8 @@ class PaymentMethods
         'authorizationProcessedWith3DS' => 'boolean'
     ];
 
+    protected $stripePaymentDataMapper;
+
     /**
      * @method __construct
      * @param  Session      $customerSession
@@ -42,10 +45,12 @@ class PaymentMethods
      */
     public function __construct(
         Session $customerSession,
-        ForterConfig $forterConfig
+        ForterConfig $forterConfig,
+        Stripe\PaymentDataMapper $stripePaymentDataMapper
     ) {
         $this->customerSession = $customerSession;
         $this->forterConfig = $forterConfig;
+        $this->stripePaymentDataMapper = $stripePaymentDataMapper;
     }
 
     public function getPaypalDetails($payment)
@@ -423,6 +428,21 @@ class PaymentMethods
         $preferCcDetailsArray = $this->preferCcDetails($payment, $detailsArray);
         $mergedArray = $this->mergeArrays($preferCcDetailsArray, $detailsArray);
         return $mergedArray;
+    }
+
+    public function getStripePaymentDetails($payment, $stripePayment)
+    {
+//        $additonal_data = $payment->getAdditionalInformation('additionalData');
+        $detailsArray = [];
+
+        $detailsArray = $this->stripePaymentDataMapper->dataMapper($payment, $detailsArray, $stripePayment);
+
+        $writer = new \Zend_Log_Writer_Stream(BP . '/var/log/stripeDATA.log');
+        $logger = new \Zend_Log();
+        $logger->addWriter($writer);
+        $logger->info(json_encode($detailsArray));
+
+        return $this->preferCcDetails($payment, $detailsArray);
     }
 
     /**
