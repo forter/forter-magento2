@@ -226,8 +226,7 @@ class PaymentPlaceEnd implements ObserverInterface
                 true
             );
 
-            $data = $this->requestBuilderOrder->buildTransaction($order, 'AFTER_PAYMENT_ACTION');
-            $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
+
             $payment = $order->getPayment();
 
             if ($this->forterConfig->getIsPaymentMethodAccepted($paymentMethod) && !$this->forterConfig->getIsReadyForForter($payment)) { //de adaugat aici metodele agreate cu cc_trans_id populat, in rest sa mearga mai departe
@@ -239,6 +238,8 @@ class PaymentPlaceEnd implements ObserverInterface
                 return;
             }
 
+            $data = $this->requestBuilderOrder->buildTransaction($order, 'AFTER_PAYMENT_ACTION');
+            $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
             $forterResponse = $this->abstractApi->sendApiRequest($url, json_encode($data));
 
             $retries = $forterEntity->getRetries();
