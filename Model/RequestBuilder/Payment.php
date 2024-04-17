@@ -102,6 +102,11 @@ class Payment
                 unset($paymentData["creditCard"]);
             }
 
+            if ($payment->getMethod() === 'stripe_payments' && $payment->getAdditionalInformation('token')) {
+                $paymentData['tokenizedCard'] = $cardDetails;
+                unset($paymentData["creditCard"]);
+            }
+
             // Attempt to set tokenized card information if available
             if ( !isset($paymentData["creditCard"]) && $payment->getAdditionalInformation('forter_cc_token') && $payment->getAdditionalInformation('forter_cc_bin') ) {
                 $paymentData["tokenizedCard"] = array(

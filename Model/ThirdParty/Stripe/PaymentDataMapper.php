@@ -24,73 +24,44 @@ class PaymentDataMapper
 
     public function dataMapper($payment, $detailsArray, $stripePayment)
     {
-        $writer = new \Zend_Log_Writer_Stream(BP . '/var/log/stripeDATA.log');
-        $logger = new \Zend_Log();
-        $logger->addWriter($writer);
-        $logger->info('mapping');
-
-        if (is_object($stripePayment) == false) {
+        if (!is_object($stripePayment)) {
             return $detailsArray;
         }
 
+        if (isset($stripePayment->payment_method)) {
+            $detailsArray['token'] = $stripePayment->payment_method;
+        }
 
-        if (isset($stripePayment->payment_method_details) &&
-            isset($stripePayment->payment_method_details->card) &&
-            isset($stripePayment->payment_method_details->card->checks)
-        ) {
+        if (isset($stripePayment->id)) {
+            $detailsArray['paymentGatewayData']['gatewayTransactionId'] = $stripePayment->id;
+        }
 
-            if (isset($stripePayment->payment_method_details->card->checks->address_postal_code_check)) {
-                $detailsArray['avsZipResult'] = $stripePayment->payment_method_details->card->checks->address_postal_code_check;
+        $card = $stripePayment->payment_method_details->card ?? null;
+        $checks = $card->checks ?? null;
+
+        if ($checks) {
+            $detailsArray['verificationResults']['avsZipResult'] = $checks->address_postal_code_check ?? '';
+            $detailsArray['verificationResults']['avsStreetResult'] = $checks->address_line1_check ?? '';
+
+            if (isset($detailsArray['verificationResults']['avsZipResult'], $detailsArray['verificationResults']['avsStreetResult'], $this->avsMap["{$detailsArray['verificationResults']['avsStreetResult']}_{$detailsArray['verificationResults']['avsZipResult']}"])) {
+                $detailsArray['verificationResults']['avsFullResult'] = $this->avsMap["{$detailsArray['verificationResults']['avsStreetResult']}_{$detailsArray['verificationResults']['avsZipResult']}"];
             }
 
-            if (isset($stripePayment->payment_method_details->card->checks->address_line1_check)) {
-                $detailsArray['avsStreetResult'] = $stripePayment->payment_method_details->card->checks->address_line1_check;
-            }
-
-            if (isset($detailsArray['avsZipResult']) && isset($detailsArray['avsStreetResult']) && isset($this->avsMap["{$detailsArray['avsStreetResult']}_{$detailsArray['avsZipResult']}"])) {
-                $detailsArray['avsFullResult'] = $this->avsMap["{$detailsArray['avsStreetResult']}_{$detailsArray['avsZipResult']}"];
-            }
-
-            if (isset($stripePayment->payment_method_details->card->checks->cvc_check)) {
-                $cvvCheck = $stripePayment->payment_method_details->card->checks->cvc_check;
-
-                if (isset($this->cvvMap[$cvvCheck])) {
-                    $detailsArray['cvvResult'] = $this->cvvMap[$cvvCheck];
-                }
+            $cvvCheck = $checks->cvc_check ?? null;
+            if (isset($cvvCheck, $this->cvvMap[$cvvCheck])) {
+                $detailsArray['verificationResults']['cvvResult'] = $this->cvvMap[$cvvCheck];
             }
         }
 
-        if (isset($stripePayment->payment_method_details) && isset($stripePayment->payment_method_details->card)) {
-
-            if (isset($stripePayment->payment_method_details->card->exp_month)) {
-                $detailsArray['expirationMonth'] = (string)$stripePayment->payment_method_details->card->exp_month;
-            }
-
-            if (isset($stripePayment->payment_method_details->card->exp_year)) {
-                $detailsArray['expirationYear'] = (string)$stripePayment->payment_method_details->card->exp_year;
-            }
-
-            if (isset($stripePayment->payment_method_details->card->last4)) {
-                $detailsArray['lastFourDigits'] = $stripePayment->payment_method_details->card->last4;
-            }
-
-            if (isset($stripePayment->payment_method_details->card->funding)) {
-                $detailsArray['cardType'] = strtoupper($stripePayment->payment_method_details->card->funding);
-            }
-
-            if (isset($stripePayment->payment_method_details->card->brand)) {
-                $detailsArray['cardBrand'] = strtoupper($stripePayment->payment_method_details->card->brand);
-            }
-
-            if (isset($stripePayment->payment_method_details->card->country)) {
-                $detailsArray['countryOfIssuance'] = strtoupper($stripePayment->payment_method_details->card->country);
-            }
+        if ($card) {
+            $detailsArray['expirationMonth'] = (string)($card->exp_month ?? '');
+            $detailsArray['expirationYear'] = (string)($card->exp_year ?? '');
+            $detailsArray['lastFourDigits'] = $card->last4 ?? '';
+            $detailsArray['cardType'] = strtoupper($card->funding ?? '');
+            $detailsArray['cardBrand'] = strtoupper($card->brand ?? '');
+            $detailsArray['countryOfIssuance'] = strtoupper($card->country ?? '');
         }
 
-        $logger->info('mapping end');
-        $logger->info('mapping json START');
-        $logger->info(json_encode($detailsArray));
-        $logger->info('mapping json END');
         return $detailsArray;
     }
 }

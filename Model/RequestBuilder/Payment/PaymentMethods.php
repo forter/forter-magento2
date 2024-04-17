@@ -432,17 +432,17 @@ class PaymentMethods
 
     public function getStripePaymentDetails($payment, $stripePayment)
     {
-//        $additonal_data = $payment->getAdditionalInformation('additionalData');
         $detailsArray = [];
 
         $detailsArray = $this->stripePaymentDataMapper->dataMapper($payment, $detailsArray, $stripePayment);
 
-        $writer = new \Zend_Log_Writer_Stream(BP . '/var/log/stripeDATA.log');
-        $logger = new \Zend_Log();
-        $logger->addWriter($writer);
-        $logger->info(json_encode($detailsArray));
+        if (isset($stripePayment)) {
+            $payment->setAdditionalInformation('stripeChargeData',json_encode($stripePayment));
+        }
+        $preferCcDetailsArray = $this->preferCcDetails($payment, $detailsArray);
+        $mergedArray = $this->mergeArrays($preferCcDetailsArray, $detailsArray);
 
-        return $this->preferCcDetails($payment, $detailsArray);
+        return $mergedArray;
     }
 
     /**
