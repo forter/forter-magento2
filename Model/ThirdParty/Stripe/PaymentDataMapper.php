@@ -53,6 +53,10 @@ class PaymentDataMapper
             }
         }
 
+        if (isset($stripePayment->outcome) && isset($stripePayment->outcome->type)) {
+            $detailsArray['verificationResults']['processorResponseText'] = $stripePayment->outcome->type;
+        }
+
         if ($card) {
             $detailsArray['expirationMonth'] = (string)($card->exp_month ?? '');
             $detailsArray['expirationYear'] = (string)($card->exp_year ?? '');

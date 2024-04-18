@@ -93,9 +93,9 @@
 			type="Forter\Forter\Plugin\Thirdparty\Paysafe\ClientMock" />
     </type>
 
-    <type name="StripeIntegration\Payments\Helper\Order">
-        <plugin name="Forter_Plugin_Stripe_Payments_Helper" type="\Forter\Forter\Plugin\Thirdparty\Stripe\Order" />
-    </type>
+<!--    <type name="StripeIntegration\Payments\Helper\Order">-->
+<!--        <plugin name="Forter_Plugin_Stripe_Payments_Helper" type="\Forter\Forter\Plugin\Thirdparty\Stripe\Order" />-->
+<!--    </type>-->
 
 	<type name="Magento\Payment\Gateway\Request\BuilderComposite">
 		<arguments>
