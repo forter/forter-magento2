@@ -101,8 +101,7 @@ class Payment
                 $paymentData['applePay'] = $cardDetails;
                 unset($paymentData["creditCard"]);
             }
-
-            if ($payment->getMethod() === 'stripe_payments' && $payment->getAdditionalInformation('token')) {
+            if (strpos($payment->getMethod(),'stripe_payments') !== false && $payment->getAdditionalInformation('token')) {
                 $paymentData['tokenizedCard'] = $cardDetails;
                 unset($paymentData["creditCard"]);
             }
