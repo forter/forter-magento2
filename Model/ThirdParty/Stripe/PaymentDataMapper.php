@@ -68,11 +68,11 @@ class PaymentDataMapper
         }
 
         if ($threeDsStatus) {
-            $detailsArray['threeDsStatus']['cvvResult'] = $threeDsStatus->authenticated ?? '';
-            $detailsArray['threeDsVersion']['cvvResult'] = $threeDsStatus->version ?? '';
-            $detailsArray['threeDsVersion']['eciValue'] = $threeDsStatus->electronic_commerce_indicator ?? '';
-            $detailsArray['threeDsVersion']['authorizationPolicy'] = '3DS';
-            $detailsArray['threeDsVersion']['threeDsInteractionMode'] = 'FRICTIONLESS';
+            $detailsArray['verificationResults']['cvvResult'] = $threeDsStatus->authenticated ?? '';
+            $detailsArray['verificationResults']['threeDsVersion'] = $threeDsStatus->version ?? '';
+            $detailsArray['verificationResults']['eciValue'] = $threeDsStatus->electronic_commerce_indicator ?? '';
+            $detailsArray['verificationResults']['authorizationPolicy'] = '3DS';
+            $detailsArray['verificationResults']['threeDsInteractionMode'] = 'FRICTIONLESS';
         }
 
         return $detailsArray;
