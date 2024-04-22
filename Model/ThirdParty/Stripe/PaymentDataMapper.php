@@ -68,7 +68,7 @@ class PaymentDataMapper
         }
 
         if ($threeDsStatus) {
-            $detailsArray['verificationResults']['cvvResult'] = $threeDsStatus->authenticated ?? '';
+            $detailsArray['verificationResults']['cvvResult'] = (string)$threeDsStatus->authenticated ?? '';
             $detailsArray['verificationResults']['threeDsVersion'] = $threeDsStatus->version ?? '';
             $detailsArray['verificationResults']['eciValue'] = $threeDsStatus->electronic_commerce_indicator ?? '';
             $detailsArray['verificationResults']['authorizationPolicy'] = '3DS';
