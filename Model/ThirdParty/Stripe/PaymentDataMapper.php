@@ -38,6 +38,7 @@ class PaymentDataMapper
 
         $card = $stripePayment->payment_method_details->card ?? null;
         $checks = $card->checks ?? null;
+        $threeDsStatus = $card->three_d_secure ?? null ;
 
         if ($checks) {
             $detailsArray['verificationResults']['avsZipResult'] = $checks->address_postal_code_check ?? '';
@@ -64,6 +65,14 @@ class PaymentDataMapper
             $detailsArray['cardType'] = strtoupper($card->funding ?? '');
             $detailsArray['cardBrand'] = strtoupper($card->brand ?? '');
             $detailsArray['countryOfIssuance'] = strtoupper($card->country ?? '');
+        }
+
+        if ($threeDsStatus) {
+            $detailsArray['threeDsStatus']['cvvResult'] = $threeDsStatus->authenticated ?? '';
+            $detailsArray['threeDsVersion']['cvvResult'] = $threeDsStatus->version ?? '';
+            $detailsArray['threeDsVersion']['eciValue'] = $threeDsStatus->electronic_commerce_indicator ?? '';
+            $detailsArray['threeDsVersion']['authorizationPolicy'] = '3DS';
+            $detailsArray['threeDsVersion']['threeDsInteractionMode'] = 'FRICTIONLESS';
         }
 
         return $detailsArray;
