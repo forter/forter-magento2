@@ -59,7 +59,8 @@ class PaymentDataMapper
         }
 
         if ($card) {
-            $detailsArray['expirationMonth'] = (string)($card->exp_month ?? '');
+            $expMonth = $card->exp_month ? $card->exp_month : '';
+            $detailsArray['expirationMonth'] = (string)strlen($expMonth) > 1 ? $expMonth : '0' . $expMonth;
             $detailsArray['expirationYear'] = (string)($card->exp_year ?? '');
             $detailsArray['lastFourDigits'] = $card->last4 ?? '';
             $detailsArray['cardType'] = strtoupper($card->funding ?? '');
