@@ -889,6 +889,11 @@ class Config
         return explode(',', $this->getConfigValue('general/accepted_payment_methods', $scope, $scopeId));
     }
 
+    public function noPreAuthPaymentMethods($scope = null, $scopeId = null)
+    {
+        return explode(',', $this->getConfigValue('general/no_preauth_payment_methods', $scope, $scopeId));
+    }
+
     /**
      * @param $scope
      * @param $scopeId
@@ -912,5 +917,15 @@ class Config
         }
 
         return $payment->getCcTransId();
+    }
+
+    public function getNoPreAuthPaymentMethod($paymentMethod)
+    {
+        foreach ($this->noPreAuthPaymentMethods() as $noPreAuthPaymentMethod) {
+            if (strpos($paymentMethod, $noPreAuthPaymentMethod) !== false) {
+                return true;
+            }
+        }
+        return false;
     }
 }

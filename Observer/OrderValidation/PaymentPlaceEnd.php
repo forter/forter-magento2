@@ -197,9 +197,10 @@ class PaymentPlaceEnd implements ObserverInterface
             }
 
             $forterEntity = $this->entityHelper->getForterEntityByIncrementId($order->getIncrementId());
-            if (!$forterEntity) {
+            if (in_array($paymentMethod, $this->forterConfig->asyncPaymentMethods()) && !$forterEntity) {
                 $validationType = 'post-authorization';
-                $forterEntity = $this->entityHelper->createForterEntity($order, $order->getStoreId(), $validationType);
+                $this->entityHelper->createForterEntity($order, $order->getStoreId(), $validationType);
+                return;
             }
 
             if ($methodSetting && $methodSetting !== 'post' && $methodSetting !== 'prepost') {
@@ -225,6 +226,11 @@ class PaymentPlaceEnd implements ObserverInterface
                 'frontend',
                 true
             );
+
+            if (!$forterEntity) {
+                $validationType = 'post-authorization';
+                $forterEntity = $this->entityHelper->createForterEntity($order, $order->getStoreId(), $validationType);
+            }
 
             $payment = $order->getPayment();
 

@@ -29,7 +29,6 @@ class Cart
      */
     private $giftCardPrepere;
 
-
     /**
      * Cart constructor.
      * @param CategoryFactory $categoryFactory
@@ -49,8 +48,12 @@ class Cart
      */
     public function getTotalAmount($order)
     {
+        $amountUSD = null;
+        if ($order->getOrderCurrency()->getCurrencyCode() === 'USD') {
+            $amountUSD = number_format($order->getGrandTotal(), 1, '.');
+        }
         return [
-            "amountUSD" => null,
+            "amountUSD" => $amountUSD,
             "amountLocalCurrency" => strval($order->getGrandTotal()),
             "currency" => $order->getOrderCurrency()->getCurrencyCode() . ""
         ];
@@ -81,11 +84,11 @@ class Cart
             $singleCartItem = [
                 "basicItemData" => [
                     "price" => [
-                        "amountLocalCurrency" => strval($item->getPrice()),
+                        "amountLocalCurrency" => strval(number_format($item->getPrice(), 2, '.', '')),
                         "currency" => $order->getOrderCurrency()->getCurrencyCode() . ""
                     ],
                     "value" => [
-                        "amountLocalCurrency" => strval($item->getPrice()),
+                        "amountLocalCurrency" => strval(number_format($item->getPrice(), 2, '.', '')),
                         "currency" => $order->getOrderCurrency()->getCurrencyCode() . ""
                     ],
                     "productId" => $item->getProductId(),

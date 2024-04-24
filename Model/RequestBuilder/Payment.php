@@ -102,8 +102,11 @@ class Payment
                 unset($paymentData["creditCard"]);
             }
             if (strpos($payment->getMethod(),'stripe_payments') !== false) {
-                $paymentData['tokenizedCard'] = $cardDetails;
-                unset($paymentData["creditCard"]);
+                $stripeData = json_decode($payment->getAdditionalInformation('stripeChargeData') ?? '');
+                if ($stripeData && isset($stripeData->payment_method)) {
+                    $paymentData['tokenizedCard'] = $cardDetails;
+                    unset($paymentData["creditCard"]);
+                }
             }
 
             // Attempt to set tokenized card information if available
