@@ -41,11 +41,6 @@ class StripePayment
                 return false;
             }
 
-            $writer = new \Zend_Log_Writer_Stream(BP . '/var/log/stripeDATA.log');
-            $logger = new \Zend_Log();
-            $logger->addWriter($writer);
-            $logger->info('getting CHARGE');
-
             $paymentIntentID = $order->getPayment()->getLastTransId();
 
             if (empty($paymentIntentID)) {
