@@ -19,7 +19,8 @@ class PaymentDataMapper
     protected $cvvMap = [
         'pass' => 'M',
         'fail' => 'N',
-        'unchecked' => 'P'
+        'unchecked' => 'P',
+        'U' => 'U' // Default value when cvc check is empty
     ];
 
     public function dataMapper($payment, $detailsArray, $stripePayment)
@@ -38,29 +39,35 @@ class PaymentDataMapper
 
         $card = $stripePayment->payment_method_details->card ?? null;
         $checks = $card->checks ?? null;
-        $threeDsStatus = $card->three_d_secure ?? null ;
+        $threeDsStatus = $card->three_d_secure ?? null;
 
         if ($checks) {
-            $detailsArray['verificationResults']['avsZipResult'] = $checks->address_postal_code_check ?? '';
-            $detailsArray['verificationResults']['avsStreetResult'] = $checks->address_line1_check ?? '';
+            $detailsArray['verificationResults']['avsZipResult'] = $checks->address_postal_code_check ?? 'unchecked';
+            $detailsArray['verificationResults']['avsStreetResult'] = $checks->address_line1_check ?? 'unchecked';
 
-            if (isset($detailsArray['verificationResults']['avsZipResult'], $detailsArray['verificationResults']['avsStreetResult'], $this->avsMap["{$detailsArray['verificationResults']['avsStreetResult']}_{$detailsArray['verificationResults']['avsZipResult']}"])) {
-                $detailsArray['verificationResults']['avsFullResult'] = $this->avsMap["{$detailsArray['verificationResults']['avsStreetResult']}_{$detailsArray['verificationResults']['avsZipResult']}"];
-            }
+            // Combined AVS result mapping
+            $avsCombinedKey = "{$detailsArray['verificationResults']['avsStreetResult']}_{$detailsArray['verificationResults']['avsZipResult']}";
+            $detailsArray['verificationResults']['avsFullResult'] = $this->avsMap[$avsCombinedKey] ?? 'U';
 
-            $cvvCheck = $checks->cvc_check ?? null;
-            if (isset($cvvCheck, $this->cvvMap[$cvvCheck])) {
-                $detailsArray['verificationResults']['cvvResult'] = $this->cvvMap[$cvvCheck];
-            }
+            // CVV result mapping
+            $cvvCheck = $checks->cvc_check ?? 'U';
+            $detailsArray['verificationResults']['cvvResult'] = $this->cvvMap[$cvvCheck] ?? 'P';
         }
 
-        if (isset($stripePayment->outcome) && isset($stripePayment->outcome->type)) {
-            $detailsArray['verificationResults']['processorResponseText'] = $stripePayment->outcome->type;
+        // Processor response and text mapping
+        $outcomeType = $stripePayment->outcome->type ?? '';
+        if ($outcomeType === 'authorized') {
+            $detailsArray['verificationResults']['processorResponseCode'] = $outcomeType;
+            $detailsArray['verificationResults']['processorResponseText'] = $outcomeType;
+        } else {
+            $detailsArray['verificationResults']['processorResponseCode'] = $outcomeType;
+            $detailsArray['verificationResults']['processorResponseText'] = $stripePayment->outcome->reason ?? '';
         }
 
         if ($card) {
-            $expMonth = $card->exp_month ? $card->exp_month : '';
-            $detailsArray['expirationMonth'] = (string)(strlen($expMonth) > 1 ? $expMonth : (strlen($expMonth) == 0 ? $expMonth : '0' . $expMonth));
+            // Card details mapping
+            $expMonth = $card->exp_month ?? '';
+            $detailsArray['expirationMonth'] = str_pad($expMonth, 2, '0', STR_PAD_LEFT);
             $detailsArray['expirationYear'] = (string)($card->exp_year ?? '');
             $detailsArray['lastFourDigits'] = $card->last4 ?? '';
             $detailsArray['cardType'] = strtoupper($card->funding ?? '');
@@ -69,11 +76,36 @@ class PaymentDataMapper
         }
 
         if ($threeDsStatus) {
-            $detailsArray['verificationResults']['cvvResult'] = (string)$threeDsStatus->authenticated ?? '';
+            // 3DS related details
             $detailsArray['verificationResults']['threeDsVersion'] = $threeDsStatus->version ?? '';
+            $detailsArray['verificationResults']['threeDsStatus'] = $threeDsStatus->result ?? '';
+
+            if (isset($threeDsStatus->authentication_flow)) {
+                if ($threeDsStatus->authentication_flow === 'challenge') {
+                    $detailsArray['verificationResults']['threeDsInteractionMode'] = 'CHALLENGED';
+                }
+                if ($threeDsStatus->authentication_flow === 'frictionless') {
+                    $detailsArray['verificationResults']['threeDsInteractionMode'] = 'FRICTIONLESS';
+                }
+            } else {
+                $detailsArray['verificationResults']['threeDsInteractionMode'] = 'N/A'; // Consider default or N/A for null cases
+            }
+
             $detailsArray['verificationResults']['eciValue'] = $threeDsStatus->electronic_commerce_indicator ?? '';
-            $detailsArray['verificationResults']['authorizationPolicy'] = '3DS';
-            $detailsArray['verificationResults']['threeDsInteractionMode'] = 'FRICTIONLESS';
+            $detailsArray['verificationResults']['authorizationPolicy'] = '3DSecure';
+
+            // external3dsVendorPayload mapping
+            $detailsArray['verificationResults']['external3dsVendorPayload'] = [
+                'authenticated' => $threeDsStatus->authenticated ?? false,
+                'authentication_flow' => $threeDsStatus->authentication_flow ?? '',
+                'electronic_commerce_indicator' => $threeDsStatus->electronic_commerce_indicator ?? '',
+                'exemption_indicator' => $threeDsStatus->exemption_indicator ?? '',
+                'result' => $threeDsStatus->result ?? '',
+                'result_reason' => $threeDsStatus->result_reason ?? '',
+                'succeeded' => $threeDsStatus->succeeded ?? false,
+                'transaction_id' => $threeDsStatus->transaction_id ?? '',
+                'version' => $threeDsStatus->version ?? ''
+            ];
         }
 
         return $detailsArray;

@@ -82,8 +82,8 @@ class Payment
                 $cardDetails = $this->paymentMethods->getBraintreeDetails($payment);
             } elseif (strpos($payment_method, 'mercadopago') !== false) {
                 $cardDetails = $this->paymentMethods->getMercadopagoDetails($payment);
-            } elseif (strpos($payment_method, 'stripe') !== false){
-                $cardDetails = $this->paymentMethods->getStripePaymentDetails($payment,$this->stripePayment->getPaymentData($order));
+            } elseif (strpos($payment_method, 'stripe') !== false) {
+                $cardDetails = $this->paymentMethods->getStripePaymentDetails($payment, $this->stripePayment->getPaymentData($order));
             } else {
                 $cardDetails = $this->paymentMethods->preferCcDetails($payment);
             }
@@ -101,20 +101,42 @@ class Payment
                 $paymentData['applePay'] = $cardDetails;
                 unset($paymentData["creditCard"]);
             }
-            if (strpos($payment->getMethod(),'stripe_payments') !== false) {
+            if (strpos($payment->getMethod(), 'stripe_payments') !== false) {
                 $stripeData = json_decode($payment->getAdditionalInformation('stripeChargeData') ?? '');
                 if ($stripeData && isset($stripeData->payment_method)) {
                     $paymentData['tokenizedCard'] = $cardDetails;
                     unset($paymentData["creditCard"]);
                 }
+
+                if ($stripeData && isset($stripeData->payment_method_details)
+                    && isset($stripeData->payment_method_details->card)
+                    && isset($stripeData->payment_method_details->card->wallet)
+                    && isset($stripeData->payment_method_details->card->wallet->type)
+                    && $stripeData->payment_method_details->card->wallet->type === 'google_pay') {
+
+                    $paymentData['androidPay'] = $cardDetails;
+                    unset($paymentData["tokenizedCard"]);
+                    unset($paymentData["creditCard"]);
+                }
+
+                if ($stripeData && isset($stripeData->payment_method_details)
+                    && isset($stripeData->payment_method_details->card)
+                    && isset($stripeData->payment_method_details->card->wallet)
+                    && isset($stripeData->payment_method_details->card->wallet->type)
+                    && $stripeData->payment_method_details->card->wallet->type === 'apple_pay') {
+
+                    $paymentData['applePay'] = $cardDetails;
+                    unset($paymentData["tokenizedCard"]);
+                    unset($paymentData["creditCard"]);
+                }
             }
 
             // Attempt to set tokenized card information if available
-            if ( !isset($paymentData["creditCard"]) && $payment->getAdditionalInformation('forter_cc_token') && $payment->getAdditionalInformation('forter_cc_bin') ) {
-                $paymentData["tokenizedCard"] = array(
+            if (!isset($paymentData["creditCard"]) && $payment->getAdditionalInformation('forter_cc_token') && $payment->getAdditionalInformation('forter_cc_bin')) {
+                $paymentData["tokenizedCard"] = [
                     'bin'   => $payment->getAdditionalInformation('forter_cc_bin'),
                     'token' => $payment->getAdditionalInformation('forter_cc_token')
-                );
+                ];
             }
         }
 

@@ -139,6 +139,11 @@ class ForterQueue
                     continue;
                 }
                 $payment = $order->getPayment();
+
+                if (!$payment) {
+                    continue;
+                }
+
                 $method = $payment->getMethod();
 
                 // let bind the relevent store in case of multi store settings
