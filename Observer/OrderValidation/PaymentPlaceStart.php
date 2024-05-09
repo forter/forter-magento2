@@ -211,10 +211,10 @@ class PaymentPlaceStart implements ObserverInterface
 
             $paymentMethod = $order->getPayment()->getMethod();
 
-            if (in_array($paymentMethod, $this->config->noPreAuthPaymentMethods())) {
-                $this->entityHelper->createForterEntity($order, $storeId, 'post-authorization');
-                return;
-            }
+//            if (in_array($paymentMethod, $this->config->noPreAuthPaymentMethods())) {
+//                $this->entityHelper->createForterEntity($order, $storeId, 'post-authorization');
+//                return;
+//            }
 
             if (in_array($paymentMethod, $this->config->asyncPaymentMethods())) {
                 $this->entityHelper->createForterEntity($order, $storeId, 'post-authorization');
