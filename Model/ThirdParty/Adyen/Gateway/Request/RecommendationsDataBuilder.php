@@ -14,6 +14,7 @@ class RecommendationsDataBuilder implements BuilderInterface
     protected const REQUEST_SCA_EXEMPTION_TRA = "REQUEST_SCA_EXEMPTION_TRA";
     protected const REQUEST_SCA_EXCLUSION_MOTO = "REQUEST_SCA_EXCLUSION_MOTO";
     protected const REQUEST_SCA_EXEMPTION_CORP = "REQUEST_SCA_EXEMPTION_CORP";
+    protected const CANCELED_ORDER_PAYMENT_MESSAGE = "Canceled order online";
 
     /**
      * @var ScopeConfigInterface
@@ -56,14 +57,19 @@ class RecommendationsDataBuilder implements BuilderInterface
 
                 // Ensuring payment method is adyen_cc before proceeding
                 if ($payment && $payment->getMethod() === "adyen_cc") {
+
+                    $message = $payment->getMessage() ? $payment->getMessage()->getText() : null;
+                    if ($message === self::CANCELED_ORDER_PAYMENT_MESSAGE) {
+                        return $request;
+                    }
+
                     $order = $payment->getOrder();
 
                     $forterEntity = $this->entityHelper->getForterEntityByIncrementId($order->getIncrementId());
                     if (!$forterEntity) {
-                        return null;
+                        return $request;
                     }
 
-                    $forterResponse = $payment->getOrder()->getForterResponse();
                     $forterResponse = $forterEntity->getForterResponse();
                     //de facut
                     if ($forterResponse !== null) {
