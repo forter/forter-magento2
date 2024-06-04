@@ -56,7 +56,7 @@ class RecommendationsDataBuilder implements BuilderInterface
                 $payment = $paymentDataObject->getPayment();
 
                 // Ensuring payment method is adyen_cc before proceeding
-                if ($payment && $payment->getMethod() === "adyen_cc") {
+                if ($payment && $payment->getMethod() === "adyen_cc" && !$payment->getLastTransId()) {
 
                     $message = $payment->getMessage() ? $payment->getMessage()->getText() : null;
                     if ($message === self::CANCELED_ORDER_PAYMENT_MESSAGE) {
