@@ -49,47 +49,47 @@
 
 	<!-- Plugin Braintree functionality -->
 	<type name="PayPal\Braintree\Gateway\Response\CardDetailsHandler">
-   		<plugin 
-			name="forter_paypal_braintree_card_details_handler" 
+   		<plugin
+			name="forter_paypal_braintree_card_details_handler"
 			type="Forter\Forter\Plugin\Thirdparty\PaypalBraintree\Gateway\Response\CardDetailsHandler" />
   	</type>
 
 	<!-- Plugin Worldpay functionality -->
 	<type name="Forter\Forter\Model\RequestBuilder\Order">
-    	<plugin 
-			name="forter_json_worldpay_plugin" 
+    	<plugin
+			name="forter_json_worldpay_plugin"
 			type="Forter\Forter\Plugin\Thirdparty\Worldpay\RequestBuilder\Order" />
   	</type>
 
 	<!-- Plugin Checkoutcom functionality -->
 	<type name="Forter\Forter\Model\RequestBuilder\Order">
-		<plugin 
-			name="forter_json_checkoutcom_plugin" 
+		<plugin
+			name="forter_json_checkoutcom_plugin"
 			type="Forter\Forter\Plugin\Thirdparty\Checkoutcom\RequestBuilder\Order" />
   	</type>
 
 	<!-- Plugin Adyen functionality -->
 	<type name="Forter\Forter\Model\RequestBuilder\Order">
-		<plugin 
-			name="forter_json_adyen_plugin" 
+		<plugin
+			name="forter_json_adyen_plugin"
 			type="Forter\Forter\Plugin\Thirdparty\Adyen\RequestBuilder\Order" />
   	</type>
 	<type name="Adyen\Payment\Helper\Order">
-		<plugin 
-			name="forter_adyen_order" 
+		<plugin
+			name="forter_adyen_order"
 			type="Forter\Forter\Plugin\Thirdparty\Adyen\Helper\Order" />
   	</type>
 
 	<!-- Plugin Paysafe functionality -->
 	<type name="Paysafe\Payment\Model\Adapter">
-        <plugin 
-			name="forter_paysafe_adapter_plugin" 
+        <plugin
+			name="forter_paysafe_adapter_plugin"
 			type="Forter\Forter\Plugin\Thirdparty\Paysafe\Adapter" />
     </type>
-	 
+
     <type name="Paysafe\Payment\Gateway\Http\Client\ClientMock">
-        <plugin 
-			name="forter_paysafe_clientmock_plugin" 
+        <plugin
+			name="forter_paysafe_clientmock_plugin"
 			type="Forter\Forter\Plugin\Thirdparty\Paysafe\ClientMock" />
     </type>
 

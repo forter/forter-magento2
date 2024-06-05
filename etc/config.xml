@@ -40,8 +40,9 @@
                 <email_template>forter_sendmail_on_decline_email_template</email_template>
             </sendmail_on_decline>
             <general>
-                <async_payment_methods>adyen_pay_by_link</async_payment_methods>
-                <accepted_payment_methods>adyen,braintree</accepted_payment_methods>
+                <async_payment_methods>adyen_pay_by_link,stripe_payments_invoice</async_payment_methods>
+                <no_preauth_payment_methods>stripe_payments</no_preauth_payment_methods>
+                <accepted_payment_methods>adyen,braintree,stripe</accepted_payment_methods>
             </general>
         </forter>
     </default>

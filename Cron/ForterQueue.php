@@ -139,6 +139,11 @@ class ForterQueue
                     continue;
                 }
                 $payment = $order->getPayment();
+
+                if (!$payment) {
+                    continue;
+                }
+
                 $method = $payment->getMethod();
 
                 // let bind the relevent store in case of multi store settings
@@ -157,7 +162,7 @@ class ForterQueue
                     continue;
                 }
 
-                if ($this->forterConfig->getIsPaymentMethodAccepted($payment->getMethod()) && !$payment->getCcTransId()) {
+                if ($this->forterConfig->getIsPaymentMethodAccepted($payment->getMethod()) && !$this->forterConfig->getIsReadyForForter($payment)) {
                     if ($this->forterConfig->isHoldingOrdersEnabled()) {
                         $order->canHold() ?? $order->hold()->save();
                     }
