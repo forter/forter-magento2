@@ -12,6 +12,7 @@ namespace Forter\Forter\Model\RequestBuilder\Payment;
 
 use Forter\Forter\Model\Config as ForterConfig;
 use Magento\Customer\Model\Session;
+use Forter\Forter\Model\ThirdParty\Stripe;
 
 /**
  * Class Payment
@@ -35,6 +36,8 @@ class PaymentMethods
         'authorizationProcessedWith3DS' => 'boolean'
     ];
 
+    protected $stripePaymentDataMapper;
+
     /**
      * @method __construct
      * @param  Session      $customerSession
@@ -42,10 +45,12 @@ class PaymentMethods
      */
     public function __construct(
         Session $customerSession,
-        ForterConfig $forterConfig
+        ForterConfig $forterConfig,
+        Stripe\PaymentDataMapper $stripePaymentDataMapper
     ) {
         $this->customerSession = $customerSession;
         $this->forterConfig = $forterConfig;
+        $this->stripePaymentDataMapper = $stripePaymentDataMapper;
     }
 
     public function getPaypalDetails($payment)
@@ -252,6 +257,7 @@ class PaymentMethods
             }
             if (isset($additonal_data['refusalReasonRaw'])) {
                 $detailsArray['verificationResults']['processorResponseText'] = $additonal_data['refusalReasonRaw'];
+                $detailsArray['verificationResults']['processorResponseCode'] = $additonal_data['refusalReasonRaw'];
             }
             if (isset($additonal_data['eci'])) {
                 $detailsArray['verificationResults']['eciValue']= $additonal_data['eci'] === 'N/A' ? '' : $additonal_data['eci'];
@@ -327,6 +333,7 @@ class PaymentMethods
         $processorResponseText = $payment->getAdditionalInformation('adyen_refusal_reason_raw');
         if ($processorResponseText) {
             $detailsArray['verificationResults']['processorResponseText'] = $processorResponseText;
+            $detailsArray['verificationResults']['processorResponseCode'] = $processorResponseText;
         }
 
         $preferCcDetailsArray = $this->preferCcDetails($payment, $detailsArray);
@@ -409,6 +416,7 @@ class PaymentMethods
 
             if (isset($additonal_data['refusalReasonRaw'])) {
                 $detailsArray['verificationResults']['processorResponseText']= $additonal_data['refusalReasonRaw'];
+                $detailsArray['verificationResults']['processorResponseCode']= $additonal_data['refusalReasonRaw'];
             }
 
             if (isset($additonal_data['merchantReference'])) {
@@ -419,6 +427,21 @@ class PaymentMethods
         }
         $preferCcDetailsArray = $this->preferCcDetails($payment, $detailsArray);
         $mergedArray = $this->mergeArrays($preferCcDetailsArray, $detailsArray);
+        return $mergedArray;
+    }
+
+    public function getStripePaymentDetails($payment, $stripePayment)
+    {
+        $detailsArray = [];
+
+        $detailsArray = $this->stripePaymentDataMapper->dataMapper($payment, $detailsArray, $stripePayment);
+
+        if (isset($stripePayment)) {
+            $payment->setAdditionalInformation('stripeChargeData',json_encode($stripePayment));
+        }
+        $preferCcDetailsArray = $this->preferCcDetails($payment, $detailsArray);
+        $mergedArray = $this->mergeArrays($preferCcDetailsArray, $detailsArray);
+
         return $mergedArray;
     }
 

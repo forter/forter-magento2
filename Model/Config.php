@@ -889,6 +889,11 @@ class Config
         return explode(',', $this->getConfigValue('general/accepted_payment_methods', $scope, $scopeId));
     }
 
+    public function noPreAuthPaymentMethods($scope = null, $scopeId = null)
+    {
+        return explode(',', $this->getConfigValue('general/no_preauth_payment_methods', $scope, $scopeId));
+    }
+
     /**
      * @param $scope
      * @param $scopeId
@@ -899,6 +904,25 @@ class Config
     {
         foreach ($this->acceptedPaymentMethods() as $acceptedPaymentMethod) {
             if (strpos($paymentMethod, $acceptedPaymentMethod) !== false) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function getIsReadyForForter($payment)
+    {
+        if (strpos($payment->getMethod(), 'stripe') !== false) {
+            return $payment->getLastTransId();
+        }
+
+        return $payment->getCcTransId();
+    }
+
+    public function getNoPreAuthPaymentMethod($paymentMethod)
+    {
+        foreach ($this->noPreAuthPaymentMethods() as $noPreAuthPaymentMethod) {
+            if (strpos($paymentMethod, $noPreAuthPaymentMethod) !== false) {
                 return true;
             }
         }

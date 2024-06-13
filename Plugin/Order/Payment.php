@@ -14,7 +14,6 @@ use Magento\Sales\Model\Order\Payment as MagentoPayment;
  */
 class Payment
 {
-
     const CANCELED_BY_MERCHANT = 'CANCELED_BY_MERCHANT';
 
     /**
@@ -84,11 +83,14 @@ class Payment
             if ($e->getMessage() == $this->forterConfig->getPreThanksMsg()) {
                 return;
             }
+
+            if (strpos($e->getMessage(), 'Authentication Required') !== false) {
+                return;
+            }
+
             $order = $subject->getOrder();
             $data = $this->requestBuilderOrder->buildTransaction($order, 'PAYMENT_ACTION_FAILURE');
-            $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
-            $this->abstractApi->sendApiRequest($url, json_encode($data));
-            $this->forterConfig->log('PAYMENT_ACTION_FAILURE Order' . $order->getIncrementId(). ' : ' . json_encode($data));
+            $this->forterConfig->log('PAYMENT_ACTION_FAILURE Order' . $order->getIncrementId() . ' : ' . json_encode($data));
             $this->forterConfig->log('Payment Failure for Order ' . $order->getIncrementId() . ' - Order Payment Data: ' . json_encode($order->getPayment()->getData()));
             $this->sendOrderStatus($order);
         } catch (\Exception $e) {

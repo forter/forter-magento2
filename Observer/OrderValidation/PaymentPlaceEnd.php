@@ -197,9 +197,10 @@ class PaymentPlaceEnd implements ObserverInterface
             }
 
             $forterEntity = $this->entityHelper->getForterEntityByIncrementId($order->getIncrementId());
-            if (!$forterEntity) {
+            if (in_array($paymentMethod, $this->forterConfig->asyncPaymentMethods()) && !$forterEntity) {
                 $validationType = 'post-authorization';
-                $forterEntity = $this->entityHelper->createForterEntity($order, $order->getStoreId(), $validationType);
+                $this->entityHelper->createForterEntity($order, $order->getStoreId(), $validationType);
+                return;
             }
 
             if ($methodSetting && $methodSetting !== 'post' && $methodSetting !== 'prepost') {
@@ -226,11 +227,14 @@ class PaymentPlaceEnd implements ObserverInterface
                 true
             );
 
-            $data = $this->requestBuilderOrder->buildTransaction($order, 'AFTER_PAYMENT_ACTION');
-            $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
+            if (!$forterEntity) {
+                $validationType = 'post-authorization';
+                $forterEntity = $this->entityHelper->createForterEntity($order, $order->getStoreId(), $validationType);
+            }
+
             $payment = $order->getPayment();
 
-            if ($this->forterConfig->getIsPaymentMethodAccepted($paymentMethod) && !$payment->getCcTransId()) { //de adaugat aici metodele agreate cu cc_trans_id populat, in rest sa mearga mai departe
+            if ($this->forterConfig->getIsPaymentMethodAccepted($paymentMethod) && !$this->forterConfig->getIsReadyForForter($payment)) { //de adaugat aici metodele agreate cu cc_trans_id populat, in rest sa mearga mai departe
                 $forterEntity->setStatus(self::FORTER_STATUS_WAITING)
                     ->save();
                 if ($this->forterConfig->isHoldingOrdersEnabled()) {
@@ -239,6 +243,8 @@ class PaymentPlaceEnd implements ObserverInterface
                 return;
             }
 
+            $data = $this->requestBuilderOrder->buildTransaction($order, 'AFTER_PAYMENT_ACTION');
+            $url = self::VALIDATION_API_ENDPOINT . $order->getIncrementId();
             $forterResponse = $this->abstractApi->sendApiRequest($url, json_encode($data));
 
             $retries = $forterEntity->getRetries();
@@ -247,14 +253,10 @@ class PaymentPlaceEnd implements ObserverInterface
 
             $this->abstractApi->sendOrderStatus($order);
 
-//            $order->setForterResponse($forterResponse);
-//            $forterEntity->setForterResponse($forterResponse);
-
             $this->forterConfig->log('Forter Response for Order ' . $order->getIncrementId() . ': ' . $forterResponse);
 
             $forterResponse = json_decode($forterResponse);
             if ($forterResponse->status != 'success' || !isset($forterResponse->action)) {
-            //    $order->setForterStatus('error');
                 $forterEntity->setForterStatus('error');
                 $order->addStatusHistoryComment(__('Forter (post) Decision: %1', 'error'));
                 $this->forterConfig->log('Response Error for Order ' . $order->getIncrementId() . ' - Payment Data: ' . json_encode($order->getPayment()->getData()));
@@ -269,8 +271,6 @@ class PaymentPlaceEnd implements ObserverInterface
                 return;
             }
 
-  //          $order->setForterStatus($forterResponse->action ?? '');
-  //          $order->setForterReason($forterResponse->reasonCode ?? '');
             $forterEntity->setSyncFlag(1);
             $order->addStatusHistoryComment(__('Forter (post) Decision: %1%2', $forterResponse->action, $this->forterConfig->getResponseRecommendationsNote($forterResponse)));
             $order->addStatusHistoryComment(__('Forter (post) Decision Reason: %1', $forterResponse->reasonCode));
