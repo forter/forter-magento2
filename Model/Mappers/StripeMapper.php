@@ -1,8 +1,8 @@
 <?php
 
-namespace Forter\Forter\Model\ThirdParty\Stripe;
+namespace Forter\Forter\Model\Mappers;
 
-class PaymentDataMapper
+class StripeMapper
 {
     protected $avsMap = [
         'pass_pass' => 'Y',
