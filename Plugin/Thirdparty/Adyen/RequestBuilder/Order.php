@@ -94,25 +94,25 @@ class Order
             if ($method == 'adyen_cc') {
                 $logArray[3] = 'Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_hpp method';
                 $this->forterConfig->log('Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_hpp method');
-                $result = $this->handleAdyenCc($result, $notificationAdditionalData, $notification, $order);
+                $result = $this->handleAdyenCc($result, $notificationAdditionalData, $notification, $order, $method);
             }
 
             if (($method == 'adyen_hpp' && (strpos($payment->getData('cc_type'), 'paypal') !== false)) || $method === 'adyen_paypal') {
                 $logArray[3] = 'Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_hpp method';
                 $this->forterConfig->log('Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_hpp method');
-                $result = $this->handleAdyenPaypal($result, $notificationAdditionalData, $notification, $order);
+                $result = $this->handleAdyenPaypal($result, $notificationAdditionalData, $notification, $order, $method);
             }
 
             if (($method == 'adyen_hpp' && $brandCode == 'googlepay') || ($method === 'adyen_googlepay')) {
                 $logArray[3] = 'Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_hpp method';
                 $this->forterConfig->log('Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_hpp method');
-                $result = $this->handleAdyenGooglePay($result, $notificationAdditionalData, $notification, $order);
+                $result = $this->handleAdyenGooglePay($result, $notificationAdditionalData, $notification, $order, $method);
             }
 
             if (($method == 'adyen_hpp' && $brandCode == 'applepay') || ($method === 'adyen_applepay')) {
                 $logArray[3] = 'Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_hpp method';
                 $this->forterConfig->log('Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_hpp method');
-                $result = $this->handleAdyenApplePay($result, $notificationAdditionalData, $notification, $order);
+                $result = $this->handleAdyenApplePay($result, $notificationAdditionalData, $notification, $order, $method);
             }
             $logArray[4] = $result['payment'];
             $logArray[5] = json_encode('Forter Adyen Module integration end');
@@ -125,7 +125,7 @@ class Order
         }
     }
 
-    private function handleAdyenCc($result, $notificationAdditionalData, $notification, $order)
+    private function handleAdyenCc($result, $notificationAdditionalData, $notification, $order, $method)
     {
         if (isset($notificationAdditionalData['paypalPayerId'])) {
             $result['payment'][0]['paypal']['payerId']= $notificationAdditionalData['paypalPayerId'];
@@ -177,7 +177,7 @@ class Order
         return $result;
     }
 
-    private function handleAdyenPaypal($result, $notificationAdditionalData, $notification, $order)
+    private function handleAdyenPaypal($result, $notificationAdditionalData, $notification, $order, $method)
     {
         if (isset($notificationAdditionalData['paypalPayerId'])) {
             $result['payment'][0]['paypal']['payerId']= $notificationAdditionalData['paypalPayerId'];
@@ -229,7 +229,7 @@ class Order
         return $result;
     }
 
-    private function handleAdyenGooglePay($result, $notificationAdditionalData, $notification, $order)
+    private function handleAdyenGooglePay($result, $notificationAdditionalData, $notification, $order, $method)
     {
         unset($result['payment'][0]['creditCard']);
 
@@ -288,7 +288,7 @@ class Order
         return $result;
     }
 
-    private function handleAdyenApplePay($result, $notificationAdditionalData, $notification, $order)
+    private function handleAdyenApplePay($result, $notificationAdditionalData, $notification, $order, $method)
     {
         unset($result['payment'][0]['creditCard']);
 
