@@ -2,7 +2,10 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
     <group id="forter_forter">
-        <job name="forter_send_orders_queue" instance="Forter\Forter\Cron\SendQueue" method="execute">
+        <job name="forter_post_decision_actions" instance="Forter\Forter\Cron\PostDecisionActions" method="execute">
+            <schedule>*/3 * * * *</schedule>
+        </job>
+        <job name="forter_send_orders" instance="Forter\Forter\Cron\ForterQueue" method="execute">
             <schedule>* * * * *</schedule>
         </job>
     </group>

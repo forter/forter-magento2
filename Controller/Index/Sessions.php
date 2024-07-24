@@ -51,12 +51,6 @@ class Sessions extends Action implements HttpPostActionInterface, CsrfAwareActio
             if ($forterToken) {
                 $this->customerSession->setForterToken($forterToken);
             }
-
-            $bin = $this->getRequest()->getHeader('bin');
-            $this->customerSession->setForterBin($bin);
-
-            $last4cc = $this->getRequest()->getHeader('last4cc');
-            $this->customerSession->setForterLast4cc($last4cc);
         } catch (Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }

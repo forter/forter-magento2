@@ -10,6 +10,7 @@ use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Helper\Admin;
 use Magento\Sales\Model\Order;
 use Forter\Forter\Model\Config as ForterConfig;
+use Forter\Forter\Helper\EntityHelper;
 
 /**
  * Class Forter
@@ -34,6 +35,11 @@ class Forter extends \Magento\Sales\Block\Adminhtml\Order\AbstractOrder implemen
     private $forterConfig;
 
     /**
+     * @var EntityHelper
+     */
+    protected $entityHelper;
+
+    /**
      * @method __construct
      * @param  ScopeConfigInterface $scopeConfig
      * @param  Context              $context
@@ -50,12 +56,14 @@ class Forter extends \Magento\Sales\Block\Adminhtml\Order\AbstractOrder implemen
         OrderInterface $orderInterface,
         Admin $adminHelper,
         ForterConfig $forterConfig,
+        EntityHelper $entityHelper,
         array $data = []
     ) {
         parent::__construct($context, $registry, $adminHelper, $data);
         $this->orderInterface = $orderInterface;
         $this->scopeConfig = $scopeConfig;
         $this->forterConfig = $forterConfig;
+        $this->entityHelper = $entityHelper;
     }
 
     /**
@@ -106,6 +114,12 @@ class Forter extends \Magento\Sales\Block\Adminhtml\Order\AbstractOrder implemen
     {
         $order_id = $this->getRequest()->getParam('order_id');
         return $this->orderInterface->load($order_id);
+    }
+
+    public function getForterEntity()
+    {
+        $order = $this->getOrder();
+        return $this->entityHelper->getForterEntityByIncrementId($order->getIncrementId());
     }
 
     /**

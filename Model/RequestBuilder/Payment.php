@@ -12,6 +12,7 @@ namespace Forter\Forter\Model\RequestBuilder;
 
 use Forter\Forter\Model\RequestBuilder\Customer as CustomerPreper;
 use Forter\Forter\Model\RequestBuilder\Payment\PaymentMethods;
+use Forter\Forter\Model\ThirdParty\Stripe\StripePayment;
 
 /**
  * Class Payment
@@ -29,6 +30,8 @@ class Payment
      */
     protected $customerPreper;
 
+    protected $stripePayment;
+
     /**
      * Payment constructor.
      * @param PaymentMethods $paymentMethods
@@ -36,10 +39,12 @@ class Payment
      */
     public function __construct(
         PaymentMethods $paymentMethods,
-        CustomerPreper $customerPreper
+        CustomerPreper $customerPreper,
+        StripePayment $stripePayment
     ) {
         $this->paymentMethods = $paymentMethods;
         $this->customerPreper = $customerPreper;
+        $this->stripePayment = $stripePayment;
     }
 
     /**
@@ -77,11 +82,13 @@ class Payment
                 $cardDetails = $this->paymentMethods->getBraintreeDetails($payment);
             } elseif (strpos($payment_method, 'mercadopago') !== false) {
                 $cardDetails = $this->paymentMethods->getMercadopagoDetails($payment);
+            } elseif (strpos($payment_method, 'stripe') !== false) {
+                $cardDetails = $this->paymentMethods->getStripePaymentDetails($payment, $this->stripePayment->getPaymentData($order));
             } else {
                 $cardDetails = $this->paymentMethods->preferCcDetails($payment);
             }
 
-            if (array_key_exists("expirationMonth", $cardDetails) || array_key_exists("expirationYear", $cardDetails) || array_key_exists("lastFourDigits", $cardDetails)) {
+            if (array_key_exists("expirationMonth", $cardDetails ?? []) || array_key_exists("expirationYear", $cardDetails ?? []) || array_key_exists("lastFourDigits", $cardDetails ?? [])) {
                 $paymentData["creditCard"] = $cardDetails;
             }
 
@@ -90,12 +97,46 @@ class Payment
                 unset($paymentData["creditCard"]);
             }
 
+            if ($payment->getCcType() == 'applepay' || $payment->getAdditionalInformation('brand_code') == 'applepay' || $payment_method == 'adyen_applepay') {
+                $paymentData['applePay'] = $cardDetails;
+                unset($paymentData["creditCard"]);
+            }
+            if (strpos($payment->getMethod(), 'stripe_payments') !== false) {
+                $stripeData = json_decode($payment->getAdditionalInformation('stripeChargeData') ?? '');
+                if ($stripeData && isset($stripeData->payment_method)) {
+                    $paymentData['tokenizedCard'] = $cardDetails;
+                    unset($paymentData["creditCard"]);
+                }
+
+                if ($stripeData && isset($stripeData->payment_method_details)
+                    && isset($stripeData->payment_method_details->card)
+                    && isset($stripeData->payment_method_details->card->wallet)
+                    && isset($stripeData->payment_method_details->card->wallet->type)
+                    && $stripeData->payment_method_details->card->wallet->type === 'google_pay') {
+
+                    $paymentData['androidPay'] = $cardDetails;
+                    unset($paymentData["tokenizedCard"]);
+                    unset($paymentData["creditCard"]);
+                }
+
+                if ($stripeData && isset($stripeData->payment_method_details)
+                    && isset($stripeData->payment_method_details->card)
+                    && isset($stripeData->payment_method_details->card->wallet)
+                    && isset($stripeData->payment_method_details->card->wallet->type)
+                    && $stripeData->payment_method_details->card->wallet->type === 'apple_pay') {
+
+                    $paymentData['applePay'] = $cardDetails;
+                    unset($paymentData["tokenizedCard"]);
+                    unset($paymentData["creditCard"]);
+                }
+            }
+
             // Attempt to set tokenized card information if available
-            if ( !isset($paymentData["creditCard"]) && $payment->getAdditionalInformation('forter_cc_token') && $payment->getAdditionalInformation('forter_cc_bin') ) {
-                $paymentData["tokenizedCard"] = array(
+            if (!isset($paymentData["creditCard"]) && $payment->getAdditionalInformation('forter_cc_token') && $payment->getAdditionalInformation('forter_cc_bin')) {
+                $paymentData["tokenizedCard"] = [
                     'bin'   => $payment->getAdditionalInformation('forter_cc_bin'),
                     'token' => $payment->getAdditionalInformation('forter_cc_token')
-                );
+                ];
             }
         }
 
