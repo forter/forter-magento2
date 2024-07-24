@@ -202,6 +202,11 @@ class PaymentPlaceStart implements ObserverInterface
                 return;
             }
 
+            $order->getPayment()->setAdditionalInformation('forter_client_details', $connectionInformation);
+
+            $cardData = $this->getCardExtraData();
+            $this->setPaymentExtraCardData($order, $cardData);
+
             $this->forterLogger->forterConfig->log('Connection Information for Order ' . $order->getIncrementId() . ' : ' . json_encode($connectionInformation));
 
             $paymentMethod = $order->getPayment()->getMethod();
@@ -242,12 +247,7 @@ class PaymentPlaceStart implements ObserverInterface
 
             //creare entitate
             $forterEntity = $this->entityHelper->createForterEntity($order, $storeId, $validationType);
-
-            $order->getPayment()->setAdditionalInformation('forter_client_details', $connectionInformation);
-
-            $cardData = $this->getCardExtraData();
-            $this->setPaymentExtraCardData($order, $cardData);
-
+            
             $order->setData('sub_payment_method', $subMethod);
 
             $data = $this->requestBuilderOrder->buildTransaction($order, 'BEFORE_PAYMENT_ACTION');
