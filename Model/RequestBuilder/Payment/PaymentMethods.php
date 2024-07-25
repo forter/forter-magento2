@@ -11,8 +11,13 @@
 namespace Forter\Forter\Model\RequestBuilder\Payment;
 
 use Forter\Forter\Model\Config as ForterConfig;
+use Forter\Forter\Model\Mappers\AdyenMapper;
+use Forter\Forter\Model\Mappers\BraintreeMapper;
+use Forter\Forter\Model\Mappers\MercadoPagoMapper;
+use Forter\Forter\Model\Mappers\AuthorizeNetMapper;
+use Forter\Forter\Model\Mappers\PaypalMapper;
+use Forter\Forter\Model\Mappers\PayBrightMapper;
 use Magento\Customer\Model\Session;
-use Forter\Forter\Model\ThirdParty\Stripe;
 
 /**
  * Class Payment
@@ -39,6 +44,36 @@ class PaymentMethods
     protected $stripePaymentDataMapper;
 
     /**
+     * @var AdyenMapper
+     */
+    protected $adyenMapper;
+
+    /**
+     * @var MercadoPagoMapper
+     */
+    protected $mercadoPagoMapper;
+
+    /**
+     * @var BraintreeMapper
+     */
+    protected $braintreeMapper;
+
+    /**
+     * @var AuthorizeNetMapper
+     */
+    protected $authorizenetMapper;
+
+    /**
+     * @var PayBrightMapper
+     */
+    protected $payBrightMapper;
+
+    /**
+     * @var PaypalMapper
+     */
+    protected $paypalMapper;
+
+    /**
      * @method __construct
      * @param  Session      $customerSession
      * @param  ForterConfig $forterConfig
@@ -46,296 +81,61 @@ class PaymentMethods
     public function __construct(
         Session $customerSession,
         ForterConfig $forterConfig,
-        Stripe\PaymentDataMapper $stripePaymentDataMapper
+        \Forter\Forter\Model\Mappers\StripeMapper $stripePaymentDataMapper,
+        MercadoPagoMapper $mercadoPagoMapper,
+        AdyenMapper $adyenMapper,
+        BraintreeMapper $braintreeMapper,
+        AuthorizeNetMapper $authorizenetMapper,
+        PayBrightMapper $payBrightMapper,
+        PaypalMapper $paypalMapper
     ) {
         $this->customerSession = $customerSession;
         $this->forterConfig = $forterConfig;
         $this->stripePaymentDataMapper = $stripePaymentDataMapper;
+        $this->mercadoPagoMapper = $mercadoPagoMapper;
+        $this->adyenMapper = $adyenMapper;
+        $this->braintreeMapper = $braintreeMapper;
+        $this->authorizenetMapper = $authorizenetMapper;
+        $this->payBrightMapper = $payBrightMapper;
+        $this->paypalMapper = $paypalMapper;
     }
 
     public function getPaypalDetails($payment)
     {
-        return [
-          "payerId" => $payment->getAdditionalInformation("paypal_payer_id") ?? '',
-          "payerEmail" => $payment->getAdditionalInformation("paypal_payer_email") ?? '',
-          "payerStatus" => $payment->getAdditionalInformation("paypal_payer_status"),
-          "payerAddressStatus" => $payment->getAdditionalInformation("paypal_address_status"),
-          "paymentMethod" => $payment->getMethod(),
-          "paymentStatus" => $payment->getAdditionalInformation("paypal_payment_status"),
-          "protectionEligibility" => $payment->getAdditionalInformation("paypal_protection_eligibility"),
-          "correlationId" => $payment->getAdditionalInformation("paypal_correlation_id"),
-          "checkoutToken" => $payment->getAdditionalInformation("paypal_express_checkout_token"),
-          "paymentGatewayData" => [
-              "gatewayName" => $payment->getMethod(),
-              "gatewayTransactionId" => $payment->getTransactionId(),
-          ],
-          "fullPaypalResponsePayload" => $payment->getAdditionalInformation()
-        ];
+        return $this->paypalMapper->getPaypalDetails($payment);
     }
 
     public function getPaybrightDetails($order, $payment)
     {
-        return [
-          "serviceName" => $payment->getMethod(),
-          "firstName" => $order->getShippingAddress()->getFirstname(),
-          "lastName" => $order->getShippingAddress()->getLastname(),
-          "serviceResponseCode" => "200",
-          "paymentId" => $payment->getData('last_trans_id'),
-          "fullResponsePayload" => $payment->getAdditionalInformation()
-        ];
+        return $this->payBrightMapper->getPaybrightDetails($order, $payment);
     }
 
     public function getAdyenKlarnaDetails($order, $payment)
     {
-        return [
-        "serviceName" => $payment->getData('cc_type'),
-        "firstName" => $order->getShippingAddress()->getFirstname(),
-        "lastName" => $order->getShippingAddress()->getLastname(),
-        "serviceResponseCode" => "200",
-        "paymentId" => $payment->getData('cc_trans_id'),
-        "fullResponsePayload" => $payment->getAdditionalInformation()
-      ];
+        return $this->adyenMapper->getAdyenKlarnaDetails($order, $payment);
     }
 
     public function getAuthorizeNetDetails($payment)
     {
-        $detailsArray = [];
-
-        $ccLast4 = $payment->getAdditionalInformation('ccLast4');
-        if ($ccLast4) {
-            $detailsArray['lastFourDigits'] = $ccLast4;
-        }
-
-        $cc_type= $payment->getAdditionalInformation('accountType');
-        if ($cc_type) {
-            $detailsArray['cardBrand'] = $cc_type;
-        }
-
-        $cvvResponseCode = $payment->getAdditionalInformation('cvvResultCode');
-        if ($cvvResponseCode) {
-            $detailsArray['cvvResult'] = $cvvResponseCode;
-        }
-
-        $authCode = $payment->getAdditionalInformation('authCode');
-        if ($authCode) {
-            $detailsArray['authorizationCode'] = $authCode;
-        }
-
+        $detailsArray = $this->authorizenetMapper->getAuthorizeNetDetails($payment);
         return $this->preferCcDetails($payment, $detailsArray);
     }
 
     public function getBraintreeDetails($payment)
     {
-        $detailsArray =[];
-
-        $ccType = $payment->getAdditionalInformation('cc_type');
-        if ($ccType) {
-            $detailsArray['cardBrand'] = $ccType;
-        }
-
-        $authResult = $payment->getAdditionalInformation('processorAuthorizationCode');
-        if ($ccType) {
-            $detailsArray['authorizationCode'] = $authResult;
-        }
-
-        $cvvResponseCode = $payment->getAdditionalInformation('cvvResponseCode');
-        if ($cvvResponseCode) {
-            $detailsArray['cvvResult'] = $cvvResponseCode;
-        }
-
-        $avsZipResult = $payment->getAdditionalInformation('avsPostalCodeResponseCode');
-        if ($avsZipResult) {
-            $detailsArray['avsZipResult'] = $avsZipResult;
-        }
-
-        $avsStreetResult = $payment->getAdditionalInformation('avsStreetAddressResponseCode');
-        if ($avsStreetResult) {
-            $detailsArray['avsStreetResult'] = $avsStreetResult;
-        }
-
-        // field below come from the plugin Plugin/Braintree/Gateway/Response/CardDetailsHandler.php up to Forter 2.0.8
-        $forter_cc_bin = $payment->getAdditionalInformation('forter_cc_bin');
-        if ($forter_cc_bin) {
-            $detailsArray['bin'] = $forter_cc_bin;
-        }
-
-        // field below come from the plugin Plugin/Braintree/Gateway/Response/CardDetailsHandler.php up to Forter 2.0.8
-        $forter_cc_owner = $payment->getAdditionalInformation('forter_cc_owner');
-        if ($forter_cc_owner) {
-            $detailsArray['nameOnCard'] = $forter_cc_owner;
-        }
-
-        // field below come from the plugin Plugin/Braintree/Gateway/Response/CardDetailsHandler.php up to Forter 2.0.8
-        $forter_cc_country = $payment->getAdditionalInformation('forter_cc_country');
-        if ($forter_cc_country) {
-            $detailsArray['countryOfIssuance'] = $forter_cc_country;
-        }
-
+        $detailsArray = $this->braintreeMapper->getBraintreeDetails($payment);
         return $this->preferCcDetails($payment, $detailsArray);
     }
 
     public function getMercadopagoDetails($payment)
     {
-        $detailsArray =[];
-
-        $ccType = $payment->getAdditionalInformation('payment_method');
-        if ($ccType) {
-            $detailsArray['cardBrand'] = $ccType;
-        }
-
-        $expirationMonth = $payment->getAdditionalInformation('card_expiration_month');
-        if ($expirationMonth) {
-            $detailsArray['expirationMonth'] = $expirationMonth;
-        }
-
-        $expirationYear = $payment->getAdditionalInformation('card_expiration_year');
-        if ($expirationYear) {
-            $detailsArray['expirationYear'] = $expirationYear;
-        }
-
-        $nameOnCard = $payment->getAdditionalInformation('card_holder_name');
-        if ($nameOnCard) {
-            $detailsArray['nameOnCard'] = $nameOnCard;
-        }
-
-        $mercadoPayment = $payment->getAdditionalInformation('paymentResponse');
-
-        if ($mercadoPayment) {
-            if (isset($mercadoPayment['authorization_code'])) {
-                $detailsArray['authorizationCode'] = $mercadoPayment['authorization_code'];
-            }
-
-            if (isset($mercadoPayment['card']['first_six_digits'])) {
-                $detailsArray['bin'] = $mercadoPayment['card']['first_six_digits'];
-            }
-
-            if (isset($mercadoPayment['card']['last_four_digits'])) {
-                $detailsArray['lastFourDigits'] = $mercadoPayment['card']['last_four_digits'];
-            }
-        }
-
+        $detailsArray = $this->mercadoPagoMapper->getMercadopagoDetails($payment);
         return $this->preferCcDetails($payment, $detailsArray);
     }
 
     public function getAdyenDetails($payment)
     {
-        $additonal_data = $payment->getAdditionalInformation('additionalData');
-        $detailsArray = [];
-        if ($additonal_data) {
-            if (isset($additonal_data['expiryDate'])) {
-                $cardDate = explode("/", $additonal_data['expiryDate'] ?? '');
-                $detailsArray['expirationMonth'] = strlen($cardDate[0]) > 1 ? $cardDate[0] : '0' . $cardDate[0];
-                $detailsArray['expirationYear'] = $cardDate[1];
-            }
-            if (isset($additonal_data['authCode'])) {
-                $detailsArray['verificationResults']['authorizationCode'] = $additonal_data['authCode'];
-                $detailsArray['verificationResults']['processorResponseCode'] = $additonal_data['authCode'];
-            }
-            if (isset($additonal_data['cardHolderName'])) {
-                $detailsArray['nameOnCard'] = $additonal_data['cardHolderName'];
-            }
-            if (isset($additonal_data['paymentMethod'])) {
-                $detailsArray['cardBrand'] = $additonal_data['paymentMethod'];
-            }
-            if (isset($additonal_data['cardBin'])) {
-                $detailsArray['bin'] = $additonal_data['cardBin'];
-            }
-            if (isset($additonal_data['cardIssuingCountry'])) {
-                $detailsArray['countryOfIssuance'] = $additonal_data['cardIssuingCountry'];
-            }
-            if (isset($additonal_data['fundingSource'])) {
-                $detailsArray['cardType'] = $additonal_data['fundingSource'];
-            }
-            if (isset($additonal_data['cardSummary'])) {
-                $detailsArray['lastFourDigits'] = $additonal_data['cardSummary'];
-            }
-            if (isset($additonal_data['avsResultRaw'])) {
-                $detailsArray['verificationResults']['avsFullResult'] = $additonal_data['avsResultRaw'];
-            }
-            if (isset($additonal_data['cvcResultRaw'])) {
-                $detailsArray['verificationResults']['cvvResult'] = $additonal_data['cvcResultRaw'];
-            }
-            if (isset($additonal_data['refusalReasonRaw'])) {
-                $detailsArray['verificationResults']['processorResponseText'] = $additonal_data['refusalReasonRaw'];
-                $detailsArray['verificationResults']['processorResponseCode'] = $additonal_data['refusalReasonRaw'];
-            }
-            if (isset($additonal_data['eci'])) {
-                $detailsArray['verificationResults']['eciValue']= $additonal_data['eci'] === 'N/A' ? '' : $additonal_data['eci'];
-            }
-            if (isset($additonal_data['threeds2.threeDS2Result.eci'])) {
-                $detailsArray['verificationResults']['eciValue']= $additonal_data['threeds2.threeDS2Result.eci'] === 'N/A' ? '' : $additonal_data['threeds2.threeDS2Result.eci'];
-            }
-            //3DS mapping
-            if (isset($additonal_data['liabilityShift'])) {
-                $detailsArray['verificationResults']['liabilityShift'] = $additonal_data['liabilityShift'] === 'true' ? true : false;
-            }
-            if (isset($additonal_data['threeDAuthenticated'])) {
-                $detailsArray['verificationResults']['authorizationProcessedWith3DS'] = $additonal_data['threeDAuthenticated'] === 'true' ? true : false;
-            }
-            if (isset($additonal_data['threeDOffered'])) {
-                $detailsArray['verificationResults']['authenticationTriggered'] = $additonal_data['threeDOffered'] === 'true' ? true : false;
-            }
-            if (isset($additonal_data['threeDAuthenticatedResponse'])) {
-                $detailsArray['verificationResults']['threeDsStatusCode'] = $additonal_data['threeDAuthenticatedResponse'] !== 'N/A' ? $additonal_data['threeDAuthenticatedResponse'] : '';
-            }
-            if (isset($additonal_data['threeDSVersion'])) {
-                $detailsArray['verificationResults']['threeDsVersion'] = $additonal_data['threeDSVersion'];
-            }
-            if (isset($additonal_data['challengeCancel'])) {
-                $detailsArray['verificationResults']['threeDsChallengeCancelCode'] = $additonal_data['challengeCancel'];
-            }
-            if (isset($additonal_data['cavv'])) {
-                $detailsArray['verificationResults']['cavvResult'] = $additonal_data['cavv'];
-            }
-            $detailsArray['fullResponsePayload'] = $additonal_data;
-        }
-
-        $ccType = $payment->getAdditionalInformation('cc_type');
-        if ($ccType) {
-            $detailsArray['cardBrand'] = $ccType;
-        }
-
-        $adyenExpiryDate = $payment->getAdditionalInformation('adyen_expiry_date');
-        if ($adyenExpiryDate) {
-            $date = explode("/", $adyenExpiryDate ?? '');
-            $detailsArray['expirationMonth'] = $date[0];
-            $detailsArray['expirationYear'] = $date[1];
-        }
-
-        $forter_cc_bin = $payment->getAdditionalInformation('adyen_card_bin');
-        if ($forter_cc_bin) {
-            $detailsArray['bin'] = $forter_cc_bin;
-        }
-
-        $authCode = $payment->getAdditionalInformation('adyen_auth_code');
-        if ($authCode) {
-            $detailsArray['verificationResults']['authorizationCode'] = $authCode;
-            $detailsArray['verificationResults']['processorResponseCode']= $authCode;
-        }
-
-        $avsFullResult = $payment->getAdditionalInformation('adyen_avs_result');
-        if ($avsFullResult) {
-            $avsFullResult = (int) $avsFullResult;
-            $detailsArray['verificationResults']['avsFullResult'] = strval($avsFullResult);
-        }
-
-        $cvcFullResult = $payment->getAdditionalInformation('adyen_cvc_result');
-        if ($cvcFullResult) {
-            $cvcFullResult = (int) $cvcFullResult;
-            $detailsArray['verificationResults']['cvvResult'] = strval($cvcFullResult);
-        }
-
-        $processorResponseText = $payment->getAdditionalInformation('resultCode');
-        if ($processorResponseText) {
-            $detailsArray['verificationResults']['processorResponseText'] = $processorResponseText;
-        }
-
-        $processorResponseText = $payment->getAdditionalInformation('adyen_refusal_reason_raw');
-        if ($processorResponseText) {
-            $detailsArray['verificationResults']['processorResponseText'] = $processorResponseText;
-            $detailsArray['verificationResults']['processorResponseCode'] = $processorResponseText;
-        }
-
+        $detailsArray = $this->adyenMapper->getAdyenDetails($payment);
         $preferCcDetailsArray = $this->preferCcDetails($payment, $detailsArray);
         $mergedArray = $this->mergeArrays($preferCcDetailsArray, $detailsArray);
 
@@ -344,87 +144,7 @@ class PaymentMethods
 
     public function getAdyenGooglePayDetails($payment, $order)
     {
-        $additonal_data = $payment->getAdditionalInformation('additionalData');
-        $forterData = $payment->getAdditionalInformation('forterData');
-        $detailsArray = [];
-        if ($additonal_data || $forterData) {
-            if (isset($forterData['paymentMethod']) && isset($forterData['paymentMethod']['googlePayCardNetwork'])) {
-                $detailsArray['cardBrand'] = $forterData['paymentMethod']['googlePayCardNetwork'];
-            }
-
-            if (isset($forterData['paymentMethod']) && isset($forterData['paymentMethod']['googlePayToken'])) {
-                $googlePayToken = json_decode($forterData['paymentMethod']['googlePayToken']);
-                if (isset($googlePayToken->signature)) {
-                    $detailsArray['token'] = $googlePayToken->signature;
-                }
-            }
-
-            if (isset($forterData['checkoutAttemptId'])) {
-                $detailsArray['fingerprint'] = $forterData['checkoutAttemptId'];
-            }
-
-            if (isset($forterData['paymentMethod']) && isset($forterData['paymentMethod']['checkoutAttemptId'])) {
-                $detailsArray['fingerprint'] = $forterData['paymentMethod']['checkoutAttemptId'];
-            }
-
-            if (isset($additonal_data['cardHolderName'])) {
-                $detailsArray['nameOnCard'] = $additonal_data['cardHolderName'];
-            } else {
-                $detailsArray['nameOnCard'] = $order->getCustomerFirstname() . ' ' . $order->getCustomerLastname();
-            }
-
-            if (isset($additonal_data['cardBin'])) {
-                $detailsArray['bin'] = $additonal_data['cardBin'];
-            }
-
-            if (isset($additonal_data['cardIssuingCountry'])) {
-                $detailsArray['countryOfIssuance'] = $additonal_data['cardIssuingCountry'];
-            }
-
-            if (isset($additonal_data['expiryDate'])) {
-                $expiryDate = explode("/", $additonal_data['expiryDate']);
-
-                $month = $expiryDate[0];
-                if (strlen($month) == 1) {
-                    $month = "0" . $month;
-                }
-
-                $detailsArray['expirationMonth']= $month;
-                $detailsArray['expirationYear']= $expiryDate[1];
-            }
-
-            if (isset($additonal_data['cardSummary'])) {
-                $detailsArray['lastFourDigits']= $additonal_data['cardSummary'];
-            }
-
-            if (isset($additonal_data['authCode'])) {
-                $detailsArray['verificationResults']['authorizationCode']= $additonal_data['authCode'];
-                $detailsArray['verificationResults']['processorResponseCode']= $additonal_data['authCode'];
-            }
-
-            if (isset($additonal_data['avsResultRaw'])) { //sau avsResult , are text mai mult
-                $detailsArray['verificationResults']['avsFullResult']= $additonal_data['avsResultRaw'];
-            }
-
-            if (isset($additonal_data['cvcResultRaw'])) { // sau cvcResult
-                $detailsArray['verificationResults']['cvvResult']= $additonal_data['cvcResult'][0];
-            }
-
-            if (isset($additonal_data['eci'])) {
-                $detailsArray['verificationResults']['eciValue']= $additonal_data['eci'] === 'N/A' ? '' : $additonal_data['eci'];
-            }
-
-            if (isset($additonal_data['refusalReasonRaw'])) {
-                $detailsArray['verificationResults']['processorResponseText']= $additonal_data['refusalReasonRaw'];
-                $detailsArray['verificationResults']['processorResponseCode']= $additonal_data['refusalReasonRaw'];
-            }
-
-            if (isset($additonal_data['merchantReference'])) {
-                $detailsArray['paymentGatewayData']['gatewayMerchantId']= $additonal_data['merchantReference'];
-            }
-
-            $detailsArray['cardType'] = 'CREDIT';
-        }
+        $detailsArray = $this->adyenMapper->getAdyenGooglePayDetails($payment, $order);
         $preferCcDetailsArray = $this->preferCcDetails($payment, $detailsArray);
         $mergedArray = $this->mergeArrays($preferCcDetailsArray, $detailsArray);
         return $mergedArray;
