@@ -87,7 +87,7 @@ class ConfigProvider implements \Magento\Checkout\Model\ConfigProviderInterface
     {
         $adyenModule = $this->moduleList->getOne('Adyen_Payment');
 
-        if (isset($adyenModule)) {
+        if (isset($adyenModule) && isset($adyenModule['setup_version'])) {
             $adyenVersion = $adyenModule['setup_version'];
             return version_compare($adyenVersion, '8.11.0') >= 0;
         }
