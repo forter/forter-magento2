@@ -239,7 +239,7 @@ class PaymentPlaceStart implements ObserverInterface
                 }
             }
 
-            if ($methodSetting === 'pre_post' || (!$methodSetting && $this->config->getIsPreAndPost())) {
+            if ($methodSetting === 'prepost' || (!$methodSetting && $this->config->getIsPreAndPost())) {
                 $validationType = 'pre-and-post-authorization';
             } else {
                 $validationType = 'pre-authorization';
@@ -247,7 +247,7 @@ class PaymentPlaceStart implements ObserverInterface
 
             //creare entitate
             $forterEntity = $this->entityHelper->createForterEntity($order, $storeId, $validationType);
-
+            
             $order->setData('sub_payment_method', $subMethod);
 
             $data = $this->requestBuilderOrder->buildTransaction($order, 'BEFORE_PAYMENT_ACTION');
