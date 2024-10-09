@@ -50,11 +50,11 @@ class Cart
     {
         $amountUSD = null;
         if ($order->getOrderCurrency()->getCurrencyCode() === 'USD') {
-            $amountUSD = number_format($order->getGrandTotal(), 2, '.');
+            $amountUSD = number_format($order->getGrandTotal(), 2, '.', '');
         }
         return [
             "amountUSD" => $amountUSD,
-            "amountLocalCurrency" => strval(number_format($order->getGrandTotal(), 2,'.')),
+            "amountLocalCurrency" => strval(number_format($order->getGrandTotal(), 2,'.', '')),
             "currency" => $order->getOrderCurrency()->getCurrencyCode() . ""
         ];
     }
