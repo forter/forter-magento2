@@ -130,60 +130,65 @@ class ForterQueue
             $items = $this->entityHelper->getForterEntitiesPreSync();
             $items->setPageSize(10000)->setCurPage(1);
             foreach ($items as $item) {
-                $this->emulate->stopEnvironmentEmulation(); // let detach the store meta data
-                $order = $this->orderFactory->create()->loadByIncrementId($item->getData('order_increment_id'));
-                if (!$order) {
-                    $this->forterConfig->log('Order does not exist, remove from queue');
-                    // order does not exist, remove from queue
-                    $item->delete();
-                    continue;
-                }
-                $payment = $order->getPayment();
-
-                if (!$payment) {
-                    continue;
-                }
-
-                $method = $payment->getMethod();
-
-                // let bind the relevent store in case of multi store settings
-                $this->emulate->startEnvironmentEmulation(
-                    $order->getStoreId(),
-                    'frontend',
-                    true
-                );
-
-                if (strpos($method ?? '', 'adyen') !== false && !$order->getPayment()->getAdyenPspReference()) {
-                    $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'Skip Adyen Order Missing Data');
-                    $message->metaData->order = $order->getData();
-                    $message->metaData->payment = $order->getPayment()->getData();
-                    $message->proccessItem = $item;
-                    $this->forterLogger->SendLog($message);
-                    continue;
-                }
-
-                if ($this->forterConfig->getIsPaymentMethodAccepted($payment->getMethod()) && !$this->forterConfig->getIsReadyForForter($payment)) {
-                    if ($this->forterConfig->isHoldingOrdersEnabled()) {
-                        $order->canHold() ?? $order->hold()->save();
+                try {
+                    $this->emulate->stopEnvironmentEmulation(); // let detach the store meta data
+                    $order = $this->orderFactory->create()->loadByIncrementId($item->getData('order_increment_id'));
+                    if (!$order) {
+                        $this->forterConfig->log('Order does not exist, remove from queue');
+                        // order does not exist, remove from queue
+                        $item->delete();
+                        continue;
                     }
-                    continue;
-                }
+                    $payment = $order->getPayment();
 
-                $result = $this->handlePreSyncMethod($order, $item);
-                if (!$result) {
-                    $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'No Mapped CC Adyen');
-                    $message->metaData->order = $order->getData();
+                    if (!$payment) {
+                        continue;
+                    }
+
+                    $method = $payment->getMethod();
+
+                    // let bind the relevent store in case of multi store settings
+                    $this->emulate->startEnvironmentEmulation(
+                        $order->getStoreId(),
+                        'frontend',
+                        true
+                    );
+
+                    if (strpos($method ?? '', 'adyen') !== false && !$order->getPayment()->getAdyenPspReference()) {
+                        $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'Skip Adyen Order Missing Data');
+                        $message->metaData->order = $order->getData();
+                        $message->metaData->payment = $order->getPayment()->getData();
+                        $message->proccessItem = $item;
+                        $this->forterLogger->SendLog($message);
+                        continue;
+                    }
+
+                    if ($this->forterConfig->getIsPaymentMethodAccepted($payment->getMethod()) && !$this->forterConfig->getIsReadyForForter($payment)) {
+                        if ($this->forterConfig->isHoldingOrdersEnabled()) {
+                                $order->canHold() ?? $order->hold()->save();
+                        }
+                        continue;
+                    }
+
+                    $result = $this->handlePreSyncMethod($order, $item);
+                    if (!$result) {
+                        $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'No Mapped CC Adyen');
+                        $message->metaData->order = $order->getData();
+                        $message->metaData->payment = $order->getPayment()->getData();
+                        $message->proccessItem = $item;
+                        $this->forterLogger->SendLog($message);
+                        continue;
+                    }
+                    $item->save();
+                    $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'CRON Validation Finished');
+                    $message->metaData->order = $order;
                     $message->metaData->payment = $order->getPayment()->getData();
                     $message->proccessItem = $item;
                     $this->forterLogger->SendLog($message);
-                    continue;
+                } catch (\Exception $e) {
+                    $this->forterConfig->log('Error processing item: ' . $e->getMessage());
+                    $this->abstractApi->reportToForterOnCatch($e);
                 }
-                $item->save();
-                $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'CRON Validation Finished');
-                $message->metaData->order = $order;
-                $message->metaData->payment = $order->getPayment()->getData();
-                $message->proccessItem = $item;
-                $this->forterLogger->SendLog($message);
             }
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);

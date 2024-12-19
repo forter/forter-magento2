@@ -74,17 +74,16 @@ class StripePayment
                 \Stripe\ApiRequestor::setHttpClient(null);
             }
 
-            if (is_object($paymentIntent) && is_object($paymentIntent->charges) && is_array($paymentIntent->charges->data)) {
-                $paymentData = array_pop($paymentIntent->charges->data);
+            if (is_object($paymentIntent) && isset($paymentIntent->latest_charge)) {
+                $paymentData = \Stripe\Charge::retrieve($paymentIntent->latest_charge);
 
                 if (is_object($paymentData) == false) {
                     return false;
                 }
-
                 return $paymentData;
             }
         } catch (\Exception $e) {
-            $this->forterLogger->forterConfig->log('No payment data was found on Stripe API for the current order ' . $e->getMessage(),'error');
+            $this->forterLogger->forterConfig->log('No payment data was found on Stripe API for the current order ' . $e->getMessage(), 'error');
         }
         return false;
     }
