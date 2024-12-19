@@ -18,6 +18,11 @@ class ForterLoggerMessage
      */
     public $metaData;
 
+    /**
+     * @var mixed
+     */
+    public $proccessItem;
+
     public function __construct(string $siteId, string $orderId, string $message)
     {
         $this->siteId = $siteId;
