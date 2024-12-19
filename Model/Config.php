@@ -912,11 +912,11 @@ class Config
 
     public function getIsReadyForForter($payment)
     {
-        if (strpos($payment->getMethod(), 'stripe') !== false) {
+        if (strpos($payment->getMethod(), 'stripe') !== false || strpos($payment->getMethod(), 'checkoutcom') !== false) {
             return $payment->getLastTransId();
         }
 
-        return $payment->getCcTransId();
+        return $payment->getCcTransId() ? $payment->getCcTransId() : $payment->getLastTransId();
     }
 
     public function getNoPreAuthPaymentMethod($paymentMethod)

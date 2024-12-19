@@ -133,6 +133,6 @@ class Order
             $this->abstractApi->reportToForterOnCatch($e);
         }
 
-        return;
+        return $result;
     }
 }

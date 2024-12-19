@@ -42,7 +42,7 @@
             <general>
                 <async_payment_methods>adyen_pay_by_link,stripe_payments_invoice</async_payment_methods>
                 <no_preauth_payment_methods>stripe_payments</no_preauth_payment_methods>
-                <accepted_payment_methods>adyen,braintree,stripe</accepted_payment_methods>
+                <accepted_payment_methods>adyen,braintree,stripe,checkoutcom</accepted_payment_methods>
             </general>
         </forter>
     </default>
