@@ -206,7 +206,15 @@ class ForterQueue
     {
         try {
             $data = $this->requestBuilderOrder->buildTransaction($order, 'AFTER_PAYMENT_ACTION');
-            $paymentMethod = $data['payment'][0]['paymentMethodNickname'];
+
+            $paymentMethod = isset($data['payment'][0]['paymentMethodNickname'])
+                ? $data['payment'][0]['paymentMethodNickname']
+                : null;
+
+            if (!$paymentMethod) {
+                $this->forterConfig->log('Payment method data is missing for Order ID: ' . $order->getIncrementId());
+                return false;
+            }
 
             if ($paymentMethod == 'adyen_cc') {
                 if (!isset($data['payment'][0]['creditCard'])) {

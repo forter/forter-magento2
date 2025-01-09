@@ -89,7 +89,7 @@ class Order
             $payment = $order->getPayment();
             $this->forterConfig->log('Forter Adyen Module:' . $result['orderId'] . ', Payment method is:' . $method);
             $logArray[2] = 'Forter Adyen Module:' . $result['orderId'] . ', Payment method is:' . $method;
-            $notificationAdditionalData = $this->serializer->unserialize($notification->getAdditionalData());
+            $notificationAdditionalData = $notification->getAdditionalData() ? $this->serializer->unserialize($notification->getAdditionalData()) : [];
 
             if ($method == 'adyen_cc') {
                 $logArray[3] = 'Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_hpp method';
