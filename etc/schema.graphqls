@@ -1,0 +1,4 @@
+input BraintreeInput {
+    bin: String @doc(description:"Card bin details")
+    cc_last4: String @doc(description:"Card last 4 digits details")
+}
