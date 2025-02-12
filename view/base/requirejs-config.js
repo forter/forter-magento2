@@ -12,7 +12,10 @@ var config = {
             },
             'PayPal_Braintree/js/view/payment/method-renderer/cc-form': {
                  'Forter_Forter/js/model/paypal-braintree-cc-mixin': true
-            }
+            },
+             'Adyen_Payment/js/view/payment/method-renderer/adyen-cc-vault-method': {
+                        'Forter_Forter/js/model/adyen-cc-vault-method-mixin': true
+                    },
         }
     }
 };
