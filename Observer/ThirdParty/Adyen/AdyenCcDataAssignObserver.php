@@ -14,6 +14,7 @@ class AdyenCcDataAssignObserver extends AbstractDataAssignObserver
     const CARD_BRAND = 'paymentMethod';
     const ADDITIONAL_DATA = 'additionalData';
 
+    const FORTER_STATE_DATA = 'forterData';
 
     /**
      * Approved root level keys from additional data array
@@ -62,6 +63,7 @@ class AdyenCcDataAssignObserver extends AbstractDataAssignObserver
             $additionalData,
             self::$approvedAdditionalDataKeys
         );
+        $paymentInfo->unsAdditionalInformation(self::FORTER_STATE_DATA);
         $paymentInfo->setAdditionalInformation(self::ADDITIONAL_DATA, $additionalData);
     }
 }
