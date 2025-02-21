@@ -11,7 +11,7 @@ use Magento\Framework\Exception\PaymentException;
 use Magento\Sales\Api\OrderManagementInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\CreditmemoFactory;
-use agento\Sales\Model\Order\InvoiceFactory;
+use Magento\Sales\Model\Order\InvoiceFactory;
 use Magento\Sales\Model\Service\CreditmemoService;
 use Forter\Forter\Model\Order\Recommendation;
 
