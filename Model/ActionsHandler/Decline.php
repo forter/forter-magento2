@@ -11,7 +11,7 @@ use Magento\Framework\Exception\PaymentException;
 use Magento\Sales\Api\OrderManagementInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\CreditmemoFactory;
-use Magento\Sales\Model\Order\Invoice;
+use Magento\Sales\Model\Order\InvoiceFactory;
 use Magento\Sales\Model\Service\CreditmemoService;
 use Forter\Forter\Model\Order\Recommendation;
 
@@ -50,9 +50,9 @@ class Decline
      */
     private $creditmemoService;
     /**
-     * @var Invoice
+     * @var InvoiceFactory
      */
-    private $invoice;
+    private $invoiceFactory;
     /**
      * @var Sendmail
      */
@@ -78,7 +78,7 @@ class Decline
      * @param CreditmemoFactory $creditmemoFactory
      * @param ForterConfig $forterConfig
      * @param CheckoutSession $checkoutSession
-     * @param Invoice $invoice
+     * @param InvoiceFactory $invoiceFactory
      * @param CreditmemoService $creditmemoService
      */
     public function __construct(
@@ -89,7 +89,7 @@ class Decline
         CreditmemoFactory $creditmemoFactory,
         ForterConfig $forterConfig,
         CheckoutSession $checkoutSession,
-        Invoice $invoice,
+        InvoiceFactory $invoiceFactory,
         CreditmemoService $creditmemoService,
         OrderManagementInterface $orderManagement,
         Recommendation $recommendation
@@ -103,7 +103,7 @@ class Decline
         $this->forterConfig = $forterConfig;
         $this->creditmemoFactory = $creditmemoFactory;
         $this->creditmemoService = $creditmemoService;
-        $this->invoice = $invoice;
+        $this->invoiceFactory = $invoiceFactory;
         $this->recommendation = $recommendation;
     }
 
@@ -204,7 +204,7 @@ class Decline
         $invoices = $order->getInvoiceCollection();
         foreach ($invoices as $invoice) {
             $invoiceincrementid = $invoice->getIncrementId();
-            $invoiceobj = $this->invoice->loadByIncrementId($invoiceincrementid);
+            $invoiceobj = $this->invoiceFactory->create()->loadByIncrementId($invoiceincrementid);
             $creditmemo = $this->creditmemoFactory->createByOrder($order);
 
             $this->request->setParam('invoice_id', $invoiceobj->getId() );
