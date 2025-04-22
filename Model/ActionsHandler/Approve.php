@@ -80,7 +80,7 @@ class Approve
     public function handleApproveImmediatly($order)
     {
         try {
-            $paymentBaseAmountAuthorized = $order->getPayment()->getBaseAmountAuthorized();
+            $paymentBaseAmountAuthorized = $order->getPayment()->getBaseAmountAuthorized() ?? $order->getPayment()->getAmountAuthorized();
 
             if (!$paymentBaseAmountAuthorized || !($paymentBaseAmountAuthorized > 0)) {
                 return false;

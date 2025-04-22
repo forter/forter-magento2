@@ -311,6 +311,9 @@ class PaymentPlaceEnd implements ObserverInterface
             $message->metaData->pendingOnHoldEnabled = $this->forterConfig->isPendingOnHoldEnabled();
             $this->forterLogger->SendLog($message);
         }
+
+        $forterEntity->setEntityType('order');
+        $forterEntity->save();
     }
 
     public function handleDecline($order, $forterEntity)
@@ -328,8 +331,10 @@ class PaymentPlaceEnd implements ObserverInterface
             if ($order->canHold()) {
                 $order->setCanSendNewEmailFlag(false);
                 $this->decline->holdOrder($order);
-                $this->setMessage($order, 'decline', $forterEntity);
             }
+
+            $this->setMessage($order, 'decline', $forterEntity);
+
         } elseif ($result == '2') {
             $order->setCanSendNewEmailFlag(false);
             $this->decline->markOrderPaymentReview($order);

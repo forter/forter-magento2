@@ -68,7 +68,7 @@
                     <label>Action On Decline (pre-authorization)</label>
                     <source_model>Forter\Forter\Model\Config\Source\PreAuthDeclineOptions</source_model>
                     <comment>
-                        On "Approve" or "Not Reviewed" we the action will be the payment gateway default
+                        On "Approve" or "Not Reviewed" the action will be the payment gateway default
                     </comment>
                     <depends>
                         <field id="pre_post_select" separator=",">1,4</field>
