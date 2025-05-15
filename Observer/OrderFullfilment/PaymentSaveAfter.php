@@ -55,7 +55,7 @@ class PaymentSaveAfter implements ObserverInterface
             $this->forterLogger->forterConfig->log('Order no. ' . $order->getIncrementId() . ' Payment Data: ' . json_encode($order->getPayment()->getData()));
             $this->emulate->stopEnvironmentEmulation();
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }
     }
