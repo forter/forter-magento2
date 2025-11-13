@@ -5,6 +5,16 @@ namespace Forter\Forter\Model\Mappers;
 class AdyenMapper
 {
 
+    public const CARD_TYPES = [
+        "CHARGED"               => "PREPAID",
+        "CREDIT"                => "CREDIT",
+        "DEBIT"                 => "DEBIT",
+        "PREPAID"               => "PREPAID",
+        "DEFERRED_DEBIT"        => "DEBIT",
+        "PREPAID_RELOADABLE"    => "PREPAID",
+        "PREPAID_NONRELOADABLE" => "PREPAID"
+    ];
+
     public function getAdyenDetails($payment)
     {
         $additonal_data = $payment->getAdditionalInformation('additionalData');
@@ -32,7 +42,7 @@ class AdyenMapper
                 $detailsArray['countryOfIssuance'] = $additonal_data['cardIssuingCountry'];
             }
             if (isset($additonal_data['fundingSource'])) {
-                $detailsArray['cardType'] = $additonal_data['fundingSource'];
+                $detailsArray['cardType'] = isset(self::CARD_TYPES[$additonal_data['fundingSource']]) ? self::CARD_TYPES[$additonal_data['fundingSource']] : $additonal_data['fundingSource'];
             }
             if (isset($additonal_data['cardSummary'])) {
                 $detailsArray['lastFourDigits'] = $additonal_data['cardSummary'];
