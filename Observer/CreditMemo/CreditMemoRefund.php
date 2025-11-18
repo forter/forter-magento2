@@ -11,9 +11,9 @@ use Magento\Sales\Model\Order\Creditmemo;
 
 class CreditMemoRefund implements ObserverInterface
 {
-    const STATE_OPEN = Creditmemo::STATE_OPEN;
-    const STATE_REFUNDED = Creditmemo::STATE_REFUNDED;
-    const STATE_CANCELED = Creditmemo::STATE_CANCELED;
+    public const STATE_OPEN = Creditmemo::STATE_OPEN;
+    public const STATE_REFUNDED = Creditmemo::STATE_REFUNDED;
+    public const STATE_CANCELED = Creditmemo::STATE_CANCELED;
 
     /**
      * @var Config
@@ -61,7 +61,7 @@ class CreditMemoRefund implements ObserverInterface
 
     public function execute(Observer $observer)
     {
-        if (!$this->config->isEnabled() && !$this->config->isOrderCreditMemoStatusEnable()) {
+        if (!$this->config->isEnabled() || !$this->config->isOrderCreditMemoStatusEnable()) {
             return false;
         }
 

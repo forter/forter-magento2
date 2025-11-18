@@ -283,6 +283,10 @@
 }</pre><p>]]>
                     </comment>
                 </field>
+                <field id="action_excluded_payment_methods" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Action excluded payment methods</label>
+                    <comment>Comma separated list of payment method codes that would be excluded from order/payment actions. Transactions may still be sent to Forter.</comment>
+                </field>
             </group>
             <group id="advanced_settings_cc_listener" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Advanced Settings Pre Auth</label>

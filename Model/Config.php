@@ -562,11 +562,11 @@ class Config
     /**
      * @return bool
      */
-//    public function getIsCron()
-//    {
-//        $prePostSelect = $this->getConfigValue('immediate_post_pre_decision/pre_post_select');
-//        return ($prePostSelect == '3' ? true : false);
-//    }
+    //    public function getIsCron()
+    //    {
+    //        $prePostSelect = $this->getConfigValue('immediate_post_pre_decision/pre_post_select');
+    //        return ($prePostSelect == '3' ? true : false);
+    //    }
 
     /**
      * Return boolean regarding active/disable pre-auth card observing
@@ -691,6 +691,30 @@ class Config
     }
 
     /**
+     * @method getActionExcludedPaymentMethods
+     * @param $scope
+     * @param $scopeId
+     * @return string[]
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function getActionExcludedPaymentMethods($scope = null, $scopeId = null)
+    {
+        return array_filter(array_map('trim', explode(',', (string) $this->getConfigValue('advanced_settings/action_excluded_payment_methods', $scope, $scopeId))));
+    }
+
+    /**
+     * @method isActionExcludedPaymentMethod
+     * @param  string                        $methodCode
+     * @param  string|null                   $scope
+     * @param  int|null                      $scopeId
+     * @return boolean
+     */
+    public function isActionExcludedPaymentMethod($methodCode, $scope = null, $scopeId = null)
+    {
+        return in_array((string) $methodCode, $this->getActionExcludedPaymentMethods($scope, $scopeId), true);
+    }
+
+    /**
      * @param $addresses
      * @return array|bool
      */
@@ -799,7 +823,7 @@ class Config
                     $result = 'Do nothing';
                 }
                 return $result;
-              case 'not_review_cron':
+            case 'not_review_cron':
                 if ($result == '1') {
                     $result = 'Create Invoice and Capture Payments';
                 } elseif ($result == '2') {

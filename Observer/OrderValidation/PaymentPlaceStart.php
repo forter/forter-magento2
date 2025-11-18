@@ -33,8 +33,8 @@ class PaymentPlaceStart implements ObserverInterface
      */
     public const VALIDATION_API_ENDPOINT = 'https://api.forter-secure.com/v2/orders/';
 
-    const FORTER_STATUS_PRE_POST_VALIDATION = "pre_post_validation";
-    const FORTER_STATUS_COMPLETE = "complete";
+    public const FORTER_STATUS_PRE_POST_VALIDATION = "pre_post_validation";
+    public const FORTER_STATUS_COMPLETE = "complete";
 
     /**
      * @var Decline
@@ -211,10 +211,10 @@ class PaymentPlaceStart implements ObserverInterface
 
             $paymentMethod = $order->getPayment()->getMethod();
 
-//            if (in_array($paymentMethod, $this->config->noPreAuthPaymentMethods())) {
-//                $this->entityHelper->createForterEntity($order, $storeId, 'post-authorization');
-//                return;
-//            }
+            //            if (in_array($paymentMethod, $this->config->noPreAuthPaymentMethods())) {
+            //                $this->entityHelper->createForterEntity($order, $storeId, 'post-authorization');
+            //                return;
+            //            }
 
             if (in_array($paymentMethod, $this->config->asyncPaymentMethods())) {
                 $this->entityHelper->createForterEntity($order, $storeId, 'post-authorization');
@@ -228,10 +228,10 @@ class PaymentPlaceStart implements ObserverInterface
                 return;
             }
 
-//            if ($methodSetting === 'cron' || (!$methodSetting && $this->config->getIsCron())) {
-//                $this->queueOrder($order, $storeId);
-//                return;
-//            }
+            //            if ($methodSetting === 'cron' || (!$methodSetting && $this->config->getIsCron())) {
+            //                $this->queueOrder($order, $storeId);
+            //                return;
+            //            }
 
             if (!$methodSetting) {
                 if ($this->config->getIsPost() && !$this->config->getIsPreAndPost()) {
@@ -245,9 +245,9 @@ class PaymentPlaceStart implements ObserverInterface
                 $validationType = 'pre-authorization';
             }
 
-            //creare entitate
+            //creare entity
             $forterEntity = $this->entityHelper->createForterEntity($order, $storeId, $validationType);
-            
+
             $order->setData('sub_payment_method', $subMethod);
 
             $data = $this->requestBuilderOrder->buildTransaction($order, 'BEFORE_PAYMENT_ACTION');
@@ -262,7 +262,13 @@ class PaymentPlaceStart implements ObserverInterface
 
             $this->abstractApi->sendOrderStatus($order);
 
-//            $order->setForterResponse($forterResponse);
+            // Skip actions if excluded payment method
+            if ($this->config->isActionExcludedPaymentMethod($paymentMethod, null, $storeId)) {
+                $this->forterLogger->forterConfig->log("[SKIPPING] ACTION_EXCLUDED_PAYMENT_METHOD Order {$order->getIncrementId()} | Payment Method Code: {$paymentMethod}");
+                return;
+            }
+
+            // $order->setForterResponse($forterResponse);
 
             $this->forterLogger->forterConfig->log($forterResponse);
 
@@ -270,7 +276,7 @@ class PaymentPlaceStart implements ObserverInterface
 
             if ($forterResponse->status != 'success' || !isset($forterResponse->action)) {
                 $this->registry->register('forter_pre_decision', 'error');
-//                $order->setForterStatus('error');
+                //                $order->setForterStatus('error');
                 $forterEntity->setForterStatus('error');
                 $message = new ForterLoggerMessage($this->config->getSiteId(), $order->getIncrementId(), 'Response Error - Pre-Auth');
                 $message->metaData->order = $order->getData();

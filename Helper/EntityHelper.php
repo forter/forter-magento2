@@ -2,16 +2,22 @@
 
 namespace Forter\Forter\Helper;
 
+use Forter\Forter\Model\Config;
 use Forter\Forter\Model\Entity as ForterEntity;
 use Forter\Forter\Model\EntityFactory as ForterEntityFactory;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 
 class EntityHelper
 {
-    const FORTER_STATUS_WAITING = "waiting_for_data";
-    const FORTER_STATUS_PRE_POST_VALIDATION = "pre_post_validation";
-    const FORTER_STATUS_COMPLETE = "complete";
-    const FORTER_STATUS_NEW = "new";
+    public const FORTER_STATUS_WAITING = "waiting_for_data";
+    public const FORTER_STATUS_PRE_POST_VALIDATION = "pre_post_validation";
+    public const FORTER_STATUS_COMPLETE = "complete";
+    public const FORTER_STATUS_NEW = "new";
+
+    /**
+     * @var Config
+     */
+    private $config;
 
     /**
      * @var ForterEntity
@@ -29,10 +35,12 @@ class EntityHelper
     private $dateTime;
 
     public function __construct(
+        Config $config,
         ForterEntity $forterEntity,
         ForterEntityFactory $forterEntityFactory,
         DateTime $dateTime
     ) {
+        $this->config = $config;
         $this->forterEntity = $forterEntity;
         $this->forterEntityFactory = $forterEntityFactory;
         $this->dateTime = $dateTime;
@@ -40,6 +48,10 @@ class EntityHelper
 
     public function createForterEntity($order, $storeId, $validationType)
     {
+        if ($order->getPayment() && $this->config->isActionExcludedPaymentMethod($order->getPayment()->getMethod(), null, $storeId)) {
+            // If action excluded method - return an entity without actually creating it
+            return $this->forterEntity;
+        }
         $currentTime = $this->dateTime->gmtDate();
         return $this->forterEntity
             ->setStoreId($storeId)
@@ -106,6 +118,10 @@ class EntityHelper
 
     public function updateForterEntity($forterEntity, $order, $forterResponse, $message)
     {
+        if ($order->getPayment() && $this->config->isActionExcludedPaymentMethod($order->getPayment()->getMethod(), null, $order->getStoreId())) {
+            // If action excluded method - return the entity without actually updating it
+            return $forterEntity;
+        }
         $forterStatus = $forterResponse->status ?? '';
 
         if ($forterResponse->status != 'success') {
