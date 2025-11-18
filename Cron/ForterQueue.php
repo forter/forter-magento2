@@ -28,9 +28,9 @@ class ForterQueue
      */
     public const VALIDATION_API_ENDPOINT = 'https://api.forter-secure.com/v2/orders/';
 
-    const FORTER_STATUS_NEW = "new";
-    const FORTER_STATUS_WAITING = "waiting_for_data";
-    const FORTER_STATUS_PRE_POST_VALIDATION = "pre_post_validation";
+    public const FORTER_STATUS_NEW = "new";
+    public const FORTER_STATUS_WAITING = "waiting_for_data";
+    public const FORTER_STATUS_PRE_POST_VALIDATION = "pre_post_validation";
     /**
      * @var Decline
      */
@@ -147,6 +147,10 @@ class ForterQueue
 
                     $method = $payment->getMethod();
 
+                    if ($this->forterConfig->isActionExcludedPaymentMethod($method, null, $order->getStoreId())) {
+                        continue;
+                    }
+
                     // let bind the relevent store in case of multi store settings
                     $this->emulate->startEnvironmentEmulation(
                         $order->getStoreId(),
@@ -165,7 +169,7 @@ class ForterQueue
 
                     if ($this->forterConfig->getIsPaymentMethodAccepted($payment->getMethod()) && !$this->forterConfig->getIsReadyForForter($payment)) {
                         if ($this->forterConfig->isHoldingOrdersEnabled()) {
-                                $order->canHold() ?? $order->hold()->save();
+                            $order->canHold() ?? $order->hold()->save();
                         }
                         continue;
                     }

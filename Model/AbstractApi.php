@@ -213,7 +213,7 @@ class AbstractApi
                 "message" => [
                     "message" => $e->getMessage(),
                     "fileName" => $e->getFile(),
-                    "lineNumber"=> $e->getLine(),
+                    "lineNumber" => $e->getLine(),
                     "name" => get_class($e),
                     "stack" => $e->getTrace()
                 ],
