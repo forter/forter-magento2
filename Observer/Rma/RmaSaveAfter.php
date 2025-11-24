@@ -12,7 +12,6 @@ use Magento\Framework\Event\ObserverInterface;
 
 class RmaSaveAfter implements ObserverInterface
 {
-
     /**
      * @var AttributeOptionManagementInterface
      */
@@ -75,7 +74,7 @@ class RmaSaveAfter implements ObserverInterface
 
     public function execute(Observer $observer)
     {
-        if (!$this->config->isEnabled() && !$this->config->isOrderRmaStatusEnable()) {
+        if (!$this->config->isEnabled() || !$this->config->isOrderRmaStatusEnable()) {
             return false;
         }
 
@@ -118,7 +117,7 @@ class RmaSaveAfter implements ObserverInterface
                     'quantity' => intval($item->getQtyRequested()),
                     'type' => $productType,
                     'price' => [
-                        'amountLocalCurrency' => strval($rowTotalInclTax/$product->getQtyOrdered()),
+                        'amountLocalCurrency' => strval($rowTotalInclTax / $product->getQtyOrdered()),
                         'currency' => $orderCurrencyCode,
 
                     ],
