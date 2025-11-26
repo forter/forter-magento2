@@ -12,7 +12,7 @@ if ($forterResponse):
 
     <section class="admin__page-section">
         <div class="admin__page-section-title invoice_title">
-            <span class="title"><?php echo __("Forter Response Details"); ?></span>
+            <span class="title"><?php echo $block->escapeHtml(__("Forter Response Details")); ?></span>
         </div>
     </section>
 
@@ -20,10 +20,10 @@ if ($forterResponse):
     <section class="admin__page-section">
         <div class="admin__page-section-content">
             <div class="admin__page-section-item-title invoice_item_title">
-                <span class="title"><?php echo __("Forter API Request Status"); ?></span>
+                <span class="title"><?php echo $block->escapeHtml(__("Forter API Request Status")); ?></span>
             </div>
             <div class="admin__page-section-item-content invoice_item_content">
-                <div class=""><?php echo $forterResponse->status; ?></div>
+                <div class=""><?php echo $block->escapeHtml($forterResponse->status); ?></div>
             </div>
         </div>
     </section>
@@ -33,10 +33,10 @@ if ($forterResponse):
     <section class="admin__page-section">
         <div class="admin__page-section-content">
             <div class="admin__page-section-item-title invoice_item_title">
-                <span class="title"><?php echo __("Forter Action (Decision)"); ?></span>
+                <span class="title"><?php echo $block->escapeHtml(__("Forter Action (Decision)")); ?></span>
             </div>
             <div class="admin__page-section-item-content invoice_item_content">
-                <div class=""><?php echo $forterResponse->action ?></div>
+                <div class=""><?php echo $block->escapeHtml($forterResponse->action); ?></div>
             </div>
         </div>
     </section>
@@ -46,13 +46,13 @@ if ($forterResponse):
     <section class="admin__page-section">
         <div class="admin__page-section-content">
             <div class="admin__page-section-item-title invoice_item_title">
-                <span class="title"><?php echo __("Forter Recommendations"); ?></span>
+                <span class="title"><?php echo $block->escapeHtml(__("Forter Recommendations")); ?></span>
             </div>
             <div class="admin__page-section-item-content invoice_item_content">
                 <?php foreach ($forterResponse->recommendations as $recommendation): ?>
                     <?php if ($recommendation && is_string($recommendation)): ?>
-                        <div><?php echo $block->getRecommendationMessageByKey($recommendation) ?>
-                            (<?php echo $recommendation; ?>)
+                        <div><?php echo $block->escapeHtml( $block->getRecommendationMessageByKey($recommendation) ); ?>
+                            (<?php echo $block->escapeHtml($recommendation); ?>)
                         </div>
                     <?php endif; ?>
                 <?php endforeach; ?>
@@ -65,10 +65,10 @@ if ($forterResponse):
     <section class="admin__page-section">
         <div class="admin__page-section-content">
             <div class="admin__page-section-item-title invoice_item_title">
-                <span class="title"><?php echo __("Forter Message"); ?></span>
+                <span class="title"><?php echo $block->escapeHtml(__("Forter Message")); ?></span>
             </div>
             <div class="admin__page-section-item-content invoice_item_content">
-                <div class=""><?php echo $forterResponse->message; ?></div>
+                <div class=""><?php echo $block->escapeHtml($forterResponse->message); ?></div>
             </div>
         </div>
     </section>
@@ -78,10 +78,10 @@ if ($forterResponse):
     <section class="admin__page-section">
         <div class="admin__page-section-content">
             <div class="admin__page-section-item-title invoice_item_title">
-                <span class="title"><?php echo __("Forter Reason Code"); ?></span>
+                <span class="title"><?php echo $block->escapeHtml(__("Forter Reason Code")); ?></span>
             </div>
             <div class="admin__page-section-item-content invoice_item_content">
-                <div class=""><?php echo $forterResponse->reasonCode; ?></div>
+                <div class=""><?php echo $block->escapeHtml($forterResponse->reasonCode); ?></div>
             </div>
         </div>
     </section>
@@ -91,10 +91,10 @@ if ($forterResponse):
     <section class="admin__page-section">
         <div class="admin__page-section-content">
             <div class="admin__page-section-item-title invoice_item_title">
-                <span class="title"><?php echo __("Forter Reason Code"); ?></span>
+                <span class="title"><?php echo $block->escapeHtml(__("Forter Reason Code")); ?></span>
             </div>
             <div class="admin__page-section-item-content invoice_item_content">
-                <div class=""><?php echo $forterResponse->reason; ?></div>
+                <div class=""><?php echo $block->escapeHtml($forterResponse->reason); ?></div>
             </div>
         </div>
     </section>
@@ -104,15 +104,15 @@ if ($forterResponse):
     <section class="admin__page-section">
         <div class="admin__page-section-content">
             <div class="admin__page-section-item-title invoice_item_title">
-                <span class="title"><?php echo __("Forter Errors"); ?></span>
+                <span class="title"><?php echo $block->escapeHtml(__("Forter Errors")); ?></span>
             </div>
             <?php foreach ($forterResponse->errors as $element): ?>
                 <div class="admin__page-section-item-content invoice_item_content">
                     <div class=""><strong
-                            style="color:red;"><?php echo __("Error Path: "); ?></strong><?php echo stripcslashes(json_encode($element->path)); ?>
+                            style="color:red;"><?php echo $block->escapeHtml(__("Error Path: ")); ?></strong><?php echo $block->escapeHtml(stripcslashes(json_encode($element->path))); ?>
                     </div>
                     <div class=""><strong
-                            style="color:red;"><?php echo __("Error Message: "); ?></strong><?php echo json_encode($element->message); ?>
+                            style="color:red;"><?php echo $block->escapeHtml(__("Error Message: ")); ?></strong><?php echo $block->escapeHtml(json_encode($element->message)); ?>
                     </div>
                     <br><br>
                 </div>
