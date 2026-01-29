@@ -137,6 +137,10 @@ class PostDecisionActions
                     continue;
                 }
 
+                if ($order->getPayment() && $this->forterConfig->isActionExcludedPaymentMethod($order->getPayment()->getMethod(), null, $order->getStoreId())) {
+                    continue;
+                }
+
                 // let bind the relevent store in case of multi store settings
                 $this->emulate->startEnvironmentEmulation(
                     $order->getStoreId(),

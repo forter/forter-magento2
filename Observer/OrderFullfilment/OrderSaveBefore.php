@@ -18,11 +18,11 @@ use Forter\Forter\Helper\EntityHelper;
  */
 class OrderSaveBefore implements ObserverInterface
 {
-    const ORDER_FULFILLMENT_STATUS_ENDPOINT = "https://api.forter-secure.com/v2/status/";
-    const FORTER_STATUS_NEW = "new";
-    const FORTER_STATUS_WAITING = "waiting_for_data";
-    const FORTER_STATUS_PRE_POST_VALIDATION = "pre_post_validation";
-    const FORTER_STATUS_COMPLETE = "complete";
+    public const ORDER_FULFILLMENT_STATUS_ENDPOINT = "https://api.forter-secure.com/v2/status/";
+    public const FORTER_STATUS_NEW = "new";
+    public const FORTER_STATUS_WAITING = "waiting_for_data";
+    public const FORTER_STATUS_PRE_POST_VALIDATION = "pre_post_validation";
+    public const FORTER_STATUS_COMPLETE = "complete";
 
 
     /**
@@ -88,15 +88,18 @@ class OrderSaveBefore implements ObserverInterface
     {
         $order = $observer->getEvent()->getOrder();
 
-        if (!$this->config->isEnabled(null,$order->getStoreId()) ||
-            !$this->config->isOrderFulfillmentEnable(null,$order->getStoreId())) {
+        if (!$this->config->isEnabled(null, $order->getStoreId()) ||
+            !$this->config->isOrderFulfillmentEnable(null, $order->getStoreId())) {
             return false;
         }
 
         $order = $observer->getEvent()->getOrder();
-        $forterEntity = $this->entityHelper->getForterEntityByIncrementId($order->getIncrementId(),[self::FORTER_STATUS_PRE_POST_VALIDATION,self::FORTER_STATUS_COMPLETE]);
+        $forterEntity = $this->entityHelper->getForterEntityByIncrementId($order->getIncrementId(), [self::FORTER_STATUS_PRE_POST_VALIDATION,self::FORTER_STATUS_COMPLETE]);
         try {
-            if (!$forterEntity) {
+            if (
+                !$forterEntity &&
+                !($order->getPayment() && $this->config->isActionExcludedPaymentMethod($order->getPayment()->getMethod(), null, $order->getStoreId()))
+            ) {
                 return false;
             }
             $orderState = $order->getState();

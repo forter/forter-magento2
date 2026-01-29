@@ -8,7 +8,6 @@ use Magento\Framework\Event\ObserverInterface;
 
 class ShipmentSaveAfter implements ObserverInterface
 {
-
     /**
      * @var Config
      */
@@ -34,7 +33,7 @@ class ShipmentSaveAfter implements ObserverInterface
 
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
-        if (!$this->config->isEnabled() && !$this->config->isOrderShippingStatusEnable()) {
+        if (!$this->config->isEnabled() || !$this->config->isOrderShippingStatusEnable()) {
             return false;
         }
 

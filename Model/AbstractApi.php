@@ -8,7 +8,7 @@ use Forter\Forter\Model\RequestBuilder\Payment as PaymentPrepere;
 use Magento\Checkout\Model\Session;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Event\ManagerInterface;
-use Magento\Framework\HTTP\Client\Curl as ClientInterface;
+use Magento\Framework\HTTP\Client\CurlFactory as CurlFactory;
 use Magento\Framework\Module\Manager as ModuleManager;
 
 /**
@@ -30,14 +30,19 @@ class AbstractApi
     private $paymentPrepere;
 
     /**
-     * @var ClientInterface
+     * @var Session
      */
     private $checkoutSession;
 
     /**
-     * @var ClientInterface
+     * @var CurlFactory
      */
-    private $clientInterface;
+    private $curlFactory;
+
+    /**
+     * @var Curl
+     */
+    private $curlClient;
 
     /**
      * @var Config
@@ -70,7 +75,7 @@ class AbstractApi
      * @method __construct
      * @param PaymentPrepere $paymentPrepere
      * @param Session $checkoutSession
-     * @param ClientInterface $clientInterface
+     * @param CurlFactory $curlFactory
      * @param ForterConfig $forterConfig
      * @param ResourceConnection $resource
      * @param ManagerInterface $eventManager
@@ -80,7 +85,7 @@ class AbstractApi
     public function __construct(
         PaymentPrepere $paymentPrepere,
         Session $checkoutSession,
-        ClientInterface $clientInterface,
+        CurlFactory $curlFactory,
         ForterConfig $forterConfig,
         ResourceConnection $resource,
         ManagerInterface $eventManager,
@@ -89,7 +94,7 @@ class AbstractApi
     ) {
         $this->paymentPrepere = $paymentPrepere;
         $this->checkoutSession = $checkoutSession;
-        $this->clientInterface = $clientInterface;
+        $this->curlFactory = $curlFactory;
         $this->forterConfig = $forterConfig;
         $this->resource = $resource;
         $this->eventManager = $eventManager;
@@ -109,6 +114,7 @@ class AbstractApi
 
             do {
                 $tries++;
+                $this->curlClient = $this->curlFactory->create();
                 $timeOutStatus = $this->calcTimeOut($tries);
                 $this->setCurlOptions(strlen($data ?? ''), $tries);
                 $this->forterConfig->log('[Forter Request attempt number] ' . $tries, "debug");
@@ -117,13 +123,13 @@ class AbstractApi
 
                 try {
                     if ($type == 'post') {
-                        $this->clientInterface->post($url, $data);
+                        $this->curlClient->post($url, $data);
                     } elseif ($type == 'get') {
-                        $this->clientInterface->get($url);
+                        $this->curlClient->get($url);
                     }
-                    $response = $this->clientInterface->getBody();
+                    $response = $this->curlClient->getBody();
                     $this->forterConfig->log('[Forter Response Body] ' . $response, "debug");
-                    $this->forterConfig->log('[Forter Response Header] ', "debug", [$this->clientInterface->getHeaders()]);
+                    $this->forterConfig->log('[Forter Response Header] ', "debug", [$this->curlClient->getHeaders()]);
 
                     $response = json_decode($response);
 
@@ -156,17 +162,19 @@ class AbstractApi
     {
 
         /* Curl Headers */
-        $this->clientInterface->addHeader('x-forter-siteid', $this->forterConfig->getSiteId());
-        $this->clientInterface->addHeader('api-version', $this->forterConfig->getApiVersion());
-        $this->clientInterface->addHeader('x-forter-extver', $this->forterConfig->getModuleVersion());
-        $this->clientInterface->addHeader('x-forter-client', $this->forterConfig->getMagentoFullVersion());
-        $this->clientInterface->addHeader('Content-Type', 'application/json');
-        $this->clientInterface->addHeader('Content-Length', $bodyLen);
+        $this->curlClient->setHeaders([
+            'x-forter-siteid' => $this->forterConfig->getSiteId(),
+            'api-version'     => $this->forterConfig->getApiVersion(),
+            'x-forter-extver' => $this->forterConfig->getModuleVersion(),
+            'x-forter-client' => $this->forterConfig->getMagentoFullVersion(),
+            'Content-Type'    => 'application/json',
+            'Content-Length'  => $bodyLen,
+        ]);
         /* Curl Options */
-        $this->clientInterface->setOption(CURLOPT_USERNAME, $this->forterConfig->getSecretKey());
-        $this->clientInterface->setOption(CURLOPT_RETURNTRANSFER, true);
-        $this->clientInterface->setOption(CURLOPT_SSL_VERIFYPEER, true);
-        $this->clientInterface->setOption(CURLOPT_SSL_VERIFYHOST, 2);
+        $this->curlClient->setOption(CURLOPT_USERNAME, $this->forterConfig->getSecretKey());
+        $this->curlClient->setOption(CURLOPT_RETURNTRANSFER, true);
+        $this->curlClient->setOption(CURLOPT_SSL_VERIFYPEER, true);
+        $this->curlClient->setOption(CURLOPT_SSL_VERIFYHOST, 2);
     }
 
     /**
@@ -187,8 +195,8 @@ class AbstractApi
             $timeOutSettingsArray['max_request_timeout']
         );
 
-        $this->clientInterface->setOption(CURLOPT_CONNECTTIMEOUT_MS, $connect_timeout_ms);
-        $this->clientInterface->setOption(CURLOPT_TIMEOUT_MS, $total_timeout_ms);
+        $this->curlClient->setOption(CURLOPT_CONNECTTIMEOUT_MS, $connect_timeout_ms);
+        $this->curlClient->setOption(CURLOPT_TIMEOUT_MS, $total_timeout_ms);
 
         if ($connect_timeout_ms >= $timeOutSettingsArray['max_connection_timeout']) {
             if ($total_timeout_ms >= $timeOutSettingsArray['max_request_timeout']) {
@@ -213,7 +221,7 @@ class AbstractApi
                 "message" => [
                     "message" => $e->getMessage(),
                     "fileName" => $e->getFile(),
-                    "lineNumber"=> $e->getLine(),
+                    "lineNumber" => $e->getLine(),
                     "name" => get_class($e),
                     "stack" => $e->getTrace()
                 ],

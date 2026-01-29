@@ -31,9 +31,9 @@ class PaymentPlaceEnd implements ObserverInterface
 {
     public const VALIDATION_API_ENDPOINT = 'https://api.forter-secure.com/v2/orders/';
 
-    const FORTER_STATUS_WAITING = "waiting_for_data";
-    const FORTER_STATUS_PRE_POST_VALIDATION = "pre_post_validation";
-    const FORTER_STATUS_COMPLETE = "complete";
+    public const FORTER_STATUS_WAITING = "waiting_for_data";
+    public const FORTER_STATUS_PRE_POST_VALIDATION = "pre_post_validation";
+    public const FORTER_STATUS_COMPLETE = "complete";
     /**
      * @var ScopeConfigInterface
      */
@@ -188,6 +188,7 @@ class PaymentPlaceEnd implements ObserverInterface
             $paymentMethod = $order->getPayment()->getMethod();
             $subMethod = $order->getData('sub_payment_method') ? $order->getData('sub_payment_method') : $order->getPayment()->getCcType(); // This will return 'googlepay', 'applepay', etc.
             $methodSetting = $this->forterConfig->getMappedPrePos($paymentMethod, $subMethod);
+            $isActionExcludedPaymentMethod = $this->forterConfig->isActionExcludedPaymentMethod($paymentMethod, null, $order->getStoreId());
 
             if (!$this->forterConfig->isEnabled(null, $order->getStoreId())) {
                 if ($this->registry->registry('forter_pre_decision')) {
@@ -234,7 +235,11 @@ class PaymentPlaceEnd implements ObserverInterface
 
             $payment = $order->getPayment();
 
-            if ($this->forterConfig->getIsPaymentMethodAccepted($paymentMethod) && !$this->forterConfig->getIsReadyForForter($payment)) { //de adaugat aici metodele agreate cu cc_trans_id populat, in rest sa mearga mai departe
+            if (
+                !$isActionExcludedPaymentMethod &&
+                $this->forterConfig->getIsPaymentMethodAccepted($paymentMethod) &&
+                !$this->forterConfig->getIsReadyForForter($payment)
+            ) { //de adaugat aici metodele agreate cu cc_trans_id populat, in rest sa mearga mai departe
                 $forterEntity->setStatus(self::FORTER_STATUS_WAITING)
                     ->save();
                 if ($this->forterConfig->isHoldingOrdersEnabled()) {
@@ -254,6 +259,12 @@ class PaymentPlaceEnd implements ObserverInterface
             $this->abstractApi->sendOrderStatus($order);
 
             $this->forterConfig->log('Forter Response for Order ' . $order->getIncrementId() . ': ' . $forterResponse);
+
+            // Skip actions if excluded payment method
+            if ($isActionExcludedPaymentMethod) {
+                $this->forterLogger->forterConfig->log("[SKIPPING] (post) ACTION_EXCLUDED_PAYMENT_METHOD Order {$order->getIncrementId()} | Payment Method Code: {$paymentMethod}");
+                return;
+            }
 
             $forterResponse = json_decode($forterResponse);
             if ($forterResponse->status != 'success' || !isset($forterResponse->action)) {
@@ -382,8 +393,10 @@ class PaymentPlaceEnd implements ObserverInterface
 
     protected function logForterPreDecision($order)
     {
-        $order->addStatusHistoryComment(__('Forter (pre) Decision: %1', $this->registry->registry('forter_pre_decision')));
-        $order->save();
+        if (!($order->getPayment() && $this->config->isActionExcludedPaymentMethod($order->getPayment()->getMethod(), null, $order->getStoreId()))) {
+            $order->addStatusHistoryComment(__('Forter (pre) Decision: %1', $this->registry->registry('forter_pre_decision')));
+            $order->save();
+        }
         $message = new ForterLoggerMessage($this->forterConfig->getSiteId(), $order->getIncrementId(), 'Pre-Auth');
         $message->metaData->order = $order->getData();
         $message->metaData->payment = $order->getPayment()->getData();
