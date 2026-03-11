@@ -4,5 +4,5 @@
  */
 ?>
 <!-- Forter Module Version -->
-<div><?= $block->getModuleVersion() ?></div>
+<div><?php echo $block->escapeHtml($block->getModuleVersion()); ?></div>
 <!--/ Forter Module Version -->
