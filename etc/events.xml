@@ -33,5 +33,12 @@
     <event name="payment_method_assign_data_adyen_cc">
         <observer name="forter_adyen_cc_gateway_data_assign" instance="Forter\Forter\Observer\ThirdParty\Adyen\AdyenCcDataAssignObserver" />
     </event>
-
+    <event name="payment_method_assign_data_braintree">
+        <observer name="braintree_gateway_cc_data_assign"
+                  instance="Forter\Forter\Observer\ThirdParty\Braintree\BraintreeCcDataAssignObserver" />
+    </event>
+    <event name="payment_method_assign_data_braintree_applepay">
+        <observer name="braintree_applepay_gateway_cc_data_assign"
+                  instance="Forter\Forter\Observer\ThirdParty\Braintree\BraintreeCcDataAssignObserver" />
+    </event>
 </config>

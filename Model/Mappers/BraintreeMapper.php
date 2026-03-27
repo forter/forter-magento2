@@ -51,6 +51,11 @@ class BraintreeMapper
             $detailsArray['countryOfIssuance'] = $forter_cc_country;
         }
 
+        $lastFourDigits = $payment->getAdditionalInformation('cc_last4');
+        if ($lastFourDigits) {
+            $detailsArray['lastFourDigits'] = $lastFourDigits;
+        }
+
         return $detailsArray;
     }
 
