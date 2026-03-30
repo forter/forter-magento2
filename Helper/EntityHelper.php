@@ -122,10 +122,12 @@ class EntityHelper
 
         if ($forterResponse) {
             $forterEntity->setForterResponse(json_encode($forterResponse));
+            $forterEntity->setEntityType('order');
         }
 
         if ($forterResponse && isset($forterResponse->action)) {
             $forterEntity->setForterAction($forterResponse->action);
+            $forterEntity->setEntityBody($forterResponse->action);
         }
 
         if ($message) {
