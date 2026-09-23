@@ -113,11 +113,14 @@ class Decline
      */
     public function handlePreTransactionDescision($order)
     {
+        if ($order->getPayment() && $this->forterConfig->isActionExcludedPaymentMethod($order->getPayment()->getMethod(), null, $order->getStoreId())) {
+            return false;
+        }
         $this->sendDeclineMail($order);
         $forterDecision = $this->forterConfig->getDeclinePre();
         $isVerificationRequired3dsChallenge = $this->recommendation->isVerificationRequired3dsChallenge($order);
 
-        if ( $forterDecision == '1' &&  !$isVerificationRequired3dsChallenge ) {
+        if ($forterDecision == '1' &&  !$isVerificationRequired3dsChallenge) {
             throw new PaymentException(__($this->forterConfig->getPreThanksMsg()));
         }
 
@@ -137,9 +140,12 @@ class Decline
     /**
      * @param $order
      */
-    public function handlePostTransactionDescision($order, $item )
+    public function handlePostTransactionDescision($order, $item)
     {
         try {
+            if ($order->getPayment() && $this->forterConfig->isActionExcludedPaymentMethod($order->getPayment()->getMethod(), null, $order->getStoreId())) {
+                return false;
+            }
             if ($order->canCancel()) {
                 $this->cancelOrder($order);
             }
@@ -156,19 +162,19 @@ class Decline
             $item->setSyncFlag(1);
 
         } catch (\Exception $e) {
-           // if ($order->canHold()) {
-                //$this->holdOrder($order);
+            // if ($order->canHold()) {
+            //$this->holdOrder($order);
             //}
 
             $retries    = (int)$item->getRetries() + 1;
-//            $date       = date('Y-m-d H:i:s',  strtotime(' + ' . $retries . ' hours'));
+            //            $date       = date('Y-m-d H:i:s',  strtotime(' + ' . $retries . ' hours'));
 
             $item->setSyncFlag(0);
-//            $item->setEntityType( 'order' );
-//            $item->setForterStatus( $order->getForterStatus() );
-            $item->setRetries( $retries );
-//            $item->setUpdatedAt( $date );
-//            $item->setSyncDate($date);
+            //            $item->setEntityType( 'order' );
+            //            $item->setForterStatus( $order->getForterStatus() );
+            $item->setRetries($retries);
+            //            $item->setUpdatedAt( $date );
+            //            $item->setSyncDate($date);
             $item->setSyncLastError($e->getMessage());
 
             $this->forterConfig->addCommentToOrder($order, 'Order Cancellation attempt failed. Internal Error');
@@ -207,7 +213,7 @@ class Decline
             $invoiceobj = $this->invoice->loadByIncrementId($invoiceincrementid);
             $creditmemo = $this->creditmemoFactory->createByOrder($order);
 
-            $this->request->setParam('invoice_id', $invoiceobj->getId() );
+            $this->request->setParam('invoice_id', $invoiceobj->getId());
 
             if ($invoiceobj || isset($invoiceobj)) {
                 $creditmemo->setInvoice($invoiceobj);
@@ -231,7 +237,10 @@ class Decline
      */
     public function holdOrder($order)
     {
-        if ($this->forterConfig->isHoldingOrdersEnabled()) {
+        if (
+            $this->forterConfig->isHoldingOrdersEnabled() &&
+            !($order->getPayment() && $this->forterConfig->isActionExcludedPaymentMethod($order->getPayment()->getMethod(), null, $order->getStoreId()))
+        ) {
             $order->hold()->save();
             $this->forterConfig->addCommentToOrder($order, "Order Has been holded");
             $this->forterConfig->log('Payment Hold for Order ' . $order->getIncrementId() . ' - Order Payment Data: ' . json_encode($order->getPayment()->getData()));
@@ -240,6 +249,9 @@ class Decline
 
     public function markOrderPaymentReview($order)
     {
+        if ($order->getPayment() && $this->forterConfig->isActionExcludedPaymentMethod($order->getPayment()->getMethod(), null, $order->getStoreId())) {
+            return false;
+        }
         $orderState = Order::STATE_PAYMENT_REVIEW;
         $order->setState($orderState)->setStatus(Order::STATE_PAYMENT_REVIEW);
         $order->save();

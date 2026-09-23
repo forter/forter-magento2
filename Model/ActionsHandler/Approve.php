@@ -80,6 +80,9 @@ class Approve
     public function handleApproveImmediatly($order)
     {
         try {
+            if ($order->getPayment() && $this->forterConfig->isActionExcludedPaymentMethod($order->getPayment()->getMethod(), null, $order->getStoreId())) {
+                return false;
+            }
             $paymentBaseAmountAuthorized = $order->getPayment()->getBaseAmountAuthorized() ?? $order->getPayment()->getAmountAuthorized();
 
             if (!$paymentBaseAmountAuthorized || !($paymentBaseAmountAuthorized > 0)) {

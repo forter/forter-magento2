@@ -25,15 +25,14 @@ use Magento\Store\Model\App\Emulation;
 use Magento\Store\Model\StoreManagerInterface;
 use Forter\Forter\Helper\EntityHelper;
 
-
 /**
  * Class OrderSaveAfter
  * @package Forter\Forter\Observer\OrderFullfilment
  */
 class PaymentSaveAfter implements ObserverInterface
 {
-    const FORTER_STATUS_WAITING = "waiting_for_data";
-    const FORTER_STATUS_COMPLETE = "complete";
+    public const FORTER_STATUS_WAITING = "waiting_for_data";
+    public const FORTER_STATUS_COMPLETE = "complete";
 
     /**
      * @var Config
@@ -207,7 +206,10 @@ class PaymentSaveAfter implements ObserverInterface
         try {
             $forterEntity = $this->entityHelper->getForterEntityByIncrementId($order->getIncrementId(), [self::FORTER_STATUS_COMPLETE]);
 
-            if (!$forterEntity) {
+            if (
+                !$forterEntity &&
+                !($order->getPayment() && $this->config->isActionExcludedPaymentMethod($order->getPayment()->getMethod(), null, $order->getStoreId()))
+            ) {
                 return false;
             }
             $this->emulate->stopEnvironmentEmulation();
