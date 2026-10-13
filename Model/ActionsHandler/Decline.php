@@ -190,9 +190,23 @@ class Decline
             return;
         }
 
+        // Native cancel did not void the authorization (e.g. adyen_hpp / Apple Pay).
+        // Attempt an explicit payment void as a fallback.
+        $payment = $order->getPayment();
+        if ($payment && $payment->getAuthorizationTransaction()) {
+            try {
+                $payment->void(new \Magento\Framework\DataObject());
+                $order->save();
+                $this->forterConfig->addCommentToOrder($order, 'Order payment voided (fallback)');
+                $this->forterConfig->log('Payment void fallback succeeded for Order ' . $order->getIncrementId());
+                return;
+            } catch (\Exception $voidException) {
+                $this->forterConfig->log('Payment void fallback failed for Order ' . $order->getIncrementId() . ': ' . $voidException->getMessage());
+            }
+        }
+
         $this->forterConfig->addCommentToOrder($order, 'Order Cancellation attempt failed');
         $this->forterConfig->log('Cancellation Failure for Order ' . $order->getIncrementId() .' - Payment Data: ' . json_encode($order->getPayment()->getData()));
-        return;
     }
 
     /**
