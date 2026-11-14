@@ -50,5 +50,9 @@
         <column xsi:type="text" name="entity_body" nullable="true" comment="Request Body"/>
         <column xsi:type="varchar" name="entity_type" nullable="true" length="50"  default="0" comment="Store ID"/>
         <column xsi:type="smallint" padding="6" name="post_decision_actions_flag" nullable="true" default="0" comment="Post Decision actions Taken Flag"/>
+        <index referenceId="FORTER_ENTITY_ORDER_INCREMENT_ID_CREATED_AT" indexType="btree">
+            <column name="order_increment_id"/>
+            <column name="created_at"/>
+        </index>
     </table>
 </schema>

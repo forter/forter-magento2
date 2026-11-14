@@ -1,0 +1,60 @@
+{
+    "forter_send_queue": {
+        "column": {
+            "sync_id": true,
+            "store_id": true,
+            "entity_type": true,
+            "increment_id": true,
+            "entity_body": true,
+            "sync_flag": true,
+            "sync_date": true,
+            "sync_retries": true,
+            "sync_last_error": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    },
+    "sales_order": {
+        "column": {
+            "forter_status": true,
+            "forter_response": true,
+            "forter_reason": true
+        }
+    },
+    "sales_order_grid": {
+        "column": {
+            "forter_status": true,
+            "forter_reason": true
+        }
+    },
+    "forter_entity": {
+        "column": {
+            "entity_id": true,
+            "store_id": true,
+            "order_increment_id": true,
+            "created_at": true,
+            "updated_at": true,
+            "retries": true,
+            "sync_flag": true,
+            "status": true,
+            "validation_type": true,
+            "additional_information": true,
+            "forter_status": true,
+            "forter_action": true,
+            "forter_response": true,
+            "origin_store_code": true,
+            "forter_reason": true,
+            "sync_last_error": true,
+            "entity_body": true,
+            "entity_type": true,
+            "post_decision_actions_flag": true
+        },
+        "index": {
+            "FORTER_ENTITY_ORDER_INCREMENT_ID_CREATED_AT": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    }
+}
