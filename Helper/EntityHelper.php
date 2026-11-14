@@ -59,17 +59,16 @@ class EntityHelper
             ->create()
             ->getCollection()
             ->addFieldToFilter('order_increment_id', $incrementId)
-            ->setOrder('created_at', 'DESC');
+            ->setOrder('created_at', 'DESC')
+            ->setOrder('entity_id', 'DESC');
 
         if (!empty($statuses)) {
             $collection->addFieldToFilter('status', ['in' => $statuses]);
         }
 
-        if ($collection->getSize() == 0) {
-            return null;
-        }
+        $forterEntity = $collection->setPageSize(1)->getFirstItem();
 
-        return $collection->getFirstItem();
+        return $forterEntity->getId() ? $forterEntity : null;
     }
 
     public function getForterEntitiesPreSync()
